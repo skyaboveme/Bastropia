@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { categoryMeta, type Tier } from '../data/taxonomy';
+import { stampParts, whenLabel } from '../lib/time';
+
+interface Props {
+  event: CollectionEntry<'events'>;
+  tier?: Tier;
+  compact?: boolean;
+}
+
+const { event, tier = event.data.tier, compact = false } = Astro.props;
+const stamp = stampParts(event.data.start);
+const category = categoryMeta[event.data.category];
+---
+
+<article class:list={['event-card', `tier-${tier}`, { compact }]}>
+  <a class:list={[{ 'has-photo': event.data.image && !compact }]} href={`/events/${event.id}`}>
+    {!compact && (
+      <time class="date-stamp" datetime={event.data.start.toISOString()}>
+        <span>{stamp.month}</span>
+        <strong>{stamp.day}</strong>
+      </time>
+    )}
+    {event.data.image && !compact && <img class="event-thumb" src={event.data.image} alt="" width="160" height="120" />}
+    <div>
+      <p class="kicker">{category.label} · {event.data.city}</p>
+      <h3>{event.data.title}</h3>
+      <p class="meta">{whenLabel(event.data.schedule, event.data.start, event.data.end)}{compact ? '' : ` · ${event.data.venue}`}</p>
+      {tier !== 'community' && <p class="badge">{tier === 'lost-pines' ? 'Lost Pines' : tier}</p>}
+    </div>
+  </a>
+</article>

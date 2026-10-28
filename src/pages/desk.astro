@@ -1,0 +1,74 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FormError from '../components/FormError.astro';
+import { deskAuthorized, deskKeyConfigured } from '../lib/auth';
+import { eventMarkdown, listIntake, readSponsors, readUpgrades } from '../lib/intake';
+import { money } from '../lib/format';
+import { formatMedium } from '../lib/time';
+
+const allowed = deskAuthorized(Astro.url.hostname, Astro.cookies.get('bastropia_desk')?.value);
+const locked = deskKeyConfigured();
+const orders = allowed ? await listIntake() : [];
+const sponsors = allowed ? await readSponsors() : [];
+const upgrades = allowed ? await readUpgrades() : [];
+---
+
+<BaseLayout title="Desk" description="Orders, listing submissions, and newsletter signups for Bastropia.">
+  <PageHead
+    kicker="Publisher"
+    title="The desk"
+    lede="Reservations land here. Place an ad or apply an upgrade after you have been paid. Nothing on this page is public."
+  />
+  <div class="wrap">
+    {!allowed && locked && (
+      <form class="form" action="/api/desk" method="post">
+        <FormError />
+        <input type="hidden" name="action" value="login" />
+        <label class="field" style="max-width:24rem;">
+          <span>Desk password</span>
+          <input name="password" type="password" required autocomplete="current-password" />
+        </label>
+        <button class="button" type="submit">Unlock</button>
+      </form>
+    )}
+    {!allowed && !locked && (
+      <p class="lede">This desk is open on your own computer. Before you put the site on a public server, set <code>BASTROPIA_DESK_KEY</code> so orders are not visible to the whole county.</p>
+    )}
+    {allowed && (
+      <>
+        <p class="meta">{orders.length} saved. {sponsors.length} ad{sponsors.length === 1 ? '' : 's'} on the site. {upgrades.length} listing upgrade{upgrades.length === 1 ? '' : 's'} applied.</p>
+        <div class="card-list" style="margin-top:1rem;">
+          {orders.map((order) => (
+            <article class="detail-main">
+              <p class="kicker">{order.status} · {order.type} · {formatMedium(new Date(order.createdAt))}</p>
+              <h2>{order.id}</h2>
+              <p>{order.summary}</p>
+              {order.total > 0 && <p class="price-line">{money(order.total)}</p>}
+              <dl class="facts">
+                {Object.entries(order.fields).map(([key, value]) => (
+                  <div>
+                    <dt>{key}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              {order.type === 'event' && <pre class="markdown">{eventMarkdown(order.fields)}</pre>}
+              {order.status === 'pending' && (
+                <form class="cluster" action="/api/desk" method="post">
+                  <input type="hidden" name="id" value={order.id} />
+                  {order.type === 'ad' && <button class="button" name="action" value="place">Place this ad</button>}
+                  {order.type === 'upgrade' && <button class="button" name="action" value="upgrade">Apply upgrade</button>}
+                  <button class="button button-ghost" name="action" value="decline">Decline</button>
+                </form>
+              )}
+            </article>
+          ))}
+          {!orders.length && <p>No reservations yet. An ad, an upgrade, a listing, or a newsletter signup will show up here.</p>}
+        </div>
+      </>
+    )}
+  </div>
+</BaseLayout>

@@ -1,0 +1,40 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import EventCard from '../components/EventCard.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { filterEvents } from '../lib/events';
+import { activeUpgrades, resolveTier } from '../lib/intake';
+import { eventKey, labelFromKey, thisWeekendKeys } from '../lib/time';
+
+const now = new Date();
+const days = thisWeekendKeys(now);
+const upgrades = await activeUpgrades(eventKey(now));
+const events = filterEvents(await getCollection('events'), { when: 'weekend' }, now);
+---
+
+<BaseLayout title="This weekend" description="Friday, Saturday, and Sunday plans across Bastrop County.">
+  <PageHead
+    kicker="Friday to Sunday"
+    title="This weekend in the county"
+    lede={`${labelFromKey(days[0])} through ${labelFromKey(days[2])}. If your plans are not here, the desk has not heard about them yet.`}
+  />
+  <div class="wrap">
+    <AdSlot placement="weekend-sponsor" />
+    <div class="weekend-grid" style="margin-top:1rem;">
+      {days.map((day) => {
+        const items = events.filter((event) => eventKey(event.data.start) === day);
+        return (
+          <section class="day-card">
+              <p class="kicker">{labelFromKey(day)}</p>
+              {items.map((event) => <EventCard event={event} tier={resolveTier(event.id, event.data.tier, upgrades)} compact />)}
+              {!items.length && <p class="meta">Nothing listed.</p>}
+          </section>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>

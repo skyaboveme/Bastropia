@@ -1,0 +1,102 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FormError from '../components/FormError.astro';
+import { listingTiers } from '../data/commerce';
+import { money } from '../lib/format';
+import { activeUpgrades } from '../lib/intake';
+import { eventKey, formatMedium } from '../lib/time';
+
+const selectedEvent = Astro.url.searchParams.get('event');
+const selectedTier = Astro.url.searchParams.get('tier');
+const events = (await getCollection('events')).sort((a, b) => a.data.start.getTime() - b.data.start.getTime());
+const upgrades = await activeUpgrades(eventKey(new Date()));
+const prices = Object.fromEntries(listingTiers.map((tier) => [tier.id, tier.price]));
+---
+
+<BaseLayout title="Upgrade a listing" description="Move a Bastrop County event listing from a free community card to Spotlight, Featured, or Lost Pines.">
+  <PageHead
+    kicker="Listings"
+    title="Upgrade how far a listing travels"
+    lede="The listing itself stays free. An upgrade changes the card, where it sits, and — for Lost Pines — includes a share in the Bastropia Facebook group. The desk invoices you. The upgrade starts after payment."
+  />
+  <div class="wrap">
+    <div class="tier-grid">
+      {listingTiers.map((tier) => (
+        <article class="choice" style="padding:0.9rem;">
+          <p class="kicker">{tier.price ? money(tier.price) : 'Free'}</p>
+          <h2 style="font-size:1.7rem;">{tier.name}</h2>
+          <p class="meta">{tier.summary}</p>
+          <ul style="margin-top:0.6rem; padding-left:1rem; list-style:disc;">
+            {tier.perks.map((perk) => <li>{perk}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+    <FormError />
+    <form id="upgrade-form" class="form" action="/api/intake" method="post">
+      <input type="hidden" name="type" value="upgrade" />
+      <input type="hidden" name="from" value="/upgrade" />
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="place-grid">
+        {listingTiers.filter((tier) => tier.id !== 'community').map((tier) => (
+          <label class="choice">
+            <input type="radio" name="tier" value={tier.id} required checked={selectedTier ? selectedTier === tier.id : tier.id === 'featured'} />
+            <p class="kicker">{tier.days} days · {money(tier.price)}</p>
+            <h2 style="font-size:1.6rem;">{tier.name}</h2>
+          </label>
+        ))}
+      </div>
+      <div class="fields">
+        <label class="field wide">
+          <span>Listing</span>
+          <select name="eventId" required>
+            <option value="">Choose a published listing</option>
+            {events.map((event) => (
+              <option value={`${event.id}::${event.data.title}`} selected={event.id === selectedEvent}>
+                {formatMedium(event.data.start)} — {event.data.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label class="field">
+          <span>Contact name</span>
+          <input name="contact" required autocomplete="name" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field">
+          <span>Phone</span>
+          <input name="phone" type="tel" autocomplete="tel" />
+        </label>
+        <label class="field wide">
+          <span>Notes</span>
+          <textarea name="notes" rows="4" maxlength="1200"></textarea>
+        </label>
+      </div>
+      <p class="price-line">Total <strong id="upgrade-total">{money(89)}</strong></p>
+      <p class="meta">The listing has to be on the calendar first. <a class="text-link" href="/submit">Submit it</a> if it is not in the menu. Current upgrades: {upgrades.length ? upgrades.map((item) => item.eventId).join(', ') : 'none live'}.</p>
+      <label>
+        <input type="checkbox" name="terms" value="yes" required /> I understand this upgrade is invoiced by the desk and starts after payment.
+      </label>
+      <button class="button" type="submit">Request this upgrade</button>
+    </form>
+  </div>
+</BaseLayout>
+<script define:vars={{ prices }}>
+  const form = document.querySelector('#upgrade-form');
+  const total = document.querySelector('#upgrade-total');
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const update = () => {
+    if (!(form instanceof HTMLFormElement) || !total) return;
+    const data = new FormData(form);
+    total.textContent = money.format(prices[String(data.get('tier'))] || 0);
+  };
+  form?.addEventListener('input', update);
+  update();
+</script>

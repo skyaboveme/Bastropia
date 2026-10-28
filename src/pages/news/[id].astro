@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatLong } from '../../lib/time';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('news');
+  return stories.map((story) => ({ params: { id: story.id }, props: { story } }));
+}
+
+const { story } = Astro.props;
+const { Content } = await render(story);
+---
+
+<BaseLayout title={story.data.title} description={story.data.description}>
+  <article class="wrap">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+      <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
+      <h1>{story.data.title}</h1>
+      <p class="lede">{story.data.description}</p>
+    </header>
+    <div class="prose">
+      <Content />
+      {story.data.sourceUrl && <p>Source: <a href={story.data.sourceUrl}>{story.data.sourceLabel ?? 'Public source'}</a></p>}
+    </div>
+  </article>
+</BaseLayout>

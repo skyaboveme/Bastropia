@@ -1,0 +1,36 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import ExternalNews from '../../components/ExternalNews.astro';
+import { getExternalNews } from '../../lib/externalNews';
+import { formatMedium } from '../../lib/time';
+
+const stories = (await getCollection('news')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const externalNews = await getExternalNews(14);
+---
+
+<BaseLayout title="News" description="County desk notes on burn bans, public meetings, and what’s happening in Bastrop County.">
+  <link slot="head" rel="alternate" type="application/rss+xml" title="Bastropia news" href="/rss.xml" />
+  <PageHead kicker="Desk" title="News from Bastrop County" lede="Short briefings with a link back to the public source. This is a community desk, not a city hall feed." />
+  <div class="wrap">
+    <div class="split">
+      <div class="news-list">
+        {stories.map((story) => (
+          <article class="story-card">
+            <a href={`/news/${story.id}`}>
+              <p class="kicker">{story.data.place} · {formatMedium(story.data.pubDate)}</p>
+              <h3>{story.data.title}</h3>
+              <p class="meta">{story.data.description}</p>
+            </a>
+          </article>
+        ))}
+      </div>
+      <AdSlot placement="news-rail" />
+    </div>
+    <ExternalNews items={externalNews} columns={2} showSummary />
+  </div>
+</BaseLayout>

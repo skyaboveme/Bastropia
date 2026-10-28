@@ -1,0 +1,59 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { serviceGroups } from '../data/services';
+import { formatMedium } from '../lib/time';
+
+const q = Astro.url.searchParams.get('q')?.trim() ?? '';
+const needle = q.toLowerCase();
+const events = needle
+  ? (await getCollection('events')).filter((event) =>
+      `${event.data.title} ${event.data.summary} ${event.data.venue} ${event.data.city}`.toLowerCase().includes(needle),
+    )
+  : [];
+const news = needle
+  ? (await getCollection('news')).filter((story) => `${story.data.title} ${story.data.description}`.toLowerCase().includes(needle))
+  : [];
+const updates = needle
+  ? (await getCollection('updates')).filter((update) => `${update.data.title} ${update.data.description} ${update.data.agency}`.toLowerCase().includes(needle))
+  : [];
+const services = needle
+  ? serviceGroups.flatMap((group) =>
+      group.items
+        .filter((item) => `${item.name} ${item.detail} ${item.phone ?? ''}`.toLowerCase().includes(needle))
+        .map((item) => ({ ...item, group: group.title })),
+    )
+  : [];
+const total = events.length + news.length + updates.length + services.length;
+---
+
+<BaseLayout title="Search" description="Search events, news, public notices, and services in Bastrop County.">
+  <PageHead kicker="Search" title={q ? `Results for “${q}”` : 'Search the desk'} lede={q ? `${total} match${total === 1 ? '' : 'es'}.` : 'Events, news, notices, and phone numbers.'} />
+  <div class="wrap">
+    <form class="search" action="/search" method="get">
+      <label class="sr" for="search-q">Search</label>
+      <input id="search-q" name="q" type="search" value={q} placeholder="Sheriff, Boo Bash, burn ban" />
+      <button class="button" type="submit">Search</button>
+    </form>
+    {q && (
+      <div class="section card-list">
+        {events.map((event) => (
+          <a class="text-link" href={`/events/${event.id}`}>Event · {formatMedium(event.data.start)} · {event.data.title}</a>
+        ))}
+        {news.map((story) => (
+          <a class="text-link" href={`/news/${story.id}`}>News · {story.data.title}</a>
+        ))}
+        {updates.map((update) => (
+          <a class="text-link" href={`/government/${update.id}`}>Notice · {update.data.title}</a>
+        ))}
+        {services.map((service) => (
+          <p>{service.group} · {service.name}{service.phone ? ` · ${service.phone}` : ''}</p>
+        ))}
+        {!total && <p>Nothing on the desk matches that.</p>}
+      </div>
+    )}
+  </div>
+</BaseLayout>

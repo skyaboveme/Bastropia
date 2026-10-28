@@ -1,0 +1,184 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import ExternalNews from '../components/ExternalNews.astro';
+import {
+  daysUntil,
+  earlyBranches,
+  earlyMain,
+  earlyVotingDays,
+  electionDay,
+  electionDayLocations,
+  electionHours,
+  electionOffice,
+  mapHref,
+  registeredVoters,
+  voteIsLive,
+  voteSource,
+  type VoteLocation,
+} from '../data/vote';
+import { phoneHref } from '../lib/format';
+import { getExternalNews } from '../lib/externalNews';
+import { eventKey, formatMedium, labelFromKey } from '../lib/time';
+
+const now = new Date();
+// After the cutoff the page is gone. Old links and shared posts land on the front page.
+if (!voteIsLive(now)) return Astro.redirect('/', 302);
+
+const today = eventKey(now);
+const firstEarly = earlyVotingDays[0].date;
+const lastEarly = earlyVotingDays[earlyVotingDays.length - 1].date;
+const todayHours = earlyVotingDays.find((day) => day.date === today)?.hours;
+const daysLeft = daysUntil(today, electionDay);
+
+let headline = `Election Day is ${labelFromKey(electionDay)}.`;
+let detail = `Polls are open ${electionHours} at any Election Day location in the county.`;
+if (today === electionDay) {
+  headline = 'Today is Election Day.';
+  detail = `Polls are open ${electionHours}. Vote at any Election Day location in the county. If you are in line at 7 pm, stay in line.`;
+} else if (todayHours) {
+  headline = `Early voting is open today, ${todayHours}.`;
+  detail = `Early voting runs through ${labelFromKey(lastEarly)}. Election Day is ${labelFromKey(electionDay)}, ${electionHours}.`;
+} else if (today < firstEarly) {
+  headline = `Early voting starts ${labelFromKey(firstEarly)}.`;
+} else if (today > lastEarly) {
+  headline = `Early voting is over. Vote ${labelFromKey(electionDay)}.`;
+  detail = `Polls are open ${electionHours} at any Election Day location in the county.`;
+}
+
+const byCity = new Map<string, VoteLocation[]>();
+for (const place of electionDayLocations) {
+  byCity.set(place.city, [...(byCity.get(place.city) ?? []), place]);
+}
+
+const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|election|elections|ballot|ballots|turnout)\b/i);
+---
+
+<BaseLayout
+  title="Go Vote"
+  description="Early voting hours, Election Day polling places, and the elections office for Bastrop County, Texas. Election Day is November 3, 2026."
+>
+  <PageHead
+    kicker="Election 2026"
+    title="Go Vote"
+    lede="Early voting hours, Election Day polling places, and who to call. Every time and address here comes from Bastrop County Elections."
+  />
+
+  <div class="wrap">
+    <section class="vote-status" aria-live="polite">
+      <div>
+        <p class="kicker">{today === electionDay ? 'Election Day' : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} until Election Day`}</p>
+        <h2>{headline}</h2>
+        <p class="dek">{detail}</p>
+      </div>
+      <div class="vote-facts">
+        <p><span>Election Day</span><strong>{labelFromKey(electionDay)}</strong></p>
+        <p><span>Polls open</span><strong>{electionHours}</strong></p>
+        <p><span>Questions</span><strong><a href={phoneHref(electionOffice.phone)}>{electionOffice.phone}</a></strong></p>
+      </div>
+    </section>
+
+    <section class="section split">
+      <div>
+        <div class="section-head">
+          <h2>Early voting hours</h2>
+          <span class="meta">{formatMedium(new Date('2026-10-19T12:00:00-05:00'))} to {formatMedium(new Date('2026-10-30T12:00:00-05:00'))}</span>
+        </div>
+        <p class="meta">A voter may vote at any early voting location below, on any day.</p>
+        <table class="vote-table">
+          <caption class="sr">Early voting days and hours</caption>
+          <thead>
+            <tr><th scope="col">Day</th><th scope="col">Hours</th><th scope="col"><span class="sr">Status</span></th></tr>
+          </thead>
+          <tbody>
+            {earlyVotingDays.map((day) => (
+              <tr class={day.date < today ? 'is-past' : day.date === today ? 'is-today' : ''}>
+                <th scope="row">{labelFromKey(day.date)}</th>
+                <td>{day.hours}</td>
+                <td>{day.date === today ? 'Today' : day.date < today ? 'Closed' : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="section-head">
+          <h2>Early voting locations</h2>
+        </div>
+        <ul class="vote-places">
+          <li class="is-main">
+            <p class="kicker">Main location</p>
+            <h3>{earlyMain.name}</h3>
+            <p>{earlyMain.street}, {earlyMain.city}, TX {earlyMain.zip}</p>
+            <p class="meta">{earlyMain.note}</p>
+            <p class="more"><a href={mapHref(earlyMain)} rel="noopener">Map</a></p>
+          </li>
+          {earlyBranches.map((place) => (
+            <li>
+              <p class="kicker">Branch · {place.city}</p>
+              <h3>{place.name}</h3>
+              <p>{place.street}, {place.city}, TX {place.zip}</p>
+              <p class="more"><a href={mapHref(place)} rel="noopener">Map</a></p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Election Day polling places</h2>
+        <span class="meta">{labelFromKey(electionDay)}, {electionHours}</span>
+      </div>
+      <p class="meta">On Election Day a voter may vote at any of these {electionDayLocations.length} locations.</p>
+      <div class="vote-towns">
+        {[...byCity.entries()].map(([city, places]) => (
+          <section class="vote-town">
+            <h3>{city}</h3>
+            <ul>
+              {places.map((place) => (
+                <li>
+                  <strong>{place.name}</strong>
+                  <span>{place.street}, {place.city} {place.zip}</span>
+                  <a href={mapHref(place)} rel="noopener">Map<span class="sr"> for {place.name}</span></a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </section>
+
+    <section class="section split">
+      <div>
+        <div class="section-head">
+          <h2>Elections office</h2>
+        </div>
+        <address class="vote-office">
+          <strong>{electionOffice.name}</strong>
+          <span>{electionOffice.street}, {electionOffice.city}, TX {electionOffice.zip}</span>
+          <a href={phoneHref(electionOffice.phone)}>{electionOffice.phone}</a>
+          <a href={`mailto:${electionOffice.email}`}>{electionOffice.email}</a>
+          <a href={electionOffice.facebook} rel="noopener">Elections office on Facebook</a>
+        </address>
+        <p class="meta" lang="es">¿Necesita información o ayuda en español? Por favor comuníquese con nuestra oficina al {electionOffice.phone}.</p>
+      </div>
+      <div>
+        <div class="section-head">
+          <h2>By the numbers</h2>
+        </div>
+        <p class="vote-number"><strong>{registeredVoters.total}</strong><span>registered voters in Bastrop County as of {registeredVoters.asOf}</span></p>
+      </div>
+    </section>
+
+    <ExternalNews items={stories} columns={2} showSummary heading="Election news" />
+
+    <p class="disclaimer">
+      Times, dates, and addresses come from <a class="text-link" href={voteSource.url} rel="noopener">{voteSource.name}</a>, checked {formatMedium(new Date(`${voteSource.checked}T12:00:00-05:00`))}. Bastropia is not the elections office.
+      Confirm anything that matters, including what to bring to vote, with the elections office or at <a class="text-link" href={voteSource.home} rel="noopener">bastropvotes.org</a>. This page comes down after Election Day.
+    </p>
+  </div>
+</BaseLayout>

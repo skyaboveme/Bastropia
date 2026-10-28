@@ -1,0 +1,37 @@
+---
+import { facebookGroup } from '../data/site';
+import { emergencyLine } from '../data/services';
+import { phoneHref } from '../lib/format';
+---
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="/"><img src="/brand/logo-trim.png" alt="Bastropia" width="865" height="923" /></a>
+      <p class="legal">The community news desk for Bastrop County, Texas.</p>
+    </div>
+    <div>
+      <h3>Sections</h3>
+      <p><a href="/news">News</a></p>
+      <p><a href="/events">Events</a></p>
+      <p><a href="/calendar">Calendar</a></p>
+      <p><a href="/this-weekend">This weekend</a></p>
+      <p><a href="/live">Live</a></p>
+      <p><a href="/videos">Videos</a></p>
+      <p><a href="/weather">Weather</a></p>
+      <p><a href="/burn-ban">Burn ban</a></p>
+      <p><a href="/government">Government</a></p>
+    </div>
+    <div>
+      <h3>Take part</h3>
+      <p><a href="/submit">Add an event</a></p>
+      <p><a href="/upgrade">Upgrade a listing</a></p>
+      <p><a href="/advertise">Advertise</a></p>
+      <p><a href={facebookGroup}>Facebook group</a></p>
+      <p><a href="/about">About Bastropia</a></p>
+      <p><a href="/rss.xml">RSS</a></p>
+      <p><a href={phoneHref(emergencyLine.phone)}>Emergencies: 911</a></p>
+    </div>
+    <p class="fine">Bastropia is a community site. It is not Bastrop County, a city, or an emergency service. Confirm bans, closures, and meeting times on the official pages linked here. For an emergency, call 911.</p>
+  </div>
+</footer>

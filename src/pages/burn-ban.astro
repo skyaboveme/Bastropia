@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { burnBan } from '../data/burnBan';
+import { formatMedium } from '../lib/time';
+
+const checked = formatMedium(new Date(`${burnBan.checked}T12:00:00`));
+---
+
+<BaseLayout title="Burn ban" description="Whether Bastrop County currently lists a burn ban, and what to check before you light a fire.">
+  <PageHead
+    kicker="Outdoor burning"
+    title={burnBan.headline}
+    lede={burnBan.summary}
+  />
+  <div class="wrap">
+    <p class={burnBan.inEffect ? 'pill pill-stop' : 'pill pill-ok'}>
+      {burnBan.inEffect ? 'Ban in effect' : 'No ban listed'} · checked {checked}
+    </p>
+    <div class="split" style="margin-top:1rem;">
+      <article class="detail-main prose">
+        <h2>Before you burn</h2>
+        <ul>
+          <li>Read the county page the same day. A ban can be ordered after this desk was updated.</li>
+          <li>A clear page still leaves the TCEQ outdoor-burning rule in place.</li>
+          <li>Burn natural material from that property, keep it small, and have a way to put it out.</li>
+          <li>Have the fire dead out before sunset. Do not burn trash, tires, treated wood, shingles, or chemicals.</li>
+          <li>If a fire escapes, call 911.</li>
+        </ul>
+        <p>Recent orders posted by the county include {burnBan.recentOrders.join(', ')}.</p>
+        <p><a href={burnBan.sourceUrl}>{burnBan.sourceLabel}</a></p>
+        <p><a href="https://www.bastropesd2.org/outdoor-burning/">ESD No. 2 outdoor burning notes</a> · <a href="https://tfsweb.tamu.edu/BurnBans/">Texas A&M Forest Service ban map</a></p>
+      </article>
+      <aside class="side-card">
+        <h2>If you are not sure</h2>
+        <p>Call the county Office of Emergency Management at <a class="text-link" href="tel:5125814022">(512) 581-4022</a>.</p>
+        <p>Inside ESD No. 2, outdoor-burning questions go to <a class="text-link" href="tel:8443473373">(844) 347-3373</a>.</p>
+        <a class="button" href={burnBan.sourceUrl}>Open the county page</a>
+      </aside>
+    </div>
+    <p class="disclaimer">Bastropia repeats the county status so neighbors can see it next to the calendar. The county page is the order. This page is not.</p>
+  </div>
+</BaseLayout>

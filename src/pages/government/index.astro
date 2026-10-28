@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { emergencyLine, serviceGroups } from '../../data/services';
+import { phoneHref } from '../../lib/format';
+import { formatMedium } from '../../lib/time';
+
+const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout title="Government" description="Emergency numbers, county and city services, and summaries of public notices for Bastrop County.">
+  <PageHead
+    kicker="Services"
+    title="Government and emergency contacts"
+    lede="The numbers and offices neighbors ask for, plus short summaries of public notices. Official pages are linked on every item that has one."
+  />
+  <div class="wrap">
+    <section class="notice">
+      <p class="kicker" style="color: var(--river);">Emergency</p>
+      <h2>Call {emergencyLine.phone}</h2>
+      <p class="lede" style="color:#d5e4dc;">{emergencyLine.label}. Do not post an emergency in the Facebook group or email this desk.</p>
+      <p class="cluster"><a class="button" href={phoneHref(emergencyLine.phone)}>Call 911</a></p>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Notices</p>
+          <h2>What the public record says</h2>
+        </div>
+      </div>
+      <div class="news-list">
+        {updates.map((update) => (
+          <article class="update-card">
+            <a href={`/government/${update.id}`}>
+              <p class="kicker">{update.data.agency} · {formatMedium(update.data.pubDate)}</p>
+              <h3>{update.data.title}</h3>
+              <p class="meta">{update.data.description}</p>
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    {serviceGroups.map((group) => (
+      <section class="section" id={group.id}>
+        <div class="section-head">
+          <div>
+            <h2>{group.title}</h2>
+            <p class="meta">{group.intro}</p>
+          </div>
+        </div>
+        <div class="service-grid">
+          {group.items.map((item) => (
+            <article class="service" style="padding: 0.9rem 1rem;">
+              <h3>{item.name}</h3>
+              <p class="meta">{item.detail}</p>
+              {item.address && <p style="margin-top:0.35rem;">{item.address}</p>}
+              <p class="cluster">
+                {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
+                {item.href && <a class="button button-ghost" href={item.href}>Website</a>}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+    ))}
+    <p class="disclaimer">These are published office numbers and links, gathered for convenience. Hours change. If an emergency is happening, call 911 instead of an office line.</p>
+  </div>
+</BaseLayout>

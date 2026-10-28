@@ -1,0 +1,90 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import EventCard from '../../components/EventCard.astro';
+import { categories, categoryMeta, cities } from '../../data/taxonomy';
+import { filterEvents } from '../../lib/events';
+import { activeUpgrades, resolveTier } from '../../lib/intake';
+import { eventKey, labelFromKey } from '../../lib/time';
+
+const params = Astro.url.searchParams;
+const query = {
+  when: params.get('when'),
+  category: params.get('category'),
+  city: params.get('city'),
+  q: params.get('q'),
+  date: params.get('date'),
+};
+const events = await getCollection('events');
+const upgrades = await activeUpgrades(eventKey(new Date()));
+const visible = filterEvents(events, query);
+const activeWhen = query.date ? '' : query.when || 'upcoming';
+
+function href(overrides: Record<string, string | null>) {
+  const next = new URLSearchParams();
+  const merged: Record<string, string | null> = {
+    when: query.when,
+    category: query.category,
+    city: query.city,
+    q: query.q,
+    date: query.date,
+    ...overrides,
+  };
+  for (const [key, value] of Object.entries(merged)) {
+    if (value) next.set(key, value);
+  }
+  const search = next.toString();
+  return search ? `/events?${search}` : '/events';
+}
+---
+
+<BaseLayout title="Events" description="What’s happening in Bastrop County — filter by day, town, and the kind of plans you want.">
+  <PageHead
+    kicker="Calendar"
+    title="Events in Bastrop County"
+    lede="Festivals, meetings, markets, and ordinary Tuesday plans. Filter the desk, or add the thing you’re hosting."
+  />
+  <div class="wrap">
+    <form class="search" action="/events" method="get">
+      <label class="sr" for="event-q">Search events</label>
+      <input id="event-q" name="q" type="search" value={query.q ?? ''} placeholder="Search listings" />
+      {query.when && <input type="hidden" name="when" value={query.when} />}
+      {query.category && <input type="hidden" name="category" value={query.category} />}
+      {query.city && <input type="hidden" name="city" value={query.city} />}
+      <button class="button" type="submit">Search</button>
+    </form>
+    <div class="filters">
+      <div class="filter-row">
+        <span>When</span>
+        {[['upcoming', 'Upcoming'], ['today', 'Today'], ['tonight', 'Tonight'], ['weekend', 'This weekend'], ['all', 'All dates']].map(([id, label]) => (
+          <a class="chip" href={href({ when: id, date: null })} aria-current={activeWhen === id ? 'true' : undefined}>{label}</a>
+        ))}
+      </div>
+      <div class="filter-row">
+        <span>What</span>
+        <a class="chip" href={href({ category: null })} aria-current={query.category ? undefined : 'true'}>All</a>
+        {categories.map((category) => (
+          <a class="chip" href={href({ category })} aria-current={query.category === category ? 'true' : undefined}>{categoryMeta[category].label}</a>
+        ))}
+      </div>
+      <div class="filter-row">
+        <span>Where</span>
+        <a class="chip" href={href({ city: null })} aria-current={query.city ? undefined : 'true'}>All</a>
+        {cities.map((city) => (
+          <a class="chip" href={href({ city })} aria-current={query.city === city ? 'true' : undefined}>{city}</a>
+        ))}
+      </div>
+    </div>
+    {query.date && <p class="lede">Showing {labelFromKey(query.date)}.</p>}
+    {visible.length ? (
+      <div class="card-list">
+        {visible.map((event) => <EventCard event={event} tier={resolveTier(event.id, event.data.tier, upgrades)} />)}
+      </div>
+    ) : (
+      <p class="lede">Nothing matches. <a class="text-link" href="/submit">Submit a listing</a> or <a class="text-link" href="/events">clear the filters</a>.</p>
+    )}
+  </div>
+</BaseLayout>

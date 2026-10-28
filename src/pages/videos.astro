@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import VideoSection from '../components/VideoSection.astro';
+---
+
+<BaseLayout title="Videos" description="Videos about Bastrop, Texas: things to do, a downtown tour, and what living in Bastrop is like.">
+  <PageHead
+    kicker="Watch"
+    title="Bastrop on video"
+    lede="Tours, things to do, and local insight from channels that have been to Bastrop. Pick a video from the list to watch it here."
+  />
+  <div class="wrap">
+    <VideoSection heading="Now playing" />
+  </div>
+</BaseLayout>

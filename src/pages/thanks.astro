@@ -1,0 +1,31 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { getIntake } from '../lib/intake';
+import { money } from '../lib/format';
+
+const id = Astro.url.searchParams.get('id') ?? '';
+const record = id ? await getIntake(id) : null;
+---
+
+<BaseLayout title="Received" description="Your note is on the Bastropia desk.">
+  <PageHead
+    kicker="Desk"
+    title={record ? 'The desk has it' : 'Received'}
+    lede={record ? record.summary : 'If this was a real submission, the confirmation includes an order number.'}
+  />
+  <div class="wrap">
+    {record && (
+      <article class="detail-main">
+        <p class="kicker">{record.id}</p>
+        {record.total > 0 && <p class="price-line">{money(record.total)}</p>}
+        {record.type === 'ad' && <p>This reserves the placement. Bastropia checks that the week is open and sends an invoice. The ad is labeled Sponsored and goes up after payment.</p>}
+        {record.type === 'upgrade' && <p>This requests the upgrade. It starts after the invoice is paid and the desk applies it to the listing.</p>}
+        {record.type === 'event' && <p>A person will read this before it goes on the calendar. You will get email if the address you gave works.</p>}
+        {record.type === 'newsletter' && <p>Your address is stored with the other newsletter signups. It is not sold with the ad inventory.</p>}
+      </article>
+    )}
+  </div>
+</BaseLayout>

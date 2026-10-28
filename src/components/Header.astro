@@ -1,0 +1,100 @@
+---
+import { burnBan } from '../data/burnBan';
+import { facebookGroup } from '../data/site';
+import { electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
+import { formatLong, labelFromKey } from '../lib/time';
+import { getForecast, weatherLabel } from '../lib/weather';
+
+const path = Astro.url.pathname;
+const forecast = await getForecast('Bastrop');
+const today = formatLong(new Date());
+const voteLive = voteIsLive();
+
+const links = [
+  { href: '/', label: 'Front page' },
+  { href: '/news', label: 'News' },
+  { href: '/events', label: 'Events' },
+  { href: '/calendar', label: 'Calendar' },
+  { href: '/this-weekend', label: 'This weekend' },
+  { href: '/live', label: 'Live' },
+  { href: '/videos', label: 'Videos' },
+  { href: '/weather', label: 'Weather' },
+  { href: '/government', label: 'Government' },
+  { href: '/advertise', label: 'Advertise' },
+];
+const voteLink = { href: '/go-vote', label: 'Go Vote' };
+
+function current(href: string) {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(`${href}/`);
+}
+---
+
+{burnBan.inEffect && (
+  <a class="alert-bar" href="/burn-ban">Burn ban in effect in Bastrop County. Read the order before you burn.</a>
+)}
+{voteLive && (
+  <a class="vote-bar" href="/go-vote" data-expires={voteLiveUntil}>
+    <strong>Go Vote.</strong> Election Day is {labelFromKey(electionDay)}, polls open {electionHours}. See hours and polling places.
+  </a>
+)}
+<header class="site-head">
+  <div class="utility">
+    <div class="utility-inner">
+      <p>{today}</p>
+      <div class="utility-links">
+        <a href={facebookGroup}>Facebook group</a>
+        <a href="/#newsletter">Newsletter</a>
+        <a href="/submit">Add an event</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="masthead">
+    <a class="ear ear-left" href="/weather">
+      <span class="ear-label">Right now</span>
+      <strong>{forecast ? `${forecast.temp}°` : 'Weather'}</strong>
+      <span class="ear-sub">{forecast ? `${weatherLabel(forecast.code)} in Bastrop` : 'County forecast'}</span>
+    </a>
+    <a class="brand" href="/">
+      <img src="/brand/logo-trim.png" alt="Bastropia" width="865" height="923" />
+    </a>
+    <a class="ear ear-right" href="/burn-ban">
+      <span class="ear-label">Burn ban</span>
+      <strong class={burnBan.inEffect ? 'is-stop' : 'is-ok'}>{burnBan.inEffect ? 'In effect' : 'None listed'}</strong>
+      <span class="ear-sub">Emergencies: call 911</span>
+    </a>
+  </div>
+
+  <div class="sections-bar">
+    <div class="sections-inner">
+      <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav">Sections</button>
+      <nav id="site-nav" class="nav" aria-label="Sections">
+        {voteLive && (
+          <a class="nav-vote" href={voteLink.href} data-expires={voteLiveUntil} aria-current={current(voteLink.href) ? 'page' : undefined}>{voteLink.label}</a>
+        )}
+        {links.map((link) => (
+          <a href={link.href} aria-current={current(link.href) ? 'page' : undefined}>{link.label}</a>
+        ))}
+      </nav>
+      <form class="nav-search" action="/search" method="get" role="search">
+        <label class="sr" for="nav-q">Search Bastropia</label>
+        <input id="nav-q" name="q" type="search" placeholder="Search" />
+      </form>
+    </div>
+  </div>
+</header>
+<script>
+  // Pages built ahead of time can outlive the Go Vote page, so expiring links remove themselves.
+  const chicagoToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
+  document.querySelectorAll<HTMLElement>('[data-expires]').forEach((element) => {
+    if (element.dataset.expires && chicagoToday >= element.dataset.expires) element.remove();
+  });
+
+  const button = document.querySelector('.menu');
+  const nav = document.querySelector('#site-nav');
+  button?.addEventListener('click', () => {
+    const open = nav?.classList.toggle('is-open');
+    button.setAttribute('aria-expanded', String(Boolean(open)));
+  });
+</script>

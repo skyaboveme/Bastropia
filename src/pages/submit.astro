@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FormError from '../components/FormError.astro';
+import { categories, categoryMeta, cities } from '../data/taxonomy';
+import { addDays, eventKey } from '../lib/time';
+
+const tomorrow = addDays(eventKey(new Date()), 1);
+---
+
+<BaseLayout title="Add an event" description="Submit a community listing for Bastrop County. A person reviews it before it goes on the calendar.">
+  <PageHead
+    kicker="Listings"
+    title="Add your event"
+    lede="Free for gatherings, fundraisers, worship nights, school events, and civic meetings. The desk reviews it before it is public. If you want it pinned or shared to the Facebook group, upgrade it after it is published."
+  />
+  <div class="wrap">
+    <FormError />
+    <form class="form" action="/api/intake" method="post">
+      <input type="hidden" name="type" value="event" />
+      <input type="hidden" name="from" value="/submit" />
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="fields">
+        <label class="field wide">
+          <span>Event name</span>
+          <input name="title" required maxlength="120" />
+        </label>
+        <label class="field">
+          <span>Date</span>
+          <input name="date" type="date" required value={tomorrow} />
+        </label>
+        <label class="field">
+          <span>Town</span>
+          <select name="city" required>
+            {cities.map((city) => <option value={city}>{city}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span>Start time</span>
+          <input name="startTime" type="time" />
+        </label>
+        <label class="field">
+          <span>End time</span>
+          <input name="endTime" type="time" />
+        </label>
+        <label class="field wide">
+          <input type="checkbox" name="allDay" value="yes" /> All day
+        </label>
+        <label class="field">
+          <span>Venue</span>
+          <input name="venue" required maxlength="120" />
+        </label>
+        <label class="field">
+          <span>Address</span>
+          <input name="address" maxlength="160" />
+        </label>
+        <label class="field">
+          <span>Category</span>
+          <select name="category">
+            {categories.map((category) => <option value={category}>{categoryMeta[category].label}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span>Cost</span>
+          <input name="cost" placeholder="Free" maxlength="40" />
+        </label>
+        <label class="field">
+          <span>Organizer</span>
+          <input name="organizer" maxlength="80" />
+        </label>
+        <label class="field">
+          <span>Your name</span>
+          <input name="contact" autocomplete="name" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field">
+          <span>Phone</span>
+          <input name="phone" type="tel" autocomplete="tel" />
+        </label>
+        <label class="field">
+          <span>Website</span>
+          <input name="website" type="url" placeholder="https://" />
+        </label>
+        <label class="field wide">
+          <span>Live stream link, if you have one</span>
+          <input name="streamUrl" type="url" placeholder="https://" />
+        </label>
+        <label class="field wide">
+          <span>What should neighbors know?</span>
+          <textarea name="details" required minlength="20" rows="6" maxlength="1500" placeholder="Who it is for, what happens, and anything about parking or cost."></textarea>
+        </label>
+      </div>
+      <button class="button" type="submit">Send it to the desk</button>
+    </form>
+  </div>
+</BaseLayout>

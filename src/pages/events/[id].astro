@@ -1,0 +1,94 @@
+---
+export const prerender = false;
+
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { categoryMeta } from '../../data/taxonomy';
+import { listingTiers } from '../../data/commerce';
+import { googleCalendarUrl } from '../../lib/ics';
+import { activeUpgrades, resolveTier } from '../../lib/intake';
+import { eventKey, formatLong, whenLabel } from '../../lib/time';
+
+const id = Astro.params.id ?? '';
+const event = await getEntry('events', id);
+if (!event) Astro.response.status = 404;
+const rendered = event ? await render(event) : null;
+const upgrades = await activeUpgrades(eventKey(new Date()));
+const tier = event ? resolveTier(event.id, event.data.tier, upgrades) : 'community';
+const pageUrl = new URL(`/events/${id}`, Astro.site).toString();
+const tierName = listingTiers.find((item) => item.id === tier)?.name ?? 'Community';
+const jsonLd = event
+  ? JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: event.data.title,
+      description: event.data.summary,
+      startDate: event.data.start.toISOString(),
+      endDate: event.data.end?.toISOString(),
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      eventStatus: 'https://schema.org/EventScheduled',
+      location: {
+        '@type': 'Place',
+        name: event.data.venue,
+        address: event.data.address ?? event.data.city,
+      },
+      url: pageUrl,
+      image: event.data.image ? new URL(event.data.image, Astro.site).toString() : undefined,
+    }).replace(/</g, '\\u003c')
+  : '';
+---
+
+<BaseLayout title={event?.data.title ?? 'Listing not found'} description={event?.data.summary ?? 'That listing is not on the Bastropia calendar.'}>
+  {jsonLd && <script slot="head" type="application/ld+json" set:html={jsonLd} />}
+  {event && rendered ? (
+    <div class="wrap">
+      <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+        <p class="kicker">{categoryMeta[event.data.category].label} · {event.data.city} · {tierName}</p>
+        <h1>{event.data.title}</h1>
+        <p class="lede">{event.data.summary}</p>
+      </header>
+      <div class="detail">
+        <article class="detail-main prose">
+          {event.data.image && <img class="event-photo" src={event.data.image} alt={event.data.title} />}
+          <rendered.Content />
+          {event.data.sourceUrl && (
+            <p>Source: <a href={event.data.sourceUrl}>{event.data.sourceLabel ?? 'Original listing'}</a></p>
+          )}
+          {event.data.streamUrl && (
+            <p>Stream: <a href={event.data.streamUrl}>Watch the live link supplied with this listing</a></p>
+          )}
+        </article>
+        <aside class="side-card">
+          <dl class="facts">
+            <div>
+              <dt>When</dt>
+              <dd>{formatLong(event.data.start)}</dd>
+              <dd>{whenLabel(event.data.schedule, event.data.start, event.data.end)}</dd>
+            </div>
+            <div>
+              <dt>Where</dt>
+              <dd>{event.data.venue}</dd>
+              {event.data.address && <dd>{event.data.address}</dd>}
+            </div>
+            <div>
+              <dt>Cost</dt>
+              <dd>{event.data.cost}</dd>
+            </div>
+            {event.data.organizer && (
+              <div>
+                <dt>Host</dt>
+                <dd>{event.data.organizer}</dd>
+              </div>
+            )}
+          </dl>
+          <a class="button" href={googleCalendarUrl(event, pageUrl)}>Google Calendar</a>
+          <a class="button button-ghost" href={`/ics/${event.id}`}>Download .ics</a>
+          <a class="button button-dark" href={`/upgrade?event=${event.id}`}>Upgrade this listing</a>
+        </aside>
+      </div>
+    </div>
+  ) : (
+    <PageHead kicker="Calendar" title="That listing is not on the desk" lede="It may have been renamed. Browse the calendar or submit it again." />
+  )}
+</BaseLayout>

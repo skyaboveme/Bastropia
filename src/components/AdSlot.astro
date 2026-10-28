@@ -1,0 +1,36 @@
+---
+import { placements, type PlacementId } from '../data/commerce';
+import { activeSponsor } from '../lib/intake';
+import { money } from '../lib/format';
+import { eventKey } from '../lib/time';
+
+interface Props {
+  placement: PlacementId;
+}
+
+const { placement } = Astro.props;
+const meta = placements.find((item) => item.id === placement);
+const sponsor = await activeSponsor(placement, eventKey(new Date()));
+---
+
+{meta && (
+  <aside class:list={['ad-slot', { 'ad-open': !sponsor }]} aria-label={sponsor ? 'Sponsored' : 'Advertising'}>
+    <div>
+      <p>{sponsor ? 'Sponsored' : 'Open placement'}</p>
+      {sponsor ? (
+        <a href={sponsor.href}>
+          <strong>{sponsor.name}</strong>
+          <span>{sponsor.line}</span>
+        </a>
+      ) : (
+        <a href={`/advertise?placement=${meta.id}`}>
+          <strong>{meta.name}</strong>
+          <span>{meta.detail} {money(meta.weeklyRate)} a week.</span>
+        </a>
+      )}
+    </div>
+    <a class="button" href={sponsor ? sponsor.href : `/advertise?placement=${meta.id}`}>
+      {sponsor ? 'Visit' : 'Advertise'}
+    </a>
+  </aside>
+)}

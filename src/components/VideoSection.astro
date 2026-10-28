@@ -1,0 +1,107 @@
+---
+import { thumbnail, videos, watchUrl } from '../data/videos';
+
+interface Props {
+  heading?: string;
+  allVideos?: boolean;
+}
+
+const { heading = 'Watch', allVideos = false } = Astro.props;
+const [featured] = videos;
+---
+
+{videos.length > 0 && (
+  <section class="section" aria-labelledby="video-heading">
+    <div class="section-head">
+      <h2 id="video-heading">{heading}</h2>
+      {allVideos && <a href="/videos">All videos</a>}
+    </div>
+    <div class="video-layout" data-video-player>
+      <div class="video-main">
+        <div class="video-stage" data-video-stage>
+          <a class="video-thumb" href={watchUrl(featured.id)} data-id={featured.id} data-title={featured.title}>
+            <img src={thumbnail(featured.id, 'hqdefault')} alt="" width="480" height="360" loading="lazy" />
+            <span class="video-play" aria-hidden="true"></span>
+            <span class="sr">Play: {featured.title}</span>
+          </a>
+        </div>
+        <h3 data-video-title><a href={watchUrl(featured.id)} rel="noopener">{featured.title}</a></h3>
+        <p class="meta" data-video-channel>From <a class="text-link" href={featured.channelUrl} rel="noopener">{featured.channel}</a> on YouTube</p>
+      </div>
+      <ul class="video-list">
+        {videos.map((video, index) => (
+          <li>
+            <a
+              class="video-item"
+              href={watchUrl(video.id)}
+              data-video-id={video.id}
+              data-title={video.title}
+              data-channel={video.channel}
+              data-channel-url={video.channelUrl}
+              aria-current={index === 0 ? 'true' : undefined}
+            >
+              <img src={thumbnail(video.id)} alt="" width="320" height="180" loading="lazy" />
+              <span>
+                <strong>{video.title}</strong>
+                <em>{video.channel}</em>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <p class="disclaimer">These videos are made by their channels and play from YouTube. Bastropia did not make them, and a video here is not an endorsement. Details such as hours and prices may be out of date.</p>
+  </section>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video-player]').forEach((root) => {
+    const stage = root.querySelector<HTMLElement>('[data-video-stage]');
+    const title = root.querySelector<HTMLElement>('[data-video-title]');
+    const channel = root.querySelector<HTMLElement>('[data-video-channel]');
+    if (!stage) return;
+
+    function play(id: string, name: string) {
+      const frame = document.createElement('iframe');
+      frame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
+      frame.title = name;
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      stage!.replaceChildren(frame);
+    }
+
+    stage.addEventListener('click', (event) => {
+      const thumb = (event.target as HTMLElement).closest<HTMLAnchorElement>('.video-thumb');
+      if (!thumb) return;
+      event.preventDefault();
+      play(thumb.dataset.id ?? '', thumb.dataset.title ?? 'Video');
+    });
+
+    root.querySelectorAll<HTMLAnchorElement>('[data-video-id]').forEach((item) => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault();
+        const { videoId = '', title: name = 'Video', channel: by = '', channelUrl = '' } = item.dataset;
+        root.querySelectorAll('[data-video-id]').forEach((other) => other.removeAttribute('aria-current'));
+        item.setAttribute('aria-current', 'true');
+        if (title) {
+          const link = document.createElement('a');
+          link.href = item.href;
+          link.rel = 'noopener';
+          link.textContent = name;
+          title.replaceChildren(link);
+        }
+        if (channel) {
+          const link = document.createElement('a');
+          link.className = 'text-link';
+          link.href = channelUrl;
+          link.rel = 'noopener';
+          link.textContent = by;
+          channel.replaceChildren('From ', link, ' on YouTube');
+        }
+        play(videoId, name);
+        stage.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    });
+  });
+</script>

@@ -1,0 +1,45 @@
+---
+import type { ExternalStory } from '../lib/externalNews';
+import { newsSources } from '../lib/externalNews';
+import { formatMedium } from '../lib/time';
+
+interface Props {
+  items: ExternalStory[];
+  columns?: 2 | 4;
+  showSummary?: boolean;
+  allNews?: boolean;
+  heading?: string;
+}
+
+const { items, columns = 4, showSummary = false, allNews = false, heading = 'Around the county' } = Astro.props;
+const present = newsSources.filter((source) => items.some((item) => item.source.id === source.id));
+---
+
+{items.length > 0 && (
+  <section class="section" aria-labelledby="ext-heading">
+    <div class="section-head">
+      <h2 id="ext-heading">{heading}</h2>
+      {allNews && <a href="/news">All news</a>}
+    </div>
+    <div class={`ci-grid ci-${columns}`}>
+      {items.map((item) => (
+        <article class="brief">
+          <p class="kicker">{item.source.name} · {formatMedium(item.published)}</p>
+          <h3><a href={item.link} rel="noopener">{item.title}</a></h3>
+          {showSummary && item.summary && <p class="meta">{item.summary}</p>}
+          {item.author && <p class="meta byline">By {item.author}</p>}
+        </article>
+      ))}
+    </div>
+    <p class="disclaimer">
+      Headlines and links from
+      {present.map((source, index) => (
+        <>
+          {index > 0 && (index === present.length - 1 ? ' and ' : ', ')}
+          <a class="text-link" href={source.home} rel="noopener">{source.name}</a>
+        </>
+      ))}.
+      Stories open on their sites. Bastropia does not write or edit them.
+    </p>
+  </section>
+)}

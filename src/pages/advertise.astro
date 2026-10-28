@@ -1,0 +1,105 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FormError from '../components/FormError.astro';
+import { placements } from '../data/commerce';
+import { money } from '../lib/format';
+import { activeSponsors } from '../lib/intake';
+import { addDays, eventKey, labelFromKey } from '../lib/time';
+
+const today = eventKey(new Date());
+const booked = await activeSponsors(today);
+const selected = Astro.url.searchParams.get('placement');
+const start = addDays(today, 7);
+const rates = Object.fromEntries(placements.map((item) => [item.id, item.weeklyRate]));
+---
+
+<BaseLayout title="Advertise" description="Buy a labeled ad on Bastropia. Choose a placement, a start date, and how many weeks.">
+  <PageHead
+    kicker="Sponsors"
+    title="Put your business on the county desk"
+    lede="Ads are labeled, priced by the week, and kept off the burn-ban page and the emergency numbers. You reserve a placement here. Bastropia confirms the week is open and sends an invoice. The ad goes up after payment."
+  />
+  <div class="wrap">
+    <FormError />
+    <form id="ad-form" class="form" action="/api/intake" method="post">
+      <input type="hidden" name="type" value="ad" />
+      <input type="hidden" name="from" value="/advertise" />
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="place-grid">
+        {placements.map((placement) => {
+          const holder = booked.find((item) => item.placement === placement.id);
+          return (
+            <label class="choice">
+              <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'river-banner'} />
+              <p class="kicker">{placement.page} · {money(placement.weeklyRate)} / week</p>
+              <h2 style="font-size:1.7rem;">{placement.name}</h2>
+              <p class="meta">{placement.where}</p>
+              <p style="margin-top:0.4rem;">{placement.detail}</p>
+              {holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
+            </label>
+          );
+        })}
+      </div>
+      <div class="fields">
+        <label class="field">
+          <span>Weeks</span>
+          <input name="weeks" type="number" min="1" max="12" value="1" required />
+        </label>
+        <label class="field">
+          <span>Start date</span>
+          <input name="start" type="date" value={start} required />
+        </label>
+        <label class="field">
+          <span>Business name</span>
+          <input name="business" required maxlength="80" />
+        </label>
+        <label class="field">
+          <span>Contact name</span>
+          <input name="contact" required maxlength="80" autocomplete="name" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field">
+          <span>Phone</span>
+          <input name="phone" type="tel" autocomplete="tel" />
+        </label>
+        <label class="field wide">
+          <span>Website the ad should open</span>
+          <input name="website" type="url" required placeholder="https://" />
+        </label>
+        <label class="field wide">
+          <span>Ad line, up to 90 characters</span>
+          <input name="line" required maxlength="90" placeholder="Saturday produce on Main Street" />
+        </label>
+        <label class="field wide">
+          <span>Notes</span>
+          <textarea name="notes" rows="4" maxlength="1200" placeholder="Anything the desk should know. Political ads need the paid-for line in this box."></textarea>
+        </label>
+      </div>
+      <p class="price-line">Estimated total <strong id="ad-total">{money(placements[0].weeklyRate)}</strong></p>
+      <label>
+        <input type="checkbox" name="terms" value="yes" required /> The ad will say Sponsored. It will not imitate the county, a city, or an emergency notice. I understand this reservation is invoiced by the desk and is not charged on this form.
+      </label>
+      <button class="button" type="submit">Reserve this placement</button>
+    </form>
+  </div>
+</BaseLayout>
+<script define:vars={{ rates }}>
+  const form = document.querySelector('#ad-form');
+  const total = document.querySelector('#ad-total');
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const update = () => {
+    if (!(form instanceof HTMLFormElement) || !total) return;
+    const data = new FormData(form);
+    const rate = rates[String(data.get('placement'))] || 0;
+    const weeks = Math.min(12, Math.max(1, Number(data.get('weeks')) || 1));
+    total.textContent = money.format(rate * weeks);
+  };
+  form?.addEventListener('input', update);
+  update();
+</script>

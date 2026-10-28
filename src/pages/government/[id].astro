@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatLong } from '../../lib/time';
+
+export async function getStaticPaths() {
+  const updates = await getCollection('updates');
+  return updates.map((update) => ({ params: { id: update.id }, props: { update } }));
+}
+
+const { update } = Astro.props;
+const { Content } = await render(update);
+---
+
+<BaseLayout title={update.data.title} description={update.data.description}>
+  <article class="wrap">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+      <p class="kicker">{update.data.agency} · {formatLong(update.data.pubDate)}</p>
+      <h1>{update.data.title}</h1>
+      <p class="lede">{update.data.description}</p>
+    </header>
+    <div class="prose">
+      <Content />
+      <p>Source: <a href={update.data.sourceUrl}>{update.data.sourceLabel}</a></p>
+    </div>
+  </article>
+</BaseLayout>
