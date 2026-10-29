@@ -52,9 +52,13 @@ const listed = [...upcoming].sort((a, b) => a.data.start.getTime() - b.data.star
   description={siteDescription}
   extra={[linkList('Upcoming events in Bastrop County', listed.map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]}
 >
+  <link slot="head" rel="preload" as="image" type="image/webp" href="/images/bastrop-aerial.webp" imagesrcset="/images/bastrop-aerial-640.webp 640w, /images/bastrop-aerial.webp 1024w" imagesizes="(min-width: 1224px) 1180px, calc(100vw - 2.4rem)" fetchpriority="high" />
   <div class="wrap">
     <figure class="hero-photo">
-      <img src="/images/bastrop-aerial.jpg" alt="Aerial view of downtown Bastrop, the river bridge, and the surrounding pines" width="1024" height="682" fetchpriority="high" />
+      <picture>
+        <source type="image/webp" srcset="/images/bastrop-aerial-640.webp 640w, /images/bastrop-aerial.webp 1024w" sizes="(min-width: 1224px) 1180px, calc(100vw - 2.4rem)" />
+        <img src="/images/bastrop-aerial.jpg" alt="Aerial view of downtown Bastrop, the river bridge, and the surrounding pines" width="1024" height="682" fetchpriority="high" decoding="async" />
+      </picture>
     </figure>
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
