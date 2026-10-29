@@ -23,6 +23,43 @@ export const newsSources: NewsSource[] = [
   },
 ];
 
+export type Headline = {
+  title: string;
+  href: string;
+  date: Date;
+  label: string;
+  summary: string;
+  external: boolean;
+};
+
+export function latestHeadlines(
+  desk: { id: string; data: { title: string; description: string; pubDate: Date; place: string } }[],
+  external: ExternalStory[],
+): Headline[] {
+  const items: Headline[] = [
+    ...desk.map((story) => ({
+      title: story.data.title,
+      href: `/news/${story.id}`,
+      date: story.data.pubDate,
+      label: story.data.place,
+      summary: story.data.description,
+      external: false,
+    })),
+    ...external.map((story) => ({
+      title: story.title,
+      href: story.link,
+      date: story.published,
+      label: story.source.name,
+      summary: story.summary,
+      external: true,
+    })),
+  ];
+  const seen = new Set<string>();
+  return items
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .filter((item) => (seen.has(item.href) ? false : (seen.add(item.href), true)));
+}
+
 export type ExternalStory = {
   title: string;
   link: string;

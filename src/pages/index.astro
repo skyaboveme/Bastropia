@@ -7,7 +7,7 @@ import EventCard from '../components/EventCard.astro';
 import AdSlot from '../components/AdSlot.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import VideoSection from '../components/VideoSection.astro';
-import { getExternalNews } from '../lib/externalNews';
+import { getExternalNews, latestHeadlines } from '../lib/externalNews';
 import { burnBan } from '../data/burnBan';
 import { siteDescription } from '../data/site';
 import { linkList } from '../lib/schema';
@@ -33,12 +33,14 @@ const picks = sortByTier(
 ).slice(0, 4);
 const boosted = picks.some((event) => tierOf(event) !== 'community');
 const byTime = <T extends { data: { pubDate: Date } }>(a: T, b: T) => b.data.pubDate.getTime() - a.data.pubDate.getTime();
-const news = (await getCollection('news')).sort(byTime);
 const notices = (await getCollection('updates')).sort(byTime);
-const lead = news[0];
-const secondary = news.slice(1, 3);
-const briefs = news.slice(3);
-const [forecast, externalNews] = await Promise.all([getForecast('Bastrop'), getExternalNews(4, 2)]);
+const [forecast, externalNews] = await Promise.all([getForecast('Bastrop'), getExternalNews(16)]);
+const headlines = latestHeadlines(await getCollection('news'), externalNews);
+const lead = headlines[0];
+const secondary = headlines.slice(1, 3);
+const briefs = headlines.slice(3, 7);
+const shown = new Set(headlines.slice(0, 7).map((story) => story.href));
+const around = externalNews.filter((story) => !shown.has(story.link)).slice(0, 4);
 const townCounts = cities
   .filter((city) => city !== 'Countywide')
   .map((city) => ({ city, count: upcoming.filter((event) => event.data.city === city).length }));
@@ -58,18 +60,18 @@ const listed = [...upcoming].sort((a, b) => a.data.start.getTime() - b.data.star
       <div class="col col-lead">
         {lead && (
           <article class="story-lead">
-            <p class="kicker">{lead.data.place} · {formatMedium(lead.data.pubDate)}</p>
-            <h1><a href={`/news/${lead.id}`}>{lead.data.title}</a></h1>
-            <p class="dek">{lead.data.description}</p>
-            <p class="more"><a href={`/news/${lead.id}`}>Read the story</a></p>
+            <p class="kicker">{lead.label} · {formatMedium(lead.date)}</p>
+            <h1><a href={lead.href} rel={lead.external ? 'noopener' : undefined}>{lead.title}</a></h1>
+            {lead.summary && <p class="dek">{lead.summary}</p>}
+            <p class="more"><a href={lead.href} rel={lead.external ? 'noopener' : undefined}>Read the story</a></p>
           </article>
         )}
         <div class="story-pair">
           {secondary.map((story) => (
             <article class="story-sub">
-              <p class="kicker">{story.data.place} · {formatMedium(story.data.pubDate)}</p>
-              <h2><a href={`/news/${story.id}`}>{story.data.title}</a></h2>
-              <p class="dek">{story.data.description}</p>
+              <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
+              <h2><a href={story.href} rel={story.external ? 'noopener' : undefined}>{story.title}</a></h2>
+              {story.summary && <p class="dek">{story.summary}</p>}
             </article>
           ))}
         </div>
@@ -79,8 +81,8 @@ const listed = [...upcoming].sort((a, b) => a.data.start.getTime() - b.data.star
         <h2 class="col-title">More headlines</h2>
         {briefs.map((story) => (
           <article class="brief">
-            <p class="kicker">{story.data.place}</p>
-            <h3><a href={`/news/${story.id}`}>{story.data.title}</a></h3>
+            <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
+            <h3><a href={story.href} rel={story.external ? 'noopener' : undefined}>{story.title}</a></h3>
           </article>
         ))}
         {notices.slice(0, 3).map((notice) => (
@@ -143,7 +145,7 @@ const listed = [...upcoming].sort((a, b) => a.data.start.getTime() - b.data.star
       </aside>
     </section>
 
-    <ExternalNews items={externalNews} allNews />
+    <ExternalNews items={around} allNews />
 
     <section class="section">
       <div class="section-head">

@@ -5,13 +5,12 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import AdSlot from '../../components/AdSlot.astro';
-import ExternalNews from '../../components/ExternalNews.astro';
-import { getExternalNews } from '../../lib/externalNews';
+import { getExternalNews, latestHeadlines } from '../../lib/externalNews';
 import { linkList } from '../../lib/schema';
 import { formatMedium } from '../../lib/time';
 
-const stories = (await getCollection('news')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
-const externalNews = await getExternalNews(14);
+const stories = await getCollection('news');
+const headlines = latestHeadlines(stories, await getExternalNews(24));
 ---
 
 <BaseLayout
@@ -23,18 +22,18 @@ const externalNews = await getExternalNews(14);
   <div class="wrap">
     <div class="split">
       <div class="news-list">
-        {stories.map((story) => (
+        {headlines.map((story) => (
           <article class="story-card">
-            <a href={`/news/${story.id}`}>
-              <p class="kicker">{story.data.place} · {formatMedium(story.data.pubDate)}</p>
-              <h3>{story.data.title}</h3>
-              <p class="meta">{story.data.description}</p>
+            <a href={story.href} rel={story.external ? 'noopener' : undefined}>
+              <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
+              <h3>{story.title}</h3>
+              {story.summary && <p class="meta">{story.summary}</p>}
             </a>
           </article>
         ))}
       </div>
       <AdSlot placement="news-rail" />
     </div>
-    <ExternalNews items={externalNews} columns={2} showSummary />
+    <p class="disclaimer">Headlines from Community Impact and KXAN open on their sites. Bastropia does not write or edit them.</p>
   </div>
 </BaseLayout>
