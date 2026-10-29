@@ -21,8 +21,8 @@ const fullTitle = title === siteName ? `${siteName} — Everything happening in 
 const requestPath = Astro.url.pathname.length > 1 && Astro.url.pathname.endsWith('/') ? Astro.url.pathname.slice(0, -1) : Astro.url.pathname;
 const path = canonicalPath ?? requestPath;
 const canonical = new URL(path, Astro.site);
-const sharePath = image ?? (requestPath === '/' ? '/images/bastrop-aerial.jpg' : '/brand/logo.png');
-const shareAlt = imageAlt ?? (requestPath === '/' ? 'Aerial view of downtown Bastrop, the river bridge, and the surrounding pines' : siteName);
+const sharePath = image || '/brand/og.png';
+const shareAlt = image ? (imageAlt ?? title) : 'Bastropia — everything happening in Bastrop County';
 const shareImage = new URL(sharePath, Astro.site);
 const themeColor = '#10281f';
 
@@ -82,6 +82,9 @@ const jsonLd = stringify(graph(nodes));
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={shareImage} />
     <meta property="og:image:alt" content={shareAlt} />
+    {!image && <meta property="og:image:width" content="1200" />}
+    {!image && <meta property="og:image:height" content="630" />}
+    {!image && <meta property="og:image:type" content="image/png" />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
