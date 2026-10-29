@@ -12,6 +12,7 @@ tier: community
 organizer: "Colorado River Cowboy Church"
 sourceUrl: "https://www.coloradorivercowboychurch.org"
 sourceLabel: "Colorado River Cowboy Church"
+image: "/images/events/round-up-day-colorado-river-cowboy-church-2026-11-08.jpg"
 ---
 
 "Come celebrate with us as we move into our new worship building!" Colorado River Cowboy Church holds Round Up Day on Sunday, November 8, 2026. The open house starts at 9 am and worship starts at 10 am. These details come from the church's flyer. Confirm the schedule and any cost with the church before you go.
