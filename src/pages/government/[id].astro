@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { noticeNode } from '../../lib/schema';
 import { formatLong } from '../../lib/time';
 
 export async function getStaticPaths() {
@@ -12,7 +13,7 @@ const { update } = Astro.props;
 const { Content } = await render(update);
 ---
 
-<BaseLayout title={update.data.title} description={update.data.description}>
+<BaseLayout title={update.data.title} description={update.data.description} pageType="Article" extra={[noticeNode(update)]}>
   <article class="wrap">
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
       <p class="kicker">{update.data.agency} · {formatLong(update.data.pubDate)}</p>

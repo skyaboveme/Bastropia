@@ -1,7 +1,9 @@
 export const siteName = 'Bastropia';
 
+export const siteUrl = 'https://bastropia.com';
+
 export const siteDescription =
-  'Events, news, weather, burn bans, public meetings, and local services for Bastrop County, Texas.';
+  'Everything in Bastrop County, Texas: events, news, weather, burn bans, public meetings, and local services.';
 
 export const facebookGroup = 'https://www.facebook.com/groups/bastropia';
 

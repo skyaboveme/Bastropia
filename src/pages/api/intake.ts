@@ -23,6 +23,10 @@ export const POST: APIRoute = async ({ request }) => {
   const id = `BAS-${randomBytes(4).toString('hex').toUpperCase()}`;
   const built = buildRecord(input, id);
   if (!built.ok) return bounce(`${from}?error=${built.error}`);
-  await saveIntake(built.record);
+  try {
+    await saveIntake(built.record);
+  } catch {
+    return bounce(`${from}?error=save`);
+  }
   return bounce(`/thanks?id=${built.record.id}`);
 };

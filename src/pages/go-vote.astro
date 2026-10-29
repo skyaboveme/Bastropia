@@ -59,6 +59,31 @@ const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|electio
 <BaseLayout
   title="Go Vote"
   description="Early voting hours, Election Day polling places, and the elections office for Bastrop County, Texas. Election Day is November 3, 2026."
+  extra={[{
+    '@type': 'Event',
+    name: 'Bastrop County Election Day 2026',
+    description: 'Polls are open 7 am to 7 pm at Election Day locations in Bastrop County, Texas.',
+    startDate: '2026-11-03T07:00:00-06:00',
+    endDate: '2026-11-03T19:00:00-06:00',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    url: 'https://bastropia.com/go-vote',
+    location: {
+      '@type': 'Place',
+      name: 'Bastrop County, Texas',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Bastrop County',
+        addressRegion: 'TX',
+        addressCountry: 'US',
+      },
+    },
+    organizer: {
+      '@type': 'GovernmentOrganization',
+      name: voteSource.name,
+      url: voteSource.url,
+    },
+  }]}
 >
   <PageHead
     kicker="Election 2026"

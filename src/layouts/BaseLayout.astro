@@ -3,17 +3,58 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { siteDescription, siteName } from '../data/site';
+import { breadcrumb, graph, organization, stringify, webPage, website } from '../lib/schema';
 
 interface Props {
   title: string;
   description?: string;
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+  pageType?: string;
+  canonicalPath?: string;
+  extra?: Record<string, unknown>[];
 }
 
-const { title, description = siteDescription } = Astro.props;
+const { title, description = siteDescription, image, imageAlt, noindex = false, pageType = 'WebPage', canonicalPath, extra = [] } = Astro.props;
 const fullTitle = title === siteName ? `${siteName} — Everything happening in Bastrop County` : `${title} · ${siteName}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const image = new URL('/brand/logo.png', Astro.site);
+const requestPath = Astro.url.pathname.length > 1 && Astro.url.pathname.endsWith('/') ? Astro.url.pathname.slice(0, -1) : Astro.url.pathname;
+const path = canonicalPath ?? requestPath;
+const canonical = new URL(path, Astro.site);
+const sharePath = image ?? (requestPath === '/' ? '/images/bastrop-aerial.jpg' : '/brand/logo.png');
+const shareAlt = imageAlt ?? (requestPath === '/' ? 'Aerial view of downtown Bastrop, the river bridge, and the surrounding pines' : siteName);
+const shareImage = new URL(sharePath, Astro.site);
 const themeColor = '#10281f';
+
+const sections: Record<string, string> = {
+  events: 'Events',
+  news: 'News',
+  government: 'Government',
+  calendar: 'Calendar',
+  'this-weekend': 'This weekend',
+  weather: 'Weather',
+  'burn-ban': 'Burn ban',
+  live: 'Live',
+  videos: 'Videos',
+  about: 'About',
+  submit: 'Add an event',
+  advertise: 'Advertise',
+  upgrade: 'Upgrade a listing',
+  'go-vote': 'Go Vote',
+};
+const parts = requestPath.split('/').filter(Boolean);
+const crumbs: { name: string; path: string }[] = [];
+if (sections[parts[0]]) crumbs.push({ name: sections[parts[0]], path: `/${parts[0]}` });
+if (parts.length > 1) crumbs.push({ name: title, path: requestPath });
+const schemaType = pageType === 'NewsArticle' || pageType === 'Article' ? 'WebPage' : pageType;
+const nodes = [
+  organization(),
+  website(),
+  webPage({ path, name: title, description, type: schemaType, image: sharePath }),
+  ...(crumbs.length ? [breadcrumb(crumbs)] : []),
+  ...extra,
+];
+const jsonLd = stringify(graph(nodes));
 ---
 
 <!doctype html>
@@ -24,18 +65,32 @@ const themeColor = '#10281f';
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+    <meta name="geo.region" content="US-TX" />
+    <meta name="geo.placename" content="Bastrop County" />
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content={themeColor} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="Bastropia news" href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Bastropia events" href="/events.xml" />
+    <link rel="alternate" type="text/plain" title="LLM site guide" href="/llms.txt" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={pageType === 'NewsArticle' || pageType === 'Article' ? 'article' : 'website'} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={image} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:alt" content={shareAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={shareImage} />
+    <meta name="twitter:image:alt" content={shareAlt} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,680&family=Outfit:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+    <script type="application/ld+json" set:html={jsonLd} />
     <slot name="head" />
   </head>
   <body>

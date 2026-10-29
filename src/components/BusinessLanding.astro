@@ -1,0 +1,24 @@
+---
+import type { Business } from '../data/businesses';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localBusiness } from '../lib/schema';
+import BusinessPage from './BusinessPage.astro';
+
+interface Props {
+  business: Business;
+}
+
+const { business } = Astro.props;
+---
+
+<BaseLayout
+  title={business.name}
+  description={business.summary}
+  image={business.shareImage}
+  imageAlt={business.shareAlt}
+  canonicalPath={`/${business.slug}`}
+  extra={[localBusiness(business)]}
+>
+  {business.fontHref && <link slot="head" rel="stylesheet" href={business.fontHref} />}
+  <BusinessPage business={business} />
+</BaseLayout>

@@ -10,6 +10,6 @@ export const GET: APIRoute = async ({ site }) => {
       return `<item><title><![CDATA[${story.data.title}]]></title><link>${link}</link><pubDate>${story.data.pubDate.toUTCString()}</pubDate><description><![CDATA[${story.data.description}]]></description></item>`;
     })
     .join('');
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Bastropia</title><link>${origin}</link><description>News for Bastrop County, Texas</description>${items}</channel></rss>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Bastropia news</title><link>${origin}</link><description>News for Bastrop County, Texas</description><language>en-us</language>${items}</channel></rss>`;
   return new Response(xml, { headers: { 'Content-Type': 'application/rss+xml; charset=utf-8' } });
 };

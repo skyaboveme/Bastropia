@@ -10,6 +10,7 @@ import VideoSection from '../components/VideoSection.astro';
 import { getExternalNews } from '../lib/externalNews';
 import { burnBan } from '../data/burnBan';
 import { siteDescription } from '../data/site';
+import { linkList } from '../lib/schema';
 import { categoryMeta, cities } from '../data/taxonomy';
 import { streams } from '../data/streams';
 import { filterEvents, sortByTier } from '../lib/events';
@@ -41,17 +42,14 @@ const [forecast, externalNews] = await Promise.all([getForecast('Bastrop'), getE
 const townCounts = cities
   .filter((city) => city !== 'Countywide')
   .map((city) => ({ city, count: upcoming.filter((event) => event.data.city === city).length }));
-const jsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Bastropia',
-  url: 'https://bastropia.com/',
-  description: siteDescription,
-}).replace(/</g, '\\u003c');
+const listed = [...upcoming].sort((a, b) => a.data.start.getTime() - b.data.start.getTime()).slice(0, 12);
 ---
 
-<BaseLayout title="Bastropia" description={siteDescription}>
-  <script slot="head" type="application/ld+json" set:html={jsonLd} />
+<BaseLayout
+  title="Bastropia"
+  description={siteDescription}
+  extra={[linkList('Upcoming events in Bastrop County', listed.map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]}
+>
   <div class="wrap">
     <figure class="hero-photo">
       <img src="/images/bastrop-aerial.jpg" alt="Aerial view of downtown Bastrop, the river bridge, and the surrounding pines" width="1024" height="682" fetchpriority="high" />
@@ -242,34 +240,99 @@ const jsonLd = JSON.stringify({
 
     <VideoSection heading="Watch" allVideos />
 
-    <section class="band" id="newsletter">
+    <section class="band newsletter" id="newsletter">
       <div>
-        <p class="kicker">Your event. Your business.</p>
-        <h2>Free to list. Louder if you need it.</h2>
-        <p class="dek">Community listings are reviewed and published at no charge. Spotlight, Featured, and Lost Pines pin a listing higher. Ads are sold by the week and always labeled.</p>
-        <div class="cluster">
-          <a class="button" href="/submit">Submit a listing</a>
-          <a class="button button-light" href="/upgrade">Upgrade prices</a>
-          <a class="button button-light" href="/advertise">Buy an ad</a>
-        </div>
+        <p class="kicker">Weekly</p>
+        <h2>Sign up for our weekly newsletter</h2>
+        <p class="dek">Be in the know about everything happening in Bastrop County.</p>
       </div>
-      <form class="form" action="/api/intake" method="post">
-        <input type="hidden" name="type" value="newsletter" />
-        <input type="hidden" name="from" value="/" />
-        <h3>The county, in your inbox</h3>
+      <form class="form" data-newsletter-form action="https://app.kit.com/forms/9966284/subscriptions" method="post">
         <label class="field">
           <span>Email</span>
-          <input name="email" type="email" required autocomplete="email" />
+          <input name="email_address" type="email" required autocomplete="email" />
         </label>
-        <label class="field">
-          <span>How often</span>
-          <select name="cadence">
-            <option value="weekly">Weekly, before the weekend</option>
-            <option value="daily">Daily</option>
-          </select>
-        </label>
-        <button class="button" type="submit">Get the list</button>
+        <button class="button" type="submit">Sign up</button>
       </form>
     </section>
   </div>
+
+  <dialog class="newsletter-pop" id="newsletter-pop" aria-labelledby="newsletter-pop-title">
+    <button class="newsletter-dismiss" type="button" data-newsletter-dismiss aria-label="Close">×</button>
+    <p class="kicker">Weekly</p>
+    <h2 id="newsletter-pop-title">Sign up for our weekly newsletter</h2>
+    <p class="dek">Be in the know about everything happening in Bastrop County.</p>
+    <form class="form" data-newsletter-form action="https://app.kit.com/forms/9966284/subscriptions" method="post">
+      <label class="field">
+        <span>Email</span>
+        <input name="email_address" type="email" required autocomplete="email" />
+      </label>
+      <button class="button" type="submit">Sign up</button>
+    </form>
+    <button class="newsletter-later" type="button" data-newsletter-dismiss>Not now</button>
+  </dialog>
+
+  <script is:inline>
+    const storageKey = 'bastropia-newsletter';
+    const dialog = document.querySelector('#newsletter-pop');
+    const band = document.querySelector('#newsletter');
+    let joined = false;
+    let skip = location.hash === '#newsletter';
+
+    const readChoice = () => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const remember = (status) => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ status, at: Date.now() }));
+      } catch {
+        /* private browsing can block storage */
+      }
+    };
+
+    const choice = readChoice();
+    if (choice && choice.status === 'joined') skip = true;
+    if (choice && choice.status === 'dismissed' && choice.at && Date.now() - choice.at < 14 * 24 * 60 * 60 * 1000) skip = true;
+
+    document.querySelectorAll('[data-newsletter-form]').forEach((form) => {
+      form.addEventListener('submit', () => {
+        joined = true;
+        remember('joined');
+      });
+    });
+
+    const dismiss = () => {
+      if (dialog && dialog.open) dialog.close();
+    };
+
+    document.querySelectorAll('[data-newsletter-dismiss]').forEach((button) => {
+      button.addEventListener('click', dismiss);
+    });
+
+    if (dialog) {
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dismiss();
+      });
+      dialog.addEventListener('close', () => {
+        if (!joined) remember('dismissed');
+      });
+    }
+
+    if (band && 'IntersectionObserver' in window) {
+      const seen = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) skip = true;
+      }, { threshold: 0.45 });
+      seen.observe(band);
+    }
+
+    window.setTimeout(() => {
+      if (skip || !dialog || dialog.open) return;
+      dialog.showModal();
+    }, 6000);
+  </script>
 </BaseLayout>

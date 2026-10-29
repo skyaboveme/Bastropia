@@ -1,0 +1,9 @@
+---
+import BusinessLanding from '../components/BusinessLanding.astro';
+import { businessBySlug } from '../data/businesses';
+
+const business = businessBySlug('StringPrairieHeatingandAir');
+if (!business) throw new Error('Missing String Prairie Heating & Air');
+---
+
+<BusinessLanding business={business} />

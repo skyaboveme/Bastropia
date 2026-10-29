@@ -1,0 +1,82 @@
+# AI crawlers are welcome.
+# Site guide: https://bastropia.com/llms.txt
+# Current listings and stories: https://bastropia.com/llms-full.txt
+
+User-agent: *
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: GPTBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: CCBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+Sitemap: https://bastropia.com/sitemap-index.xml

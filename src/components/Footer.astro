@@ -1,14 +1,12 @@
 ---
 import { facebookGroup } from '../data/site';
-import { emergencyLine } from '../data/services';
-import { phoneHref } from '../lib/format';
 ---
 
 <footer class="site-footer">
   <div class="footer-grid">
     <div class="footer-brand">
       <a href="/"><img src="/brand/logo-trim.png" alt="Bastropia" width="865" height="923" /></a>
-      <p class="legal">The community news desk for Bastrop County, Texas.</p>
+      <p class="legal">Everything in Bastrop County.</p>
     </div>
     <div>
       <h3>Sections</h3>
@@ -30,8 +28,8 @@ import { phoneHref } from '../lib/format';
       <p><a href={facebookGroup}>Facebook group</a></p>
       <p><a href="/about">About Bastropia</a></p>
       <p><a href="/rss.xml">RSS</a></p>
-      <p><a href={phoneHref(emergencyLine.phone)}>Emergencies: 911</a></p>
+      <p><a href="/llms.txt">llms.txt</a></p>
     </div>
-    <p class="fine">Bastropia is a community site. It is not Bastrop County, a city, or an emergency service. Confirm bans, closures, and meeting times on the official pages linked here. For an emergency, call 911.</p>
+    <p class="fine">Bastropia is a community site. It is not Bastrop County, a city, or an emergency service. Confirm bans, closures, and meeting times on the official pages linked here.</p>
   </div>
 </footer>

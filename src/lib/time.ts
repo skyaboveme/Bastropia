@@ -32,6 +32,12 @@ export function addDays(key: string, days: number) {
   return next.toISOString().slice(0, 10);
 }
 
+export function addMonths(key: string, months: number) {
+  const [year, month, day] = key.split('-').map(Number);
+  const next = new Date(Date.UTC(year, month - 1 + months, day));
+  return next.toISOString().slice(0, 10);
+}
+
 const weekdayIndex: Record<string, number> = {
   Sun: 0,
   Mon: 1,

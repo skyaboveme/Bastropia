@@ -12,7 +12,11 @@ const forecast = await getForecast(town);
 const alerts = await getAlerts();
 ---
 
-<BaseLayout title="Weather" description="Current conditions and the week ahead for towns in Bastrop County, plus National Weather Service alerts.">
+<BaseLayout
+  title={`${town} weather`}
+  description={`Current conditions and the week ahead for ${town}, plus National Weather Service alerts for Bastrop County.`}
+  canonicalPath={town === 'Bastrop' ? '/weather' : `/weather?town=${encodeURIComponent(town)}`}
+>
   <PageHead
     kicker="Sky"
     title={`${town} weather`}

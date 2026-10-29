@@ -10,7 +10,7 @@ const id = Astro.url.searchParams.get('id') ?? '';
 const record = id ? await getIntake(id) : null;
 ---
 
-<BaseLayout title="Received" description="Your note is on the Bastropia desk.">
+<BaseLayout title="Received" description="Your note is on the Bastropia desk." noindex>
   <PageHead
     kicker="Desk"
     title={record ? 'The desk has it' : 'Received'}
@@ -21,7 +21,7 @@ const record = id ? await getIntake(id) : null;
       <article class="detail-main">
         <p class="kicker">{record.id}</p>
         {record.total > 0 && <p class="price-line">{money(record.total)}</p>}
-        {record.type === 'ad' && <p>This reserves the placement. Bastropia checks that the week is open and sends an invoice. The ad is labeled Sponsored and goes up after payment.</p>}
+        {record.type === 'ad' && <p>This reserves the placement. Bastropia checks that the dates are open and sends an invoice. The ad is labeled Sponsored and goes up after payment.</p>}
         {record.type === 'upgrade' && <p>This requests the upgrade. It starts after the invoice is paid and the desk applies it to the listing.</p>}
         {record.type === 'event' && <p>A person will read this before it goes on the calendar. You will get email if the address you gave works.</p>}
         {record.type === 'newsletter' && <p>Your address is stored with the other newsletter signups. It is not sold with the ad inventory.</p>}

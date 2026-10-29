@@ -4,7 +4,6 @@ export const prerender = false;
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import AdSlot from '../components/AdSlot.astro';
 import { streams } from '../data/streams';
 import { eventKey, labelFromKey, whenLabel } from '../lib/time';
 
@@ -53,6 +52,5 @@ const streamsToday = (await getCollection('events')).filter(
         {!streamsToday.length && <p class="lede">No upcoming listing includes a stream link. Add one when you <a class="text-link" href="/submit">submit an event</a>.</p>}
       </div>
     </section>
-    <AdSlot placement="live-companion" />
   </div>
 </BaseLayout>

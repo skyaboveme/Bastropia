@@ -1,0 +1,406 @@
+---
+import type { Business } from '../data/businesses';
+
+interface Props {
+  business: Business;
+}
+
+const { business } = Astro.props;
+const style = [
+  `--biz:${business.accent}`,
+  `--biz-2:${business.accent2}`,
+  `--biz-radius:${business.radius}`,
+  `--biz-display:${business.displayFont}`,
+  `--biz-text:${business.textFont}`,
+].join(';');
+---
+
+<article class="biz" style={style}>
+  <header class="biz-hero">
+    <div class="biz-hero-copy">
+      <p class="biz-kicker">Local business · {business.category}</p>
+      <img class="biz-logo" src={business.logo.src} alt={business.logo.alt} width={business.logo.width} height={business.logo.height} />
+      <h1>{business.name}</h1>
+      <p class="biz-tag">{business.tagline}</p>
+      <p class="biz-lede">{business.summary}</p>
+      <div class="biz-actions">
+        {business.phone ? (
+          <a class="biz-btn" href={business.phoneHref}>Call {business.phone}</a>
+        ) : business.bookUrl ? (
+          <a class="biz-btn" href={business.bookUrl} target="_blank" rel="noopener noreferrer">{business.bookLabel ?? 'Book'}</a>
+        ) : business.email ? (
+          <a class="biz-btn" href={`mailto:${business.email}`}>Email {business.email}</a>
+        ) : (
+          <a class="biz-btn" href={business.website} target="_blank" rel="noopener noreferrer">{business.websiteLabel}</a>
+        )}
+        {business.phone && business.bookUrl && (
+          <a class="biz-btn biz-btn-line" href={business.bookUrl} target="_blank" rel="noopener noreferrer">{business.bookLabel ?? 'Book'}</a>
+        )}
+        {business.phone && !business.bookUrl && business.email && (
+          <a class="biz-btn biz-btn-line" href={`mailto:${business.email}`}>Email {business.email}</a>
+        )}
+        {!business.phone && business.bookUrl && business.mapsUrl && (
+          <a class="biz-btn biz-btn-line" href={business.mapsUrl} target="_blank" rel="noopener noreferrer">Map</a>
+        )}
+      </div>
+    </div>
+    <img class="biz-hero-photo" src={business.hero.src} alt={business.hero.alt} width={business.hero.width} height={business.hero.height} style={business.hero.objectPosition ? `object-position: ${business.hero.objectPosition}` : undefined} />
+  </header>
+
+  <ul class="biz-points wrap">
+    {business.points.map((point) => <li>{point}</li>)}
+  </ul>
+
+  <section class="wrap biz-block">
+    <h2>Services</h2>
+    <div class="biz-services">
+      {business.services.map((group) => (
+        <section>
+          <h3>{group.title}</h3>
+          <ul>
+            {group.items.map((item) => <li>{item}</li>)}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  {business.steps && (
+    <section class="wrap biz-block">
+      <h2>{business.stepsTitle ?? 'How a quote works'}</h2>
+      <ol class="biz-steps">
+        {business.steps.map((step, index) => (
+          <li>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  <section class="wrap biz-split">
+    <div>
+      <h2>About</h2>
+      <p class="biz-about">{business.about}</p>
+      {business.partner && (
+        <p class="biz-partner">
+          {business.partner.note}: <a href={business.partner.href} target="_blank" rel="noopener noreferrer">{business.partner.label}</a>
+        </p>
+      )}
+      <dl class="biz-facts">
+        {business.facts.map((fact) => (
+          <div>
+            <dt>{fact.label}</dt>
+            <dd>{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    {business.portrait && (
+      <img src={business.portrait.src} alt={business.portrait.alt} width={business.portrait.width} height={business.portrait.height} />
+    )}
+  </section>
+
+  {business.gallery.length > 0 && (
+    <section class="wrap biz-block">
+      <h2>Work</h2>
+      <ul class="biz-gallery">
+        {business.gallery.map((image) => (
+          <li>
+            <img src={image.src} alt={image.alt} width={image.width} height={image.height} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="wrap biz-block">
+    <h2>Where they work</h2>
+    <p class="biz-area-note">{business.areaNote}</p>
+    <ul class="biz-areas">
+      {business.areas.map((area) => <li>{area}</li>)}
+    </ul>
+  </section>
+
+  {business.quotes.length > 0 && (
+    <section class="wrap biz-block">
+      <h2>What customers say</h2>
+      <div class="biz-quotes">
+        {business.quotes.map((quote) => (
+          <figure>
+            <blockquote><p>{quote.quote}</p></blockquote>
+            <figcaption>{quote.name}</figcaption>
+          </figure>
+        ))}
+      </div>
+      <p class="biz-more"><a href={business.reviewsUrl} target="_blank" rel="noopener noreferrer">Read more reviews</a></p>
+    </section>
+  )}
+
+  <section class="biz-contact">
+    <div class="wrap">
+      <h2>Contact {business.name}</h2>
+      {business.phone && <p class="biz-contact-phone"><a href={business.phoneHref}>{business.phone}</a></p>}
+      <p>{business.hours}</p>
+      <p>{business.place}</p>
+      <div class="biz-actions">
+        {business.phone && <a class="biz-btn" href={business.phoneHref}>Call</a>}
+        {business.bookUrl && <a class:list={['biz-btn', { 'biz-btn-line': Boolean(business.phone) }]} href={business.bookUrl} target="_blank" rel="noopener noreferrer">{business.bookLabel ?? 'Book'}</a>}
+        {business.email && <a class="biz-btn biz-btn-line" href={`mailto:${business.email}`}>{business.email}</a>}
+        <a class="biz-btn biz-btn-line" href={business.website} target="_blank" rel="noopener noreferrer">{business.websiteLabel}</a>
+        {business.mapsUrl && <a class="biz-btn biz-btn-line" href={business.mapsUrl} target="_blank" rel="noopener noreferrer">Map</a>}
+        {business.facebook && <a class="biz-btn biz-btn-line" href={business.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>}
+      </div>
+      <p class="biz-source">This is a Bastropia page. Hours and availability should be confirmed with the business. Details are drawn from <a href={business.website} target="_blank" rel="noopener noreferrer">{business.websiteLabel}</a>.</p>
+    </div>
+  </section>
+</article>
+
+<style>
+  .biz {
+    color: var(--ink);
+    font-family: var(--biz-text);
+  }
+  .biz h1, .biz h2, .biz h3 {
+    font-family: var(--biz-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  .biz-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    background: var(--biz);
+    color: #fff;
+    min-height: 28rem;
+  }
+  .biz-hero-copy {
+    display: grid;
+    align-content: center;
+    gap: 0.75rem;
+    padding: clamp(1.4rem, 4vw, 3.2rem);
+  }
+  .biz-kicker {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--biz-2);
+  }
+  .biz-logo {
+    width: min(100%, 280px);
+    height: auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.45rem 0.7rem;
+  }
+  .biz-hero h1 {
+    font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+    color: #fff;
+    line-height: 1.02;
+  }
+  .biz-tag {
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+    line-height: 1.25;
+  }
+  .biz-lede {
+    max-width: 38rem;
+    font-size: 1.08rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .biz-hero-photo {
+    width: 100%;
+    height: 100%;
+    min-height: 22rem;
+    object-fit: cover;
+  }
+  .biz-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+  .biz-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.8rem;
+    padding: 0.55rem 1.15rem;
+    border-radius: var(--biz-radius);
+    background: #fff;
+    color: var(--biz);
+    font-family: var(--sans);
+    font-weight: 700;
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  .biz-btn:hover { background: var(--biz-2); color: var(--biz); }
+  .biz-btn-line {
+    background: transparent;
+    color: #fff;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.75);
+  }
+  .biz-btn-line:hover { background: #fff; color: var(--biz); }
+  .biz-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.7rem;
+    margin-top: -1.2rem;
+    position: relative;
+  }
+  .biz-points li {
+    background: #fff;
+    border-top: 4px solid var(--biz-2);
+    border-radius: 12px;
+    padding: 0.9rem 0.95rem 1rem;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    font-family: var(--sans);
+    font-weight: 650;
+    line-height: 1.3;
+  }
+  .biz-block, .biz-split { padding-top: 2.4rem; }
+  .biz-block h2, .biz-split h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); }
+  .biz-services, .biz-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+  .biz-quotes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+  .biz-services section, .biz-quotes figure, .biz-steps li {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.1rem 1.1rem 1.2rem;
+    box-shadow: 0 4px 16px rgba(16, 24, 40, 0.04);
+  }
+  .biz-quotes figure, .biz-quotes blockquote { margin: 0; }
+  .biz-services h3, .biz-steps h3 { font-size: 1.35rem; margin-bottom: 0.45rem; }
+  .biz-services li {
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans);
+  }
+  .biz-steps { list-style: none; }
+  .biz-steps span {
+    display: block;
+    font-family: var(--sans);
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    color: var(--biz);
+    margin-bottom: 0.35rem;
+  }
+  .biz-steps p, .biz-about, .biz-area-note, .biz-partner { margin-top: 0.7rem; line-height: 1.5; }
+  .biz-split {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 1.4rem;
+    align-items: start;
+  }
+  .biz-split img {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    max-height: 36rem;
+  }
+  .biz-partner a, .biz-more a, .biz-source a { color: var(--biz); font-weight: 700; }
+  .biz-facts { margin-top: 1.1rem; }
+  .biz-facts div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0.6rem;
+    padding: 0.45rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .biz-facts dt {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding-top: 0.15rem;
+  }
+  .biz-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+  .biz-gallery img {
+    width: 100%;
+    height: 16rem;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .biz-areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+  }
+  .biz-areas li {
+    font-family: var(--sans);
+    font-weight: 650;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--biz);
+  }
+  .biz-quotes blockquote p { font-size: 1.12rem; line-height: 1.4; }
+  .biz-quotes figcaption {
+    margin-top: 0.8rem;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .biz-more { margin-top: 0.9rem; font-family: var(--sans); }
+  .biz-contact {
+    margin-top: 2.6rem;
+    background: var(--biz);
+    color: #fff;
+    padding: 2.2rem 0 2.4rem;
+  }
+  .biz-contact h2 { color: #fff; font-size: clamp(1.8rem, 3vw, 2.5rem); }
+  .biz-contact-phone {
+    font-family: var(--biz-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0.4rem 0;
+  }
+  .biz-contact-phone a { text-decoration: none; }
+  .biz-contact-phone a:hover { text-decoration: underline; }
+  .biz-contact .biz-actions { margin-top: 1rem; }
+  .biz-source {
+    margin-top: 1.2rem;
+    max-width: 40rem;
+    color: rgba(255, 255, 255, 0.82);
+    font-family: var(--sans);
+    font-size: 0.95rem;
+  }
+  .biz-source a { color: #fff; }
+
+  @media (max-width: 900px) {
+    .biz-hero, .biz-split, .biz-services, .biz-steps, .biz-quotes { grid-template-columns: 1fr; }
+    .biz-hero-copy { gap: 0.4rem; padding: 1rem 1.1rem 1.1rem; }
+    .biz-logo { width: min(100%, 180px); max-height: 4.4rem; height: auto; object-fit: contain; object-position: left center; padding: 0.25rem 0.45rem; }
+    .biz-hero h1 { font-size: 2.15rem; }
+    .biz-tag { font-size: 1.15rem; }
+    .biz-lede { font-size: 1rem; }
+    .biz-hero-photo { min-height: 16rem; max-height: 18rem; }
+    .biz-gallery img { height: 14rem; }
+    .biz-facts div { grid-template-columns: 1fr; gap: 0.1rem; }
+  }
+</style>

@@ -8,6 +8,7 @@ import { categoryMeta } from '../../data/taxonomy';
 import { listingTiers } from '../../data/commerce';
 import { googleCalendarUrl } from '../../lib/ics';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
+import { eventNode } from '../../lib/schema';
 import { eventKey, formatLong, whenLabel } from '../../lib/time';
 
 const id = Astro.params.id ?? '';
@@ -18,29 +19,16 @@ const upgrades = await activeUpgrades(eventKey(new Date()));
 const tier = event ? resolveTier(event.id, event.data.tier, upgrades) : 'community';
 const pageUrl = new URL(`/events/${id}`, Astro.site).toString();
 const tierName = listingTiers.find((item) => item.id === tier)?.name ?? 'Community';
-const jsonLd = event
-  ? JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Event',
-      name: event.data.title,
-      description: event.data.summary,
-      startDate: event.data.start.toISOString(),
-      endDate: event.data.end?.toISOString(),
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      location: {
-        '@type': 'Place',
-        name: event.data.venue,
-        address: event.data.address ?? event.data.city,
-      },
-      url: pageUrl,
-      image: event.data.image ? new URL(event.data.image, Astro.site).toString() : undefined,
-    }).replace(/</g, '\\u003c')
-  : '';
 ---
 
-<BaseLayout title={event?.data.title ?? 'Listing not found'} description={event?.data.summary ?? 'That listing is not on the Bastropia calendar.'}>
-  {jsonLd && <script slot="head" type="application/ld+json" set:html={jsonLd} />}
+<BaseLayout
+  title={event?.data.title ?? 'Listing not found'}
+  description={event?.data.summary ?? 'That listing is not on the Bastropia calendar.'}
+  image={event?.data.image}
+  imageAlt={event?.data.title}
+  noindex={!event}
+  extra={event ? [eventNode(event)] : []}
+>
   {event && rendered ? (
     <div class="wrap">
       <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">

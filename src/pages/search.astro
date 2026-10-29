@@ -30,7 +30,7 @@ const services = needle
 const total = events.length + news.length + updates.length + services.length;
 ---
 
-<BaseLayout title="Search" description="Search events, news, public notices, and services in Bastrop County.">
+<BaseLayout title="Search" description="Search events, news, public notices, and services in Bastrop County." noindex>
   <PageHead kicker="Search" title={q ? `Results for “${q}”` : 'Search the desk'} lede={q ? `${total} match${total === 1 ? '' : 'es'}.` : 'Events, news, notices, and phone numbers.'} />
   <div class="wrap">
     <form class="search" action="/search" method="get">

@@ -25,7 +25,7 @@ const sponsor = await activeSponsor(placement, eventKey(new Date()));
       ) : (
         <a href={`/advertise?placement=${meta.id}`}>
           <strong>{meta.name}</strong>
-          <span>{meta.detail} {money(meta.weeklyRate)} a week.</span>
+          <span>{meta.detail} {money(meta.rate)} a {meta.unit}.</span>
         </a>
       )}
     </div>

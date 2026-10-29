@@ -1,7 +1,7 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { placementById, tierById, type ListingTierId, type PlacementId } from '../data/commerce';
-import { addDays } from './time';
+import { addDays, addMonths } from './time';
 import type { Tier } from '../data/taxonomy';
 
 const intakeDir = path.join(process.cwd(), 'data', 'intake');
@@ -123,21 +123,24 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
     if (input.terms !== 'yes') return { ok: false as const, error: 'terms' };
     const placement = placementById(clean(input.placement, 40));
     if (!placement) return { ok: false as const, error: 'placement' };
-    const weeks = Math.min(12, Math.max(1, Number(input.weeks) || 0));
-    if (!weeks) return { ok: false as const, error: 'weeks' };
+    const count = Math.min(12, Math.max(1, Number(input.count) || 0));
+    if (!count) return { ok: false as const, error: 'count' };
     const start = clean(input.start, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return { ok: false as const, error: 'date' };
     const business = clean(input.business, 80);
     const line = clean(input.line, 90);
     const href = httpUrl(clean(input.website, 300));
     if (!business || !line || !href) return { ok: false as const, error: 'details' };
-    total = placement.weeklyRate * weeks;
+    const unit = placement.unit;
+    const unitLabel = count === 1 ? unit : `${unit}s`;
+    total = placement.rate * count;
     Object.assign(fields, {
       placement: placement.id,
       placementName: placement.name,
-      weeks: String(weeks),
+      count: String(count),
+      unit,
       start,
-      until: addDays(start, weeks * 7),
+      until: unit === 'month' ? addMonths(start, count) : addDays(start, count * 7),
       business,
       line,
       website: href,
@@ -145,7 +148,7 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
       contact: clean(input.contact, 80),
       notes: clean(input.notes, 1200),
     });
-    summary = `${placement.name} for ${weeks} week${weeks === 1 ? '' : 's'}, starting ${start}`;
+    summary = `${placement.name} for ${count} ${unitLabel}, starting ${start}`;
   }
 
   if (type === 'upgrade') {

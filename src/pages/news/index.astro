@@ -7,14 +7,18 @@ import PageHead from '../../components/PageHead.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import ExternalNews from '../../components/ExternalNews.astro';
 import { getExternalNews } from '../../lib/externalNews';
+import { linkList } from '../../lib/schema';
 import { formatMedium } from '../../lib/time';
 
 const stories = (await getCollection('news')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 const externalNews = await getExternalNews(14);
 ---
 
-<BaseLayout title="News" description="County desk notes on burn bans, public meetings, and what’s happening in Bastrop County.">
-  <link slot="head" rel="alternate" type="application/rss+xml" title="Bastropia news" href="/rss.xml" />
+<BaseLayout
+  title="News"
+  description="County desk notes on burn bans, public meetings, and what’s happening in Bastrop County."
+  extra={[linkList('Bastropia news', stories.map((story) => ({ name: story.data.title, path: `/news/${story.id}` })))]}
+>
   <PageHead kicker="Desk" title="News from Bastrop County" lede="Short briefings with a link back to the public source. This is a community desk, not a city hall feed." />
   <div class="wrap">
     <div class="split">

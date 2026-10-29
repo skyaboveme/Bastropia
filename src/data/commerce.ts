@@ -5,15 +5,17 @@ export const placements = [
     page: 'Home',
     where: 'Under the weekend plans on the homepage',
     detail: 'One advertiser. The first thing people see after today’s events.',
-    weeklyRate: 420,
+    rate: 300,
+    unit: 'month',
   },
   {
     id: 'weekend-sponsor',
     name: 'Weekend sponsor',
     page: 'This weekend',
     where: 'Above the Friday–Sunday lineup',
-    detail: 'For restaurants, markets, and anything that belongs on a Saturday.',
-    weeklyRate: 180,
+    detail: 'Friday, Saturday, and Sunday. For restaurants, markets, and anything that belongs on a Saturday.',
+    rate: 75,
+    unit: 'weekend',
   },
   {
     id: 'news-rail',
@@ -21,15 +23,8 @@ export const placements = [
     page: 'News',
     where: 'Beside the county news list',
     detail: 'A quiet placement for shops, clinics, and services people look up on purpose.',
-    weeklyRate: 240,
-  },
-  {
-    id: 'live-companion',
-    name: 'Live companion',
-    page: 'Live',
-    where: 'Below the public-meeting streams',
-    detail: 'Labeled as an ad. It cannot be designed to look like a county notice.',
-    weeklyRate: 160,
+    rate: 150,
+    unit: 'month',
   },
   {
     id: 'calendar-sponsor',
@@ -37,7 +32,8 @@ export const placements = [
     page: 'Calendar',
     where: 'Under the month grid',
     detail: 'Seen by people already planning a day in the county.',
-    weeklyRate: 200,
+    rate: 200,
+    unit: 'month',
   },
 ] as const;
 

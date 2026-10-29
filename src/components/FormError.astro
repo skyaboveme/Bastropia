@@ -3,12 +3,13 @@ const messages: Record<string, string> = {
   email: 'Enter an email we can reply to.',
   terms: 'Confirm the terms before this reservation is saved.',
   placement: 'Choose a placement.',
-  weeks: 'Choose how many weeks you want.',
+  count: 'Choose how many months or weekends you want.',
   date: 'Add a start date.',
   details: 'Add the name, date, place, and a short description.',
   tier: 'Choose Spotlight, Featured, or Lost Pines.',
   event: 'Choose the listing you want to upgrade.',
   form: 'That form could not be read. Try it again.',
+  save: 'That request could not be saved. Try it again in a minute.',
   auth: 'That desk password did not match.',
 };
 const error = Astro.url.searchParams.get('error');

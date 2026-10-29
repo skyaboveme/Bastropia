@@ -1,0 +1,9 @@
+---
+import BusinessLanding from '../components/BusinessLanding.astro';
+import { businessBySlug } from '../data/businesses';
+
+const business = businessBySlug('BarefootFlowerFarms');
+if (!business) throw new Error('Missing Barefoot Flower Farms');
+---
+
+<BusinessLanding business={business} />

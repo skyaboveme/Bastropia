@@ -6,6 +6,11 @@ import { formatLong, labelFromKey } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
 
 const path = Astro.url.pathname;
+const checkedLabel = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC',
+  month: 'long',
+  day: 'numeric',
+}).format(new Date(`${burnBan.checked}T12:00:00Z`));
 const forecast = await getForecast('Bastrop');
 const today = formatLong(new Date());
 const voteLive = voteIsLive();
@@ -62,7 +67,7 @@ function current(href: string) {
     <a class="ear ear-right" href="/burn-ban">
       <span class="ear-label">Burn ban</span>
       <strong class={burnBan.inEffect ? 'is-stop' : 'is-ok'}>{burnBan.inEffect ? 'In effect' : 'None listed'}</strong>
-      <span class="ear-sub">Emergencies: call 911</span>
+      <span class="ear-sub">Checked {checkedLabel}</span>
     </a>
   </div>
 

@@ -4,12 +4,17 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import { emergencyLine, serviceGroups } from '../../data/services';
 import { phoneHref } from '../../lib/format';
+import { linkList } from '../../lib/schema';
 import { formatMedium } from '../../lib/time';
 
 const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 ---
 
-<BaseLayout title="Government" description="Emergency numbers, county and city services, and summaries of public notices for Bastrop County.">
+<BaseLayout
+  title="Government"
+  description="Emergency numbers, county and city services, and summaries of public notices for Bastrop County."
+  extra={[linkList('Public notices', updates.map((update) => ({ name: update.data.title, path: `/government/${update.id}` })))]}
+>
   <PageHead
     kicker="Services"
     title="Government and emergency contacts"
