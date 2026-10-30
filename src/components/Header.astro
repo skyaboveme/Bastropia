@@ -1,8 +1,8 @@
 ---
 import { burnBan } from '../data/burnBan';
 import { facebookGroup } from '../data/site';
-import { electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
-import { formatLong, labelFromKey } from '../lib/time';
+import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
+import { eventKey, formatLong, labelFromKey } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
 
 const path = Astro.url.pathname;
@@ -12,8 +12,20 @@ const checkedLabel = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 }).format(new Date(`${burnBan.checked}T12:00:00Z`));
 const forecast = await getForecast('Bastrop');
-const today = formatLong(new Date());
-const voteLive = voteIsLive();
+const now = new Date();
+const today = formatLong(now);
+const dayKey = eventKey(now);
+const earlyToday = earlyVotingDays.find((day) => day.date === dayKey);
+const lastEarly = earlyVotingDays[earlyVotingDays.length - 1]?.date;
+const voteLive = voteIsLive(now);
+const voteBanner =
+  dayKey === electionDay
+    ? `Today is Election Day. Polls are open ${electionHours}. See polling places.`
+    : earlyToday && dayKey === lastEarly
+      ? `Last day of early voting. Polls are open ${earlyToday.hours} today. Election Day is ${labelFromKey(electionDay)}.`
+      : earlyToday
+        ? `Early voting is open today, ${earlyToday.hours}. Election Day is ${labelFromKey(electionDay)}.`
+        : `Election Day is ${labelFromKey(electionDay)}, polls open ${electionHours}. See hours and polling places.`;
 
 const links = [
   { href: '/', label: 'Front page' },
@@ -40,7 +52,7 @@ function current(href: string) {
 )}
 {voteLive && (
   <a class="vote-bar" href="/go-vote" data-expires={voteLiveUntil}>
-    <strong>Go Vote.</strong> Election Day is {labelFromKey(electionDay)}, polls open {electionHours}. See hours and polling places.
+    <strong>Go Vote.</strong> {voteBanner}
   </a>
 )}
 <header class="site-head">

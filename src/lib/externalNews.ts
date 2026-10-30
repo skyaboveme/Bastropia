@@ -123,8 +123,16 @@ export function parseFeed(xml: string, source: NewsSource): ExternalStory[] {
   return stories;
 }
 
+const metroRoundup = /\baustin[-\s]?(area|metro)\b/i;
+
 function isLocal(story: ExternalStory) {
-  return aboutBastrop.test(`${story.title} ${story.summary}`) || story.categories.some((category) => townTag.test(category));
+  const text = `${story.title} ${story.summary}`;
+  if (aboutBastrop.test(text) || story.categories.some((category) => townTag.test(category))) return true;
+  // The Bastrop–Cedar Creek edition files some local stories without repeating the town name.
+  if (story.source.id === 'community-impact' && story.link.includes('/bastrop-cedar-creek/')) {
+    return !metroRoundup.test(story.title) || aboutBastrop.test(`${text} ${story.link}`);
+  }
+  return false;
 }
 
 async function loadSource(source: NewsSource): Promise<ExternalStory[]> {

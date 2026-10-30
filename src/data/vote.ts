@@ -12,7 +12,7 @@ export const voteSource = {
   name: 'Bastrop County Elections',
   url: 'https://www.bastropvotes.org/voting-schedule/',
   home: 'https://www.bastropvotes.org/',
-  checked: '2026-10-28',
+  checked: '2026-10-30',
 };
 
 export function voteIsLive(now = new Date()) {
