@@ -130,7 +130,9 @@ function isLocal(story: ExternalStory) {
   if (aboutBastrop.test(text) || story.categories.some((category) => townTag.test(category))) return true;
   // The Bastrop–Cedar Creek edition files some local stories without repeating the town name.
   if (story.source.id === 'community-impact' && story.link.includes('/bastrop-cedar-creek/')) {
-    return !metroRoundup.test(story.title) || aboutBastrop.test(`${text} ${story.link}`);
+    // The section path contains "bastrop", so judge Austin roundups by the headline itself.
+    if (metroRoundup.test(story.title)) return aboutBastrop.test(text);
+    return true;
   }
   return false;
 }
