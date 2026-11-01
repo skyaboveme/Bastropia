@@ -5,6 +5,7 @@ const headers = { 'user-agent': 'BastropiaBot/1.0 (+https://bastropia.com)', acc
 const listUrl = 'https://results.enr.clarityelections.com/TX/Bastrop/elections.json';
 
 export const resultsHome = 'https://www.bastropvotes.org/election-results-2/';
+export const resultsEnr = 'https://results.enr.clarityelections.com/TX/Bastrop/';
 export const resultsOffice = {
   name: 'Bastrop County Elections',
   phone: '512-581-7160',
@@ -55,16 +56,16 @@ type ClarityRow = {
 const cache = new Map<string, { at: number; value: ElectionBoard | null }>();
 
 const categoryOrder = [
+  'Federal',
+  'State',
   'County',
-  'City of Bastrop Special Election',
-  'City of Elgin Special Election',
-  'City of Smithville Special Election',
   'Bastrop ISD',
   'McDade ISD',
-  'ESD#2',
   'ACC',
-  'State',
-  'Federal',
+  'ESD#2',
+  'City of Bastrop Special Election',
+  'City of Smithville Special Election',
+  'City of Elgin Special Election',
 ];
 
 function choiceName(raw: string, party: string) {

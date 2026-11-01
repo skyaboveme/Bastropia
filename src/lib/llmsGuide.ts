@@ -21,7 +21,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/live', label: 'Live', note: 'Newest video from Bastrop ISD, Elgin ISD, Smithville ISD, and the City of Bastrop, plus links that open on their own site' },
   { path: '/videos', label: 'Videos', note: 'County live and recorded sources, plus videos about Bastrop from other channels' },
   { path: '/go-vote', label: 'Go Vote', note: 'Election hours and polling places, live through November 3, 2026' },
-  { path: '/results', label: 'Election results', note: 'Unofficial race-by-race totals from the Bastrop County election-night report, plus the elections office central-count camera' },
+  { path: '/results', label: 'Election results', note: 'Unofficial race-by-race totals from https://results.enr.clarityelections.com/TX/Bastrop/, plus the elections office central-count camera' },
   { path: '/scores', label: 'Friday night scores', note: 'Latest finals for Bastrop, Cedar Creek, Elgin, and Smithville football' },
   { path: '/roads', label: 'Highway alerts', note: 'DriveTexas construction conditions for SH 71, US 290, and other county roads' },
   { path: '/government/court-decisions', label: 'What the court decided', note: 'Three bullets after each Commissioners Court meeting, once the minutes are posted' },
