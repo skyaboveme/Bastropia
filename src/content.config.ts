@@ -49,4 +49,19 @@ const updates = defineCollection({
   }),
 });
 
-export const collections = { events, news, updates };
+const social = defineCollection({
+  loader: glob({ base: './src/content/social', pattern: '**/*.md' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    pubDate: z.coerce.date(),
+    group: z.string(),
+    groupUrl: z.string().url(),
+    tier: z.enum(['primary', 'standout']),
+    topic: z.string().optional(),
+    city: z.string().optional(),
+    sourceUrl: z.string().url().optional(),
+  }),
+});
+
+export const collections = { events, news, updates, social };
