@@ -1,18 +1,20 @@
 ---
+export const prerender = false;
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
 import VideoSection from '../components/VideoSection.astro';
 ---
 
-<BaseLayout title="Videos" description="Elgin ISD board video, links to live county audio and high school games, and tours of Bastrop.">
+<BaseLayout title="Videos" description="The newest video from each local YouTube channel, plus tours of Bastrop.">
   <PageHead
     kicker="Watch"
     title="Bastrop on video"
-    lede="The Elgin ISD board recording plays here. Scanner audio, games, agendas, city meetings, and river gauges open on the site that publishes them. Tours of town are below."
+    lede="Local channels are first, with the newest video from each one. Tours of town are below."
   />
   <div class="wrap">
-    <CountyFeeds heading="County feeds" />
+    <CountyFeeds />
     <VideoSection heading="Now playing" />
   </div>
 </BaseLayout>

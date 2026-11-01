@@ -1,72 +1,87 @@
 ---
 import { countyFeeds } from '../data/countyFeeds';
-import { thumbnail, watchUrl } from '../data/videos';
+import { channelUrl, youtubeChannels } from '../data/youtubeChannels';
+import { latestChannelVideos } from '../lib/youtubeLatest';
 
 interface Props {
   heading?: string;
   allFeeds?: boolean;
 }
 
-const { heading = 'Live and recorded', allFeeds = false } = Astro.props;
-const featured = countyFeeds.find((feed) => feed.youtubeId) ?? countyFeeds[0];
+const { heading = 'Local channels', allFeeds = false } = Astro.props;
+const videos = await latestChannelVideos();
+const featured = videos[0];
+const elsewhere = countyFeeds.filter((feed) => !['elgin-isd', 'bastrop-isd-youtube', 'smithville-isd-youtube'].includes(feed.id));
 ---
 
-<section class="section" aria-labelledby="county-feeds-heading">
-  <div class="section-head">
-    <h2 id="county-feeds-heading">{heading}</h2>
-    {allFeeds && <a href="/live">All live</a>}
-  </div>
-  <div class="video-layout" data-county-feeds>
-    <div class="video-main">
-      <div class="video-stage" data-feed-stage>
-        {featured.youtubeId ? (
-          <a class="video-thumb" href={watchUrl(featured.youtubeId)} data-youtube={featured.youtubeId} data-title={featured.name}>
-            <img src={thumbnail(featured.youtubeId, 'hqdefault')} alt={featured.name} width="480" height="360" />
-            <span class="video-play" aria-hidden="true"></span>
-            <span class="sr">Play: {featured.name}</span>
-          </a>
-        ) : (
-          <a class="live-open" href={featured.href} rel="noopener">
-            <span>{featured.kind}</span>
-            <strong>{featured.name}</strong>
-            <em>{featured.action}</em>
-          </a>
-        )}
-      </div>
-      <h3 data-feed-title><a href={featured.youtubeId ? watchUrl(featured.youtubeId) : featured.href} rel="noopener">{featured.name}</a></h3>
-      <p class="meta" data-feed-note>{featured.note}</p>
+<section class="section" aria-labelledby={heading ? 'county-feeds-heading' : undefined}>
+  {heading && (
+    <div class="section-head">
+      <h2 id="county-feeds-heading">{heading}</h2>
+      {allFeeds && <a href="/live">All live</a>}
     </div>
-    <ul class="video-list">
-      {countyFeeds.map((feed) => (
-        <li>
-          <a
-            class="video-item"
-            href={feed.youtubeId ? watchUrl(feed.youtubeId) : feed.href}
-            data-feed-id={feed.id}
-            data-name={feed.name}
-            data-kind={feed.kind}
-            data-action={feed.action}
-            data-note={feed.note}
-            data-source={feed.href}
-            data-youtube={feed.youtubeId}
-            aria-current={feed.id === featured.id ? 'true' : undefined}
-            rel="noopener"
-          >
-            {feed.youtubeId ? (
-              <img src={thumbnail(feed.youtubeId)} alt={feed.name} width="320" height="180" loading="lazy" />
-            ) : (
-              <span class="live-mark">{feed.kind}</span>
-            )}
-            <span>
-              <strong>{feed.name}</strong>
-              <em>{feed.kind}</em>
-            </span>
+  )}
+  {featured ? (
+    <div class="video-layout" data-county-feeds>
+      <div class="video-main">
+        <div class="video-stage" data-feed-stage>
+          <a class="video-thumb" href={featured.href} data-youtube={featured.videoId} data-title={featured.title}>
+            <img src={featured.thumb} alt="" width="480" height="270" />
+            <span class="video-play" aria-hidden="true"></span>
+            <span class="sr">Play: {featured.title}</span>
           </a>
-        </li>
-      ))}
-    </ul>
+        </div>
+        <h3 data-feed-title><a href={featured.href} rel="noopener">{featured.title}</a></h3>
+        <p class="meta" data-feed-note>
+          <a href={featured.channelHref} rel="noopener">{featured.channel.name}</a>
+          {featured.when ? ` · ${featured.when}` : ''}
+        </p>
+      </div>
+      <ul class="video-list">
+        {videos.map((video) => (
+          <li>
+            <a
+              class="video-item"
+              href={video.href}
+              data-feed-id={video.channel.id}
+              data-title={video.title}
+              data-channel={video.channel.name}
+              data-when={video.when}
+              data-channel-href={video.channelHref}
+              data-youtube={video.videoId}
+              aria-current={video.channel.id === featured.channel.id ? 'true' : undefined}
+              rel="noopener"
+            >
+              <img src={video.thumb} alt="" width="168" height="94" loading="lazy" />
+              <span>
+                <strong>{video.title}</strong>
+                <em>{video.channel.name}{video.when ? ` · ${video.when}` : ''}</em>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : (
+    <p class="lede">The channel list did not load. Open a channel directly:</p>
+  )}
+  <ul class="channel-links">
+    {(videos.length ? videos.map((video) => video.channel) : youtubeChannels).map((channel) => (
+      <li><a href={channelUrl(channel.handle)} rel="noopener">{channel.name}</a></li>
+    ))}
+  </ul>
+  <p class="disclaimer">The newest public video on each channel. Playback is that channel’s YouTube player. Bastropia does not rebroadcast them.</p>
+  <div class="section-head" style="margin-top:1.4rem;">
+    <h2>Open on their site</h2>
   </div>
-  <p class="disclaimer">Bastropia does not rebroadcast these. The Elgin ISD recording plays from YouTube. Scanner audio, games, agendas, city meetings, river gauges, road conditions, traffic cameras, and state park pages open on the site that publishes them.</p>
+  <ul class="off-yt">
+    {elsewhere.map((feed) => (
+      <li>
+        <a href={feed.href} rel="noopener">{feed.name}</a>
+        <span>{feed.kind}</span>
+      </li>
+    ))}
+  </ul>
 </section>
 
 <script is:inline>
@@ -86,52 +101,45 @@ const featured = countyFeeds.find((feed) => feed.youtubeId) ?? countyFeeds[0];
       stage.replaceChildren(frame);
     };
 
-    const openPanel = (item) => {
-      const link = document.createElement('a');
-      link.className = 'live-open';
-      link.href = item.dataset.source || item.href;
-      link.rel = 'noopener';
-      const kind = document.createElement('span');
-      kind.textContent = item.dataset.kind || '';
-      const name = document.createElement('strong');
-      name.textContent = item.dataset.name || '';
-      const action = document.createElement('em');
-      action.textContent = item.dataset.action || 'Open';
-      link.append(kind, name, action);
-      stage.replaceChildren(link);
+    const poster = (id, name, href) => {
+      const thumb = document.createElement('a');
+      thumb.className = 'video-thumb';
+      thumb.href = href;
+      thumb.dataset.youtube = id;
+      thumb.dataset.title = name;
+      const image = document.createElement('img');
+      image.src = 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg';
+      image.alt = '';
+      image.width = 480;
+      image.height = 270;
+      const button = document.createElement('span');
+      button.className = 'video-play';
+      button.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('span');
+      label.className = 'sr';
+      label.textContent = 'Play: ' + name;
+      thumb.append(image, button, label);
+      stage.replaceChildren(thumb);
     };
 
     const select = (item, startPlayback) => {
       root.querySelectorAll('[data-feed-id]').forEach((other) => other.removeAttribute('aria-current'));
       item.setAttribute('aria-current', 'true');
-      const name = item.dataset.name || 'Source';
+      const name = item.dataset.title || 'Video';
       const link = document.createElement('a');
-      link.href = item.dataset.youtube ? item.href : item.dataset.source || item.href;
+      link.href = item.href;
       link.rel = 'noopener';
       link.textContent = name;
       title.replaceChildren(link);
-      note.textContent = item.dataset.note || '';
-      if (item.dataset.youtube && startPlayback) play(item.dataset.youtube, name);
-      else if (item.dataset.youtube) {
-        const thumb = document.createElement('a');
-        thumb.className = 'video-thumb';
-        thumb.href = item.href;
-        thumb.dataset.youtube = item.dataset.youtube;
-        thumb.dataset.title = name;
-        const image = document.createElement('img');
-        image.src = 'https://i.ytimg.com/vi/' + encodeURIComponent(item.dataset.youtube) + '/hqdefault.jpg';
-        image.alt = name;
-        image.width = 480;
-        image.height = 360;
-        const playButton = document.createElement('span');
-        playButton.className = 'video-play';
-        playButton.setAttribute('aria-hidden', 'true');
-        const label = document.createElement('span');
-        label.className = 'sr';
-        label.textContent = 'Play: ' + name;
-        thumb.append(image, playButton, label);
-        stage.replaceChildren(thumb);
-      } else openPanel(item);
+      note.replaceChildren();
+      const channel = document.createElement('a');
+      channel.href = item.dataset.channelHref || item.href;
+      channel.rel = 'noopener';
+      channel.textContent = item.dataset.channel || '';
+      note.append(channel);
+      if (item.dataset.when) note.append(' · ' + item.dataset.when);
+      if (startPlayback) play(item.dataset.youtube, name);
+      else poster(item.dataset.youtube, name, item.href);
     };
 
     stage.addEventListener('click', (event) => {

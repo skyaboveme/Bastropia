@@ -6,10 +6,14 @@ import PageHead from '../components/PageHead.astro';
 import { electionDay, electionHours } from '../data/vote';
 import { eventKey } from '../lib/time';
 import { getElectionBoard, racesByCategory, resultsHome, resultsOffice } from '../lib/electionResults';
+import { electionsChannel, channelPage } from '../data/youtubeChannels';
+import { channelVideos } from '../lib/youtubeLatest';
 
 const board = await getElectionBoard();
 const refresh = Boolean(board?.votesReported || eventKey(new Date()) === electionDay);
 const groups = board ? racesByCategory(board.races) : [];
+const cameras = await channelVideos(electionsChannel, 6);
+const camera = cameras[0];
 const description = board
   ? `${board.status} Race-by-race totals for Bastrop County.`
   : 'Race-by-race results for Bastrop County, from the county elections office.';
@@ -22,6 +26,57 @@ const description = board
     lede={board?.status ?? 'The county election-night report did not load. The links below are the elections office.'}
   />
   <div class="wrap">
+    <section class="section" aria-labelledby="count-camera">
+      <div class="section-head">
+        <h2 id="count-camera">Central count</h2>
+        <a href={channelPage(electionsChannel)} rel="noopener">Bastrop County Elections</a>
+      </div>
+      {camera ? (
+        <div class="video-layout" data-election-videos>
+          <div class="video-main">
+            <div class="video-stage" data-feed-stage>
+              <a class="video-thumb" href={camera.href} data-youtube={camera.videoId} data-title={camera.title}>
+                <img src={camera.thumb} alt="" width="480" height="270" />
+                <span class="video-play" aria-hidden="true"></span>
+                <span class="sr">Play: {camera.title}</span>
+              </a>
+            </div>
+            <h3 data-feed-title><a href={camera.href} rel="noopener">{camera.title}</a></h3>
+            <p class="meta" data-feed-note>{camera.when || 'Bastrop County Elections'}</p>
+          </div>
+          <ul class="video-list">
+            {cameras.map((video) => (
+              <li>
+                <a
+                  class="video-item"
+                  href={video.href}
+                  data-feed-id={video.videoId}
+                  data-title={video.title}
+                  data-when={video.when}
+                  data-youtube={video.videoId}
+                  aria-current={video.videoId === camera.videoId ? 'true' : undefined}
+                  rel="noopener"
+                >
+                  <img src={video.thumb} alt="" width="168" height="94" loading="lazy" />
+                  <span>
+                    <strong>{video.title}</strong>
+                    {video.when && <em>{video.when}</em>}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p class="lede">
+          The elections channel did not load.
+          <a class="text-link" href={channelPage(electionsChannel)} rel="noopener">Open it on YouTube</a>.
+        </p>
+      )}
+      <p class="disclaimer">The newest public video on the county elections channel, then earlier cameras. Playback is YouTube’s player.</p>
+    </section>
+
+    <div id="results-board">
     <p class="meta">
       Unofficial until Bastrop County posts the reconciliation on its
       <a class="text-link" href={resultsHome}>results page</a>.
@@ -75,11 +130,63 @@ const description = board
       {board && <a class="text-link" href={board.sourceUrl}>Open the county report</a>}.
       <a class="text-link" href="/go-vote">Polling places</a>.
     </p>
+    </div>
     {refresh && (
       <script is:inline>
-        setTimeout(() => location.reload(), 60000);
+        async function refreshResults() {
+          try {
+            const response = await fetch(location.pathname, { headers: { accept: 'text/html' } });
+            if (!response.ok) return;
+            const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+            const next = doc.querySelector('#results-board');
+            const current = document.querySelector('#results-board');
+            if (next && current) current.replaceWith(next);
+          } catch {
+            /* The camera stays up if the totals cannot be refreshed. */
+          }
+        }
+        setInterval(refreshResults, 60000);
       </script>
     )}
+    <script is:inline>
+      document.querySelectorAll('[data-election-videos]').forEach((root) => {
+        const stage = root.querySelector('[data-feed-stage]');
+        const title = root.querySelector('[data-feed-title]');
+        const note = root.querySelector('[data-feed-note]');
+        if (!stage || !title || !note) return;
+        const play = (id, name) => {
+          const frame = document.createElement('iframe');
+          frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0';
+          frame.title = name;
+          frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          frame.allowFullscreen = true;
+          frame.referrerPolicy = 'strict-origin-when-cross-origin';
+          stage.replaceChildren(frame);
+        };
+        stage.addEventListener('click', (event) => {
+          const thumb = event.target.closest('.video-thumb');
+          if (!thumb || !thumb.dataset.youtube) return;
+          event.preventDefault();
+          play(thumb.dataset.youtube, thumb.dataset.title || 'Video');
+        });
+        root.querySelectorAll('[data-feed-id]').forEach((item) => {
+          item.addEventListener('click', (event) => {
+            event.preventDefault();
+            root.querySelectorAll('[data-feed-id]').forEach((other) => other.removeAttribute('aria-current'));
+            item.setAttribute('aria-current', 'true');
+            const name = item.dataset.title || 'Video';
+            const link = document.createElement('a');
+            link.href = item.href;
+            link.rel = 'noopener';
+            link.textContent = name;
+            title.replaceChildren(link);
+            note.textContent = item.dataset.when || 'Bastrop County Elections';
+            play(item.dataset.youtube, name);
+            stage.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          });
+        });
+      });
+    </script>
   </div>
 </BaseLayout>
 
