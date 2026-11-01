@@ -12,6 +12,27 @@ export type EventQuery = {
   date?: string | null;
 };
 
+/** An event is over once its end has passed. All-day and agenda listings last through that Chicago date. */
+export function hasEnded(event: ListedEvent, now = new Date()) {
+  const today = eventKey(now);
+  if (event.data.schedule === 'all-day' || event.data.schedule === 'agenda') {
+    return eventKey(event.data.end ?? event.data.start) < today;
+  }
+  return (event.data.end ?? event.data.start).getTime() <= now.getTime();
+}
+
+/** Keep the first listings from each organizer so one calendar cannot fill the page. */
+export function capOrganizer(events: ListedEvent[], max = 2) {
+  const counts = new Map<string, number>();
+  return events.filter((event) => {
+    const key = (event.data.organizer || event.id).trim().toLowerCase();
+    const seen = counts.get(key) ?? 0;
+    if (seen >= max) return false;
+    counts.set(key, seen + 1);
+    return true;
+  });
+}
+
 export function filterEvents(events: ListedEvent[], query: EventQuery, now = new Date()) {
   const today = chicagoParts(now).key;
   const weekend = new Set(thisWeekendKeys(now));
@@ -35,6 +56,7 @@ export function filterEvents(events: ListedEvent[], query: EventQuery, now = new
           .toLowerCase();
         if (!haystack.includes(needle)) return false;
       }
+      if (query.when !== 'all' && hasEnded(event, now)) return false;
       if (query.date) return key === query.date;
       if (query.when === 'today') return key === today;
       if (query.when === 'tonight') {

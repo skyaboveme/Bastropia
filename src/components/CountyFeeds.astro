@@ -1,0 +1,152 @@
+---
+import { countyFeeds } from '../data/countyFeeds';
+import { thumbnail, watchUrl } from '../data/videos';
+
+interface Props {
+  heading?: string;
+  allFeeds?: boolean;
+}
+
+const { heading = 'Live and recorded', allFeeds = false } = Astro.props;
+const featured = countyFeeds.find((feed) => feed.youtubeId) ?? countyFeeds[0];
+---
+
+<section class="section" aria-labelledby="county-feeds-heading">
+  <div class="section-head">
+    <h2 id="county-feeds-heading">{heading}</h2>
+    {allFeeds && <a href="/live">All live</a>}
+  </div>
+  <div class="video-layout" data-county-feeds>
+    <div class="video-main">
+      <div class="video-stage" data-feed-stage>
+        {featured.youtubeId ? (
+          <a class="video-thumb" href={watchUrl(featured.youtubeId)} data-youtube={featured.youtubeId} data-title={featured.name}>
+            <img src={thumbnail(featured.youtubeId, 'hqdefault')} alt={featured.name} width="480" height="360" />
+            <span class="video-play" aria-hidden="true"></span>
+            <span class="sr">Play: {featured.name}</span>
+          </a>
+        ) : (
+          <a class="live-open" href={featured.href} rel="noopener">
+            <span>{featured.kind}</span>
+            <strong>{featured.name}</strong>
+            <em>{featured.action}</em>
+          </a>
+        )}
+      </div>
+      <h3 data-feed-title><a href={featured.youtubeId ? watchUrl(featured.youtubeId) : featured.href} rel="noopener">{featured.name}</a></h3>
+      <p class="meta" data-feed-note>{featured.note}</p>
+    </div>
+    <ul class="video-list">
+      {countyFeeds.map((feed) => (
+        <li>
+          <a
+            class="video-item"
+            href={feed.youtubeId ? watchUrl(feed.youtubeId) : feed.href}
+            data-feed-id={feed.id}
+            data-name={feed.name}
+            data-kind={feed.kind}
+            data-action={feed.action}
+            data-note={feed.note}
+            data-source={feed.href}
+            data-youtube={feed.youtubeId}
+            aria-current={feed.id === featured.id ? 'true' : undefined}
+            rel="noopener"
+          >
+            {feed.youtubeId ? (
+              <img src={thumbnail(feed.youtubeId)} alt={feed.name} width="320" height="180" loading="lazy" />
+            ) : (
+              <span class="live-mark">{feed.kind}</span>
+            )}
+            <span>
+              <strong>{feed.name}</strong>
+              <em>{feed.kind}</em>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <p class="disclaimer">Bastropia does not rebroadcast these. The Elgin ISD recording plays from YouTube. Scanner audio, games, agendas, city meetings, river gauges, road conditions, traffic cameras, and state park pages open on the site that publishes them.</p>
+</section>
+
+<script is:inline>
+  document.querySelectorAll('[data-county-feeds]').forEach((root) => {
+    const stage = root.querySelector('[data-feed-stage]');
+    const title = root.querySelector('[data-feed-title]');
+    const note = root.querySelector('[data-feed-note]');
+    if (!stage || !title || !note) return;
+
+    const play = (id, name) => {
+      const frame = document.createElement('iframe');
+      frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0';
+      frame.title = name;
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      stage.replaceChildren(frame);
+    };
+
+    const openPanel = (item) => {
+      const link = document.createElement('a');
+      link.className = 'live-open';
+      link.href = item.dataset.source || item.href;
+      link.rel = 'noopener';
+      const kind = document.createElement('span');
+      kind.textContent = item.dataset.kind || '';
+      const name = document.createElement('strong');
+      name.textContent = item.dataset.name || '';
+      const action = document.createElement('em');
+      action.textContent = item.dataset.action || 'Open';
+      link.append(kind, name, action);
+      stage.replaceChildren(link);
+    };
+
+    const select = (item, startPlayback) => {
+      root.querySelectorAll('[data-feed-id]').forEach((other) => other.removeAttribute('aria-current'));
+      item.setAttribute('aria-current', 'true');
+      const name = item.dataset.name || 'Source';
+      const link = document.createElement('a');
+      link.href = item.dataset.youtube ? item.href : item.dataset.source || item.href;
+      link.rel = 'noopener';
+      link.textContent = name;
+      title.replaceChildren(link);
+      note.textContent = item.dataset.note || '';
+      if (item.dataset.youtube && startPlayback) play(item.dataset.youtube, name);
+      else if (item.dataset.youtube) {
+        const thumb = document.createElement('a');
+        thumb.className = 'video-thumb';
+        thumb.href = item.href;
+        thumb.dataset.youtube = item.dataset.youtube;
+        thumb.dataset.title = name;
+        const image = document.createElement('img');
+        image.src = 'https://i.ytimg.com/vi/' + encodeURIComponent(item.dataset.youtube) + '/hqdefault.jpg';
+        image.alt = name;
+        image.width = 480;
+        image.height = 360;
+        const playButton = document.createElement('span');
+        playButton.className = 'video-play';
+        playButton.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span');
+        label.className = 'sr';
+        label.textContent = 'Play: ' + name;
+        thumb.append(image, playButton, label);
+        stage.replaceChildren(thumb);
+      } else openPanel(item);
+    };
+
+    stage.addEventListener('click', (event) => {
+      const thumb = event.target.closest('.video-thumb');
+      if (!thumb || !thumb.dataset.youtube) return;
+      event.preventDefault();
+      play(thumb.dataset.youtube, thumb.dataset.title || 'Video');
+    });
+
+    root.querySelectorAll('[data-feed-id]').forEach((item) => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault();
+        select(item, true);
+        stage.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    });
+  });
+</script>

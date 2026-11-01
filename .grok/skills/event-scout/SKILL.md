@@ -36,3 +36,7 @@ When the city page for that event includes a poster, the scout saves the image a
 - If a source fails to load, say which one and keep going with the others.
 - After a real run, name the events that were posted (title, date, city) and any source that failed.
 - Do not claim an event is free, or name a room, unless that text came from the source.
+
+## Publishing
+
+Branch from the current `origin/main`. Add event files and their posters only. Open a pull request. Do not deploy from the bot branch, and do not edit the header, homepage, or other shared code. A merge to `main` is what publishes the new listings.

@@ -29,7 +29,9 @@ const themeColor = '#10281f';
 const sections: Record<string, string> = {
   events: 'Events',
   news: 'News',
+  social: 'Bastropia Social',
   government: 'Government',
+  groups: 'Groups',
   calendar: 'Calendar',
   'this-weekend': 'This weekend',
   weather: 'Weather',
@@ -41,6 +43,9 @@ const sections: Record<string, string> = {
   advertise: 'Advertise',
   upgrade: 'Upgrade a listing',
   'go-vote': 'Go Vote',
+  results: 'Results',
+  scores: 'Scores',
+  roads: 'Roads',
 };
 const parts = requestPath.split('/').filter(Boolean);
 const crumbs: { name: string; path: string }[] = [];
@@ -71,7 +76,7 @@ const jsonLd = stringify(graph(nodes));
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content={themeColor} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title="Bastropia news" href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Bastrop County" href="/rss.xml" />
     <link rel="alternate" type="application/rss+xml" title="Bastropia events" href="/events.xml" />
     <link rel="alternate" type="text/plain" title="LLM site guide" href="/llms.txt" />
     <meta property="og:site_name" content={siteName} />

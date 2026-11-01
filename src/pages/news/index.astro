@@ -10,7 +10,7 @@ import { linkList } from '../../lib/schema';
 import { formatMedium } from '../../lib/time';
 
 const stories = await getCollection('news');
-const headlines = latestHeadlines(stories, await getExternalNews(24));
+const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
 ---
 
 <BaseLayout
@@ -34,6 +34,11 @@ const headlines = latestHeadlines(stories, await getExternalNews(24));
       </div>
       <AdSlot placement="news-rail" />
     </div>
-    <p class="disclaimer">Headlines from Community Impact and KXAN open on their sites. Bastropia does not write or edit them.</p>
+    <p class="disclaimer">
+      Headlines open on the site that published them. Bastropia does not write or edit them.
+      The Statesman and KVUE block this server, so their stories are not listed here. The Bastrop Advertiser and the Smithville Times do not offer a feed.
+      Rosanky, Tahitian Village, and The Colony have no paper of their own, so a story is marked with that place when a headline names it.
+      A Community Impact headline about The Colony is marked Sponsored.
+    </p>
   </div>
 </BaseLayout>

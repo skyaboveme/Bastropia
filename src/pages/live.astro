@@ -4,6 +4,7 @@ export const prerender = false;
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import CountyFeeds from '../components/CountyFeeds.astro';
 import { streams } from '../data/streams';
 import { eventKey, labelFromKey, whenLabel } from '../lib/time';
 
@@ -17,9 +18,10 @@ const streamsToday = (await getCollection('events')).filter(
   <PageHead
     kicker="Live"
     title="Meetings, streams, and the group"
-    lede="Bastropia points at public streams. It does not rebroadcast court or city meetings. Neighbor video lives in the Facebook group."
+    lede="Play the Elgin ISD recording here. Scanner audio, high school games, agendas, city meetings, and river gauges open on the site that publishes them."
   />
   <div class="wrap">
+    <CountyFeeds heading="County feeds" />
     <div class="stream-list">
       {streams.map((stream) => {
         const next = stream.dates?.find((date) => date >= today);

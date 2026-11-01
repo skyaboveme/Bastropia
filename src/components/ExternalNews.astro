@@ -1,6 +1,6 @@
 ---
 import type { ExternalStory } from '../lib/externalNews';
-import { newsSources } from '../lib/externalNews';
+import { newsSources, storyLabel } from '../lib/externalNews';
 import { formatMedium } from '../lib/time';
 
 interface Props {
@@ -24,7 +24,7 @@ const present = newsSources.filter((source) => items.some((item) => item.source.
     <div class={`ci-grid ci-${columns}`}>
       {items.map((item) => (
         <article class="brief">
-          <p class="kicker">{item.source.name} · {formatMedium(item.published)}</p>
+          <p class="kicker">{storyLabel(item)} · {formatMedium(item.published)}</p>
           <h3><a href={item.link} rel="noopener">{item.title}</a></h3>
           {showSummary && item.summary && <p class="meta">{item.summary}</p>}
           {item.author && <p class="meta byline">By {item.author}</p>}

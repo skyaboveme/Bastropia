@@ -20,6 +20,11 @@ const news = needle
 const updates = needle
   ? (await getCollection('updates')).filter((update) => `${update.data.title} ${update.data.description} ${update.data.agency}`.toLowerCase().includes(needle))
   : [];
+const decisions = needle
+  ? (await getCollection('decisions')).filter((meeting) =>
+      `${meeting.data.title} ${meeting.data.description}`.toLowerCase().includes(needle),
+    )
+  : [];
 const services = needle
   ? serviceGroups.flatMap((group) =>
       group.items
@@ -27,7 +32,7 @@ const services = needle
         .map((item) => ({ ...item, group: group.title })),
     )
   : [];
-const total = events.length + news.length + updates.length + services.length;
+const total = events.length + news.length + updates.length + decisions.length + services.length;
 ---
 
 <BaseLayout title="Search" description="Search events, news, public notices, and services in Bastrop County." noindex>
@@ -48,6 +53,9 @@ const total = events.length + news.length + updates.length + services.length;
         ))}
         {updates.map((update) => (
           <a class="text-link" href={`/government/${update.id}`}>Notice · {update.data.title}</a>
+        ))}
+        {decisions.map((meeting) => (
+          <a class="text-link" href="/government/court-decisions">Court · {meeting.data.title}</a>
         ))}
         {services.map((service) => (
           <p>{service.group} · {service.name}{service.phone ? ` · ${service.phone}` : ''}</p>

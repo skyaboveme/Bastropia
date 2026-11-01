@@ -49,4 +49,35 @@ const updates = defineCollection({
   }),
 });
 
-export const collections = { events, news, updates };
+const decisions = defineCollection({
+  loader: glob({ base: './src/content/decisions', pattern: '**/*.md' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    meetingDate: z.preprocess(
+      (value) => (value instanceof Date ? value.toISOString().slice(0, 10) : value),
+      z.string(),
+    ),
+    pubDate: z.coerce.date(),
+    sourceUrl: z.string().url(),
+    sourceLabel: z.string(),
+    decided: z.boolean(),
+  }),
+});
+
+const social = defineCollection({
+  loader: glob({ base: './src/content/social', pattern: '**/*.md' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    pubDate: z.coerce.date(),
+    group: z.string(),
+    groupUrl: z.string().url(),
+    tier: z.enum(['primary', 'standout']),
+    topic: z.string().optional(),
+    city: z.string().optional(),
+    sourceUrl: z.string().url().optional(),
+  }),
+});
+
+export const collections = { events, news, updates, decisions, social };

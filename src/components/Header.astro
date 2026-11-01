@@ -1,5 +1,6 @@
 ---
-import { burnBan } from '../data/burnBan';
+import BurnMark from './BurnMark.astro';
+import { burnBan, burnStatus } from '../data/burnBan';
 import { facebookGroup } from '../data/site';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
 import { eventKey, formatLong, labelFromKey } from '../lib/time';
@@ -29,7 +30,10 @@ const voteBanner =
 
 const links = [
   { href: '/', label: 'Front page' },
+  { href: '/results', label: 'Results' },
+  { href: '/scores', label: 'Scores' },
   { href: '/news', label: 'News' },
+  { href: '/social', label: 'Bastropia Social' },
   { href: '/events', label: 'Events' },
   { href: '/calendar', label: 'Calendar' },
   { href: '/this-weekend', label: 'This weekend' },
@@ -37,6 +41,7 @@ const links = [
   { href: '/videos', label: 'Videos' },
   { href: '/weather', label: 'Weather' },
   { href: '/government', label: 'Government' },
+  { href: '/groups', label: 'Groups' },
   { href: '/advertise', label: 'Advertise' },
 ];
 const voteLink = { href: '/go-vote', label: 'Go Vote' };
@@ -76,12 +81,73 @@ function current(href: string) {
     <a class="brand" href="/">
       <img src="/brand/logo-trim.png" alt="Bastropia" width="865" height="923" />
     </a>
-    <a class="ear ear-right" href="/burn-ban">
+    <a class="ear ear-right" href="/burn-ban" aria-label={`Burn ban: ${burnStatus}. Checked ${checkedLabel}`}>
       <span class="ear-label">Burn ban</span>
-      <strong class={burnBan.inEffect ? 'is-stop' : 'is-ok'}>{burnBan.inEffect ? 'In effect' : 'None listed'}</strong>
+      <strong class:list={['burn-word', burnBan.inEffect ? 'is-stop' : 'is-ok']}>
+        <BurnMark banned={burnBan.inEffect} />
+        <span>{burnStatus}</span>
+      </strong>
       <span class="ear-sub">Checked {checkedLabel}</span>
     </a>
   </div>
+
+  <div class="county-strip" id="county-strip">
+    <a href="https://waterdata.usgs.gov/monitoring-location/08159200/">
+      <span>Colorado River</span>
+      <strong data-now="river">—</strong>
+      <em data-now="river-detail">Bastrop gauge</em>
+    </a>
+    <a href="https://www.tceq.texas.gov/cgi-bin/compliance/monops/daily_summary.pl?cams=1612">
+      <span>Air</span>
+      <strong data-now="air">—</strong>
+      <em data-now="air-detail">Bastrop</em>
+    </a>
+    <a href="/roads">
+      <span>SH 71</span>
+      <strong data-now="sh71">—</strong>
+      <em data-now="sh71-detail">Construction</em>
+    </a>
+    <a href="/roads">
+      <span>US 290</span>
+      <strong data-now="us290">—</strong>
+      <em data-now="us290-detail">Construction</em>
+    </a>
+  </div>
+  <p class="strip-also" data-now="also" hidden></p>
+  <script is:inline>
+    fetch('/api/now')
+      .then((response) => response.json())
+      .then((data) => {
+        const set = (key, value) => {
+          const node = document.querySelector(`[data-now="${key}"]`);
+          if (node && value) node.textContent = value;
+        };
+        if (data.river) {
+          set('river', data.river.label);
+          set('river-detail', data.river.detail);
+        }
+        if (data.air) {
+          set('air', data.air.label);
+          set('air-detail', data.air.detail);
+        }
+        const sh = (data.roads || []).find((road) => road.route === 'SH 71');
+        const us = (data.roads || []).find((road) => road.route === 'US 290');
+        if (sh) {
+          set('sh71', sh.label);
+          set('sh71-detail', sh.label === 'None listed' ? 'No alert filed' : sh.detail);
+        }
+        if (us) {
+          set('us290', us.label);
+          set('us290-detail', us.label === 'None listed' ? 'No alert filed' : us.detail);
+        }
+        const also = document.querySelector('[data-now="also"]');
+        if (also && data.others && data.others.length) {
+          also.hidden = false;
+          also.textContent = data.others.map((alert) => `${alert.route}: ${alert.detail}`).join(' ');
+        }
+      })
+      .catch(() => {});
+  </script>
 
   <div class="sections-bar">
     <div class="sections-inner">

@@ -1,0 +1,32 @@
+---
+export const prerender = false;
+
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { labelFromKey } from '../../lib/time';
+
+const meetings = (await getCollection('decisions')).sort((a, b) => b.data.meetingDate.localeCompare(a.data.meetingDate));
+const rendered = await Promise.all(meetings.map(async (meeting) => ({ meeting, Content: (await render(meeting)).Content })));
+---
+
+<BaseLayout
+  title="What the Commissioners Court decided"
+  description="Three bullets from the county record after each Commissioners Court meeting. No decision is listed until the minutes are posted."
+>
+  <PageHead
+    kicker="Commissioners Court"
+    title="What the court decided"
+    lede="Three bullets from the county record, posted within a day of the meeting. If the minutes are not up, this page says so instead of guessing the vote."
+  />
+  <div class="wrap">
+    {rendered.map(({ meeting, Content }) => (
+      <article class="section prose">
+        <p class="kicker">{labelFromKey(meeting.data.meetingDate)}</p>
+        <h2>{meeting.data.decided ? 'Decided' : 'Minutes not posted'}</h2>
+        <Content />
+        <p>Source: <a href={meeting.data.sourceUrl}>{meeting.data.sourceLabel}</a></p>
+      </article>
+    ))}
+  </div>
+</BaseLayout>

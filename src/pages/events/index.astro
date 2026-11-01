@@ -8,7 +8,7 @@ import EventCard from '../../components/EventCard.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
 import { filterEvents } from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
-import { linkList } from '../../lib/schema';
+import { eventNode, linkList } from '../../lib/schema';
 import { eventKey, labelFromKey } from '../../lib/time';
 
 const params = Astro.url.searchParams;
@@ -47,7 +47,10 @@ function href(overrides: Record<string, string | null>) {
   title="Events"
   description="What’s happening in Bastrop County — filter by day, town, and the kind of plans you want."
   noindex={filtered}
-  extra={filtered ? [] : [linkList('Events in Bastrop County', visible.slice(0, 30).map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]}
+  extra={[
+    ...(filtered ? [] : [linkList('Events in Bastrop County', visible.slice(0, 30).map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]),
+    ...visible.map((event) => eventNode(event)),
+  ]}
 >
   <PageHead
     kicker="Calendar"

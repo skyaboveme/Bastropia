@@ -54,7 +54,7 @@ export function thisWeekendKeys(now = new Date()) {
   const day = weekdayIndex[weekday] ?? 0;
   const fridayOffset = day === 0 ? -2 : 5 - day;
   const friday = addDays(key, fridayOffset);
-  return [friday, addDays(friday, 1), addDays(friday, 2)];
+  return [friday, addDays(friday, 1), addDays(friday, 2)].filter((day) => day >= key);
 }
 
 export function formatTime(date: Date) {

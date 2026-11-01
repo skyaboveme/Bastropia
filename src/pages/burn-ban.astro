@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import { burnBan } from '../data/burnBan';
+import BurnMark from '../components/BurnMark.astro';
+import { burnBan, burnStatus } from '../data/burnBan';
 import { formatMedium } from '../lib/time';
 
 const checked = formatMedium(new Date(`${burnBan.checked}T12:00:00`));
@@ -15,7 +16,8 @@ const checked = formatMedium(new Date(`${burnBan.checked}T12:00:00`));
   />
   <div class="wrap">
     <p class={burnBan.inEffect ? 'pill pill-stop' : 'pill pill-ok'}>
-      {burnBan.inEffect ? 'Ban in effect' : 'No ban listed'} · checked {checked}
+      <BurnMark banned={burnBan.inEffect} />
+      {burnStatus} · checked {checked}
     </p>
     <div class="split" style="margin-top:1rem;">
       <article class="detail-main prose">

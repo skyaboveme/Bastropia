@@ -20,7 +20,7 @@ const [featured] = videos;
       <div class="video-main">
         <div class="video-stage" data-video-stage>
           <a class="video-thumb" href={watchUrl(featured.id)} data-id={featured.id} data-title={featured.title}>
-            <img src={thumbnail(featured.id, 'hqdefault')} alt="" width="480" height="360" loading="lazy" />
+            <img src={thumbnail(featured.id, 'hqdefault')} alt={featured.title} width="480" height="360" loading="lazy" />
             <span class="video-play" aria-hidden="true"></span>
             <span class="sr">Play: {featured.title}</span>
           </a>
@@ -40,7 +40,7 @@ const [featured] = videos;
               data-channel-url={video.channelUrl}
               aria-current={index === 0 ? 'true' : undefined}
             >
-              <img src={thumbnail(video.id)} alt="" width="320" height="180" loading="lazy" />
+              <img src={thumbnail(video.id)} alt={video.title} width="320" height="180" loading="lazy" />
               <span>
                 <strong>{video.title}</strong>
                 <em>{video.channel}</em>

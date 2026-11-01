@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatLong } from '../../lib/time';
+
+export async function getStaticPaths() {
+  const items = await getCollection('social');
+  return items.map((item) => ({ params: { id: item.id }, props: { item } }));
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+---
+
+<BaseLayout title={item.data.title} description={item.data.summary}>
+  <article class="wrap">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+      <p class="kicker">{item.data.group} · {formatLong(item.data.pubDate)}</p>
+      <h1>{item.data.title}</h1>
+      <p class="lede">{item.data.summary}</p>
+    </header>
+    <div class="prose">
+      <Content />
+      <p>From <a href={item.data.sourceUrl ?? item.data.groupUrl} rel="noopener">{item.data.group}</a> on Facebook.</p>
+      <p><a href="/social">More from Bastropia Social</a></p>
+    </div>
+  </article>
+</BaseLayout>

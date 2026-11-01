@@ -14,13 +14,14 @@ const now = new Date();
 const days = thisWeekendKeys(now);
 const upgrades = await activeUpgrades(eventKey(now));
 const events = filterEvents(await getCollection('events'), { when: 'weekend' }, now);
+const span = days.length < 2 ? labelFromKey(days[0]) : `${labelFromKey(days[0])} through ${labelFromKey(days[days.length - 1])}`;
 ---
 
 <BaseLayout title="This weekend" description="Friday, Saturday, and Sunday plans across Bastrop County.">
   <PageHead
     kicker="Friday to Sunday"
     title="This weekend in the county"
-    lede={`${labelFromKey(days[0])} through ${labelFromKey(days[2])}. If your plans are not here, the desk has not heard about them yet.`}
+    lede={`${span}. Events that have already ended are left off. If your plans are not here, the desk has not heard about them yet.`}
   />
   <div class="wrap">
     <AdSlot placement="weekend-sponsor" />

@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { directoryShelves, directorySource } from '../data/facebookDirectory';
+
+const pageIds = new Set(['news-pages', 'official', 'parties', 'nonprofits', 'places']);
+const groups = directoryShelves.filter((shelf) => !pageIds.has(shelf.id));
+const pages = directoryShelves.filter((shelf) => pageIds.has(shelf.id));
+const total = directoryShelves.reduce((count, shelf) => count + shelf.items.length, 0);
+---
+
+<BaseLayout
+  title="Groups and pages"
+  description="Facebook groups and pages people use in Bastrop County, sorted by town and by what they are for."
+>
+  <PageHead
+    kicker="Community"
+    title="Groups and pages"
+    lede={`${total} Facebook rooms and pages people use in Bastrop County. A private group has to approve you before you can read it. Member counts are approximate.`}
+  />
+  <div class="wrap">
+    <nav class="filters" aria-label="Jump to a category">
+      <div>
+        <p class="kicker">Groups to join</p>
+        <div class="filter-row">
+          {groups.map((shelf) => (
+            <a class="chip" href={`#${shelf.id}`}>{shelf.title}</a>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p class="kicker">Pages to follow</p>
+        <div class="filter-row">
+          {pages.map((shelf) => (
+            <a class="chip" href={`#${shelf.id}`}>{shelf.title}</a>
+          ))}
+        </div>
+      </div>
+    </nav>
+
+    {groups.map((shelf) => (
+      <section class="section" id={shelf.id}>
+        <div class="section-head">
+          <div>
+            <h2>{shelf.title}</h2>
+            <p class="meta">{shelf.intro}</p>
+          </div>
+          <p class="meta">{shelf.items.length} groups</p>
+        </div>
+        <ul class="directory">
+          {shelf.items.map((item) => (
+            <li>
+              <a href={item.href} rel="noopener">
+                <strong>{item.name}</strong>
+                <em>{item.detail}</em>
+                {item.note && <span class="note">{item.note}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <div class="section-head" id="pages">
+      <div>
+        <p class="kicker">Follow</p>
+        <h2>Pages</h2>
+        <p class="meta">These are Facebook pages, not groups you request to join.</p>
+      </div>
+    </div>
+
+    {pages.map((shelf) => (
+      <section class="section" id={shelf.id}>
+        <div class="section-head">
+          <div>
+            <h2>{shelf.title}</h2>
+            <p class="meta">{shelf.intro}</p>
+          </div>
+          <p class="meta">{shelf.items.length} pages</p>
+        </div>
+        <ul class="directory">
+          {shelf.items.map((item) => (
+            <li>
+              <a href={item.href} rel="noopener">
+                <strong>{item.name}</strong>
+                <em>{item.detail}</em>
+                {item.note && <span class="note">{item.note}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <p class="disclaimer">
+      Names, privacy, and member counts come from <a href={directorySource}>this community list</a>.
+      Counts change, and a private group may not let you in. Bastropia does not run these groups or pages, and a name here is not an endorsement.
+      Official business — a burn ban, a polling place, a 911 call — still belongs on the county, the city, or the emergency line.
+    </p>
+  </div>
+</BaseLayout>

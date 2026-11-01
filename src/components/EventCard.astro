@@ -22,7 +22,7 @@ const category = categoryMeta[event.data.category];
         <strong>{stamp.day}</strong>
       </time>
     )}
-    {event.data.image && !compact && <img class="event-thumb" src={event.data.image} alt="" width="160" height="120" />}
+    {event.data.image && !compact && <img class="event-thumb" src={event.data.image} alt={event.data.title} width="160" height="120" />}
     <div>
       <p class="kicker">{category.label} · {event.data.city}</p>
       <h3>{event.data.title}</h3>
