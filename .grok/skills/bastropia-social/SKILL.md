@@ -5,7 +5,7 @@ description: Find community highlights in PUBLIC Bastrop County Facebook groups 
 
 # Bastropia Social
 
-Items live in `src/content/social/*.md` and show on `/social`. New items arrive as a pull request built from the current `origin/main`. Only add files. Never edit pages, layouts, or styles. Do not deploy from the bot branch. A merge to `main` is what publishes the new items.
+Items live in `src/content/social/*.md` and show at the top of `/groups`. `/social` redirects there. The card links to `sourceUrl` (the post) when there is one, otherwise `groupUrl`. New items arrive as a pull request built from the current `origin/main`. Only add files. Never edit pages, layouts, or styles. Do not deploy from the bot branch. A merge to `main` is what publishes the new items.
 
 ## Hard rules
 - PUBLIC groups and Pages only. Never read from or post about private groups, even if the account is a member.

@@ -33,9 +33,7 @@ const links = [
   { href: '/results', label: 'Results' },
   { href: '/scores', label: 'Scores' },
   { href: '/news', label: 'News' },
-  { href: '/social', label: 'Bastropia Social' },
   { href: '/events', label: 'Events' },
-  { href: '/calendar', label: 'Calendar' },
   { href: '/this-weekend', label: 'This weekend' },
   { href: '/live', label: 'Live' },
   { href: '/videos', label: 'Videos' },
@@ -48,6 +46,8 @@ const voteLink = { href: '/go-vote', label: 'Go Vote' };
 
 function current(href: string) {
   if (href === '/') return path === '/';
+  if (href === '/events') return path === '/events' || path.startsWith('/events/') || path === '/calendar';
+  if (href === '/groups') return path === '/groups' || path.startsWith('/groups/') || path === '/social' || path.startsWith('/social/');
   return path === href || path.startsWith(`${href}/`);
 }
 ---

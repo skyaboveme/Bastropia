@@ -1,37 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PageHead from '../../components/PageHead.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import { formatMedium } from '../../lib/time';
+export const prerender = false;
 
-const items = (await getCollection('social')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+return Astro.redirect('/groups#highlights');
 ---
-
-<BaseLayout
-  title="Bastropia Social"
-  description="Community highlights from public Bastrop County Facebook groups and Pages, summarized by Bastropia."
->
-  <PageHead kicker="Social" title="Bastropia Social" lede="What neighbors are talking about in public Bastrop County groups and Pages, summarized with a link back to each group." />
-  <div class="wrap">
-    <div class="split">
-      <div class="news-list">
-        {items.length === 0 ? (
-          <p class="meta">Community highlights from local Bastrop groups are coming soon.</p>
-        ) : (
-          items.map((item) => (
-            <article class="story-card">
-              <a href={`/social/${item.id}`}>
-                <p class="kicker">{item.data.group} · {formatMedium(item.data.pubDate)}</p>
-                <h3>{item.data.title}</h3>
-                <p class="meta">{item.data.summary}</p>
-              </a>
-            </article>
-          ))
-        )}
-      </div>
-      <AdSlot placement="news-rail" />
-    </div>
-    <p class="disclaimer">Bastropia Social summarizes posts from public Facebook groups and Pages only. Each item links to its group. Bastropia does not speak for these groups.</p>
-  </div>
-</BaseLayout>
