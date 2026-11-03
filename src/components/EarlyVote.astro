@@ -2,15 +2,17 @@
 const total = 28799;
 const groups = (
   [
-    ['Republican primary', 10262],
-    ['Democratic primary', 9398],
-    ['General election only', 6666],
-    ['No primary history', 2473],
+    ['Republican primary', 10262, 'rep'],
+    ['Democratic primary', 9398, 'dem'],
+    ['General election only', 6666, 'gen'],
+    ['No primary history', 2473, 'none'],
   ] as const
-).map(([name, count]) => ({
+).map(([name, count, tone]) => ({
   name,
   count,
+  tone,
   percent: `${Math.round((count / total) * 1000) / 10}%`,
+  share: (count / total) * 100,
 }));
 ---
 
@@ -29,9 +31,14 @@ const groups = (
   <ul>
     {groups.map((group) => (
       <li>
-        <span>{group.name}</span>
-        <strong>{group.count.toLocaleString('en-US')}</strong>
-        <em>{group.percent}</em>
+        <span class="who">{group.name}</span>
+        <span class="track">
+          <span class:list={['bar', group.tone]} style={`width:${group.share}%`}></span>
+        </span>
+        <span class="fig">
+          <strong>{group.count.toLocaleString('en-US')}</strong>
+          <em>{group.percent}</em>
+        </span>
       </li>
     ))}
   </ul>
@@ -41,10 +48,22 @@ const groups = (
   .early-vote { margin: 0 0 1.4rem; }
   .early-vote h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); border-top: 4px solid var(--ink); padding-top: 0.55rem; }
   .early-vote p { max-width: 46rem; margin-top: 0.45rem; color: var(--ink-soft); }
-  .early-vote ul { list-style: none; margin: 0.8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
-  .early-vote li { border-top: 3px solid var(--ink); padding-top: 0.45rem; }
-  .early-vote span, .early-vote em { display: block; font-style: normal; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
-  .early-vote strong { display: block; font-family: var(--serif); font-size: 1.45rem; font-weight: 620; line-height: 1.15; margin-top: 0.15rem; }
-  .early-vote em { margin-top: 0.15rem; letter-spacing: 0.04em; }
-  @media (max-width: 800px) { .early-vote ul { grid-template-columns: 1fr 1fr; } }
+  .early-vote ul { list-style: none; margin: 0.9rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
+  .early-vote li { display: grid; grid-template-columns: 12.5rem minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
+  .who { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .track { display: block; height: 1.35rem; background: var(--paper-2); }
+  .bar { display: block; height: 100%; }
+  .bar.rep { background: #b42318; }
+  .bar.dem { background: #1d4e89; }
+  .bar.gen { background: var(--pine); }
+  .bar.none { background: #8a8175; }
+  .fig { display: flex; gap: 0.45rem; align-items: baseline; justify-content: flex-end; min-width: 7.2rem; }
+  .fig strong { font-family: var(--serif); font-size: 1.35rem; font-weight: 620; }
+  .fig em { font-style: normal; color: var(--ink-soft); font-size: 0.92rem; }
+  @media (max-width: 700px) {
+    .early-vote li { grid-template-columns: 1fr auto; }
+    .who { grid-column: 1; grid-row: 1; }
+    .fig { grid-column: 2; grid-row: 1; min-width: 0; }
+    .track { grid-column: 1 / -1; grid-row: 2; }
+  }
 </style>
