@@ -6,6 +6,8 @@ const listUrl = 'https://results.enr.clarityelections.com/TX/Bastrop/elections.j
 
 export const resultsHome = 'https://www.bastropvotes.org/election-results-2/';
 export const resultsEnr = 'https://results.enr.clarityelections.com/TX/Bastrop/';
+/** November 3, 2026 county summary. The live loader replaces this when the office publishes a new page. */
+export const resultsSummary = 'https://results.enr.clarityelections.com/TX/Bastrop/127476/web.345435/#/summary';
 export const resultsOffice = {
   name: 'Bastrop County Elections',
   phone: '512-581-7160',
@@ -28,6 +30,27 @@ export type ResultRace = {
   choices: ResultChoice[];
 };
 
+export type VoteCenterStatus = 'reported' | 'partial' | 'not-reported' | 'out' | 'other';
+
+export type VoteCenterPoint = {
+  name: string;
+  address: string;
+  status: VoteCenterStatus;
+  label: string;
+  x: number;
+  y: number;
+};
+
+export type CenterMap = {
+  width: number;
+  height: number;
+  paths: string[];
+  centers: VoteCenterPoint[];
+  reported: number;
+  partial: number;
+  waiting: number;
+};
+
 export type ElectionBoard = {
   title: string;
   electionId: string;
@@ -37,7 +60,11 @@ export type ElectionBoard = {
   votesReported: boolean;
   status: string;
   sourceUrl: string;
+  summaryUrl: string;
+  registeredVoters: number;
+  ballotsCast: number;
   races: ResultRace[];
+  centerMap: CenterMap | null;
 };
 
 type ClarityElection = { EID: string; ElectionName: string; Date: string };
@@ -80,6 +107,114 @@ function electionDateKey(value: string) {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
+type RawCenter = { voteCenter?: { idVoteCenter?: string; voteCenterName?: string; address?: string; latitude?: string; longitude?: string } };
+type RawOutline = { GCords?: string };
+
+const centerStatus: Record<number, { status: VoteCenterStatus; label: string }> = {
+  0: { status: 'reported', label: 'Certified' },
+  1: { status: 'not-reported', label: 'Not reported' },
+  2: { status: 'partial', label: 'Partially reported' },
+  4: { status: 'reported', label: 'Completely reported' },
+  8: { status: 'out', label: 'Not participating' },
+  64: { status: 'reported', label: 'Election night complete' },
+};
+
+function decodePath(encoded: string) {
+  const points: [number, number][] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+  while (index < encoded.length) {
+    let result = 0;
+    let shift = 0;
+    let byte = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20 && index <= encoded.length);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+    result = 0;
+    shift = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20 && index <= encoded.length);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+  return points;
+}
+
+function thin(points: [number, number][], max = 48) {
+  if (points.length <= max) return points;
+  const step = Math.ceil(points.length / max);
+  const kept = points.filter((_, index) => index % step === 0);
+  const last = points[points.length - 1];
+  if (kept[kept.length - 1] !== last) kept.push(last);
+  return kept;
+}
+
+function centerMapFor(centers: RawCenter[], status: { P?: string[]; S?: number[] }, outlines: RawOutline[]): CenterMap | null {
+  const byId = new Map((status.P ?? []).map((id, index) => [id, status.S?.[index] ?? 1]));
+  const places = centers.flatMap((row) => {
+    const center = row.voteCenter;
+    const lat = Number(center?.latitude);
+    const lng = Number(center?.longitude);
+    if (!center?.voteCenterName || !Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+    const code = byId.get(center.idVoteCenter ?? '') ?? 1;
+    const named = centerStatus[code] ?? { status: 'other' as const, label: 'Not reported' };
+    return [{
+      name: center.voteCenterName.replace(/,\s*$/, ''),
+      address: (center.address ?? '').replace(/,?\s*USA$/, ''),
+      lat,
+      lng,
+      status: named.status,
+      label: named.label,
+    }];
+  });
+  if (!places.length) return null;
+  const rings = outlines.flatMap((outline) => {
+    const ring = outline.GCords ? thin(decodePath(outline.GCords)) : [];
+    return ring.length > 2 ? [ring] : [];
+  });
+  const points = rings.flat().concat(places.map((place) => [place.lat, place.lng] as [number, number]));
+  const lats = points.map((point) => point[0]);
+  const lngs = points.map((point) => point[1]);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const width = 640;
+  const height = 520;
+  const pad = 28;
+  const project = (lat: number, lng: number) => {
+    const x = pad + ((lng - minLng) / (maxLng - minLng || 1)) * (width - pad * 2);
+    const y = pad + ((maxLat - lat) / (maxLat - minLat || 1)) * (height - pad * 2);
+    return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+  };
+  const paths = rings.map((ring) => ring.map(([lat, lng]) => {
+    const [x, y] = project(lat, lng);
+    return `${x},${y}`;
+  }).join(' '));
+  const mapped = places
+    .map((place) => {
+      const [x, y] = project(place.lat, place.lng);
+      return { name: place.name, address: place.address, status: place.status, label: place.label, x, y };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return {
+    width,
+    height,
+    paths,
+    centers: mapped,
+    reported: mapped.filter((place) => place.status === 'reported').length,
+    partial: mapped.filter((place) => place.status === 'partial').length,
+    waiting: mapped.filter((place) => place.status === 'not-reported').length,
+  };
+}
+
 function statusLine(now: Date, votesReported: boolean) {
   const { key, hour } = chicagoParts(now);
   const day = labelFromKey(electionDay);
@@ -93,7 +228,11 @@ async function load(url: string) {
   const response = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new Error(String(response.status));
   const type = response.headers.get('content-type') ?? '';
-  return type.includes('json') ? response.json() : response.text();
+  if (type.includes('json')) return response.json();
+  const text = await response.text();
+  const trimmed = text.trim();
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) return JSON.parse(trimmed);
+  return text;
 }
 
 export async function getElectionBoard(now = new Date()): Promise<ElectionBoard | null> {
@@ -108,10 +247,43 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
     if (!current) throw new Error('no election');
     const version = String(await load(`https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/current_ver.txt`)).trim();
     const root = `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/${version}/json`;
-    const [summary, settings] = (await Promise.all([
+    const [summary, settings, shell, centers, centerStatusFile] = (await Promise.all([
       load(`${root}/en/summary.json`),
       load(`${root}/en/electionsettings.json`),
-    ])) as [ClarityRow[], { websiteupdatedat?: string; settings?: { numberofprecinctsreporting?: number; totalprecinctsreporting?: number } }];
+      load(`https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/`).catch(() => ''),
+      load(`${root}/vc.json`).catch(() => []),
+      load(`${root}/vc_status.json`).catch(() => ({})),
+    ])) as [
+      ClarityRow[],
+      {
+        websiteupdatedat?: string;
+        settings?: {
+          numberofprecinctsreporting?: number;
+          totalprecinctsreporting?: number;
+          electiondetails?: { registeredvoters?: number | string; ballotscast?: number | string };
+          kmlmap?: string;
+        };
+      },
+      string,
+      RawCenter[],
+      { P?: string[]; S?: number[] },
+    ];
+    const webVersion = String(shell).match(/web\.(\d+)/)?.[1];
+    const summaryUrl = webVersion
+      ? `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/web.${webVersion}/#/summary`
+      : current.EID === '127476'
+        ? resultsSummary
+        : `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/`;
+    const details = settings.settings?.electiondetails;
+    const mapName = settings.settings?.kmlmap;
+    const outlines = mapName
+      ? ((await load(`${root}/${mapName}`).catch(() => [])) as RawOutline[])
+      : [];
+    const centerMap = centerMapFor(
+      Array.isArray(centers) ? centers : [],
+      centerStatusFile ?? {},
+      Array.isArray(outlines) ? outlines : [],
+    );
     const races = summary
       .filter((row) => row.C && row.CH?.length)
       .map((row) => {
@@ -143,7 +315,11 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
       votesReported,
       status: statusLine(now, votesReported),
       sourceUrl: `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/`,
+      summaryUrl,
+      registeredVoters: Number(details?.registeredvoters) || 0,
+      ballotsCast: Number(details?.ballotscast) || 0,
       races,
+      centerMap,
     };
     cache.set('board', { at: Date.now(), value: board });
     return board;

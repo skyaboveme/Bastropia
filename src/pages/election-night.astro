@@ -8,7 +8,7 @@ import { electionHours } from '../data/vote';
 import { electionNightIsLive, nightRaces } from '../lib/electionNight';
 import { electionSources, getElectionCalls } from '../lib/electionCalls';
 import { coverageVideos } from '../lib/electionCoverage';
-import { getElectionBoard, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
+import { getElectionBoard, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
 import { channelVideos } from '../lib/youtubeLatest';
 
 const now = new Date();
@@ -21,6 +21,12 @@ const [board, cameras, calls, coverage] = await Promise.all([
   coverageVideos(),
 ]);
 const races = board ? nightRaces(board.races) : [];
+const summaryUrl = board?.summaryUrl || resultsSummary;
+const centerUrl = summaryUrl.replace(/#.*$/, '#/vote-center');
+const centerMap = board?.centerMap;
+const turnout = board && board.registeredVoters > 0 && board.ballotsCast > 0
+  ? `${Math.round((board.ballotsCast / board.registeredVoters) * 1000) / 10}%`
+  : 'Waiting';
 const camera = cameras[0];
 const lead = coverage[0];
 const description = 'Unofficial Bastrop County totals, Associated Press calls, and live election video.';
@@ -41,7 +47,52 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
           <strong>{board && board.precincts > 0 ? `${board.reporting} of ${board.precincts}` : 'Waiting'}</strong>
         </p>
         <p><span>Office file</span><strong>{board?.updated || 'Not posted'}</strong></p>
+        <p><span>Registered voters</span><strong>{board?.registeredVoters ? board.registeredVoters.toLocaleString('en-US') : 'Waiting'}</strong></p>
+        <p><span>Ballots cast</span><strong>{board ? board.ballotsCast.toLocaleString('en-US') : 'Waiting'}</strong></p>
+        <p><span>Turnout</span><strong>{turnout}</strong></p>
       </div>
+
+      {centerMap && (
+        <section class="center-section" aria-labelledby="centers-map">
+          <div class="section-head">
+            <h2 id="centers-map">Vote centers</h2>
+            <a href={centerUrl} rel="noopener">County map</a>
+          </div>
+          <p class="meta">
+            {centerMap.reported} of {centerMap.centers.length} completely reported
+            {centerMap.partial ? ` · ${centerMap.partial} partially reported` : ''}
+            {centerMap.waiting ? ` · ${centerMap.waiting} not reported` : ''}
+          </p>
+          <div class="center-layout">
+            <svg class="center-map" viewBox={`0 0 ${centerMap.width} ${centerMap.height}`} role="img" aria-label="Map of Bastrop County vote centers and whether each has reported">
+              {centerMap.paths.map((points) => <polygon class="county-shape" points={points} />)}
+              {centerMap.centers.map((center) => (
+                <circle class:list={['center-dot', center.status]} cx={center.x} cy={center.y} r="8">
+                  <title>{center.name}: {center.label}</title>
+                </circle>
+              ))}
+            </svg>
+            <div>
+              <ul class="center-key">
+                <li><i class="reported"></i> Completely reported</li>
+                <li><i class="partial"></i> Partially reported</li>
+                <li><i class="not-reported"></i> Not reported</li>
+              </ul>
+              <ul class="center-list">
+                {centerMap.centers.map((center) => (
+                  <li>
+                    <i class={center.status}></i>
+                    <span>
+                      <strong>{center.name}</strong>
+                      <em>{center.label}{center.address ? ` · ${center.address}` : ''}</em>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
       {races.length ? (
         <div class="race-grid">
@@ -77,11 +128,14 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
       <p class="meta night-links">
         <a class="text-link" href="/results">Every race</a>
         <a class="text-link" href="/go-vote">Polling places</a>
-        <a class="text-link" href={resultsEnr}>County election-night report</a>
+        <a class="text-link" href={summaryUrl}>County results summary</a>
+        <a class="text-link" href={centerUrl}>Vote centers reporting</a>
         <a class="text-link" href={resultsHome}>Elections office results page</a>
       </p>
       <p class="disclaimer">
-        These are unofficial totals. Bastrop County certifies them later.
+        These are unofficial totals from the county summary at
+        <a class="text-link" href={summaryUrl}>results.enr.clarityelections.com</a>.
+        Bastrop County certifies them later.
         Elections office, 804 Pecan St., Bastrop,
         <a class="text-link" href={`tel:${resultsOffice.phone.replaceAll('-', '')}`}>{resultsOffice.phone}</a>.
       </p>
@@ -303,12 +357,29 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
   .race-count { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: center; color: var(--ink-soft); font-size: 0.88rem; }
   .race-count b { display: block; height: 0.35rem; background: var(--river); border-radius: 99px; }
   .night-links { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; }
+  .center-section { margin: 1.4rem 0 1.6rem; }
+  .center-layout { display: grid; grid-template-columns: 1.35fr 0.9fr; gap: 1.2rem; align-items: start; }
+  .center-map { width: 100%; height: auto; background: #f7f3ea; border: 1px solid var(--line); }
+  .county-shape { fill: #e4efe8; stroke: var(--pine-deep); stroke-width: 1.25; stroke-linejoin: round; }
+  .center-dot { stroke: #fff; stroke-width: 2; }
+  .center-dot.reported, .center-key .reported, .center-list .reported { fill: var(--pine); background: var(--pine); }
+  .center-dot.partial, .center-key .partial, .center-list .partial { fill: var(--sun-deep); background: var(--sun-deep); }
+  .center-dot.not-reported, .center-key .not-reported, .center-list .not-reported { fill: #8d6b4a; background: #8d6b4a; }
+  .center-dot.out, .center-list .out { fill: #b9b3a8; background: #b9b3a8; }
+  .center-key, .center-list { list-style: none; margin: 0; padding: 0; }
+  .center-key { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; margin-bottom: 0.6rem; }
+  .center-key li, .center-list li { display: flex; gap: 0.45rem; align-items: flex-start; }
+  .center-key i, .center-list i { width: 0.7rem; height: 0.7rem; border-radius: 99px; margin-top: 0.28rem; flex: none; }
+  .center-list { max-height: 28rem; overflow: auto; }
+  .center-list li { padding: 0.45rem 0; border-top: 1px solid var(--line); }
+  .center-list strong, .center-list em { display: block; }
+  .center-list em { font-style: normal; color: var(--ink-soft); font-size: 0.86rem; }
   .call { margin: 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
   .call.called { color: var(--pine); }
   .source-list { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem 1.4rem; }
   .source-list li { display: grid; gap: 0.15rem; border-top: 3px solid var(--ink); padding-top: 0.45rem; }
   .source-list span { color: var(--ink-soft); font-size: 0.92rem; }
   @media (max-width: 800px) {
-    .night-facts, .race-grid, .source-list { grid-template-columns: 1fr; }
+    .night-facts, .race-grid, .source-list, .center-layout { grid-template-columns: 1fr; }
   }
 </style>
