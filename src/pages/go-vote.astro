@@ -37,7 +37,7 @@ let headline = `Election Day is ${labelFromKey(electionDay)}.`;
 let detail = `Polls are open ${electionHours} at any Election Day location in the county.`;
 if (today === electionDay) {
   headline = 'Today is Election Day.';
-  detail = `Polls are open ${electionHours}. Vote at any Election Day location in the county. If you are in line at 7 pm, stay in line.`;
+  detail = `Polls are open ${electionHours}. A voter may vote at any Election Day location in the county.`;
 } else if (todayHours) {
   headline = `Early voting is open today, ${todayHours}.`;
   detail = `Early voting runs through ${labelFromKey(lastEarly)}. Election Day is ${labelFromKey(electionDay)}, ${electionHours}.`;
@@ -58,7 +58,7 @@ const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|electio
 
 <BaseLayout
   title="Go Vote"
-  description="Early voting hours, Election Day polling places, and the elections office for Bastrop County, Texas. Election Day is November 3, 2026."
+  description="Polls are open 7 am to 7 pm today at any Election Day location in Bastrop County. Addresses are from Bastrop County Elections."
   extra={[{
     '@type': 'Event',
     name: 'Bastrop County Election Day 2026',
@@ -88,7 +88,9 @@ const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|electio
   <PageHead
     kicker="Election 2026"
     title="Go Vote"
-    lede="Early voting hours, Election Day polling places, and who to call. Every time and address here comes from Bastrop County Elections."
+    lede={today === electionDay
+      ? 'Polls are open until 7 pm. Pick any location below. Every address comes from Bastrop County Elections.'
+      : 'Early voting hours, Election Day polling places, and who to call. Every time and address here comes from Bastrop County Elections.'}
   />
 
   <div class="wrap">
@@ -105,13 +107,48 @@ const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|electio
       </div>
     </section>
 
+    <section class="section">
+      <div class="section-head">
+        <h2>Election Day polling places</h2>
+        <span class="meta">{labelFromKey(electionDay)}, {electionHours}</span>
+      </div>
+      <p class="meta">On Election Day a voter may vote at any of these {electionDayLocations.length} locations.</p>
+      <div class="vote-towns">
+        {[...byCity.entries()].map(([city, places]) => (
+          <section class="vote-town">
+            <h3>{city}</h3>
+            <ul>
+              {places.map((place) => (
+                <li>
+                  <strong>{place.name}</strong>
+                  <span>{place.street}, {place.city} {place.zip}</span>
+                  <a href={mapHref(place)} rel="noopener">Map<span class="sr"> for {place.name}</span></a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Free rides today</h2>
+      </div>
+      <p>
+        Community Impact reports that CARTS will offer free rides to and from polling places in Bastrop County today.
+        Use the code VoteTexas2026 in the CARTS Country Bus or CARTS NOW app, or call <a href="tel:5124787433">512-478-7433</a>.
+      </p>
+      <p class="more"><a href="https://communityimpact.com/bastrop-cedar-creek/election/carts-to-offer-free-election-day-rides/" rel="noopener">Read the Community Impact report</a></p>
+    </section>
+
     <section class="section split">
       <div>
         <div class="section-head">
           <h2>Early voting hours</h2>
           <span class="meta">{formatMedium(new Date('2026-10-19T12:00:00-05:00'))} to {formatMedium(new Date('2026-10-30T12:00:00-05:00'))}</span>
         </div>
-        <p class="meta">A voter may vote at any early voting location below, on any day.</p>
+        <p class="meta">Early voting ended October 30. These were the hours.</p>
         <table class="vote-table">
           <caption class="sr">Early voting days and hours</caption>
           <thead>
@@ -153,30 +190,6 @@ const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|electio
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>Election Day polling places</h2>
-        <span class="meta">{labelFromKey(electionDay)}, {electionHours}</span>
-      </div>
-      <p class="meta">On Election Day a voter may vote at any of these {electionDayLocations.length} locations.</p>
-      <div class="vote-towns">
-        {[...byCity.entries()].map(([city, places]) => (
-          <section class="vote-town">
-            <h3>{city}</h3>
-            <ul>
-              {places.map((place) => (
-                <li>
-                  <strong>{place.name}</strong>
-                  <span>{place.street}, {place.city} {place.zip}</span>
-                  <a href={mapHref(place)} rel="noopener">Map<span class="sr"> for {place.name}</span></a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-    </section>
-
     <section class="section split">
       <div>
         <div class="section-head">
@@ -197,17 +210,6 @@ const stories = await getExternalNews(4, 2, /\b(vote|voter|voters|voting|electio
         </div>
         <p class="vote-number"><strong>{registeredVoters.total}</strong><span>registered voters in Bastrop County as of {registeredVoters.asOf}</span></p>
       </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <h2>Free rides on Election Day</h2>
-      </div>
-      <p>
-        Community Impact reports that CARTS will offer free rides to and from polling places in Bastrop County on Tuesday, November 3.
-        Use the code VoteTexas2026 in the CARTS Country Bus or CARTS NOW app, or call <a href="tel:5124787433">512-478-7433</a>.
-      </p>
-      <p class="more"><a href="https://communityimpact.com/bastrop-cedar-creek/election/carts-to-offer-free-election-day-rides/" rel="noopener">Read the Community Impact report</a></p>
     </section>
 
     <ExternalNews items={stories} columns={2} showSummary heading="Election news" />
