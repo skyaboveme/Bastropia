@@ -331,14 +331,39 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
   }
 }
 
-export function racesByCategory(races: ResultRace[]) {
+/** These county contests lead the Bastrop County group, in this order. */
+const countyLead = [
+  'County Commissioner Pct 4',
+  'JOP Pct 2',
+  'JOP Pct 1',
+  'County Judge',
+];
+
+function withCountyLead(races: ResultRace[]) {
+  const lead: ResultRace[] = [];
+  const used = new Set<ResultRace>();
+  for (const name of countyLead) {
+    const race = races.find((item) => item.category === 'County' && item.name === name);
+    if (!race) continue;
+    lead.push(race);
+    used.add(race);
+  }
+  return [...lead, ...races.filter((race) => !used.has(race))];
+}
+
+export function racesByCategory(races: ResultRace[], firstCategory?: string) {
   const groups = new Map<string, ResultRace[]>();
-  for (const race of races) {
+  for (const race of withCountyLead(races)) {
     const list = groups.get(race.category) ?? [];
     list.push(race);
     groups.set(race.category, list);
   }
   const known = categoryOrder.filter((name) => groups.has(name));
   const rest = [...groups.keys()].filter((name) => !categoryOrder.includes(name));
-  return [...known, ...rest].map((name) => ({ name, races: groups.get(name) ?? [] }));
+  const names = [...known, ...rest];
+  if (firstCategory) {
+    const index = names.indexOf(firstCategory);
+    if (index > 0) names.unshift(...names.splice(index, 1));
+  }
+  return names.map((name) => ({ name, races: groups.get(name) ?? [] }));
 }

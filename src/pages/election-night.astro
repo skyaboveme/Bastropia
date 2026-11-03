@@ -5,10 +5,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { electionsChannel, channelPage } from '../data/youtubeChannels';
 import { electionHours } from '../data/vote';
-import { electionNightIsLive, nightRaces } from '../lib/electionNight';
+import { electionNightIsLive } from '../lib/electionNight';
 import { electionSources, getElectionCalls } from '../lib/electionCalls';
 import { coverageVideos } from '../lib/electionCoverage';
-import { getElectionBoard, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
+import { getElectionBoard, racesByCategory, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
 import { channelVideos } from '../lib/youtubeLatest';
 
 const now = new Date();
@@ -16,11 +16,11 @@ if (!electionNightIsLive(now)) return Astro.redirect('/results', 302);
 
 const [board, cameras, calls, coverage] = await Promise.all([
   getElectionBoard(now),
-  channelVideos(electionsChannel, 4),
+  channelVideos(electionsChannel, 6),
   getElectionCalls(),
   coverageVideos(),
 ]);
-const races = board ? nightRaces(board.races) : [];
+const groups = board ? racesByCategory(board.races, 'County') : [];
 const summaryUrl = board?.summaryUrl || resultsSummary;
 const centerUrl = summaryUrl.replace(/#.*$/, '#/vote-center');
 const centerMap = board?.centerMap;
@@ -51,6 +51,61 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
         <p><span>Ballots cast</span><strong>{board ? board.ballotsCast.toLocaleString('en-US') : 'Waiting'}</strong></p>
         <p><span>Turnout</span><strong>{turnout}</strong></p>
       </div>
+
+      {groups.length ? groups.map((group) => (
+        <section class="results-group" aria-labelledby={`results-${group.name.replace(/\W+/g, '-').toLowerCase()}`}>
+          <div class="section-head">
+            <h2 id={`results-${group.name.replace(/\W+/g, '-').toLowerCase()}`}>{group.name}</h2>
+          </div>
+          <div class="race-grid">
+            {group.races.map((race) => (
+              <article class="race">
+                <h3>{race.name}</h3>
+                {race.name.startsWith('Bastrop County Special Election, JOP') && (
+                  <p>
+                    The legal sale of all alcoholic beverages including mixed beverages.
+                    <a class="text-link" href="https://www.bastropvotes.org/wp-content/uploads/2026/08/Complete_with_Docusign_Order_a_Special_Elect.pdf">County order</a>
+                  </p>
+                )}
+                <p class="meta">
+                  {race.votes.toLocaleString('en-US')} {race.votes === 1 ? 'vote' : 'votes'}
+                  {race.precincts > 0 ? ` · ${race.precinctsReporting} of ${race.precincts} precincts` : ''}
+                </p>
+                <ol>
+                  {race.choices.map((choice) => (
+                    <li>
+                      <span class="race-who">
+                        <strong>{choice.name}</strong>
+                        {choice.party && <em>{choice.party}</em>}
+                      </span>
+                      <span class="race-count">
+                        {board?.votesReported ? <b style={`width:${Math.max(choice.percent, choice.votes ? 2 : 0)}%`} /> : null}
+                        <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${choice.percent}%` : ''}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </article>
+            ))}
+          </div>
+        </section>
+      )) : (
+        <p class="lede">The county list of races did not load.</p>
+      )}
+
+      <p class="meta night-links">
+        <a class="text-link" href="/go-vote">Polling places</a>
+        <a class="text-link" href={summaryUrl}>County results summary</a>
+        <a class="text-link" href={centerUrl}>Vote centers reporting</a>
+        <a class="text-link" href={resultsHome}>Elections office results page</a>
+      </p>
+      <p class="disclaimer">
+        These are unofficial totals from the county summary at
+        <a class="text-link" href={summaryUrl}>results.enr.clarityelections.com</a>.
+        Bastrop County certifies them later.
+        Elections office, 804 Pecan St., Bastrop,
+        <a class="text-link" href={`tel:${resultsOffice.phone.replaceAll('-', '')}`}>{resultsOffice.phone}</a>.
+      </p>
 
       {centerMap && (
         <section class="center-section" aria-labelledby="centers-map">
@@ -93,53 +148,59 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
           </div>
         </section>
       )}
+    </div>
 
-      {races.length ? (
-        <div class="race-grid">
-          {races.map((race) => (
-            <article class="race">
-              <p class="kicker">{race.category}</p>
-              <h2>{race.name}</h2>
-              <p class="meta">
-                {race.votes.toLocaleString('en-US')} {race.votes === 1 ? 'vote' : 'votes'}
-                {race.precincts > 0 ? ` · ${race.precinctsReporting} of ${race.precincts} precincts` : ''}
-              </p>
-              <ol>
-                {race.choices.map((choice) => (
-                  <li>
-                    <span class="race-who">
-                      <strong>{choice.name}</strong>
-                      {choice.party && <em>{choice.party}</em>}
+    <section class="section" aria-labelledby="count-camera">
+      <div class="section-head">
+        <h2 id="count-camera">Central count</h2>
+        <a href={channelPage(electionsChannel)} rel="noopener">Bastrop County Elections</a>
+      </div>
+      {camera ? (
+        <div class="video-layout" data-election-videos>
+          <div class="video-main">
+            <div class="video-stage" data-feed-stage>
+              <a class="video-thumb" href={camera.href} data-youtube={camera.videoId} data-title={camera.title}>
+                <img src={camera.thumb} alt="" width="480" height="270" />
+                <span class="video-play" aria-hidden="true"></span>
+                <span class="sr">Play: {camera.title}</span>
+              </a>
+            </div>
+            <h3 data-feed-title><a href={camera.href} rel="noopener">{camera.title}</a></h3>
+            <p class="meta" data-feed-note>{camera.when || 'Bastrop County Elections'}</p>
+          </div>
+          {cameras.length > 1 && (
+            <ul class="video-list">
+              {cameras.map((video) => (
+                <li>
+                  <a
+                    class="video-item"
+                    href={video.href}
+                    data-feed-id={video.videoId}
+                    data-title={video.title}
+                    data-when={video.when || 'Bastrop County Elections'}
+                    data-youtube={video.videoId}
+                    aria-current={video.videoId === camera.videoId ? 'true' : undefined}
+                    rel="noopener"
+                  >
+                    <img src={video.thumb} alt="" width="168" height="94" loading="lazy" />
+                    <span>
+                      <strong>{video.title}</strong>
+                      {video.when && <em>{video.when}</em>}
                     </span>
-                    <span class="race-count">
-                      {board?.votesReported ? <b style={`width:${Math.max(choice.percent, choice.votes ? 2 : 0)}%`} /> : null}
-                      <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${choice.percent}%` : ''}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          ))}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ) : (
-        <p class="lede">The county list of races did not load.</p>
+        <p class="lede">
+          The elections channel did not load.
+          <a class="text-link" href={channelPage(electionsChannel)} rel="noopener">Open it on YouTube</a>.
+        </p>
       )}
-
-      <p class="meta night-links">
-        <a class="text-link" href="/results">Every race</a>
-        <a class="text-link" href="/go-vote">Polling places</a>
-        <a class="text-link" href={summaryUrl}>County results summary</a>
-        <a class="text-link" href={centerUrl}>Vote centers reporting</a>
-        <a class="text-link" href={resultsHome}>Elections office results page</a>
-      </p>
-      <p class="disclaimer">
-        These are unofficial totals from the county summary at
-        <a class="text-link" href={summaryUrl}>results.enr.clarityelections.com</a>.
-        Bastrop County certifies them later.
-        Elections office, 804 Pecan St., Bastrop,
-        <a class="text-link" href={`tel:${resultsOffice.phone.replaceAll('-', '')}`}>{resultsOffice.phone}</a>.
-      </p>
-    </div>
+      <p class="disclaimer">The newest public video on the county elections channel, then earlier cameras. Playback is YouTube’s player.</p>
+    </section>
 
     <section class="section" aria-labelledby="night-calls-title">
       <div class="section-head">
@@ -253,34 +314,6 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
       <p class="disclaimer">Live streams and election video from KXAN, KVUE, the Texas Tribune, and FOX 7 Austin. Playback is YouTube’s player.</p>
     </section>
 
-    <section class="section" aria-labelledby="count-camera">
-      <div class="section-head">
-        <h2 id="count-camera">Central count</h2>
-        <a href={channelPage(electionsChannel)} rel="noopener">Bastrop County Elections</a>
-      </div>
-      {camera ? (
-        <div class="video-layout" data-election-videos>
-          <div class="video-main">
-            <div class="video-stage" data-feed-stage>
-              <a class="video-thumb" href={camera.href} data-youtube={camera.videoId} data-title={camera.title}>
-                <img src={camera.thumb} alt="" width="480" height="270" />
-                <span class="video-play" aria-hidden="true"></span>
-                <span class="sr">Play: {camera.title}</span>
-              </a>
-            </div>
-            <h3 data-feed-title><a href={camera.href} rel="noopener">{camera.title}</a></h3>
-            <p class="meta" data-feed-note>{camera.when || 'Bastrop County Elections'}</p>
-          </div>
-        </div>
-      ) : (
-        <p class="lede">
-          The elections channel did not load.
-          <a class="text-link" href={channelPage(electionsChannel)} rel="noopener">Open it on YouTube</a>.
-        </p>
-      )}
-      <p class="disclaimer">The newest public video on the county elections channel. Playback is YouTube’s player.</p>
-    </section>
-
     <script is:inline>
       async function refreshNight() {
         try {
@@ -349,7 +382,9 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
   .night-facts strong { display: block; font-family: var(--serif); font-size: 1.45rem; font-weight: 620; line-height: 1.15; margin-top: 0.15rem; }
   .race-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 1.4rem; }
   .race { border-top: 3px solid var(--ink); padding-top: 0.7rem; }
-  .race h2 { font-size: 1.35rem; line-height: 1.15; margin-top: 0.2rem; }
+  .results-group { margin-top: 1.6rem; }
+  .results-group:first-of-type { margin-top: 0.4rem; }
+  .race h2, .race h3 { font-size: 1.35rem; line-height: 1.15; margin-top: 0.2rem; }
   .race ol { list-style: none; margin: 0.4rem 0 0; padding: 0; }
   .race li { display: grid; gap: 0.15rem; padding: 0.45rem 0; border-top: 1px solid var(--line); }
   .race-who { display: flex; justify-content: space-between; gap: 0.6rem; }

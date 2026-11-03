@@ -4,10 +4,13 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { electionDay, electionHours } from '../data/vote';
+import { electionNightIsLive } from '../lib/electionNight';
 import { eventKey } from '../lib/time';
 import { getElectionBoard, racesByCategory, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
 import { electionsChannel, channelPage } from '../data/youtubeChannels';
 import { channelVideos } from '../lib/youtubeLatest';
+
+if (electionNightIsLive()) return Astro.redirect('/election-night', 302);
 
 const board = await getElectionBoard();
 const refresh = Boolean(board?.votesReported || eventKey(new Date()) === electionDay);
