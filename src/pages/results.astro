@@ -6,7 +6,7 @@ import PageHead from '../components/PageHead.astro';
 import { electionDay, electionHours } from '../data/vote';
 import { electionNightIsLive } from '../lib/electionNight';
 import { eventKey } from '../lib/time';
-import { getElectionBoard, racesByCategory, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
+import { announcedWinners, getElectionBoard, racesByCategory, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
 import { electionsChannel, channelPage } from '../data/youtubeChannels';
 import { channelVideos } from '../lib/youtubeLatest';
 
@@ -15,6 +15,7 @@ if (electionNightIsLive()) return Astro.redirect('/election-night', 302);
 const board = await getElectionBoard();
 const refresh = Boolean(board?.votesReported || eventKey(new Date()) === electionDay);
 const groups = board ? racesByCategory(board.races) : [];
+const winners = announcedWinners(groups.flatMap((group) => group.races));
 const cameras = await channelVideos(electionsChannel, 6);
 const camera = cameras[0];
 const description = board
@@ -30,6 +31,11 @@ const description = board
   />
   <div class="wrap">
     <div id="results-board">
+    {winners.length > 0 && (
+      <ul class="winners" aria-label="Winners">
+        {winners.map((line) => <li>{line}</li>)}
+      </ul>
+    )}
     <p class="meta">
       These totals are the county election-night report at
       <a class="text-link" href={resultsEnr}>results.enr.clarityelections.com/TX/Bastrop</a>.
@@ -198,6 +204,8 @@ const description = board
 </BaseLayout>
 
 <style>
+  .winners { list-style: none; margin: 0 0 1.3rem; padding: 0; }
+  .winners li { color: #c5161d; font-family: var(--serif); font-size: 1.45rem; font-weight: 650; line-height: 1.25; padding: 0.55rem 0; border-top: 3px solid #c5161d; }
   .race-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 1.4rem; }
   .race { border-top: 3px solid var(--ink); padding-top: 0.7rem; }
   .race h3 { font-size: 1.35rem; line-height: 1.15; }

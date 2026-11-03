@@ -8,7 +8,7 @@ import { electionHours } from '../data/vote';
 import { electionNightIsLive } from '../lib/electionNight';
 import { electionSources, getElectionCalls } from '../lib/electionCalls';
 import { coverageVideos } from '../lib/electionCoverage';
-import { getElectionBoard, racesByCategory, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
+import { announcedWinners, getElectionBoard, racesByCategory, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
 import { channelVideos } from '../lib/youtubeLatest';
 
 const now = new Date();
@@ -21,6 +21,7 @@ const [board, cameras, calls, coverage] = await Promise.all([
   coverageVideos(),
 ]);
 const groups = board ? racesByCategory(board.races, 'County') : [];
+const winners = announcedWinners(groups.flatMap((group) => group.races));
 const summaryUrl = board?.summaryUrl || resultsSummary;
 const centerUrl = summaryUrl.replace(/#.*$/, '#/vote-center');
 const centerMap = board?.centerMap;
@@ -40,6 +41,11 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
   />
   <div class="wrap">
     <div id="night-board">
+      {winners.length > 0 && (
+        <ul class="winners" aria-label="Winners">
+          {winners.map((line) => <li>{line}</li>)}
+        </ul>
+      )}
       <div class="night-facts">
         <p><span>Polls</span><strong>{electionHours}</strong></p>
         <p>
@@ -376,6 +382,8 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
 </BaseLayout>
 
 <style>
+  .winners { list-style: none; margin: 0 0 1.3rem; padding: 0; }
+  .winners li { color: #c5161d; font-family: var(--serif); font-size: 1.45rem; font-weight: 650; line-height: 1.25; padding: 0.55rem 0; border-top: 3px solid #c5161d; }
   .night-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin: 0.2rem 0 1.4rem; }
   .night-facts p { border-top: 3px solid var(--ink); padding-top: 0.45rem; }
   .night-facts span { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }

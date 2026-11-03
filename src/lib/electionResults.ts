@@ -19,6 +19,7 @@ export type ResultChoice = {
   party: string;
   votes: number;
   percent: number;
+  winner: boolean;
 };
 
 export type ResultRace = {
@@ -78,6 +79,7 @@ type ClarityRow = {
   PR?: number;
   TP?: number;
   TV?: number;
+  W?: number[];
 };
 
 const cache = new Map<string, { at: number; value: ElectionBoard | null }>();
@@ -292,6 +294,7 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
           party: row.P?.[index] ?? '',
           votes: row.V?.[index] ?? 0,
           percent: row.PCT?.[index] ?? 0,
+          winner: (row.W?.[index] ?? 0) > 0,
         }));
         const votes = row.TV ?? choices.reduce((sum, choice) => sum + choice.votes, 0);
         if (votes > 0) choices.sort((a, b) => b.votes - a.votes);
@@ -366,4 +369,52 @@ export function racesByCategory(races: ResultRace[], firstCategory?: string) {
     if (index > 0) names.unshift(...names.splice(index, 1));
   }
   return names.map((name) => ({ name, races: groups.get(name) ?? [] }));
+}
+
+function officeLabel(name: string) {
+  const commissioner = name.match(/^County Commissioner Pct (\d+)$/);
+  if (commissioner) return `Precinct ${commissioner[1]} Commissioner`;
+  const jop = name.match(/^JOP Pct (\d+)$/);
+  if (jop) return `Precinct ${jop[1]} Justice of the Peace`;
+  if (name === 'Criminal District Attorney Bastrop County') return 'Criminal District Attorney';
+  return name;
+}
+
+function choiceLabel(name: string) {
+  return /^write-in$/i.test(name) ? 'Write in' : name;
+}
+
+function againstList(names: string[]) {
+  const labels = names.map(choiceLabel);
+  if (labels.length <= 1) return labels[0] ?? '';
+  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+  return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+}
+
+/** Lines for races the county file has decided. Contested races wait until every precinct is in. */
+export function announcedWinners(races: ResultRace[]) {
+  const lines: string[] = [];
+  for (const race of races) {
+    const marked = race.choices.filter((choice) => choice.winner);
+    const ranked = [...race.choices].sort((a, b) => b.votes - a.votes);
+    const leader = marked.length === 1 ? marked[0] : ranked[0];
+    if (!leader) continue;
+    const runnerUp = ranked.find((choice) => choice !== leader);
+    const ahead = leader.votes > (runnerUp?.votes ?? -1);
+    const called = marked.length === 1;
+    const complete = race.precincts > 0 && race.precinctsReporting >= race.precincts;
+    const namedOpponents = race.choices.some((choice) => choice !== leader && !/^write-in$/i.test(choice.name));
+    const decided = (called && leader.votes > 0) || (leader.votes > 0 && ahead && (complete || !namedOpponents));
+    if (!decided) continue;
+    const office = officeLabel(race.name);
+    const who = choiceLabel(leader.name);
+    const measure = race.choices.length === 2 && race.choices.every((choice) => choice.name === 'For' || choice.name === 'Against');
+    if (measure) {
+      lines.push(who === 'For' ? `For passes ${office}.` : `Against defeats ${office}.`);
+      continue;
+    }
+    const against = againstList(race.choices.filter((choice) => choice !== leader).map((choice) => choice.name));
+    lines.push(against ? `${who} wins ${office} against ${against}.` : `${who} wins ${office}.`);
+  }
+  return lines;
 }
