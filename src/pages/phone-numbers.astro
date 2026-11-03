@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { emergencyLine, serviceGroups, type Service } from '../data/services';
+import { phoneHref } from '../lib/format';
+
+function pick(id: string, names: string[]): Service[] {
+  const group = serviceGroups.find((item) => item.id === id);
+  if (!group) return [];
+  return names
+    .map((name) => group.items.find((item) => item.name === name))
+    .filter((item): item is Service => Boolean(item));
+}
+
+const sections: { title: string; intro: string; items: Service[] }[] = [
+  {
+    title: 'Sheriff and police',
+    intro: 'These are office lines. Call 911 if you need help now.',
+    items: pick('emergency', [
+      'Bastrop County Sheriff’s Office',
+      'Bastrop Police Department',
+      'Elgin Police Department',
+      'Smithville Police Department',
+    ]),
+  },
+  {
+    title: 'Tax office',
+    intro: 'Vehicle registration and property tax. Exemptions are the appraisal district, (512) 303-1930.',
+    items: pick('county', [
+      'Tax Assessor-Collector',
+      'Tax office, Cedar Creek',
+      'Tax office, Elgin',
+      'Tax office, Smithville',
+    ]),
+  },
+  {
+    title: 'City hall',
+    intro: 'Cedar Creek, McDade, and Paige are unincorporated. County business goes to the courthouse line, (512) 581-7100.',
+    items: pick('cities', ['City of Bastrop', 'City of Elgin', 'City of Smithville']),
+  },
+  {
+    title: 'Water',
+    intro: 'Aqua serves many places outside the cities. City water questions go to that city hall.',
+    items: pick('roads', ['Aqua Water Supply']),
+  },
+  {
+    title: 'Libraries',
+    intro: 'Hours are the ones each library posts.',
+    items: pick('libraries', ['Bastrop Public Library', 'Elgin Public Library', 'Smithville Public Library']),
+  },
+  {
+    title: 'Schools',
+    intro: 'Bastrop ISD covers Bastrop and Cedar Creek. A Paige address can fall in Bastrop ISD, McDade ISD, or Smithville ISD.',
+    items: pick('schools', ['Bastrop ISD', 'Elgin ISD', 'Smithville ISD', 'McDade ISD']),
+  },
+];
+---
+
+<BaseLayout
+  title="Bastrop County phone numbers"
+  description="Phone numbers for the sheriff, tax office, city halls, Aqua Water, libraries, and school districts in Bastrop County, Texas."
+>
+  <PageHead
+    kicker="Numbers"
+    title="Bastrop County phone numbers"
+    lede="The lines neighbors look up: sheriff, tax office, city hall, water, library, and schools. Each one is copied from the office that publishes it."
+  />
+  <div class="wrap">
+    <section class="notice">
+      <p class="kicker" style="color: var(--river);">Emergency</p>
+      <h2>Call {emergencyLine.phone}</h2>
+      <p class="lede" style="color:#d5e4dc;">{emergencyLine.label}.</p>
+      <p class="cluster"><a class="button" href={phoneHref(emergencyLine.phone)}>Call 911</a></p>
+    </section>
+
+    {sections.map((section) => (
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>{section.title}</h2>
+            <p class="meta">{section.intro}</p>
+          </div>
+        </div>
+        <div class="service-grid">
+          {section.items.map((item) => (
+            <article class="service" style="padding: 0.9rem 1rem;">
+              <h3>{item.name}</h3>
+              <p class="meta">{item.detail}</p>
+              {item.address && <p style="margin-top:0.35rem;">{item.address}</p>}
+              <p class="cluster">
+                {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
+                {item.href && <a class="button button-ghost" href={item.href} rel="noopener">Source</a>}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+    ))}
+    <p class="disclaimer">
+      Numbers and hours were checked against the linked pages on November 3, 2026. Hours change. More county offices are on <a class="text-link" href="/government">Government</a>.
+      If an emergency is happening, call 911 instead of an office line.
+    </p>
+  </div>
+</BaseLayout>

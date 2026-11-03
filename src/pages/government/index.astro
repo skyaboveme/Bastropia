@@ -34,7 +34,10 @@ const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.g
           <p class="kicker">Notices</p>
           <h2>What the public record says</h2>
         </div>
-        <a href="/government/court-decisions">What the court decided</a>
+        <p class="cluster">
+          <a href="/phone-numbers">Phone numbers</a>
+          <a href="/government/court-decisions">What the court decided</a>
+        </p>
       </div>
       <div class="news-list">
         {updates.map((update) => (

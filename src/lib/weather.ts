@@ -4,6 +4,7 @@ export const forecastTowns = {
   Smithville: { latitude: 30.0086, longitude: -97.1594 },
   'Cedar Creek': { latitude: 30.0838, longitude: -97.4945 },
   McDade: { latitude: 30.2827, longitude: -97.2386 },
+  Paige: { latitude: 30.2129, longitude: -97.1258 },
 } as const;
 
 export type TownName = keyof typeof forecastTowns;

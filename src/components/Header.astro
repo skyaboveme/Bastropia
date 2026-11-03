@@ -4,7 +4,8 @@ import { burnBan, burnStatus } from '../data/burnBan';
 import { facebookGroup } from '../data/site';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
 import { eventKey, formatLong, labelFromKey } from '../lib/time';
-import { getForecast, weatherLabel } from '../lib/weather';
+import { getForecast, isTown, weatherLabel } from '../lib/weather';
+import { readTown, townCookie } from '../lib/townChoice';
 
 const path = Astro.url.pathname;
 const checkedLabel = new Intl.DateTimeFormat('en-US', {
@@ -12,7 +13,9 @@ const checkedLabel = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   day: 'numeric',
 }).format(new Date(`${burnBan.checked}T12:00:00Z`));
-const forecast = await getForecast('Bastrop');
+const savedTown = readTown(Astro.cookies.get(townCookie)?.value);
+const weatherTown = isTown(savedTown) ? savedTown : 'Bastrop';
+const forecast = await getForecast(weatherTown);
 const now = new Date();
 const today = formatLong(now);
 const dayKey = eventKey(now);
@@ -73,10 +76,10 @@ function current(href: string) {
   </div>
 
   <div class="masthead">
-    <a class="ear ear-left" href="/weather">
+    <a class="ear ear-left" href={`/weather?town=${encodeURIComponent(weatherTown)}`}>
       <span class="ear-label">Right now</span>
       <strong>{forecast ? `${forecast.temp}°` : 'Weather'}</strong>
-      <span class="ear-sub">{forecast ? `${weatherLabel(forecast.code)} in Bastrop` : 'County forecast'}</span>
+      <span class="ear-sub">{forecast ? `${weatherLabel(forecast.code)} in ${weatherTown}` : 'County forecast'}</span>
     </a>
     <a class="brand" href="/">
       <img src="/brand/logo-trim.png" alt="Bastropia" width="865" height="923" />
@@ -167,6 +170,21 @@ function current(href: string) {
     </div>
   </div>
 </header>
+<script is:inline>
+  (function () {
+    var key = 'bastropia-city';
+    var saved = '';
+    try { saved = localStorage.getItem(key) || ''; } catch (error) { saved = ''; }
+    var match = document.cookie.match(/(?:^|; )bastropia-city=([^;]*)/);
+    var current = match ? decodeURIComponent(match[1]) : '';
+    if (current && current !== saved) {
+      try { localStorage.setItem(key, current); } catch (error) { /* private browsing */ }
+    } else if (saved && !current) {
+      document.cookie = key + '=' + encodeURIComponent(saved) + '; path=/; max-age=31536000; SameSite=Lax';
+      location.reload();
+    }
+  })();
+</script>
 <script>
   // Pages built ahead of time can outlive the Go Vote page, so expiring links remove themselves.
   const chicagoToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
