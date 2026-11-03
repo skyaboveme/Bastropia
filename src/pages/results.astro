@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import EarlyVote from '../components/EarlyVote.astro';
 import { electionDay, electionHours } from '../data/vote';
 import { electionNightIsLive } from '../lib/electionNight';
 import { eventKey } from '../lib/time';
@@ -46,6 +47,7 @@ const description = board
       {board?.updated ? ` The office file says ${board.updated}.` : ''}
       {board && board.precincts > 0 ? ` Precincts reporting: ${board.reporting} of ${board.precincts}.` : ''}
     </p>
+    <EarlyVote />
 
     {groups.map((group) => (
       <section class="section">

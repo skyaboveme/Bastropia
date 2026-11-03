@@ -221,9 +221,10 @@ function statusLine(now: Date, votesReported: boolean) {
   const { key, hour } = chicagoParts(now);
   const day = labelFromKey(electionDay);
   if (votesReported) return 'Unofficial totals from the county election-night report. The county certifies them later.';
-  if (key < electionDay) return `Polls are open ${electionHours} on ${day}. The elections office has not reported votes.`;
-  if (key === electionDay && hour < 19) return `Polls are open until 7 pm. The elections office has not reported votes.`;
-  return 'The elections office has not posted the first results.';
+  const hold = 'The elections office is holding unofficial results until the last voter has voted. Early-voting totals come out first.';
+  if (key < electionDay) return `Polls are open ${electionHours} on ${day}. ${hold}`;
+  if (key === electionDay && hour < 19) return `Polls are open until 7 pm. Anyone in line at 7 pm can still vote. ${hold}`;
+  return hold;
 }
 
 async function load(url: string) {

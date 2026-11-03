@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import EarlyVote from '../components/EarlyVote.astro';
 import { electionsChannel, channelPage } from '../data/youtubeChannels';
 import { electionHours } from '../data/vote';
 import { electionNightIsLive } from '../lib/electionNight';
@@ -57,6 +58,7 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
         <p><span>Ballots cast</span><strong>{board ? board.ballotsCast.toLocaleString('en-US') : 'Waiting'}</strong></p>
         <p><span>Turnout</span><strong>{turnout}</strong></p>
       </div>
+      <EarlyVote />
 
       {groups.length ? groups.map((group) => (
         <section class="results-group" aria-labelledby={`results-${group.name.replace(/\W+/g, '-').toLowerCase()}`}>

@@ -1,0 +1,50 @@
+---
+const total = 28799;
+const groups = (
+  [
+    ['Republican primary', 10262],
+    ['Democratic primary', 9398],
+    ['General election only', 6666],
+    ['No primary history', 2473],
+  ] as const
+).map(([name, count]) => ({
+  name,
+  count,
+  percent: `${Math.round((count / total) * 1000) / 10}%`,
+}));
+---
+
+<section class="early-vote" aria-labelledby="early-vote-title">
+  <h2 id="early-vote-title">Early voting</h2>
+  <p>
+    Through October 30: 28,799 ballots, 27,611 in person and 1,188 by mail.
+    The party lines are earlier primary records of those voters, not votes for a party on this ballot.
+    Someone who has voted in both primaries is counted with the party of the most recent one.
+    Secretary of State report updated November 2 at 10:05 a.m.,
+    <a class="text-link" href="https://turnout.transparencyusa.org/2026-general/county/bastrop/" rel="noopener">posted by Transparency USA</a>.
+    The county results file still shows no ballots.
+    <a class="text-link" href="https://www.bastropvotes.org/wp-content/uploads/2026/10/Press-Release_Election-Results.pdf" rel="noopener">The elections office</a>
+    will release early-voting totals after the last voter has voted.
+  </p>
+  <ul>
+    {groups.map((group) => (
+      <li>
+        <span>{group.name}</span>
+        <strong>{group.count.toLocaleString('en-US')}</strong>
+        <em>{group.percent}</em>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .early-vote { margin: 0 0 1.4rem; }
+  .early-vote h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); border-top: 4px solid var(--ink); padding-top: 0.55rem; }
+  .early-vote p { max-width: 46rem; margin-top: 0.45rem; color: var(--ink-soft); }
+  .early-vote ul { list-style: none; margin: 0.8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
+  .early-vote li { border-top: 3px solid var(--ink); padding-top: 0.45rem; }
+  .early-vote span, .early-vote em { display: block; font-style: normal; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .early-vote strong { display: block; font-family: var(--serif); font-size: 1.45rem; font-weight: 620; line-height: 1.15; margin-top: 0.15rem; }
+  .early-vote em { margin-top: 0.15rem; letter-spacing: 0.04em; }
+  @media (max-width: 800px) { .early-vote ul { grid-template-columns: 1fr 1fr; } }
+</style>
