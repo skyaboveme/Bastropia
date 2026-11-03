@@ -1,0 +1,314 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { electionsChannel, channelPage } from '../data/youtubeChannels';
+import { electionHours } from '../data/vote';
+import { electionNightIsLive, nightRaces } from '../lib/electionNight';
+import { electionSources, getElectionCalls } from '../lib/electionCalls';
+import { coverageVideos } from '../lib/electionCoverage';
+import { getElectionBoard, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
+import { channelVideos } from '../lib/youtubeLatest';
+
+const now = new Date();
+if (!electionNightIsLive(now)) return Astro.redirect('/results', 302);
+
+const [board, cameras, calls, coverage] = await Promise.all([
+  getElectionBoard(now),
+  channelVideos(electionsChannel, 4),
+  getElectionCalls(),
+  coverageVideos(),
+]);
+const races = board ? nightRaces(board.races) : [];
+const camera = cameras[0];
+const lead = coverage[0];
+const description = 'Unofficial Bastrop County totals, Associated Press calls, and live election video.';
+---
+
+<BaseLayout title="Election night" description={description}>
+  <PageHead
+    kicker="November 3, 2026"
+    title="Election night"
+    lede={board?.status ?? 'The county election-night report did not load. The links below are the elections office.'}
+  />
+  <div class="wrap">
+    <div id="night-board">
+      <div class="night-facts">
+        <p><span>Polls</span><strong>{electionHours}</strong></p>
+        <p>
+          <span>Precincts</span>
+          <strong>{board && board.precincts > 0 ? `${board.reporting} of ${board.precincts}` : 'Waiting'}</strong>
+        </p>
+        <p><span>Office file</span><strong>{board?.updated || 'Not posted'}</strong></p>
+      </div>
+
+      {races.length ? (
+        <div class="race-grid">
+          {races.map((race) => (
+            <article class="race">
+              <p class="kicker">{race.category}</p>
+              <h2>{race.name}</h2>
+              <p class="meta">
+                {race.votes.toLocaleString('en-US')} {race.votes === 1 ? 'vote' : 'votes'}
+                {race.precincts > 0 ? ` · ${race.precinctsReporting} of ${race.precincts} precincts` : ''}
+              </p>
+              <ol>
+                {race.choices.map((choice) => (
+                  <li>
+                    <span class="race-who">
+                      <strong>{choice.name}</strong>
+                      {choice.party && <em>{choice.party}</em>}
+                    </span>
+                    <span class="race-count">
+                      {board?.votesReported ? <b style={`width:${Math.max(choice.percent, choice.votes ? 2 : 0)}%`} /> : null}
+                      <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${choice.percent}%` : ''}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="lede">The county list of races did not load.</p>
+      )}
+
+      <p class="meta night-links">
+        <a class="text-link" href="/results">Every race</a>
+        <a class="text-link" href="/go-vote">Polling places</a>
+        <a class="text-link" href={resultsEnr}>County election-night report</a>
+        <a class="text-link" href={resultsHome}>Elections office results page</a>
+      </p>
+      <p class="disclaimer">
+        These are unofficial totals. Bastrop County certifies them later.
+        Elections office, 804 Pecan St., Bastrop,
+        <a class="text-link" href={`tel:${resultsOffice.phone.replaceAll('-', '')}`}>{resultsOffice.phone}</a>.
+      </p>
+    </div>
+
+    <section class="section" aria-labelledby="night-calls-title">
+      <div class="section-head">
+        <h2 id="night-calls-title">Projections</h2>
+        <a href={electionSources[0].href} rel="noopener">Associated Press</a>
+      </div>
+      <div id="night-calls">
+        <p class="lede">
+          Calls for the races on a Bastrop County ballot. The Associated Press makes the call.
+          The Texas Tribune publishes the same numbers. The Secretary of State is the official statewide count.
+        </p>
+        {calls?.length ? (
+          <div class="race-grid">
+            {calls.map((race) => (
+              <article class="race">
+                <p class:list={['call', race.called && 'called']}>{race.status}</p>
+                <h2>{race.name}</h2>
+                {race.note && <p class="meta">{race.note}</p>}
+                <p class="meta">
+                  {race.votes > 0
+                    ? `${race.votes.toLocaleString('en-US')} ${race.scope} ${race.votes === 1 ? 'vote' : 'votes'}`
+                    : `No ${race.scope} votes yet`}
+                  {race.expected ? ` · about ${race.expected}% of the expected vote` : ''}
+                </p>
+                <ol>
+                  {race.choices.map((choice) => (
+                    <li>
+                      <span class="race-who">
+                        <strong>{choice.name}</strong>
+                        <em>{[choice.party, choice.incumbent ? 'Incumbent' : ''].filter(Boolean).join(' · ')}</em>
+                      </span>
+                      <span class="race-count">
+                        {race.votes > 0 ? <b style={`width:${Math.max(choice.percent, choice.votes ? 2 : 0)}%`} /> : null}
+                        <span>
+                          {choice.votes.toLocaleString('en-US')}{race.votes > 0 ? ` · ${choice.percent}%` : ''}
+                          {race.votes > 0 && choice.countyVotes !== null ? ` · Bastrop Co. ${choice.countyVotes.toLocaleString('en-US')}` : ''}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p class="lede">The Associated Press file did not load. The source links below are the same reports.</p>
+        )}
+        <ul class="source-list">
+          {electionSources.map((source) => (
+            <li>
+              <a class="text-link" href={source.href} rel="noopener">{source.name}</a>
+              <span>{source.note}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="night-coverage">
+      <div class="section-head">
+        <h2 id="night-coverage">Coverage</h2>
+        <a href={electionSources[3].href} rel="noopener">KXAN</a>
+      </div>
+      {lead ? (
+        <div class="video-layout" data-election-videos>
+          <div class="video-main">
+            <div class="video-stage" data-feed-stage>
+              <a class="video-thumb" href={lead.href} data-youtube={lead.videoId} data-title={lead.title}>
+                <img src={lead.thumb} alt="" width="480" height="270" />
+                <span class="video-play" aria-hidden="true"></span>
+                <span class="sr">Play: {lead.title}</span>
+              </a>
+            </div>
+            <h3 data-feed-title><a href={lead.href} rel="noopener">{lead.title}</a></h3>
+            <p class="meta" data-feed-note>{lead.live ? 'Live' : lead.when} · {lead.channel}</p>
+          </div>
+          {coverage.length > 1 && (
+            <ul class="video-list">
+              {coverage.map((video) => (
+                <li>
+                  <a
+                    class="video-item"
+                    href={video.href}
+                    data-feed-id={video.videoId}
+                    data-title={video.title}
+                    data-when={`${video.live ? 'Live' : video.when} · ${video.channel}`}
+                    data-youtube={video.videoId}
+                    aria-current={video.videoId === lead.videoId ? 'true' : undefined}
+                    rel="noopener"
+                  >
+                    <img src={video.thumb} alt="" width="168" height="94" loading="lazy" />
+                    <span>
+                      <strong>{video.title}</strong>
+                      <em>{video.live ? 'Live' : video.when} · {video.channel}</em>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <p class="lede">
+          The station feeds did not load.
+          <a class="text-link" href={electionSources[3].href} rel="noopener">KXAN</a>
+          and
+          <a class="text-link" href={electionSources[4].href} rel="noopener">KVUE</a>
+          are carrying the night.
+        </p>
+      )}
+      <p class="disclaimer">Live streams and election video from KXAN, KVUE, the Texas Tribune, and FOX 7 Austin. Playback is YouTube’s player.</p>
+    </section>
+
+    <section class="section" aria-labelledby="count-camera">
+      <div class="section-head">
+        <h2 id="count-camera">Central count</h2>
+        <a href={channelPage(electionsChannel)} rel="noopener">Bastrop County Elections</a>
+      </div>
+      {camera ? (
+        <div class="video-layout" data-election-videos>
+          <div class="video-main">
+            <div class="video-stage" data-feed-stage>
+              <a class="video-thumb" href={camera.href} data-youtube={camera.videoId} data-title={camera.title}>
+                <img src={camera.thumb} alt="" width="480" height="270" />
+                <span class="video-play" aria-hidden="true"></span>
+                <span class="sr">Play: {camera.title}</span>
+              </a>
+            </div>
+            <h3 data-feed-title><a href={camera.href} rel="noopener">{camera.title}</a></h3>
+            <p class="meta" data-feed-note>{camera.when || 'Bastrop County Elections'}</p>
+          </div>
+        </div>
+      ) : (
+        <p class="lede">
+          The elections channel did not load.
+          <a class="text-link" href={channelPage(electionsChannel)} rel="noopener">Open it on YouTube</a>.
+        </p>
+      )}
+      <p class="disclaimer">The newest public video on the county elections channel. Playback is YouTube’s player.</p>
+    </section>
+
+    <script is:inline>
+      async function refreshNight() {
+        try {
+          const response = await fetch(location.pathname, { headers: { accept: 'text/html' } });
+          if (!response.ok) return;
+          const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+          const next = doc.querySelector('#night-board');
+          const current = document.querySelector('#night-board');
+          if (next && current) current.replaceWith(next);
+          const nextCalls = doc.querySelector('#night-calls');
+          const currentCalls = document.querySelector('#night-calls');
+          if (nextCalls && currentCalls) currentCalls.replaceWith(nextCalls);
+        } catch {
+          /* The camera stays up if the totals cannot be refreshed. */
+        }
+      }
+      setInterval(refreshNight, 60000);
+    </script>
+    <script is:inline>
+      document.querySelectorAll('[data-election-videos]').forEach((root) => {
+        const stage = root.querySelector('[data-feed-stage]');
+        const title = root.querySelector('[data-feed-title]');
+        const note = root.querySelector('[data-feed-note]');
+        if (!stage) return;
+        const play = (id, name) => {
+          const frame = document.createElement('iframe');
+          frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0';
+          frame.title = name;
+          frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          frame.allowFullscreen = true;
+          frame.referrerPolicy = 'strict-origin-when-cross-origin';
+          stage.replaceChildren(frame);
+        };
+        stage.addEventListener('click', (event) => {
+          const thumb = event.target.closest('.video-thumb');
+          if (!thumb || !thumb.dataset.youtube) return;
+          event.preventDefault();
+          play(thumb.dataset.youtube, thumb.dataset.title || 'Video');
+        });
+        root.querySelectorAll('[data-feed-id]').forEach((item) => {
+          item.addEventListener('click', (event) => {
+            event.preventDefault();
+            root.querySelectorAll('[data-feed-id]').forEach((other) => other.removeAttribute('aria-current'));
+            item.setAttribute('aria-current', 'true');
+            const name = item.dataset.title || 'Video';
+            if (title) {
+              const link = document.createElement('a');
+              link.href = item.href;
+              link.rel = 'noopener';
+              link.textContent = name;
+              title.replaceChildren(link);
+            }
+            if (note) note.textContent = item.dataset.when || '';
+            play(item.dataset.youtube, name);
+          });
+        });
+      });
+    </script>
+  </div>
+</BaseLayout>
+
+<style>
+  .night-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin: 0.2rem 0 1.4rem; }
+  .night-facts p { border-top: 3px solid var(--ink); padding-top: 0.45rem; }
+  .night-facts span { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .night-facts strong { display: block; font-family: var(--serif); font-size: 1.45rem; font-weight: 620; line-height: 1.15; margin-top: 0.15rem; }
+  .race-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 1.4rem; }
+  .race { border-top: 3px solid var(--ink); padding-top: 0.7rem; }
+  .race h2 { font-size: 1.35rem; line-height: 1.15; margin-top: 0.2rem; }
+  .race ol { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+  .race li { display: grid; gap: 0.15rem; padding: 0.45rem 0; border-top: 1px solid var(--line); }
+  .race-who { display: flex; justify-content: space-between; gap: 0.6rem; }
+  .race-who em { font-style: normal; color: var(--ink-soft); font-size: 0.82rem; }
+  .race-count { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: center; color: var(--ink-soft); font-size: 0.88rem; }
+  .race-count b { display: block; height: 0.35rem; background: var(--river); border-radius: 99px; }
+  .night-links { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; }
+  .call { margin: 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .call.called { color: var(--pine); }
+  .source-list { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem 1.4rem; }
+  .source-list li { display: grid; gap: 0.15rem; border-top: 3px solid var(--ink); padding-top: 0.45rem; }
+  .source-list span { color: var(--ink-soft); font-size: 0.92rem; }
+  @media (max-width: 800px) {
+    .night-facts, .race-grid, .source-list { grid-template-columns: 1fr; }
+  }
+</style>

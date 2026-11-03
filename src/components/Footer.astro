@@ -1,5 +1,6 @@
 ---
 import { facebookGroup } from '../data/site';
+import { electionNightIsLive } from '../lib/electionNight';
 ---
 
 <footer class="site-footer">
@@ -10,6 +11,7 @@ import { facebookGroup } from '../data/site';
     </div>
     <div>
       <h3>Sections</h3>
+      {electionNightIsLive() && <p><a href="/election-night">Election night</a></p>}
       <p><a href="/results">Results</a></p>
       <p><a href="/scores">Scores</a></p>
       <p><a href="/news">News</a></p>

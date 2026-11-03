@@ -44,7 +44,7 @@ export default defineConfig({
         item.url = url.toString();
         const path = url.pathname;
         if (path === '/') item.priority = 1;
-        else if (path === '/events' || path === '/news' || path === '/go-vote' || path === '/phone-numbers') item.priority = 0.9;
+        else if (path === '/events' || path === '/news' || path === '/go-vote' || path === '/phone-numbers' || path === '/election-night') item.priority = 0.9;
         else if (['/bastrop', '/elgin', '/smithville', '/cedar-creek', '/mcdade', '/paige'].includes(path)) item.priority = 0.8;
         else if (path.startsWith('/events/')) item.priority = 0.8;
         else if (path.startsWith('/news/') || path.startsWith('/government')) item.priority = 0.7;

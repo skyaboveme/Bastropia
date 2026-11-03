@@ -1,0 +1,47 @@
+---
+import { electionNightIsLive, electionNightUntil } from '../lib/electionNight';
+
+const path = Astro.url.pathname;
+const show = electionNightIsLive() && path !== '/election-night';
+---
+
+{show && (
+  <dialog class="newsletter-pop election-night-pop" id="election-night-pop" aria-labelledby="election-night-title">
+    <button class="newsletter-dismiss" type="button" data-election-dismiss aria-label="Close">×</button>
+    <p class="kicker">November 3</p>
+    <h2 id="election-night-title">Election night</h2>
+    <p class="dek">Unofficial county totals, Associated Press calls, and live video. Polls close at 7 pm.</p>
+    <a class="button" href="/election-night">Open election night</a>
+    <button class="newsletter-later" type="button" data-election-dismiss>Not now</button>
+  </dialog>
+  <script is:inline define:vars={{ until: electionNightUntil }}>
+    (function () {
+      var key = 'bastropia-election-night';
+      var dialog = document.querySelector('#election-night-pop');
+      if (!dialog) return;
+      var dismissed = '';
+      try { dismissed = localStorage.getItem(key) || ''; } catch (error) { dismissed = ''; }
+      if (dismissed === until) return;
+      var close = function () {
+        if (dialog.open) dialog.close();
+      };
+      dialog.querySelectorAll('[data-election-dismiss]').forEach(function (button) {
+        button.addEventListener('click', close);
+      });
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) close();
+      });
+      var openNight = dialog.querySelector('a[href="/election-night"]');
+      if (openNight) openNight.addEventListener('click', function () {
+        try { localStorage.setItem(key, until); } catch (error) { /* private browsing */ }
+      });
+      dialog.addEventListener('close', function () {
+        try { localStorage.setItem(key, until); } catch (error) { /* private browsing */ }
+      });
+      window.setTimeout(function () {
+        if (document.querySelector('dialog[open]')) return;
+        dialog.showModal();
+      }, 1200);
+    })();
+  </script>
+)}

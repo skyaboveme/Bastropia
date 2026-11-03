@@ -20,6 +20,7 @@ import { capOrganizer, filterEvents, sortByTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, formatMedium, labelFromKey, thisWeekendKeys, whenLabel } from '../lib/time';
 import { getElectionBoard } from '../lib/electionResults';
+import { electionNightIsLive } from '../lib/electionNight';
 const now = new Date();
 const today = eventKey(now);
 const homeTown = readTown(Astro.cookies.get(townCookie)?.value);
@@ -128,9 +129,9 @@ const deskStories = pageHeadlines
         <h2>Go Vote</h2>
         <p>Polls are open {electionHours}. Vote at any county location.</p>
       </a>
-      <a class="desk-card" href="/results">
+      <a class="desk-card" href={electionNightIsLive(now) ? '/election-night' : '/results'}>
         <p class="kicker">Election night</p>
-        <h2>Results</h2>
+        <h2>{electionNightIsLive(now) ? 'Election night' : 'Results'}</h2>
         <p>{board?.status ?? 'The county report did not load. Open the elections office page from Results.'}</p>
       </a>
       <a class="desk-card" href="/government/court-decisions">
@@ -478,7 +479,7 @@ const deskStories = pageHeadlines
     }
 
     window.setTimeout(() => {
-      if (skip || !dialog || dialog.open) return;
+      if (skip || !dialog || dialog.open || document.querySelector('dialog[open]')) return;
       dialog.showModal();
     }, 6000);
   </script>

@@ -346,6 +346,7 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .newsletter-pop .dek { color: #cfe0d7; margin-top: 0.55rem; }
 .newsletter-pop .field span { color: #dfeae4; }
 .newsletter-pop .form .button { width: 100%; }
+.election-night-pop .button { display: flex; width: 100%; margin-top: 1rem; }
 .newsletter-dismiss {
   position: absolute;
   top: 0.45rem;
