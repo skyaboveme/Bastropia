@@ -9,7 +9,7 @@ import { electionHours } from '../data/vote';
 import { electionNightIsLive } from '../lib/electionNight';
 import { electionSources, getElectionCalls } from '../lib/electionCalls';
 import { coverageVideos } from '../lib/electionCoverage';
-import { announcedWinners, getElectionBoard, racesByCategory, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
+import { announcedWinners, getElectionBoard, percentText, precinctFact, raceMeta, racesByCategory, resultsHome, resultsOffice, resultsSummary } from '../lib/electionResults';
 import { channelVideos } from '../lib/youtubeLatest';
 
 const now = new Date();
@@ -51,7 +51,7 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
         <p><span>Polls</span><strong>{electionHours}</strong></p>
         <p>
           <span>Precincts</span>
-          <strong>{board && board.precincts > 0 ? `${board.reporting} of ${board.precincts}` : 'Waiting'}</strong>
+          <strong>{board ? precinctFact(board) : 'Waiting'}</strong>
         </p>
         <p><span>Office file</span><strong>{board?.updated || 'Not posted'}</strong></p>
         <p><span>Registered voters</span><strong>{board?.registeredVoters ? board.registeredVoters.toLocaleString('en-US') : 'Waiting'}</strong></p>
@@ -75,10 +75,7 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
                     <a class="text-link" href="https://www.bastropvotes.org/wp-content/uploads/2026/08/Complete_with_Docusign_Order_a_Special_Elect.pdf">County order</a>
                   </p>
                 )}
-                <p class="meta">
-                  {race.votes.toLocaleString('en-US')} {race.votes === 1 ? 'vote' : 'votes'}
-                  {race.precincts > 0 ? ` · ${race.precinctsReporting} of ${race.precincts} precincts` : ''}
-                </p>
+                <p class="meta">{raceMeta(race)}</p>
                 <ol>
                   {race.choices.map((choice) => (
                     <li>
@@ -88,7 +85,7 @@ const description = 'Unofficial Bastrop County totals, Associated Press calls, a
                       </span>
                       <span class="race-count">
                         {board?.votesReported ? <b style={`width:${Math.max(choice.percent, choice.votes ? 2 : 0)}%`} /> : null}
-                        <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${choice.percent}%` : ''}</span>
+                        <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${percentText(choice.percent)}%` : ''}</span>
                       </span>
                     </li>
                   ))}

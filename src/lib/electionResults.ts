@@ -57,6 +57,7 @@ export type ElectionBoard = {
   electionId: string;
   updated: string;
   reporting: number;
+  partial: number;
   precincts: number;
   votesReported: boolean;
   status: string;
@@ -217,9 +218,10 @@ function centerMapFor(centers: RawCenter[], status: { P?: string[]; S?: number[]
   };
 }
 
-function statusLine(now: Date, votesReported: boolean) {
+function statusLine(now: Date, votesReported: boolean, partialOnly: boolean) {
   const { key, hour } = chicagoParts(now);
   const day = labelFromKey(electionDay);
+  if (votesReported && partialOnly) return 'Unofficial partial totals from the county election-night report. Vote centers have not finished reporting. The county certifies them later.';
   if (votesReported) return 'Unofficial totals from the county election-night report. The county certifies them later.';
   const hold = 'The elections office is holding unofficial results until the last voter has voted. Early-voting totals come out first.';
   if (key < electionDay) return `Polls are open ${electionHours} on ${day}. ${hold}`;
@@ -250,12 +252,13 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
     if (!current) throw new Error('no election');
     const version = String(await load(`https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/current_ver.txt`)).trim();
     const root = `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/${version}/json`;
-    const [summary, settings, shell, centers, centerStatusFile] = (await Promise.all([
+    const [summary, settings, shell, centers, centerStatusFile, precinctFile] = (await Promise.all([
       load(`${root}/en/summary.json`),
       load(`${root}/en/electionsettings.json`),
       load(`https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/`).catch(() => ''),
       load(`${root}/vc.json`).catch(() => []),
       load(`${root}/vc_status.json`).catch(() => ({})),
+      load(`${root}/status.json`).catch(() => ({})),
     ])) as [
       ClarityRow[],
       {
@@ -270,6 +273,7 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
       string,
       RawCenter[],
       { P?: string[]; S?: number[] },
+      { S?: number[]; B?: number[] },
     ];
     const webVersion = String(shell).match(/web\.(\d+)/)?.[1];
     const summaryUrl = webVersion
@@ -297,7 +301,8 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
           percent: row.PCT?.[index] ?? 0,
           winner: (row.W?.[index] ?? 0) > 0,
         }));
-        const votes = row.TV ?? choices.reduce((sum, choice) => sum + choice.votes, 0);
+        const counted = choices.reduce((sum, choice) => sum + choice.votes, 0);
+        const votes = (row.TV ?? 0) > 0 ? row.TV ?? counted : counted;
         if (votes > 0) choices.sort((a, b) => b.votes - a.votes);
         return {
           category: row.CAT ?? 'Other',
@@ -309,19 +314,28 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
         };
       });
     const votesReported = races.some((race) => race.votes > 0);
-    const precincts = settings.settings?.totalprecinctsreporting || Math.max(0, ...races.map((race) => race.precincts));
+    const precinctStates = precinctFile.S ?? [];
+    const completeFromFile = precinctStates.filter((code) => code === 0 || code === 4 || code === 64).length;
+    const partialFromFile = precinctStates.filter((code) => code === 2).length;
+    const reportedSetting = settings.settings?.numberofprecinctsreporting ?? 0;
+    const reporting = reportedSetting > 0 ? reportedSetting : completeFromFile;
+    const precincts = settings.settings?.totalprecinctsreporting || precinctStates.length || Math.max(0, ...races.map((race) => race.precincts));
+    const partial = partialFromFile;
+    const countedBallots = Number(details?.ballotscast) || 0;
+    const precinctBallots = (precinctFile.B ?? []).reduce((sum, count) => sum + (Number(count) || 0), 0);
     const board: ElectionBoard = {
       title: `${current.ElectionName} · ${labelFromKey(electionDateKey(current.Date))}`,
       electionId: current.EID,
       updated: settings.websiteupdatedat ?? '',
-      reporting: settings.settings?.numberofprecinctsreporting ?? 0,
+      reporting,
+      partial,
       precincts,
       votesReported,
-      status: statusLine(now, votesReported),
+      status: statusLine(now, votesReported, votesReported && reporting === 0 && partial > 0),
       sourceUrl: `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/`,
       summaryUrl,
       registeredVoters: Number(details?.registeredvoters) || 0,
-      ballotsCast: Number(details?.ballotscast) || 0,
+      ballotsCast: countedBallots || precinctBallots,
       races,
       centerMap,
     };
@@ -353,6 +367,25 @@ function withCountyLead(races: ResultRace[]) {
     used.add(race);
   }
   return [...lead, ...races.filter((race) => !used.has(race))];
+}
+
+export function precinctFact(board: Pick<ElectionBoard, 'reporting' | 'partial' | 'precincts'>) {
+  if (board.precincts <= 0) return 'Waiting';
+  if (board.partial > 0 && board.reporting === 0) return `${board.partial} of ${board.precincts} partial`;
+  if (board.partial > 0) return `${board.reporting} of ${board.precincts} · ${board.partial} partial`;
+  return `${board.reporting} of ${board.precincts}`;
+}
+
+export function raceMeta(race: ResultRace) {
+  const votes = `${race.votes.toLocaleString('en-US')} ${race.votes === 1 ? 'vote' : 'votes'}`;
+  if (race.precincts <= 0) return votes;
+  if (race.votes > 0 && race.precinctsReporting === 0) return `${votes} · partial count`;
+  return `${votes} · ${race.precinctsReporting} of ${race.precincts} precincts`;
+}
+
+export function percentText(percent: number) {
+  const rounded = Math.round(percent * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
 export function racesByCategory(races: ResultRace[], firstCategory?: string) {

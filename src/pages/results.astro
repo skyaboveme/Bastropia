@@ -7,7 +7,7 @@ import EarlyVote from '../components/EarlyVote.astro';
 import { electionDay, electionHours } from '../data/vote';
 import { electionNightIsLive } from '../lib/electionNight';
 import { eventKey } from '../lib/time';
-import { announcedWinners, getElectionBoard, racesByCategory, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
+import { announcedWinners, getElectionBoard, percentText, precinctFact, raceMeta, racesByCategory, resultsEnr, resultsHome, resultsOffice } from '../lib/electionResults';
 import { electionsChannel, channelPage } from '../data/youtubeChannels';
 import { channelVideos } from '../lib/youtubeLatest';
 
@@ -45,7 +45,7 @@ const description = board
       <a class="text-link" href={resultsHome}>results page</a>.
       Polls are open {electionHours}.
       {board?.updated ? ` The office file says ${board.updated}.` : ''}
-      {board && board.precincts > 0 ? ` Precincts reporting: ${board.reporting} of ${board.precincts}.` : ''}
+      {board && board.precincts > 0 ? ` Precincts reporting: ${precinctFact(board)}.` : ''}
     </p>
     <EarlyVote />
 
@@ -64,10 +64,7 @@ const description = board
                   <a class="text-link" href="https://www.bastropvotes.org/wp-content/uploads/2026/08/Complete_with_Docusign_Order_a_Special_Elect.pdf">County order</a>
                 </p>
               )}
-              <p class="meta">
-                {race.votes.toLocaleString('en-US')} {race.votes === 1 ? 'vote' : 'votes'}
-                {race.precincts > 0 ? ` · ${race.precinctsReporting} of ${race.precincts} precincts` : ''}
-              </p>
+              <p class="meta">{raceMeta(race)}</p>
               <ol>
                 {race.choices.map((choice) => (
                   <li>
@@ -77,7 +74,7 @@ const description = board
                     </span>
                     <span class="race-count">
                       {board?.votesReported ? <b style={`width:${Math.max(choice.percent, choice.votes ? 2 : 0)}%`} /> : null}
-                      <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${choice.percent}%` : ''}</span>
+                      <span>{choice.votes.toLocaleString('en-US')}{board?.votesReported ? ` · ${percentText(choice.percent)}%` : ''}</span>
                     </span>
                   </li>
                 ))}
