@@ -9,7 +9,7 @@ const rotating = banners.length > 1;
   <div class="home-banner-frame" data-banner-frame>
     {banners.length > 0 ? (
       banners.map((banner, index) => (
-        <a class:list={['home-banner-slide', { 'is-on': index === 0 }]} href={banner.href} data-slide hidden={index !== 0}>
+        <a class:list={['home-banner-slide', { 'is-on': index === 0 }]} href={banner.href} target="_blank" rel="sponsored noopener noreferrer" data-slide hidden={index !== 0}>
           <img src={banner.src} alt={banner.alt || banner.name} width="1200" height="500" decoding={index === 0 ? 'async' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'low'} />
         </a>
       ))

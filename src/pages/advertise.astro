@@ -5,6 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
 import { placements } from '../data/commerce';
+import { homeBanners } from '../data/homeBanners';
 import { money } from '../lib/format';
 import { activeSponsors } from '../lib/intake';
 import { addDays, eventKey, labelFromKey } from '../lib/time';
@@ -39,7 +40,7 @@ const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: ite
               <h2 style="font-size:1.7rem;">{placement.name}</h2>
               <p class="meta">{placement.where}</p>
               <p style="margin-top:0.4rem;">{placement.detail}</p>
-              {placement.id === 'home-banner' && holders.length > 0 && <p class="badge">In the rotation: {holders.map((item) => item.name).join(', ')}</p>}
+              {placement.id === 'home-banner' && (homeBanners.length > 0 || holders.length > 0) && <p class="badge">In the rotation: {[...homeBanners.map((item) => item.name), ...holders.map((item) => item.name)].join(', ')}</p>}
               {placement.id !== 'home-banner' && holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
             </label>
           );
