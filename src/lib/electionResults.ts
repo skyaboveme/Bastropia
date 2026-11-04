@@ -218,6 +218,12 @@ function centerMapFor(centers: RawCenter[], status: { P?: string[]; S?: number[]
   };
 }
 
+function boardStatus(now: Date, votesReported: boolean, partialOnly: boolean, centers: CenterMap | null) {
+  const line = statusLine(now, votesReported, partialOnly);
+  if (!votesReported || partialOnly || !centers || centers.waiting === 0) return line;
+  return `Unofficial totals from the county election-night report. ${centers.reported} of ${centers.centers.length} vote centers are completely reported. The county certifies them later.`;
+}
+
 function statusLine(now: Date, votesReported: boolean, partialOnly: boolean) {
   const { key, hour } = chicagoParts(now);
   const day = labelFromKey(electionDay);
@@ -331,7 +337,7 @@ export async function getElectionBoard(now = new Date()): Promise<ElectionBoard 
       partial,
       precincts,
       votesReported,
-      status: statusLine(now, votesReported, votesReported && reporting === 0 && partial > 0),
+      status: boardStatus(now, votesReported, reporting === 0 && partial > 0, centerMap),
       sourceUrl: `https://results.enr.clarityelections.com/TX/Bastrop/${current.EID}/`,
       summaryUrl,
       registeredVoters: Number(details?.registeredvoters) || 0,
@@ -425,10 +431,11 @@ function againstList(names: string[]) {
   return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
 }
 
-/** Lines for races the county file has decided. Contested races wait until every precinct is in. */
+/** Lines for local races the county file has decided. Statewide races stay with the Associated Press calls. Contested races wait until every precinct is in. */
 export function announcedWinners(races: ResultRace[]) {
   const lines: string[] = [];
   for (const race of races) {
+    if (race.category === 'Federal' || race.category === 'State') continue;
     const marked = race.choices.filter((choice) => choice.winner);
     const ranked = [...race.choices].sort((a, b) => b.votes - a.votes);
     const leader = marked.length === 1 ? marked[0] : ranked[0];
