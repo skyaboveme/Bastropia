@@ -1,0 +1,134 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { reportFor, type AdDay } from '../../lib/ads';
+import { placements } from '../../data/commerce';
+import { labelFromKey } from '../../lib/time';
+
+const report = await reportFor(Astro.params.token || '');
+
+function perHundred(clicks: number, impressions: number) {
+  if (!impressions) return '—';
+  const value = Math.round((clicks / impressions) * 1000) / 10;
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function pageName(id: string) {
+  return placements.find((item) => item.id === id)?.page || id;
+}
+
+function placementName(id: string) {
+  const item = placements.find((placement) => placement.id === id);
+  return item ? `${item.page} · ${item.name}` : id;
+}
+
+function byDate(days: AdDay[]) {
+  const dates = [...new Set(days.map((day) => day.date))].slice(0, 30);
+  return dates.map((date) => {
+    const rows = days.filter((day) => day.date === date);
+    return {
+      date,
+      impressions: rows.reduce((sum, row) => sum + row.impressions, 0),
+      clicks: rows.reduce((sum, row) => sum + row.clicks, 0),
+    };
+  });
+}
+
+function byPage(days: AdDay[]) {
+  return placements
+    .filter((item) => report?.placements.includes(item.id))
+    .map((item) => {
+      const rows = days.filter((day) => day.placement === item.id);
+      return {
+        id: item.id,
+        label: placementName(item.id),
+        impressions: rows.reduce((sum, row) => sum + row.impressions, 0),
+        clicks: rows.reduce((sum, row) => sum + row.clicks, 0),
+      };
+    });
+}
+
+const days = report ? byDate(report.days) : [];
+const pages = report ? byPage(report.days) : [];
+---
+
+<BaseLayout
+  title={report ? report.name : 'Advertiser report'}
+  description="Impressions and clicks for one advertiser on Bastropia."
+  noindex
+>
+  {report ? (
+    <>
+      <PageHead
+        kicker="Advertiser"
+        title={report.name}
+        lede={`${report.active ? 'This ad is on the site.' : 'This ad is paused.'} A view is counted when the ad is on screen. A click is counted when someone leaves for ${report.href}.`}
+      />
+      <div class="wrap">
+        <div class="ad-metrics">
+          <div>
+            <strong>{report.impressions.toLocaleString('en-US')}</strong>
+            <span>Views</span>
+          </div>
+          <div>
+            <strong>{report.clicks.toLocaleString('en-US')}</strong>
+            <span>Clicks</span>
+          </div>
+          <div>
+            <strong>{perHundred(report.clicks, report.impressions)}</strong>
+            <span>Clicks per 100 views</span>
+          </div>
+        </div>
+        {report.src && <img class="ad-thumb" src={report.src} alt="" />}
+        <h2>Pages</h2>
+        <table class="stat-table">
+          <thead>
+            <tr>
+              <th>Page</th>
+              <th>Views</th>
+              <th>Clicks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pages.map((page) => (
+              <tr>
+                <td>{page.label}</td>
+                <td>{page.impressions.toLocaleString('en-US')}</td>
+                <td>{page.clicks.toLocaleString('en-US')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <h2 style="margin-top:1.6rem;">Days</h2>
+        {days.length ? (
+          <table class="stat-table">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Views</th>
+                <th>Clicks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((day) => (
+                <tr>
+                  <td>{labelFromKey(day.date)}</td>
+                  <td>{day.impressions.toLocaleString('en-US')}</td>
+                  <td>{day.clicks.toLocaleString('en-US')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No views yet. The totals above stay at zero until someone loads a page where this ad is showing.</p>
+        )}
+        {[...new Set(report.days.map((day) => day.date))].length > 30 && <p class="meta">The table is the latest 30 days. The totals are the whole run.</p>}
+        <p class="disclaimer">These numbers are for this advertiser on Bastropia. They are not a bill. The pages are {report.placements.map(pageName).join(', ')}.</p>
+      </div>
+    </>
+  ) : (
+    <PageHead kicker="Advertiser" title="That report is not on the desk" lede="The link may have been replaced. Ask Bastropia for a new one." />
+  )}
+</BaseLayout>

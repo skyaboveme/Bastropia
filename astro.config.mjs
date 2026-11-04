@@ -6,7 +6,7 @@ import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 
 const site = 'https://bastropia.com';
-const hidden = ['/desk', '/thanks', '/search', '/404', '/ics/', '/api/'];
+const hidden = ['/desk', '/thanks', '/search', '/404', '/ics/', '/api/', '/ad/', '/ads/', '/go/'];
 
 function contentUrls(folder, prefix) {
   return readdirSync(join(process.cwd(), 'src/content', folder))

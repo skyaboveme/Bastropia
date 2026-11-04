@@ -331,7 +331,19 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 
 .service, .choice, .ad-slot, .detail-main, .side-card, .forecast article, .alert { background: var(--card); border: 1px solid var(--line); }
 .service, .choice { padding: 0.85rem 0.95rem; }
+.ad-stack { display: grid; gap: 0.8rem; margin-top: 1.6rem; }
+.ad-stack .ad-slot { margin-top: 0; }
 .ad-slot { margin-top: 1.6rem; padding: 0.8rem 1rem; display: flex; justify-content: space-between; gap: 1rem; align-items: center; background: var(--paper-2); border-color: var(--line); }
+.ad-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.ad-metrics div { border-top: 3px solid var(--ink); padding-top: 0.45rem; }
+.ad-metrics strong { font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; line-height: 1; display: block; }
+.ad-metrics span { display: block; margin-top: 0.35rem; color: var(--ink-soft); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.stat-table { width: 100%; border-collapse: collapse; }
+.stat-table th, .stat-table td { text-align: left; padding: 0.4rem 0.7rem 0.4rem 0; border-top: 1px solid var(--line); vertical-align: top; }
+.stat-table th { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.check-row { display: grid; gap: 0.4rem; }
+.check-row label { display: flex; gap: 0.55rem; align-items: baseline; }
+.ad-thumb { width: 100%; max-width: 28rem; height: auto; display: block; border-bottom: 4px solid var(--river); }
 .ad-slot p:first-child { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
 .ad-slot strong { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; display: block; }
 .ad-slot a { text-decoration: none; }

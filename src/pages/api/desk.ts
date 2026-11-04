@@ -39,7 +39,8 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       maxAge: 60 * 60 * 24 * 14,
       secure: url.protocol === 'https:',
     });
-    return bounce('/desk');
+    const next = String(form.get('next') || '');
+    return bounce(next === '/desk/ads' ? next : '/desk');
   }
 
   if (!deskAuthorized(url.hostname, cookies.get('bastropia_desk')?.value)) {

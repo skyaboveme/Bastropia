@@ -1,5 +1,6 @@
 ---
 import { placements, type PlacementId } from '../data/commerce';
+import { textAds } from '../lib/ads';
 import { activeSponsor } from '../lib/intake';
 import { money } from '../lib/format';
 import { eventKey } from '../lib/time';
@@ -10,10 +11,44 @@ interface Props {
 
 const { placement } = Astro.props;
 const meta = placements.find((item) => item.id === placement);
-const sponsor = await activeSponsor(placement, eventKey(new Date()));
+const managed = meta && placement !== 'home-banner' ? await textAds(placement) : [];
+const sponsor = managed.length ? null : await activeSponsor(placement, eventKey(new Date()));
 ---
 
-{meta && (
+{meta && managed.length > 0 && (
+  <div class="ad-stack" data-ad-stack>
+    {managed.map((ad) => (
+      <aside class="ad-slot" aria-label="Sponsored" data-ad-id={ad.id} data-ad-placement={placement}>
+        <div>
+          <p>Sponsored</p>
+          <a href={ad.go} target="_blank" rel="sponsored noopener noreferrer">
+            <strong>{ad.name}</strong>
+            <span>{ad.line}</span>
+          </a>
+        </div>
+        <a class="button" href={ad.go} target="_blank" rel="sponsored noopener noreferrer">Visit</a>
+      </aside>
+    ))}
+    <script is:inline>
+      const stack = document.currentScript && document.currentScript.parentElement;
+      const seen = (window.__bastropiaAds = window.__bastropiaAds || new Set());
+      if (stack) {
+        stack.querySelectorAll('[data-ad-id]').forEach((node) => {
+          const id = node.getAttribute('data-ad-id');
+          const place = node.getAttribute('data-ad-placement');
+          const key = `${id}|${place}`;
+          if (!id || !place || seen.has(key)) return;
+          seen.add(key);
+          const body = new URLSearchParams({ id, placement: place });
+          if (navigator.sendBeacon) navigator.sendBeacon('/api/ad-stat', body);
+          else fetch('/api/ad-stat', { method: 'POST', body, keepalive: true });
+        });
+      }
+    </script>
+  </div>
+)}
+
+{meta && !managed.length && (
   <aside class:list={['ad-slot', { 'ad-open': !sponsor }]} aria-label={sponsor ? 'Sponsored' : 'Advertising'}>
     <div>
       <p>{sponsor ? 'Sponsored' : 'Open placement'}</p>

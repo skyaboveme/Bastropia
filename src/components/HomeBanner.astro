@@ -1,7 +1,7 @@
 ---
-import { homeBanners } from '../data/homeBanners';
+import { bannerAds } from '../lib/ads';
 
-const banners = homeBanners.filter((banner) => banner.src && banner.href);
+const banners = await bannerAds();
 const rotating = banners.length > 1;
 ---
 
@@ -9,7 +9,7 @@ const rotating = banners.length > 1;
   <div class="home-banner-frame" data-banner-frame>
     {banners.length > 0 ? (
       banners.map((banner, index) => (
-        <a class:list={['home-banner-slide', { 'is-on': index === 0 }]} href={banner.href} target="_blank" rel="sponsored noopener noreferrer" data-slide hidden={index !== 0}>
+        <a class:list={['home-banner-slide', { 'is-on': index === 0 }]} href={banner.go} target="_blank" rel="sponsored noopener noreferrer" data-slide data-ad-id={banner.id} hidden={index !== 0}>
           <img src={banner.src} alt={banner.alt || banner.name} width="1200" height="500" decoding={index === 0 ? 'async' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'low'} />
         </a>
       ))
@@ -34,10 +34,18 @@ const rotating = banners.length > 1;
   )}
 </section>
 
-{rotating && (
+{banners.length > 0 && (
   <script is:inline>
     const frame = document.querySelector('[data-banner-frame]');
     const root = frame && frame.closest('.home-banner');
+    const seen = (window.__bastropiaAds = window.__bastropiaAds || new Set());
+    const ping = (id) => {
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      const body = new URLSearchParams({ id, placement: 'home-banner' });
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/ad-stat', body);
+      else fetch('/api/ad-stat', { method: 'POST', body, keepalive: true });
+    };
     if (frame && root) {
       const slides = [...frame.querySelectorAll('[data-slide]')];
       const dots = [...root.querySelectorAll('[data-banner-dot]')];
@@ -51,6 +59,7 @@ const rotating = banners.length > 1;
           const on = slideIndex === index;
           slide.classList.toggle('is-on', on);
           slide.hidden = !on;
+          if (on) ping(slide.getAttribute('data-ad-id'));
         });
         dots.forEach((dot, dotIndex) => {
           if (dotIndex === index) dot.setAttribute('aria-current', 'true');
@@ -61,7 +70,7 @@ const rotating = banners.length > 1;
       const stop = () => window.clearInterval(timer);
       const start = () => {
         stop();
-        if (motion) return;
+        if (motion || slides.length < 2) return;
         timer = window.setInterval(() => show(index + 1), 6000);
       };
 
@@ -101,6 +110,7 @@ const rotating = banners.length > 1;
         start();
       }, { passive: true });
 
+      show(0);
       start();
     }
   </script>

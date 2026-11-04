@@ -1,0 +1,197 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { deskAds } from '../../lib/ads';
+import { deskAuthorized, deskKeyConfigured } from '../../lib/auth';
+import { placements } from '../../data/commerce';
+
+const allowed = deskAuthorized(Astro.url.hostname, Astro.cookies.get('bastropia_desk')?.value);
+const locked = deskKeyConfigured();
+const ads = allowed ? await deskAds() : [];
+const files = ads.filter((item) => item.source === 'file');
+const uploaded = ads.filter((item) => item.source === 'upload');
+const error = Astro.url.searchParams.get('error');
+const saved = Astro.url.searchParams.get('saved') === '1';
+const problems: Record<string, string> = {
+  auth: 'That desk password did not match.',
+  name: 'Name the business.',
+  url: 'The website needs to start with http:// or https://.',
+  email: 'That email address is missing the @.',
+  pages: 'Pick at least one page.',
+  line: 'A text placement needs one line, up to 90 characters.',
+  image: 'The front-page banner needs a JPG, PNG, or WebP under 1.5 MB.',
+  confirm: 'Check the box before deleting an advertiser.',
+  save: 'The ad could not be saved. Try it again.',
+};
+---
+
+<BaseLayout title="Advertisers" description="Upload advertisers and see where they run on Bastropia." noindex>
+  <PageHead
+    kicker="Publisher"
+    title="Advertisers"
+    lede="Upload a business, then pick the pages. The front-page banner rotates through every banner on that spot. A text placement shows every advertiser assigned to it. Each advertiser has a report link for views and clicks."
+  />
+  <div class="wrap">
+    {!allowed && locked && (
+      <form class="form" action="/api/desk" method="post">
+        <input type="hidden" name="action" value="login" />
+        <input type="hidden" name="next" value="/desk/ads" />
+        {error === 'auth' && <p>{problems.auth}</p>}
+        <label class="field" style="max-width:24rem;">
+          <span>Desk password</span>
+          <input name="password" type="password" required autocomplete="current-password" />
+        </label>
+        <button class="button" type="submit">Unlock</button>
+      </form>
+    )}
+    {!allowed && !locked && (
+      <p>This desk is open on your own computer. Before you put the site on a public server, set <code>BASTROPIA_DESK_KEY</code> so advertisers are not visible to the whole county.</p>
+    )}
+    {allowed && (
+      <>
+        <p><a href="/desk">Orders</a></p>
+        {saved && <p>Saved.</p>}
+        {error && problems[error] && <p>{problems[error]}</p>}
+        <form class="form" action="/api/ads" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="action" value="create" />
+          <h2>New advertiser</h2>
+          <label class="field">
+            <span>Business name</span>
+            <input name="name" required maxlength="80" />
+          </label>
+          <label class="field">
+            <span>Website the ad opens</span>
+            <input name="website" type="url" required placeholder="https://" />
+          </label>
+          <label class="field">
+            <span>Email, for your notes</span>
+            <input name="email" type="email" maxlength="120" />
+          </label>
+          <label class="field">
+            <span>Line for the text placements, up to 90 characters</span>
+            <input name="line" maxlength="90" placeholder="Saturday produce on Main Street" />
+          </label>
+          <label class="field">
+            <span>Banner description, for someone who cannot see the picture</span>
+            <input name="alt" maxlength="180" />
+          </label>
+          <label class="field">
+            <span>Banner image, 1200 × 500, JPG, PNG, or WebP</span>
+            <input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+          </label>
+          <fieldset class="check-row">
+            <legend class="kicker">Pages</legend>
+            {placements.map((placement) => (
+              <label>
+                <input type="checkbox" name="placement" value={placement.id} />
+                <span><strong>{placement.page}</strong> · {placement.name}. {placement.where}.</span>
+              </label>
+            ))}
+          </fieldset>
+          <label class="check-row">
+            <input type="checkbox" name="active" value="yes" checked />
+            <span>Showing now</span>
+          </label>
+          <button class="button" type="submit">Put this advertiser on the site</button>
+        </form>
+
+        <section class="section">
+          <h2>Uploaded</h2>
+          <div class="card-list">
+            {uploaded.map((ad) => (
+              <article class="detail-main">
+                <p class="kicker">{ad.active ? 'Showing' : 'Paused'} · {ad.impressions.toLocaleString('en-US')} views · {ad.clicks.toLocaleString('en-US')} clicks</p>
+                <h2>{ad.name}</h2>
+                {ad.email && <p class="meta">{ad.email}</p>}
+                {ad.src && <img class="ad-thumb" src={ad.src} alt="" />}
+                <label class="field">
+                  <span>Report link</span>
+                  <input readonly value={`${Astro.url.origin}/ad/${ad.token}`} />
+                </label>
+                <form class="form" action="/api/ads" method="post" enctype="multipart/form-data">
+                  <input type="hidden" name="action" value="save" />
+                  <input type="hidden" name="id" value={ad.id} />
+                  <label class="field">
+                    <span>Business name</span>
+                    <input name="name" required maxlength="80" value={ad.name} />
+                  </label>
+                  <label class="field">
+                    <span>Website</span>
+                    <input name="website" type="url" required value={ad.href} />
+                  </label>
+                  <label class="field">
+                    <span>Email</span>
+                    <input name="email" type="email" maxlength="120" value={ad.email} />
+                  </label>
+                  <label class="field">
+                    <span>Line</span>
+                    <input name="line" maxlength="90" value={ad.line} />
+                  </label>
+                  <label class="field">
+                    <span>Banner description</span>
+                    <input name="alt" maxlength="180" value={ad.alt} />
+                  </label>
+                  <label class="field">
+                    <span>Replace the banner</span>
+                    <input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+                  </label>
+                  <fieldset class="check-row">
+                    <legend class="kicker">Pages</legend>
+                    {placements.map((placement) => (
+                      <label>
+                        <input type="checkbox" name="placement" value={placement.id} checked={ad.placements.includes(placement.id)} />
+                        <span>{placement.page} · {placement.name}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                  <label class="check-row">
+                    <input type="checkbox" name="active" value="yes" checked={ad.active} />
+                    <span>Showing now</span>
+                  </label>
+                  <button class="button" type="submit">Save</button>
+                </form>
+                <form class="cluster" action="/api/ads" method="post">
+                  <input type="hidden" name="id" value={ad.id} />
+                  <button class="button button-ghost" name="action" value={ad.active ? 'hold' : 'release'}>{ad.active ? 'Pause' : 'Put it back'}</button>
+                </form>
+                <form class="form" action="/api/ads" method="post">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="id" value={ad.id} />
+                  <label class="check-row">
+                    <input type="checkbox" name="confirm" value="yes" />
+                    <span>Delete this advertiser and the report link</span>
+                  </label>
+                  <button class="button button-ghost" type="submit">Delete</button>
+                </form>
+              </article>
+            ))}
+            {!uploaded.length && <p>No uploaded advertisers yet.</p>}
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Already on the front page</h2>
+          <div class="card-list">
+            {files.map((ad) => (
+              <article class="detail-main">
+                <p class="kicker">{ad.active ? 'Showing' : 'Paused'} · {ad.impressions.toLocaleString('en-US')} views · {ad.clicks.toLocaleString('en-US')} clicks</p>
+                <h2>{ad.name}</h2>
+                <p class="meta">Front page banner. The picture lives with the site files.</p>
+                <label class="field">
+                  <span>Report link</span>
+                  <input readonly value={`${Astro.url.origin}/ad/${ad.token}`} />
+                </label>
+                <form action="/api/ads" method="post">
+                  <input type="hidden" name="id" value={ad.id} />
+                  <button class="button button-ghost" name="action" value={ad.active ? 'hold' : 'release'}>{ad.active ? 'Pause' : 'Put it back'}</button>
+                </form>
+              </article>
+            ))}
+          </div>
+        </section>
+      </>
+    )}
+  </div>
+</BaseLayout>
