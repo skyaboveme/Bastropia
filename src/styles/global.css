@@ -176,8 +176,20 @@ main { padding-bottom: 3rem; }
 .cluster { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.9rem; }
 
 /* ---------- Front page ---------- */
-.hero-photo { margin: 1.2rem 0 0; border-bottom: 4px solid var(--river); }
-.hero-photo img { display: block; width: 100%; height: clamp(190px, 33vw, 400px); object-fit: cover; object-position: center 62%; }
+.home-banner { margin: 1.2rem 0 0; }
+.home-banner-frame { position: relative; aspect-ratio: 12 / 5; background: var(--paper-2); border-bottom: 4px solid var(--river); overflow: hidden; }
+.home-banner-slide { position: absolute; inset: 0; }
+.home-banner-slide[hidden] { display: none; }
+.home-banner-slide img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.home-banner-open { position: absolute; inset: 0; display: grid; align-content: center; gap: 0.2rem; padding: 1rem 1.15rem; text-decoration: none; }
+.home-banner-open strong { font-family: var(--serif); font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 600; line-height: 1.05; }
+.home-banner-open span { color: var(--ink-soft); max-width: 28rem; }
+.home-banner-controls { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; margin-top: 0.35rem; }
+.home-banner-controls button { min-width: 2.75rem; min-height: 2.75rem; border: 0; background: transparent; color: var(--ink); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.home-banner-dots { display: flex; flex-wrap: wrap; gap: 0.15rem; justify-content: center; }
+.home-banner-dots button { width: 2.75rem; min-width: 2.75rem; position: relative; }
+.home-banner-dots button::after { content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--line); display: block; margin: 0 auto; }
+.home-banner-dots button[aria-current="true"]::after { background: var(--river-deep); }
 .front {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr) minmax(0, 1.05fr);

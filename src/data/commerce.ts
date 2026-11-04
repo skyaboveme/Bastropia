@@ -35,6 +35,15 @@ export const placements = [
     rate: 200,
     unit: 'month',
   },
+  {
+    id: 'home-banner',
+    name: 'Front page banner',
+    page: 'Home',
+    where: 'The wide banner above Results',
+    detail: 'A 1200×500 image. It runs the full width of the page and rotates with the other banners in this spot.',
+    rate: 400,
+    unit: 'month',
+  },
 ] as const;
 
 export type PlacementId = (typeof placements)[number]['id'];

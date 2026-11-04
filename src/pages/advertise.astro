@@ -30,7 +30,8 @@ const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: ite
       <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
       <div class="place-grid">
         {placements.map((placement) => {
-          const holder = booked.find((item) => item.placement === placement.id);
+          const holders = booked.filter((item) => item.placement === placement.id);
+          const holder = holders[0];
           return (
             <label class="choice">
               <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'river-banner'} />
@@ -38,7 +39,8 @@ const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: ite
               <h2 style="font-size:1.7rem;">{placement.name}</h2>
               <p class="meta">{placement.where}</p>
               <p style="margin-top:0.4rem;">{placement.detail}</p>
-              {holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
+              {placement.id === 'home-banner' && holders.length > 0 && <p class="badge">In the rotation: {holders.map((item) => item.name).join(', ')}</p>}
+              {placement.id !== 'home-banner' && holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
             </label>
           );
         })}

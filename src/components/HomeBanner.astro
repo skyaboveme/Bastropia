@@ -1,0 +1,107 @@
+---
+import { homeBanners } from '../data/homeBanners';
+
+const banners = homeBanners.filter((banner) => banner.src && banner.href);
+const rotating = banners.length > 1;
+---
+
+<section class="home-banner" aria-roledescription="carousel" aria-label="Sponsored">
+  <div class="home-banner-frame" data-banner-frame>
+    {banners.length > 0 ? (
+      banners.map((banner, index) => (
+        <a class:list={['home-banner-slide', { 'is-on': index === 0 }]} href={banner.href} data-slide hidden={index !== 0}>
+          <img src={banner.src} alt={banner.alt || banner.name} width="1200" height="500" decoding={index === 0 ? 'async' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'low'} />
+        </a>
+      ))
+    ) : (
+      <a class="home-banner-open" href="/advertise?placement=home-banner">
+        <p class="kicker">Sponsored</p>
+        <strong>Your banner here</strong>
+        <span>1200 × 500. It runs the full width of the front page.</span>
+      </a>
+    )}
+  </div>
+  {rotating && (
+    <div class="home-banner-controls">
+      <button type="button" data-banner-prev aria-label="Previous banner">‹</button>
+      <div class="home-banner-dots">
+        {banners.map((banner, index) => (
+          <button type="button" data-banner-dot aria-label={banner.name} aria-current={index === 0 ? 'true' : undefined}></button>
+        ))}
+      </div>
+      <button type="button" data-banner-next aria-label="Next banner">›</button>
+    </div>
+  )}
+</section>
+
+{rotating && (
+  <script is:inline>
+    const frame = document.querySelector('[data-banner-frame]');
+    const root = frame && frame.closest('.home-banner');
+    if (frame && root) {
+      const slides = [...frame.querySelectorAll('[data-slide]')];
+      const dots = [...root.querySelectorAll('[data-banner-dot]')];
+      let index = 0;
+      let timer = 0;
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const show = (next) => {
+        index = (next + slides.length) % slides.length;
+        slides.forEach((slide, slideIndex) => {
+          const on = slideIndex === index;
+          slide.classList.toggle('is-on', on);
+          slide.hidden = !on;
+        });
+        dots.forEach((dot, dotIndex) => {
+          if (dotIndex === index) dot.setAttribute('aria-current', 'true');
+          else dot.removeAttribute('aria-current');
+        });
+      };
+
+      const stop = () => window.clearInterval(timer);
+      const start = () => {
+        stop();
+        if (motion) return;
+        timer = window.setInterval(() => show(index + 1), 6000);
+      };
+
+      root.querySelector('[data-banner-prev]')?.addEventListener('click', () => {
+        show(index - 1);
+        start();
+      });
+      root.querySelector('[data-banner-next]')?.addEventListener('click', () => {
+        show(index + 1);
+        start();
+      });
+      dots.forEach((dot, dotIndex) => {
+        dot.addEventListener('click', () => {
+          show(dotIndex);
+          start();
+        });
+      });
+
+      root.addEventListener('pointerenter', stop);
+      root.addEventListener('pointerleave', start);
+      root.addEventListener('focusin', stop);
+      root.addEventListener('focusout', start);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else start();
+      });
+
+      let touchX = 0;
+      frame.addEventListener('touchstart', (event) => {
+        touchX = event.changedTouches[0]?.clientX ?? 0;
+      }, { passive: true });
+      frame.addEventListener('touchend', (event) => {
+        const end = event.changedTouches[0]?.clientX ?? touchX;
+        const delta = end - touchX;
+        if (Math.abs(delta) < 40) return;
+        show(index + (delta < 0 ? 1 : -1));
+        start();
+      }, { passive: true });
+
+      start();
+    }
+  </script>
+)}

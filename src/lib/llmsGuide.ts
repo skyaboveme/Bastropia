@@ -6,7 +6,7 @@ import { electionDay, voteIsLive, voteSource } from '../data/vote';
 import { eventKey, formatLong, labelFromKey, whenLabel } from './time';
 
 const pages: { path: string; label: string; note: string }[] = [
-  { path: '/', label: 'Front page', note: 'Today’s news, weather, burn ban, and upcoming events' },
+  { path: '/', label: 'Front page', note: 'A rotating sponsor banner, then today’s news, weather, burn ban, and upcoming events' },
   { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings. /calendar opens the month view' },
   { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source' },
