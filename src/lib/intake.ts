@@ -1,5 +1,6 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { alertTopics } from '../data/alerts';
 import { placementById, tierById, type ListingTierId, type PlacementId } from '../data/commerce';
 import { addDays, addMonths } from './time';
 import type { Tier } from '../data/taxonomy';
@@ -8,7 +9,7 @@ const intakeDir = path.join(process.cwd(), 'data', 'intake');
 const sponsorsFile = path.join(process.cwd(), 'data', 'sponsors.json');
 const upgradesFile = path.join(process.cwd(), 'data', 'upgrades.json');
 
-export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter';
+export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter' | 'alert';
 
 export type IntakeRecord = {
   id: string;
@@ -66,6 +67,28 @@ async function readJson<T>(file: string, fallback: T): Promise<T> {
   }
 }
 
+export async function tagAlert(fields: Record<string, string>) {
+  const key = process.env.KIT_API_SECRET;
+  const email = fields.email;
+  if (!key || !email) return;
+  const ids = new Set(
+    (fields.tagIds ?? '')
+      .split(',')
+      .map((item) => Number(item))
+      .filter((item) => item > 0),
+  );
+  if (fields.road) ids.add(25416044);
+  await Promise.all(
+    [...ids].map((id) =>
+      fetch(`https://api.kit.com/v4/tags/${id}/subscribers`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ email_address: email }),
+      }).catch(() => undefined),
+    ),
+  );
+}
+
 export async function saveIntake(record: IntakeRecord) {
   await mkdir(intakeDir, { recursive: true });
   await writeFile(path.join(intakeDir, `${record.id}.json`), JSON.stringify(record, null, 2));
@@ -104,7 +127,7 @@ export async function updateIntakeStatus(id: string, status: IntakeRecord['statu
 export function buildRecord(input: Record<string, string>, id: string, now = new Date()) {
   const type = input.type;
   const email = clean(input.email, 160).toLowerCase();
-  if (type !== 'ad' && type !== 'upgrade' && type !== 'event' && type !== 'newsletter') {
+  if (type !== 'ad' && type !== 'upgrade' && type !== 'event' && type !== 'newsletter' && type !== 'alert') {
     return { ok: false as const, error: 'form' };
   }
   if (!emailOk(email)) return { ok: false as const, error: 'email' };
@@ -117,6 +140,22 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
     const cadence = input.cadence === 'daily' ? 'daily' : 'weekly';
     fields.cadence = cadence;
     summary = `${cadence} newsletter for ${email}`;
+  }
+
+  if (type === 'alert') {
+    const picked = alertTopics.filter((topic) => input[`topic_${topic.id}`] === 'yes');
+    const road = clean(input.road, 40);
+    if (!picked.length && !road) return { ok: false as const, error: 'topics' };
+    const phone = clean(input.phone, 30);
+    const digits = phone.replace(/\D/g, '');
+    if (phone && digits.length < 10) return { ok: false as const, error: 'phone' };
+    fields.topics = picked.map((topic) => topic.label).join(', ');
+    fields.topicIds = picked.map((topic) => topic.id).join(',');
+    fields.tagIds = picked.map((topic) => String(topic.tagId)).join(',');
+    if (road) fields.road = road;
+    if (phone) fields.phone = phone;
+    const names = [...picked.map((topic) => topic.label), road].filter(Boolean);
+    summary = `Alert for ${names.join(', ')} — ${email}`;
   }
 
   if (type === 'ad') {

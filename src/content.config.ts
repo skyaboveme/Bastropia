@@ -14,6 +14,7 @@ const events = defineCollection({
     city: z.enum(cities),
     venue: z.string(),
     address: z.string().optional(),
+    phone: z.string().optional(),
     category: z.enum(categories),
     cost: z.string(),
     tier: z.enum(tiers),

@@ -115,7 +115,23 @@ function current(href: string) {
       <strong data-now="us290">—</strong>
       <em data-now="us290-detail">Construction</em>
     </a>
+    <a href="/schools">
+      <span>Schools</span>
+      <strong data-now="schools">—</strong>
+      <em data-now="schools-detail">Four districts</em>
+    </a>
+    <a href="https://www.bluebonnet.coop/outages">
+      <span>Power</span>
+      <strong data-now="power">—</strong>
+      <em data-now="power-detail">Bluebonnet</em>
+    </a>
+    <a href="/roads">
+      <span>Roads</span>
+      <strong data-now="closed">—</strong>
+      <em data-now="closed-detail">Closures</em>
+    </a>
   </div>
+  <p class="strip-also"><a href="/alerts">Email or text when one of these changes</a></p>
   <p class="strip-also" data-now="also" hidden></p>
   <script is:inline>
     fetch('/api/now')
@@ -143,6 +159,19 @@ function current(href: string) {
           set('us290', us.label);
           set('us290-detail', us.label === 'None listed' ? 'No alert filed' : us.detail);
         }
+        const fill = (key, line) => {
+          if (!line) return;
+          set(key, line.label);
+          set(`${key}-detail`, line.detail);
+          const node = document.querySelector(`[data-now="${key}"]`);
+          const link = node && node.closest('a');
+          if (!link) return;
+          const quiet = line.label === 'Normal day' || line.label === 'None reported' || line.label === 'None listed';
+          link.classList.toggle('is-alert', !quiet);
+        };
+        fill('schools', data.schools);
+        fill('power', data.power);
+        fill('closed', data.closureLine);
         const also = document.querySelector('[data-now="also"]');
         if (also && data.others && data.others.length) {
           also.hidden = false;

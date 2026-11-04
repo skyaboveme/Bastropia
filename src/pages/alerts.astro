@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FormError from '../components/FormError.astro';
+import { alertTopic, alertTopics } from '../data/alerts';
+
+const picked = alertTopic(Astro.url.searchParams.get('item') ?? '')?.id ?? '';
+const joined = Astro.url.searchParams.get('joined') === '1';
+---
+
+<BaseLayout
+  title="Status alerts"
+  description="Email or text when the burn ban, school status, power, or a named road changes in Bastrop County."
+>
+  <PageHead
+    kicker="When it changes"
+    title="One list per item"
+    lede="The weekly newsletter is the weekend. This is the burn ban that flips at 4 p.m., a two-hour delay, or a road that closes. Pick the item. Your email joins that list only."
+  />
+  <div class="wrap">
+    {joined && <p class="lede">You are on that list. It is separate from the weekly newsletter.</p>}
+    <form class="form" action="/api/intake" method="post">
+      <FormError />
+      <input type="hidden" name="type" value="alert" />
+      <input type="hidden" name="from" value="/alerts" />
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" />
+      <fieldset class="alert-picks">
+        <legend>Which change</legend>
+        {alertTopics.map((topic) => (
+          <label class="check">
+            <input type="checkbox" name={`topic_${topic.id}`} value="yes" checked={picked === topic.id} />
+            <span><strong>{topic.label}</strong> — {topic.detail}</span>
+          </label>
+        ))}
+      </fieldset>
+      <label class="field">
+        <span>A named road, if it is not already listed</span>
+        <input name="road" type="text" maxlength="40" placeholder="FM 969" />
+      </label>
+      <label class="field">
+        <span>Email</span>
+        <input name="email" type="email" required autocomplete="email" />
+      </label>
+      <label class="field">
+        <span>Mobile number, for the text list</span>
+        <input name="phone" type="tel" autocomplete="tel" placeholder="(512) 555-0100" />
+      </label>
+      <button class="button" type="submit">Join that list</button>
+    </form>
+    <p class="disclaimer">
+      Each item is its own list. A school delay does not go to the burn-ban list. The weekly newsletter is separate and still lives on the front page.
+      The address and the mobile number are stored on that list. The desk can see them under Status lists.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .alert-picks { border: 0; padding: 0; margin: 0 0 0.4rem; display: grid; gap: 0.55rem; }
+  .alert-picks input { width: auto; }
+  .check { display: grid; grid-template-columns: 1.1rem 1fr; gap: 0.55rem; align-items: start; }
+  .hp { position: absolute; left: -9999px; }
+</style>

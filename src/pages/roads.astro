@@ -6,31 +6,50 @@ import PageHead from '../components/PageHead.astro';
 import { getCountyNow } from '../lib/countyNow';
 
 const now = await getCountyNow();
+const closures = now.closures;
 const others = now.others;
 ---
 
 <BaseLayout
   title="SH 71 and US 290"
-  description="DriveTexas construction alerts for SH 71 and US 290 in Bastrop County, plus any other condition the county file lists."
+  description="DriveTexas closures and crashes in Bastrop County, plus construction on SH 71 and US 290."
 >
   <PageHead
     kicker="DriveTexas"
     title="Highway alerts"
-    lede="Construction and lane conditions TxDOT has filed for Bastrop County. SH 71 and US 290 are called out because they carry most of the through traffic."
+    lede="A closure or a crash is listed first. Construction on SH 71 and US 290 is a work zone, and it stays in its own row."
   />
   <div class="wrap">
+    <section class="section">
+      <h2>Closed or a crash</h2>
+      {closures.length > 0 ? (
+        closures.map((alert) => (
+          <article class="brief">
+            <h3>{alert.kind === 'crash' ? 'Crash' : 'Closed'} · {alert.route}</h3>
+            <p>{alert.detail}</p>
+            <p class="meta">{alert.from}{alert.to ? ` to ${alert.to}` : ''}</p>
+          </article>
+        ))
+      ) : (
+        <p>None reported in the Bastrop County file.</p>
+      )}
+      <p class="cluster"><a class="button button-ghost" href="/alerts?item=roads">Email me if a road closes</a></p>
+    </section>
     <div class="score-grid">
       {now.roads.map((road) => (
         <article class="score-card">
-          <p class="kicker">{road.route}</p>
+          <p class="kicker">{road.route} · construction</p>
           <h2>{road.label}</h2>
           {road.detail && road.label !== 'None listed' && <p>{road.detail}</p>}
+          <p class="cluster">
+            <a class="button button-ghost" href={`/alerts?item=${road.route === 'SH 71' ? 'sh-71' : 'us-290'}`}>Email me if this road closes</a>
+          </p>
         </article>
       ))}
     </div>
     {others.length > 0 && (
       <section class="section">
-        <h2>Also in the county file</h2>
+        <h2>Other work zones</h2>
         {others.map((alert) => (
           <article class="brief">
             <h3>{alert.route}</h3>

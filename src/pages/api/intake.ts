@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { randomBytes } from 'node:crypto';
-import { buildRecord, saveIntake } from '../../lib/intake';
+import { saveAlertSubscriptions } from '../../lib/alertStore';
+import { buildRecord, saveIntake, tagAlert } from '../../lib/intake';
 
 export const prerender = false;
 
@@ -8,7 +9,7 @@ function bounce(location: string) {
   return new Response(null, { status: 303, headers: { Location: location } });
 }
 
-const origins = new Set(['/', '/advertise', '/upgrade', '/submit']);
+const origins = new Set(['/', '/advertise', '/upgrade', '/submit', '/alerts']);
 
 export const POST: APIRoute = async ({ request }) => {
   const length = Number(request.headers.get('content-length') || 0);
@@ -23,10 +24,22 @@ export const POST: APIRoute = async ({ request }) => {
   const id = `BAS-${randomBytes(4).toString('hex').toUpperCase()}`;
   const built = buildRecord(input, id);
   if (!built.ok) return bounce(`${from}?error=${built.error}`);
+  let saved = false;
   try {
     await saveIntake(built.record);
+    saved = true;
   } catch {
-    return bounce(`${from}?error=save`);
+    saved = false;
   }
+  if (built.record.type === 'alert') {
+    try {
+      if (await saveAlertSubscriptions(built.record.fields)) saved = true;
+    } catch {
+      /* The file copy can still stand if the key store is down. */
+    }
+    await tagAlert(built.record.fields);
+  }
+  if (!saved) return bounce(`${from}?error=save`);
+  if (built.record.type === 'alert') return bounce('/alerts?joined=1');
   return bounce(`/thanks?id=${built.record.id}`);
 };

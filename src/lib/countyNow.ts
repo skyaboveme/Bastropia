@@ -1,3 +1,4 @@
+import { getPower, getSchoolDays, schoolSummary } from './interruptions';
 import { TZ } from './time';
 
 const headers = { 'user-agent': 'BastropiaBot/1.0 (+https://bastropia.com)', accept: 'application/json' };
@@ -9,26 +10,69 @@ const watchRoutes = [
   { code: 'US0290', name: 'US 290' },
 ];
 
+export type RoadKind = 'crash' | 'closure' | 'work';
+
 export type RoadAlert = {
   route: string;
   delay: boolean;
+  kind: RoadKind;
   from: string;
   to: string;
   detail: string;
 };
+
+export type StatusLine = { label: string; detail: string; href: string };
 
 export type CountyNow = {
   river: { label: string; detail: string; href: string } | null;
   air: { label: string; detail: string; href: string } | null;
   roads: { route: string; label: string; detail: string }[];
   others: RoadAlert[];
+  closures: RoadAlert[];
+  closureLine: StatusLine;
+  schools: StatusLine | null;
+  power: StatusLine | null;
 };
 
 const cache: { at: number; value: CountyNow } | null = { at: 0, value: emptyNow() };
 const tenMinutes = 10 * 60 * 1000;
 
 function emptyNow(): CountyNow {
-  return { river: null, air: null, roads: watchRoutes.map((route) => ({ route: route.name, label: '—', detail: '' })), others: [] };
+  return {
+    river: null,
+    air: null,
+    roads: watchRoutes.map((route) => ({ route: route.name, label: '—', detail: '' })),
+    others: [],
+    closures: [],
+    closureLine: { label: '—', detail: 'DriveTexas', href: '/roads' },
+    schools: null,
+    power: null,
+  };
+}
+
+export function roadKind(detail: string): RoadKind {
+  if (/\b(crash|accident|wreck|collision|stalled vehicle)\b/i.test(detail)) return 'crash';
+  if (/\b(road closed|highway closed|closed to (all )?traffic|all lanes closed|impassable|bridge closed|full closure)\b/i.test(detail)) return 'closure';
+  return 'work';
+}
+
+export function closureLine(alerts: RoadAlert[]): StatusLine {
+  const stops = alerts.filter((alert) => alert.kind === 'crash' || alert.kind === 'closure');
+  if (!stops.length) return { label: 'None reported', detail: 'DriveTexas', href: '/roads' };
+  const crashes = stops.filter((alert) => alert.kind === 'crash');
+  const label =
+    crashes.length === stops.length
+      ? crashes.length === 1
+        ? 'Crash'
+        : `${crashes.length} crashes`
+      : stops.length === 1
+        ? 'Closed'
+        : `${stops.length} closed`;
+  return {
+    label,
+    detail: [...new Set(stops.map((alert) => alert.route))].slice(0, 3).join(', '),
+    href: '/roads',
+  };
 }
 
 export function aqiWord(index: number) {
@@ -106,7 +150,7 @@ async function air(): Promise<CountyNow['air']> {
   };
 }
 
-async function roads(): Promise<{ watched: CountyNow['roads']; others: RoadAlert[] }> {
+async function roads(): Promise<{ watched: CountyNow['roads']; alerts: RoadAlert[] }> {
   const request = {
     action: 'table/query',
     query: {
@@ -123,35 +167,45 @@ async function roads(): Promise<{ watched: CountyNow['roads']; others: RoadAlert
   const count = rows.RTENM?.length ?? 0;
   const alerts: RoadAlert[] = [];
   for (let index = 0; index < count; index += 1) {
+    const detail = plainAlert(String(rows.CONDDSCR?.[index] ?? ''));
     alerts.push({
       route: routeName(String(rows.RTENM[index] ?? '')),
       delay: rows.CNSTRNTDELAYFLAG?.[index] === 'Y',
+      kind: roadKind(detail),
       from: String(rows.CONDLMTFROMDSCR?.[index] ?? ''),
       to: String(rows.CONDLMTTODSCR?.[index] ?? ''),
-      detail: plainAlert(String(rows.CONDDSCR?.[index] ?? '')),
+      detail,
     });
   }
   const watched = watchRoutes.map((route) => {
-    const hit = alerts.find((alert) => alert.route === route.name);
+    const hit = alerts.find((alert) => alert.route === route.name && alert.kind === 'work');
     return hit
       ? { route: route.name, label: hit.delay ? 'Delays' : 'Alert', detail: hit.detail }
       : { route: route.name, label: 'None listed', detail: 'DriveTexas' };
   });
-  return { watched, others: alerts.filter((alert) => !watchRoutes.some((route) => route.name === alert.route)) };
+  return { watched, alerts };
 }
 
 export async function getCountyNow(): Promise<CountyNow> {
   if (cache && Date.now() - cache.at < tenMinutes) return cache.value;
-  const [riverResult, airResult, roadResult] = await Promise.all([
+  const [riverResult, airResult, roadResult, schoolDays, powerResult] = await Promise.all([
     river().catch(() => null),
     air().catch(() => null),
     roads().catch(() => null),
+    getSchoolDays().catch(() => null),
+    getPower().catch(() => null),
   ]);
+  const alerts = roadResult?.alerts ?? [];
+  const closures = alerts.filter((alert) => alert.kind === 'crash' || alert.kind === 'closure');
   const value: CountyNow = {
     river: riverResult,
     air: airResult,
     roads: roadResult?.watched ?? emptyNow().roads,
-    others: roadResult?.others ?? [],
+    others: alerts.filter((alert) => alert.kind === 'work' && !watchRoutes.some((route) => route.name === alert.route)),
+    closures,
+    closureLine: closureLine(alerts),
+    schools: schoolDays ? schoolSummary(schoolDays) : null,
+    power: powerResult,
   };
   cache.at = Date.now();
   cache.value = value;

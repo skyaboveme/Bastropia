@@ -28,7 +28,7 @@ const decisions = needle
 const services = needle
   ? serviceGroups.flatMap((group) =>
       group.items
-        .filter((item) => `${item.name} ${item.detail} ${item.phone ?? ''}`.toLowerCase().includes(needle))
+        .filter((item) => `${item.name} ${item.detail} ${item.hours ?? ''} ${item.phone ?? ''}`.toLowerCase().includes(needle))
         .map((item) => ({ ...item, group: group.title })),
     )
   : [];

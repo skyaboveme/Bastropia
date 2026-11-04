@@ -108,6 +108,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   margin: 0 auto 0.85rem;
 }
 .county-strip a { text-decoration: none; display: grid; gap: 0.08rem; border-top: 3px solid var(--river); padding-top: 0.35rem; }
+.county-strip a.is-alert { border-top-color: #c5161d; }
 .county-strip span { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--river-deep); }
 .county-strip strong { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; line-height: 1.1; }
 .county-strip em { font-style: normal; color: var(--ink-soft); font-size: 0.82rem; }
@@ -277,6 +278,8 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .date-stamp strong { font-family: var(--serif); font-size: 1.7rem; font-weight: 580; }
 .event-card h3, .story-card h3, .update-card h3, .stream h3 { font-size: 1.3rem; }
 .event-card a:hover h3, .story-card a:hover h3, .update-card a:hover h3 { text-decoration: underline; text-underline-offset: 0.1em; }
+.event-actions { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; padding: 0 0 0.75rem; font-size: 0.92rem; }
+.event-actions a { color: var(--river-deep); font-weight: 650; }
 .badge { display: inline-flex; margin-top: 0.35rem; padding: 0.08rem 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--paper-2); }
 .tier-spotlight { box-shadow: inset 3px 0 0 var(--river); padding-left: 0.7rem; }
 .tier-featured { box-shadow: inset 3px 0 0 var(--sun); padding-left: 0.7rem; }

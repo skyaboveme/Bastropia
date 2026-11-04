@@ -4,6 +4,7 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
+import { listAlertSubscriptions } from '../lib/alertStore';
 import { deskAuthorized, deskKeyConfigured } from '../lib/auth';
 import { eventMarkdown, listIntake, readSponsors, readUpgrades } from '../lib/intake';
 import { money } from '../lib/format';
@@ -12,6 +13,7 @@ import { formatMedium } from '../lib/time';
 const allowed = deskAuthorized(Astro.url.hostname, Astro.cookies.get('bastropia_desk')?.value);
 const locked = deskKeyConfigured();
 const orders = allowed ? await listIntake() : [];
+const alertLists = allowed ? await listAlertSubscriptions().catch(() => []) : [];
 const sponsors = allowed ? await readSponsors() : [];
 const upgrades = allowed ? await readUpgrades() : [];
 ---
@@ -39,7 +41,15 @@ const upgrades = allowed ? await readUpgrades() : [];
     )}
     {allowed && (
       <>
-        <p class="meta">{orders.length} saved. {sponsors.length} ad{sponsors.length === 1 ? '' : 's'} on the site. {upgrades.length} listing upgrade{upgrades.length === 1 ? '' : 's'} applied.</p>
+        <p class="meta">{orders.length} saved. {sponsors.length} ad{sponsors.length === 1 ? '' : 's'} on the site. {upgrades.length} listing upgrade{upgrades.length === 1 ? '' : 's'} applied. {alertLists.length} status alert{alertLists.length === 1 ? '' : 's'}.</p>
+        {alertLists.length > 0 && (
+          <section class="section">
+            <h2>Status lists</h2>
+            {alertLists.map((item) => (
+              <p>{item.topic}{item.road ? ` · ${item.road}` : ''} · {item.email}{item.phone ? ` · ${item.phone}` : ''}</p>
+            ))}
+          </section>
+        )}
         <div class="card-list" style="margin-top:1rem;">
           {orders.map((order) => (
             <article class="detail-main">

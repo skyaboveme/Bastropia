@@ -1,6 +1,9 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { categoryMeta, type Tier } from '../data/taxonomy';
+import { siteUrl } from '../data/site';
+import { phoneHref } from '../lib/format';
+import { googleCalendarUrl } from '../lib/ics';
 import { stampParts, whenLabel } from '../lib/time';
 
 interface Props {
@@ -12,6 +15,9 @@ interface Props {
 const { event, tier = event.data.tier, compact = false } = Astro.props;
 const stamp = stampParts(event.data.start);
 const category = categoryMeta[event.data.category];
+const pageUrl = new URL(`/events/${event.id}`, siteUrl).toString();
+const place = [event.data.address, event.data.venue, `${event.data.city}, TX`].filter(Boolean).join(', ');
+const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
 ---
 
 <article class:list={['event-card', `tier-${tier}`, { compact }]}>
@@ -30,4 +36,9 @@ const category = categoryMeta[event.data.category];
       {tier !== 'community' && <p class="badge">{tier === 'lost-pines' ? 'Lost Pines' : tier}</p>}
     </div>
   </a>
+  <p class="event-actions">
+    <a href={googleCalendarUrl(event, pageUrl)}>Add to calendar</a>
+    <a href={mapHref}>Map</a>
+    {event.data.phone && <a href={phoneHref(event.data.phone)}>Call {event.data.phone}</a>}
+  </p>
 </article>

@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import { categoryMeta } from '../../data/taxonomy';
 import { listingTiers } from '../../data/commerce';
+import { phoneHref } from '../../lib/format';
 import { googleCalendarUrl } from '../../lib/ics';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
 import { eventNode } from '../../lib/schema';
@@ -57,7 +58,19 @@ const tierName = listingTiers.find((item) => item.id === tier)?.name ?? 'Communi
             <div>
               <dt>Where</dt>
               <dd>{event.data.venue}</dd>
-              {event.data.address && <dd>{event.data.address}</dd>}
+              {event.data.address && (
+                <dd>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.data.address}, ${event.data.city}, TX`)}`}>{event.data.address}</a>
+                </dd>
+              )}
+              {!event.data.address && (
+                <dd>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.data.venue}, ${event.data.city}, TX`)}`}>Map</a>
+                </dd>
+              )}
+              {event.data.phone && (
+                <dd><a href={phoneHref(event.data.phone)}>{event.data.phone}</a></dd>
+              )}
             </div>
             <div>
               <dt>Cost</dt>

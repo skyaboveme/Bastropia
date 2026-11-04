@@ -4,6 +4,8 @@ export type Service = {
   phone?: string;
   href?: string;
   address?: string;
+  hours?: string;
+  checked?: string;
 };
 
 export type ServiceGroup = {
@@ -107,28 +109,36 @@ export const serviceGroups: ServiceGroup[] = [
       },
       {
         name: 'Tax Assessor-Collector',
-        detail: 'Main office, Monday through Friday, 8 am to 4 pm. Drive-thru 7:30 am to 4 pm. Property-tax exemptions go to the appraisal district at (512) 303-1930.',
+        detail: 'Main office. Property-tax exemptions go to the appraisal district at (512) 303-1930.',
+        hours: 'Monday through Friday, 8 am to 4 pm. Drive-thru 7:30 am to 4 pm. No title transfers after 4 pm. No Texas Parks & Wildlife after 3:30 pm. The line is inside 211 Jackson Street, with a drive-thru teller and a drop box.',
+        checked: '2026-11-04',
         phone: '(512) 581-7161',
         address: '211 Jackson Street, Bastrop, TX 78602',
-        href: 'https://www.bastropcounty.gov/page/co.tax_assessor',
+        href: 'https://www.bastropcounty.gov/page/tac.locations',
       },
       {
         name: 'Tax office, Cedar Creek',
-        detail: 'Monday through Friday, 8 am to 4:30 pm',
+        detail: 'Substation',
+        hours: 'Monday through Friday, 8 am to 4:30 pm. No title transfers after 4 pm.',
+        checked: '2026-11-04',
         phone: '(512) 581-4270',
         address: '5785 FM 535, Cedar Creek, TX 78612',
         href: 'https://www.bastropcounty.gov/page/tac.locations',
       },
       {
         name: 'Tax office, Elgin',
-        detail: 'Monday through Friday, 8 am to 4:30 pm',
+        detail: 'Substation',
+        hours: 'Monday through Friday, 8 am to 4:30 pm. No title transfers after 4 pm.',
+        checked: '2026-11-04',
         phone: '(512) 581-7146',
         address: '1125 Dildy Drive, Elgin, TX 78621',
         href: 'https://www.bastropcounty.gov/page/tac.locations',
       },
       {
         name: 'Tax office, Smithville',
-        detail: 'Tuesdays and Fridays, 8 am to 4:30 pm, closed 12 to 1',
+        detail: 'Substation. Open Tuesdays and Fridays only, since October 5.',
+        hours: 'Tuesday and Friday, 8 am to 4:30 pm, closed 12 to 1. No title transfers after 4 pm.',
+        checked: '2026-11-04',
         phone: '(512) 581-7114',
         address: '1624 NE Loop 230, Smithville, TX 78957',
         href: 'https://www.bastropcounty.gov/page/tac.locations',
@@ -178,8 +188,11 @@ export const serviceGroups: ServiceGroup[] = [
       },
       {
         name: 'City of Smithville',
-        detail: 'City offices, 7:30 am to 5 pm, Monday through Friday',
+        detail: 'City offices',
+        hours: 'Monday through Friday, 7:30 am to 5 pm. The counter is at 317 Main Street.',
+        checked: '2026-11-04',
         phone: '(512) 237-3282',
+        address: '317 Main Street, Smithville, TX 78957',
         href: 'https://www.ci.smithville.tx.us/',
       },
     ],
@@ -250,24 +263,60 @@ export const serviceGroups: ServiceGroup[] = [
     items: [
       {
         name: 'Bastrop Public Library',
-        detail: 'Monday, Wednesday, Friday 10 am to 6 pm. Tuesday and Thursday 12 pm to 9 pm. Saturday 10 am to 4 pm. Closed Sunday.',
+        detail: 'City library',
+        hours: 'Monday, Wednesday, and Friday 10 am to 6 pm. Tuesday and Thursday 12 pm to 9 pm. Saturday 10 am to 4 pm. Closed Sunday.',
+        checked: '2026-11-04',
         phone: '(512) 332-8880',
         address: '1100 Church Street, Bastrop, TX 78602',
         href: 'https://www.cityofbastrop.org/page/lib.contact',
       },
       {
         name: 'Elgin Public Library',
-        detail: 'Extension 1408. Tuesday through Friday 9 am to 7 pm. Saturday 9 am to 5 pm. Closed Sunday and Monday.',
+        detail: 'Extension 1408',
+        hours: 'Tuesday through Friday 9 am to 7 pm. Saturday 9 am to 5 pm. Closed Sunday and Monday.',
+        checked: '2026-11-04',
         phone: '(512) 281-5678',
         address: '404 N. Main Street, Elgin, TX 78621',
-        href: 'https://www.elgintexas.gov/240/Public-Library',
+        href: 'https://www.elgintexas.gov/1225/About-the-Library',
       },
       {
         name: 'Smithville Public Library',
-        detail: 'Extension 6. Monday and Wednesday 10 am to 6 pm. Tuesday and Thursday 10 am to 7 pm. Friday 10 am to 5 pm. Saturday 9 am to 1 pm.',
+        detail: 'Extension 6',
+        hours: 'Monday and Wednesday 10 am to 6 pm. Tuesday and Thursday 10 am to 7 pm. Friday 10 am to 5 pm. Saturday 9 am to 1 pm. Closed Sunday.',
+        checked: '2026-11-04',
         phone: '(512) 237-3282',
         address: '507 Main Street, Smithville, TX 78957',
         href: 'https://www.smithvillepubliclibrary.org/',
+      },
+    ],
+  },
+  {
+    id: 'trash',
+    title: 'Trash and recycling',
+    intro: 'The pickup day follows the route. Cedar Creek, McDade, and Paige are outside these three city routes.',
+    items: [
+      {
+        name: 'Bastrop trash and recycling',
+        detail: 'Texas Disposal Systems posts the route map and the pickup dates. Questions go to the utility lobby.',
+        hours: 'Utility lobby and drive-thru, Monday through Friday, 8 am to 4 pm. Stand in line at 600 Spring Street.',
+        checked: '2026-11-04',
+        phone: '(512) 332-8830',
+        address: '600 Spring Street, Bastrop, TX 78602',
+        href: 'https://www.cityofbastrop.org/page/us.solidwaste',
+      },
+      {
+        name: 'Elgin trash and recycling',
+        detail: 'The day depends on the route. The city posts the 2026 trash and recycling calendar.',
+        checked: '2026-11-04',
+        phone: '(512) 281-5724',
+        href: 'https://www.elgintexas.gov/DocumentCenter/View/13269/Trash-Calendar-2026',
+      },
+      {
+        name: 'Smithville trash and recycling',
+        detail: 'Texas Disposal Systems map and schedule. Bulk pickup is TDS at (844) 873-7734. City questions stay at the utilities line.',
+        checked: '2026-11-04',
+        phone: '(512) 237-3282',
+        href: 'https://www.ci.smithville.tx.us/DocumentCenter/View/1386',
       },
     ],
   },
@@ -284,7 +333,9 @@ export const serviceGroups: ServiceGroup[] = [
       },
       {
         name: 'Aqua Water Supply',
-        detail: 'Customer service and the 24-hour leak line. Lobby 8:30 am to 4:30 pm, closed 12 to 1.',
+        detail: 'Customer service and the 24-hour leak line.',
+        hours: 'Lobby 8:30 am to 4:30 pm, closed 12 to 1. The counter is at 415 Old Austin Highway.',
+        checked: '2026-11-03',
         phone: '(512) 303-3943',
         address: '415 Old Austin Highway, Bastrop, TX 78602',
         href: 'https://www.aquawsc.com/contact/',

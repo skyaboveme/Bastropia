@@ -65,6 +65,7 @@ const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.g
             <article class="service" style="padding: 0.9rem 1rem;">
               <h3>{item.name}</h3>
               <p class="meta">{item.detail}</p>
+              {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
               {item.address && <p style="margin-top:0.35rem;">{item.address}</p>}
               <p class="cluster">
                 {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}

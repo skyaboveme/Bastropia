@@ -3,6 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { emergencyLine, serviceGroups, type Service } from '../data/services';
 import { phoneHref } from '../lib/format';
+import { formatMedium } from '../lib/time';
+
+function checkedOn(day?: string) {
+  if (!day) return '';
+  return formatMedium(new Date(`${day}T12:00:00`));
+}
 
 function pick(id: string, names: string[]): Service[] {
   const group = serviceGroups.find((item) => item.id === id);
@@ -49,6 +55,11 @@ const sections: { title: string; intro: string; items: Service[] }[] = [
     items: pick('libraries', ['Bastrop Public Library', 'Elgin Public Library', 'Smithville Public Library']),
   },
   {
+    title: 'Trash and recycling',
+    intro: 'Pickup day is by route. The link is the calendar or map that city tells residents to use.',
+    items: pick('trash', ['Bastrop trash and recycling', 'Elgin trash and recycling', 'Smithville trash and recycling']),
+  },
+  {
     title: 'Schools',
     intro: 'Bastrop ISD covers Bastrop and Cedar Creek. A Paige address can fall in Bastrop ISD, McDade ISD, or Smithville ISD.',
     items: pick('schools', ['Bastrop ISD', 'Elgin ISD', 'Smithville ISD', 'McDade ISD']),
@@ -58,12 +69,12 @@ const sections: { title: string; intro: string; items: Service[] }[] = [
 
 <BaseLayout
   title="Bastrop County phone numbers"
-  description="Phone numbers for the sheriff, tax office, city halls, Aqua Water, libraries, and school districts in Bastrop County, Texas."
+  description="Phone numbers and hours for the sheriff, tax office, city halls, Aqua Water, libraries, trash day, and school districts in Bastrop County, Texas."
 >
   <PageHead
     kicker="Numbers"
     title="Bastrop County phone numbers"
-    lede="The lines neighbors look up: sheriff, tax office, city hall, water, library, and schools. Each one is copied from the office that publishes it."
+    lede="The lines neighbors look up: sheriff, tax office, city hall, water, library, trash day, and schools. Hours are copied from the office page, with the date that page was checked."
   />
   <div class="wrap">
     <section class="notice">
@@ -86,6 +97,8 @@ const sections: { title: string; intro: string; items: Service[] }[] = [
             <article class="service" style="padding: 0.9rem 1rem;">
               <h3>{item.name}</h3>
               <p class="meta">{item.detail}</p>
+              {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
+              {item.checked && <p class="meta">Checked {checkedOn(item.checked)}</p>}
               {item.address && <p style="margin-top:0.35rem;">{item.address}</p>}
               <p class="cluster">
                 {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
@@ -97,7 +110,7 @@ const sections: { title: string; intro: string; items: Service[] }[] = [
       </section>
     ))}
     <p class="disclaimer">
-      Numbers and hours were checked against the linked pages on November 3, 2026. Hours change. More county offices are on <a class="text-link" href="/government">Government</a>.
+      Hours were copied from the linked page on the date under that office. They change. More county offices are on <a class="text-link" href="/government">Government</a>.
       If an emergency is happening, call 911 instead of an office line.
     </p>
   </div>

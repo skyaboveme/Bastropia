@@ -1,0 +1,46 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { getSchoolDays } from '../lib/interruptions';
+
+const days = await getSchoolDays();
+---
+
+<BaseLayout
+  title="School status"
+  description="Whether Bastrop ISD, Elgin ISD, Smithville ISD, and McDade ISD have posted a closing or a delay today."
+>
+  <PageHead
+    kicker="Today"
+    title="School status"
+    lede="Closed, delayed, or a normal day. Each line is what that district’s homepage is posting right now."
+  />
+  <div class="wrap">
+    <div class="score-grid">
+      {days.map((day) => (
+        <article class="score-card">
+          <p class="kicker">{day.name}</p>
+          <h2>{day.label}</h2>
+          <p>{day.note}</p>
+          <p class="cluster">
+            <a class="button" href={day.href}>District page</a>
+            <a class="button button-ghost" href="/alerts?item=schools">Email me if this changes</a>
+          </p>
+        </article>
+      ))}
+    </div>
+    <p class="disclaimer">
+      A normal day means the homepage has no closing or delay dated today. A holiday later in the week stays on the district calendar.
+      Call the campus if a child is already on the way.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .score-card { border-top: 4px solid var(--ink); padding-top: 0.7rem; }
+  .score-card h2 { font-size: 2.2rem; line-height: 1.05; }
+  @media (max-width: 700px) { .score-grid { grid-template-columns: 1fr; } }
+</style>
