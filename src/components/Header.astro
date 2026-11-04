@@ -3,7 +3,6 @@ import BurnMark from './BurnMark.astro';
 import { burnBan, burnStatus } from '../data/burnBan';
 import { facebookGroup } from '../data/site';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
-import { electionNightIsLive } from '../lib/electionNight';
 import { eventKey, formatLong, labelFromKey } from '../lib/time';
 import { getForecast, isTown, weatherLabel } from '../lib/weather';
 import { readTown, townCookie } from '../lib/townChoice';
@@ -34,7 +33,6 @@ const voteBanner =
 
 const links = [
   { href: '/', label: 'Front page' },
-  ...(electionNightIsLive(now) ? [{ href: '/election-night', label: 'Election night' }] : []),
   { href: '/results', label: 'Results' },
   { href: '/scores', label: 'Scores' },
   { href: '/news', label: 'News' },

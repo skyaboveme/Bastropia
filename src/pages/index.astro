@@ -9,7 +9,7 @@ import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
 import { siteDescription } from '../data/site';
-import { electionDay, electionHours } from '../data/vote';
+import { electionDay } from '../data/vote';
 import { townByName, townPath } from '../data/towns';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { readTown, townCookie } from '../lib/townChoice';
@@ -20,7 +20,6 @@ import { capOrganizer, filterEvents, sortByTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, formatMedium, labelFromKey, thisWeekendKeys, whenLabel } from '../lib/time';
 import { getElectionBoard } from '../lib/electionResults';
-import { electionNightIsLive } from '../lib/electionNight';
 const now = new Date();
 const today = eventKey(now);
 const homeTown = readTown(Astro.cookies.get(townCookie)?.value);
@@ -123,15 +122,10 @@ const deskStories = pageHeadlines
         <img src="/images/bastrop-aerial.jpg" alt="Aerial view of downtown Bastrop, the river bridge, and the surrounding pines" width="1024" height="682" fetchpriority="high" decoding="async" />
       </picture>
     </figure>
-    <section class="desk-row" aria-label="Go Vote, results, and court">
-      <a class="desk-card" href="/go-vote">
-        <p class="kicker">Election Day</p>
-        <h2>Go Vote</h2>
-        <p>Polls are open {electionHours}. Vote at any county location.</p>
-      </a>
-      <a class="desk-card" href={electionNightIsLive(now) ? '/election-night' : '/results'}>
-        <p class="kicker">Election night</p>
-        <h2>{electionNightIsLive(now) ? 'Election night' : 'Results'}</h2>
+    <section class="desk-row" aria-label="Results and court">
+      <a class="desk-card" href="/results">
+        <p class="kicker">November 3, 2026</p>
+        <h2>Results</h2>
         <p>{board?.status ?? 'The county report did not load. Open the elections office page from Results.'}</p>
       </a>
       <a class="desk-card" href="/government/court-decisions">

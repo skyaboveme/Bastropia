@@ -1,8 +1,8 @@
 import { electionDay } from '../data/vote';
 import { addDays, eventKey } from './time';
 
-/** The special page and popup stay up through the day after Election Day. */
-export const electionNightUntil = addDays(electionDay, 2);
+/** Election night closed the morning after Election Day. The board now lives at /results. */
+export const electionNightUntil = addDays(electionDay, 1);
 
 export function electionNightIsLive(now = new Date()) {
   const key = eventKey(now);

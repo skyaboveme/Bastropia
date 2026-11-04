@@ -433,7 +433,7 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
 .site-footer .legal { color: var(--ink-soft); margin-top: 0.6rem; }
 .fine { grid-column: 1 / -1; color: var(--ink-soft); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 1rem; }
 
-.desk-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1rem; margin: 0.4rem 0 1.4rem; }
+.desk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.4rem 0 1.4rem; }
 .desk-card { display: block; text-decoration: none; border-top: 4px solid var(--ink); padding-top: 0.65rem; }
 .desk-card h2 { font-size: 1.7rem; margin: 0.15rem 0 0.35rem; }
 .desk-card ul { list-style: none; margin: 0; padding: 0; }
