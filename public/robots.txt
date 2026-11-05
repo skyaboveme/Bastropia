@@ -79,4 +79,5 @@ Disallow: /api/
 Disallow: /thanks
 Disallow: /search
 
+Sitemap: https://bastropia.com/sitemap.xml
 Sitemap: https://bastropia.com/sitemap-index.xml
