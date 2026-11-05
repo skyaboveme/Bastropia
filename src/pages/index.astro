@@ -61,6 +61,10 @@ if (today <= electionDay) {
   const election = pageHeadlines.find((story) => story.href === '/news/election-day-tuesday');
   if (election) pageHeadlines = [election, ...pageHeadlines.filter((story) => story.href !== election.href)];
 }
+if (today === '2026-11-05') {
+  const careAVan = pageHeadlines.find((story) => story.href === '/news/care-a-van-lost-pines-elementary-nov-5-2026');
+  if (careAVan) pageHeadlines = [careAVan, ...pageHeadlines.filter((story) => story.href !== careAVan.href)];
+}
 const lead = pageHeadlines[0];
 const secondary = pageHeadlines.slice(1, 3);
 const briefs = pageHeadlines.slice(3, 7);
