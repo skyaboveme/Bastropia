@@ -199,6 +199,7 @@ export function newsNode(story: CollectionEntry<'news'>) {
     inLanguage: 'en-US',
     isAccessibleForFree: true,
     mainEntityOfPage: absolute(path),
+    ...(story.data.image ? { image: [absolute(story.data.image)] } : {}),
     author: { '@id': orgId },
     publisher: {
       '@type': 'Organization',

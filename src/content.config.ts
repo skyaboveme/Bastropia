@@ -35,6 +35,7 @@ const news = defineCollection({
     place: z.string(),
     sourceUrl: z.string().url().optional(),
     sourceLabel: z.string().optional(),
+    image: z.string().optional(),
   }),
 });
 

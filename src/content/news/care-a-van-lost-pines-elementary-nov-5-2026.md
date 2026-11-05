@@ -5,6 +5,7 @@ pubDate: 2026-11-05T06:30:00-06:00
 place: Bastrop
 sourceUrl: https://www.bastropcares.org/community-event/care-a-van-event-blessed-hope-ministries-6/2026-11-05/
 sourceLabel: Bastrop County Cares
+image: /images/news/care-a-van-lost-pines.jpg
 ---
 
 Families looking for an evening of play and a chance to ask about community resources have a local option this Thursday. Bastrop County Cares lists a Care-A-Van visit to Lost Pines Elementary on Nov. 5, from 5 to 7 p.m. The event location is 151 Tiger Woods Drive in Bastrop.

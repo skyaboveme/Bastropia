@@ -13,13 +13,22 @@ const { story } = Astro.props;
 const { Content } = await render(story);
 ---
 
-<BaseLayout title={story.data.title} description={story.data.description} pageType="NewsArticle" extra={[newsNode(story)]}>
+<BaseLayout
+  title={story.data.title}
+  description={story.data.description}
+  image={story.data.image}
+  pageType="NewsArticle"
+  extra={[newsNode(story)]}
+>
   <article class="wrap">
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
       <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
       <h1>{story.data.title}</h1>
       <p class="lede">{story.data.description}</p>
     </header>
+    {story.data.image && (
+      <img class="event-photo" src={story.data.image} alt={story.data.title} />
+    )}
     <div class="prose">
       <Content />
       {story.data.sourceUrl && <p>Source: <a href={story.data.sourceUrl}>{story.data.sourceLabel ?? 'Public source'}</a></p>}
