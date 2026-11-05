@@ -13,6 +13,7 @@ tier: community
 organizer: "Explore Bastrop County"
 sourceUrl: "https://explorebastropcounty.com/calendar-event/bastrop-county-film-industry-meetup-series-2026/2026-12-16/"
 sourceLabel: "Explore Bastrop County calendar"
+image: "/images/events/bastrop-county-film-industry-meetup-series-2026-2026-12-16.jpg"
 ---
 
 Bastrop County, Texas is rolling out the red carpet in 2026 at the upcoming Film Industry Mixer in Bastrop, Texas! Whether you’re a seasoned pro or just curious about the magic behind the camera, this is your chance to mingle with the movers and shakers of the film world and talk about your projects and skills. Discover details about Bastrop County’s new film hub website, a resource designed to connect filmmakers with local talent and locations.  The free event includes complimentary refreshment

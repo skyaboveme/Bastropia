@@ -13,6 +13,7 @@ tier: community
 organizer: "City of Bastrop"
 sourceUrl: "https://www.discoverbastroptx.org/event/bastrops-annual-tree-lighting/8862/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/bastrop-tree-lighting-2026-11-27.jpg"
 ---
 
 Discover Bastrop lists the City of Bastrop tree lighting for Friday, November 27, 2026, from 6 pm to 8 pm at Fisherman's Park, 1200 Willow Street. The listing calls it free and mentions music, treats, and a visit from Santa.

@@ -13,6 +13,7 @@ tier: community
 organizer: "Bastrop Area Cruisers"
 sourceUrl: "https://www.discoverbastroptx.org/heroes-hot-rods-veterans-day-car-show/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/heroes-hot-rods-car-show-2026-11-14.jpg"
 ---
 
 Discover Bastrop lists the Heroes & Hot Rods car show for Saturday, November 14, 7:30 am to 4 pm in downtown Bastrop. Vehicle check-in closes at 10 am. The Veterans Tribute March is at 10:30 am, and the ceremony is at 11 am at the Bastrop County Courthouse gazebo. Awards are at 3 pm in front of the Bastrop Museum & Visitor Center.

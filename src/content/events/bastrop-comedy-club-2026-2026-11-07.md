@@ -13,6 +13,7 @@ tier: community
 organizer: "Explore Bastrop County"
 sourceUrl: "https://explorebastropcounty.com/calendar-event/bastrop-comedy-club-2026/2026-11-07/"
 sourceLabel: "Explore Bastrop County calendar"
+image: "/images/events/bastrop-comedy-club-2026-2026-11-07.jpg"
 ---
 
 Ready yourself and your friends for some laughs with weekly stand up comedy at Bastrop Comedy Club inside of Film Alley Bastrop Texas. Rotating list of amazing headlining comedians come from around the nation to entertain you.

@@ -13,6 +13,7 @@ tier: community
 organizer: "Downtown Bastrop"
 sourceUrl: "https://www.discoverbastroptx.org/event/wassail-fest/8861/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/wassail-fest-2026-11-28.jpg"
 ---
 
 Discover Bastrop lists Wassail Fest for Saturday, November 28, 2026, from 4 pm to 8 pm, the Saturday after Thanksgiving. Check-in is at the Bastrop County Museum & Visitor Center, 904 Main Street. Downtown shops serve hot mulled cider, and visitors can vote in a people's-choice tasting.

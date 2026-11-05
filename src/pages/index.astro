@@ -114,7 +114,7 @@ const deskStories = pageHeadlines
     ...deskStories.map((story) => newsNode(story)),
   ]}
 >
-  <div class="wrap">
+  <div class="wrap home-stack">
     <section class="desk-row" aria-label="Results and court">
       <a class="desk-card" href="/results">
         <p class="kicker">November 3, 2026</p>
@@ -286,9 +286,11 @@ const deskStories = pageHeadlines
       </aside>
     </section>
 
-    <ExternalNews items={around} allNews />
+    <div class="home-around">
+      <ExternalNews items={around} allNews />
+    </div>
 
-    <section class="section">
+    <section class="section home-weekend">
       <div class="section-head">
         <h2>This weekend</h2>
         <a href="/this-weekend">Friday to Sunday</a>

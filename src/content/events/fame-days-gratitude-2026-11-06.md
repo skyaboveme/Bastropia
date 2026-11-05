@@ -13,6 +13,7 @@ tier: community
 organizer: "Bastrop Cultural Arts Committee"
 sourceUrl: "https://www.discoverbastroptx.org/event/f-a-m-e-days%3a-gratitude-%26-community-traditions/9052/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/fame-days-gratitude-2026-11-06.jpg"
 ---
 
 F.A.M.E. Days is the Friday Art Market and Entertainment series. Discover Bastrop lists the November theme, Gratitude & Community Traditions, for Friday, November 6, 2026, from 5 pm to 8 pm on Pine Street in downtown Bastrop. The listing calls it free, with art, handcrafted goods, and live music.

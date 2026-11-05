@@ -13,6 +13,7 @@ tier: community
 organizer: "Explore Bastrop County"
 sourceUrl: "https://explorebastropcounty.com/calendar-event/family-nature-quest-2026/2026-11-07/"
 sourceLabel: "Explore Bastrop County calendar"
+image: "/images/events/family-nature-quest-2026-2026-11-07.jpg"
 ---
 
 Ready for your family to ditch the screens and reconnect with nature? Parents and kids can engage in joyful nature play activities that awaken the senses and spark inquiry through a series of self-guided mystery box stations at McKinney Roughs Nature Park in Bastrop County, Texas. This activity is ideal for families with children ages 4-10 years.

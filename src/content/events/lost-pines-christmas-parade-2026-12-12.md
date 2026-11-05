@@ -11,6 +11,7 @@ cost: Free
 tier: community
 sourceUrl: "https://www.discoverbastroptx.org/events/lost-pines-christmas/lost-pines-christmas-parade/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/lost-pines-christmas-parade-2026-12-12.jpg"
 ---
 
 Discover Bastrop lists the Lost Pines Christmas Lighted Parade for December 12, 2026, at 6 pm in historic downtown Bastrop. Admission is free. The page says the parade has more than 150 entries and does not give an end time.

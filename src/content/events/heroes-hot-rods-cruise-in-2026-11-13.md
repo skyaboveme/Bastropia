@@ -13,6 +13,7 @@ tier: community
 organizer: "Bastrop Area Cruisers"
 sourceUrl: "https://www.discoverbastroptx.org/heroes-hot-rods-veterans-day-car-show/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/heroes-hot-rods-cruise-in-2026-11-13.jpg"
 ---
 
 Discover Bastrop lists the Heroes & Hot Rods cruise-in for Friday, November 13, from 5 pm to 9 pm on Main Street. Spectators are free. Registered show vehicles get reserved parking on Main Street until 9 pm.

@@ -13,6 +13,7 @@ tier: community
 organizer: "Explore Bastrop County"
 sourceUrl: "https://explorebastropcounty.com/calendar-event/lpac-teen-art-club/2026-11-15/"
 sourceLabel: "Explore Bastrop County calendar"
+image: "/images/events/lpac-teen-art-club-2026-11-15.jpg"
 ---
 
 The Teen Art Program at the Lost Pines Art Center in Bastrop, Texas, meets every third Sunday (except for holidays) from 2–4 p.m. — and we’d love to see you there! Admission is free and all students are welcome, ages 13-18.  The young artists explore a variety of mediums, listen to music, create freely, and connect with friends in a relaxed and welcoming space. It’s the perfect creative outlet for teens who want to try new things, express themselves, and be part of a supportive art community.

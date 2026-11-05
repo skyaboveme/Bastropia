@@ -12,6 +12,7 @@ cost: "See the listing"
 tier: community
 sourceUrl: "https://www.discoverbastroptx.org/event/bastrops-river-of-lights/8863/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/bastrop-river-of-lights-2026-11-27.jpg"
 ---
 
 Discover Bastrop lists the River of Lights from November 27, 2026, through January 4, 2027, along the half-mile June Hill Pape Riverwalk at Fisherman's Park. The listing does not give daily hours or a price. Confirm both before you go.

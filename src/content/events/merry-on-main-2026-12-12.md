@@ -13,6 +13,7 @@ tier: community
 organizer: "Bastrop Main Street Program"
 sourceUrl: "https://www.discoverbastroptx.org/events/lost-pines-christmas/merry-on-main/"
 sourceLabel: "Discover Bastrop"
+image: "/images/events/merry-on-main-2026-12-12.jpg"
 ---
 
 Discover Bastrop lists Merry on Main for the second Saturday in December, 10 am to 3 pm, on Main Street in historic downtown Bastrop. In 2026 that Saturday is December 12. The page describes vendors, food, children's activities, cookie decorating, and a visit from Santa. It does not state a ticket price.

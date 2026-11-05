@@ -506,6 +506,7 @@ function looseTitle(title) {
     .replace(/\p{M}/gu, '')
     .toLowerCase()
     .replace(/\s*[-|]\s*explore bastrop county\s*$/i, '')
+    .replace(/\s*\|\s*bastrop(?:\s*,?\s*tx)?\s*$/i, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -648,39 +649,79 @@ function runCommand(command, args) {
   });
 }
 
+function metaContent(html, property) {
+  const pattern = new RegExp(
+    `property="${property}"[^>]*content="([^"]+)"|content="([^"]+)"[^>]*property="${property}"`,
+    'i',
+  );
+  const match = html.match(pattern);
+  return match ? decode(match[1] || match[2] || '') : '';
+}
+
+function photoHostAllowed(pageHost, imageHost) {
+  const page = pageHost.replace(/^www\./i, '').toLowerCase();
+  const image = imageHost.replace(/^www\./i, '').toLowerCase();
+  if (image === page) return true;
+  if (page.endsWith('allevents.in') && /(^|\.)allevents\.in$/.test(image)) return true;
+  // Explore Bastrop often serves uploads from its Forge / staging host.
+  if (page.endsWith('explorebastropcounty.com') && image.includes('explorebastropcounty')) return true;
+  // Discover Bastrop Simpleview CDN.
+  if (page.endsWith('discoverbastroptx.org') && image.endsWith('simpleviewinc.com')) return true;
+  return false;
+}
+
+function titlesAlign(expected, pageTitle) {
+  if (!expected) return true;
+  if (!pageTitle) return false;
+  if (looseTitle(pageTitle) === looseTitle(expected)) return true;
+  if (looseTitle(pageTitle).includes(looseTitle(expected))) return true;
+  const left = [...looseTitle(expected).split(' ')].filter((word) => word.length > 2);
+  const right = new Set(looseTitle(pageTitle).split(' ').filter((word) => word.length > 2));
+  if (!left.length) return false;
+  const hits = left.filter((word) => right.has(word)).length;
+  return hits >= Math.min(3, left.length) && hits / left.length >= 0.5;
+}
+
 function pageMeta(html, pageUrl) {
-  const imageMatch = html.match(/property="og:image" content="([^"]+)"/i);
-  const titleMatch = html.match(/property="og:title" content="([^"]+)"/i);
-  const title = titleMatch ? decode(titleMatch[1]) : '';
-  if (!imageMatch) return { image: '', title };
+  const title = metaContent(html, 'og:title');
+  const imageRaw = metaContent(html, 'og:image');
+  if (!imageRaw) return { image: '', title };
   let image;
   let page;
   try {
-    image = new URL(imageMatch[1]);
+    image = new URL(imageRaw);
     page = new URL(pageUrl);
   } catch {
     return { image: '', title };
   }
   if (image.protocol !== 'https:') return { image: '', title };
-  const sameHost = image.hostname === page.hostname;
-  const alleventsCdn = /allevents\.in$/i.test(page.hostname) && /(^|\.)allevents\.in$/i.test(image.hostname);
-  if (!sameHost && !alleventsCdn) return { image: '', title };
+  // Explore often prints a dead Forge hostname; the same path lives on the public site.
+  if (/explorebastropcounty\.on-forge\.com$/i.test(image.hostname)) {
+    image.hostname = 'explorebastropcounty.com';
+  }
+  if (!photoHostAllowed(page.hostname, image.hostname)) return { image: '', title };
   if (genericPhoto.test(image.href)) return { image: '', title };
   return { image: image.href, title };
 }
 
 /** Save the city's event poster, resized. Returns a site path, or '' when the calendar has no photo. */
 function canFetchPhoto(pageUrl) {
-  return (
-    pageUrl.includes('EID=') ||
-    /explorebastropcounty\.com\/calendar-event\//i.test(pageUrl) ||
-    /allevents\.in\//i.test(pageUrl)
-  );
+  try {
+    const host = new URL(pageUrl).hostname.replace(/^www\./i, '').toLowerCase();
+    return (
+      pageUrl.includes('EID=') ||
+      host.endsWith('explorebastropcounty.com') ||
+      host.endsWith('allevents.in') ||
+      host.endsWith('discoverbastroptx.org')
+    );
+  } catch {
+    return false;
+  }
 }
 
 function looksLikeImage(bytes, contentType, remoteUrl) {
   if ((contentType || '').startsWith('image/')) return true;
-  if (/^https:\/\/[^/]*allevents\.in\//i.test(remoteUrl)) return true;
+  if (/^https:\/\/[^/]*(allevents\.in|simpleviewinc\.com|explorebastropcounty)\//i.test(remoteUrl)) return true;
   if (bytes[0] === 0xff && bytes[1] === 0xd8) return true;
   if (bytes[0] === 0x89 && bytes[1] === 0x50) return true;
   if (bytes.toString('ascii', 0, 4) === 'RIFF') return true;
@@ -726,7 +767,7 @@ async function saveEventPhoto(pageUrl, name, expectedTitle, remoteImage = '') {
   if (!canFetchPhoto(pageUrl)) return '';
   const html = await fetchText(pageUrl);
   const meta = pageMeta(html, pageUrl);
-  if (expectedTitle && looseTitle(meta.title) !== looseTitle(expectedTitle)) {
+  if (expectedTitle && !titlesAlign(expectedTitle, meta.title)) {
     console.log(`photo skipped  ${name}  page is "${meta.title || 'untitled'}"`);
     return '';
   }
@@ -742,7 +783,10 @@ function withImage(raw, imagePath) {
 }
 
 async function attachMissingPhotos(listings) {
-  const pending = listings.filter((listing) => canFetchPhoto(listing.sourceUrl) && !listing.image).slice(0, 60);
+  const pending = listings
+    .filter((listing) => canFetchPhoto(listing.sourceUrl) && !listing.image)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
+    .slice(0, 60);
   let saved = 0;
   for (const listing of pending) {
     const name = listing.file.replace(/\.md$/, '');

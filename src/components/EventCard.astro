@@ -23,14 +23,14 @@ const calendarHref = googleCalendarUrl(event, pageUrl);
 ---
 
 <article class:list={['event-card', `tier-${tier}`, { compact }]}>
-  <a class:list={[{ 'has-photo': event.data.image && !compact }]} href={`/events/${event.id}`}>
+  <a class:list={[{ 'has-photo': Boolean(event.data.image) }]} href={`/events/${event.id}`}>
     {!compact && (
       <time class="date-stamp" datetime={event.data.start.toISOString()}>
         <span>{stamp.month}</span>
         <strong>{stamp.day}</strong>
       </time>
     )}
-    {event.data.image && !compact && <img class="event-thumb" src={event.data.image} alt={event.data.title} width="160" height="120" />}
+    {event.data.image && <img class="event-thumb" src={event.data.image} alt={event.data.title} width="160" height="120" loading="lazy" />}
     <div>
       <p class="kicker">{category.label} · {event.data.city}</p>
       <h3>{event.data.title}</h3>

@@ -553,20 +553,39 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
     margin: 0 auto 0.45rem;
     font-size: 0.78rem;
   }
-  .desk-row { grid-template-columns: 1fr; }
+  .desk-row { display: none; }
+  .home-stack { display: flex; flex-direction: column; }
+  .home-stack > .front { order: 1; }
+  .home-stack > .home-around { order: 3; }
+  .home-stack > .section,
+  .home-stack > .band { order: 4; }
+  .home-stack > .home-weekend { order: 2; }
   .sections-inner { flex-wrap: wrap; }
   .menu { display: inline-flex; }
   .nav { display: none; width: 100%; flex-direction: column; padding-bottom: 0.6rem; }
   .nav.is-open { display: flex; }
   .nav-search { display: none; }
-  .front { grid-template-columns: 1fr; grid-template-areas: "lead" "right" "left"; }
-  .col-left, .col-right { padding: 0; border: 0; margin-top: 1.4rem; }
+  /* Today first on phones, then the lead story, then more headlines. */
+  .front { grid-template-columns: 1fr; grid-template-areas: "right" "lead" "left"; }
+  .col-left, .col-right { padding: 0; border: 0; margin-top: 1.1rem; }
+  .col-right { margin-top: 0.35rem; }
+  .col-right .wx { display: none; }
+  .col-left { display: none; }
+  .story-pair { display: none; }
   .story-pair, .ci-4, .ci-2 { grid-template-columns: 1fr; }
   .story-sub + .story-sub { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 1rem; }
+  .story-lead .dek { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .story-sub .dek { display: none; }
+  .brand img { height: 120px; }
+  .home-around .ci-grid { grid-template-columns: 1fr; }
+  .home-around .brief:nth-child(n + 4) { display: none; }
   .fields, .place-grid { grid-template-columns: 1fr; }
   .ad-slot { flex-direction: column; align-items: flex-start; }
-  .event-card a, .event-card a.has-photo { grid-template-columns: 3.4rem 1fr; }
-  .event-thumb { display: none; }
+  .event-card a { grid-template-columns: 3.4rem 1fr; }
+  .event-card a.has-photo { grid-template-columns: 3.4rem 4rem 1fr; }
+  .event-thumb { display: block; height: 3.6rem; }
+  .event-card.compact a.has-photo { grid-template-columns: 4rem 1fr; }
+  .event-card.compact a.has-photo time { display: none; }
   .footer-grid { grid-template-columns: 1fr; }
   .band { padding: 1.3rem; }
 }
