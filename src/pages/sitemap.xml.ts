@@ -55,6 +55,7 @@ const hubs: Entry[] = [
   { path: '/events.xml', priority: '0.5' },
   { path: '/llms.txt', priority: '0.4' },
   { path: '/llms-full.txt', priority: '0.4' },
+  { path: '/sitemap', priority: '0.3' },
 ];
 
 export const GET: APIRoute = async () => {
