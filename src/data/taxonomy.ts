@@ -5,6 +5,7 @@ export const cities = [
   'Cedar Creek',
   'McDade',
   'Paige',
+  'Rosanky',
   'Countywide',
 ] as const;
 
