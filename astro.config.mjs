@@ -1,9 +1,25 @@
 // @ts-check
-import { readdirSync } from 'node:fs';
+import { copyFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
+
+/** Keep generated sitemaps in public/ so the Cloudflare Worker asset manifest includes them. */
+function mirrorSitemapToPublic() {
+  return {
+    name: 'mirror-sitemap-to-public',
+    hooks: {
+      'astro:build:done': async ({ dir }) => {
+        const out = dir.pathname;
+        for (const name of readdirSync(out)) {
+          if (!/^sitemap.*\.xml$/i.test(name)) continue;
+          copyFileSync(join(out, name), join(process.cwd(), 'public', name));
+        }
+      },
+    },
+  };
+}
 
 const site = 'https://bastropia.com';
 const hidden = ['/desk', '/thanks', '/search', '/404', '/ics/', '/api/', '/ad/', '/ads/', '/go/'];
@@ -55,6 +71,7 @@ export default defineConfig({
         return item;
       },
     }),
+    mirrorSitemapToPublic(),
   ],
   redirects: {
     '/events/submit': '/submit',
