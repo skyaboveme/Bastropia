@@ -103,37 +103,54 @@ ul { margin: 0; padding: 0; list-style: none; }
 .county-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.7rem 1rem;
+  gap: 0.55rem 0.85rem;
   width: min(var(--wrap), calc(100% - 2.4rem));
-  margin: 0 auto 0.85rem;
+  margin: 0 auto 0.65rem;
 }
-.county-strip a { text-decoration: none; display: grid; gap: 0.08rem; border-top: 3px solid var(--river); padding-top: 0.35rem; }
+.county-strip a { text-decoration: none; display: grid; gap: 0.04rem; border-top: 3px solid var(--river); padding-top: 0.28rem; min-width: 0; }
 .county-strip a.is-alert { border-top-color: #c5161d; }
 .county-strip span {
   display: inline-flex;
   align-items: center;
-  gap: 0.32em;
-  font-size: 0.68rem;
+  gap: 0.28em;
+  min-width: 0;
+  font-size: 0.64rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--river-deep);
 }
 .county-strip .strip-icon {
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.85rem;
+  height: 0.85rem;
   flex: none;
   color: currentColor;
 }
 .county-strip a.is-alert span,
 .county-strip a.is-alert .strip-icon { color: #c5161d; }
-.county-strip strong { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; line-height: 1.1; }
-.county-strip em { font-style: normal; color: var(--ink-soft); font-size: 0.82rem; }
+.county-strip strong {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.county-strip em {
+  font-style: normal;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .strip-also {
   width: min(var(--wrap), calc(100% - 2.4rem));
-  margin: -0.4rem auto 0.8rem;
+  margin: -0.25rem auto 0.55rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
 }
 .sections-bar { border-top: 4px solid var(--ink); border-bottom: 1px solid var(--ink); background: var(--paper); position: sticky; top: 0; z-index: 10; }
 .sections-inner { display: flex; align-items: center; gap: 1rem; }
@@ -505,7 +522,36 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
   .ear { max-width: none; }
   .ear strong { font-size: 2.2rem; }
   .ear strong.is-stop { font-size: 1.45rem; }
-  .county-strip { grid-template-columns: 1fr 1fr; }
+  .county-strip {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0.1rem 1.2rem 0.45rem;
+    scrollbar-width: none;
+  }
+  .county-strip::-webkit-scrollbar { display: none; }
+  .county-strip a {
+    flex: 0 0 auto;
+    width: 7.6rem;
+    scroll-snap-align: start;
+    border-top-width: 2px;
+    padding-top: 0.22rem;
+  }
+  .county-strip span { font-size: 0.58rem; letter-spacing: 0.08em; }
+  .county-strip .strip-icon { width: 0.78rem; height: 0.78rem; }
+  .county-strip strong { font-size: 1.02rem; }
+  .county-strip em { font-size: 0.68rem; }
+  .strip-also {
+    width: min(var(--wrap), calc(100% - 2.4rem));
+    margin: 0 auto 0.45rem;
+    font-size: 0.78rem;
+  }
   .desk-row { grid-template-columns: 1fr; }
   .sections-inner { flex-wrap: wrap; }
   .menu { display: inline-flex; }

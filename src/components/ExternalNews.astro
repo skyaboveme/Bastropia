@@ -1,6 +1,7 @@
 ---
 import type { ExternalStory } from '../lib/externalNews';
 import { newsSources, storyLabel } from '../lib/externalNews';
+import { offsiteAttrs } from '../lib/links';
 import { formatMedium } from '../lib/time';
 
 interface Props {
@@ -25,7 +26,7 @@ const present = newsSources.filter((source) => items.some((item) => item.source.
       {items.map((item) => (
         <article class="brief">
           <p class="kicker">{storyLabel(item)} · {formatMedium(item.published)}</p>
-          <h3><a href={item.link} rel="noopener">{item.title}</a></h3>
+          <h3><a href={item.link} {...offsiteAttrs(item.link)}>{item.title}</a></h3>
           {showSummary && item.summary && <p class="meta">{item.summary}</p>}
           {item.author && <p class="meta byline">By {item.author}</p>}
         </article>
@@ -36,7 +37,7 @@ const present = newsSources.filter((source) => items.some((item) => item.source.
       {present.map((source, index) => (
         <>
           {index > 0 && (index === present.length - 1 ? ' and ' : ', ')}
-          <a class="text-link" href={source.home} rel="noopener">{source.name}</a>
+          <a class="text-link" href={source.home} {...offsiteAttrs(source.home)}>{source.name}</a>
         </>
       ))}.
       Stories open on their sites. Bastropia does not write or edit them.

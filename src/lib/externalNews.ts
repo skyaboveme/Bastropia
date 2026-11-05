@@ -59,6 +59,56 @@ export type Headline = {
   external: boolean;
 };
 
+/** Words that do not identify the story once names and offices are present. */
+const subjectStop = new Set([
+  'a', 'an', 'the', 'and', 'or', 'but', 'of', 'in', 'on', 'at', 'to', 'for', 'from', 'with', 'by', 'as', 'after',
+  'before', 'over', 'into', 'near', 'about', 'amid', 'during', 'against', 'its', 'his', 'her', 'their', 'our',
+  'new', 'more', 'says', 'said', 'amid', 'close', 'narrow', 'official', 'officials', 'results', 'unofficial',
+  'wins', 'win', 'won', 'beats', 'beat', 'claims', 'claim', 'claimed', 'unseats', 'unseat', 'unseated',
+  'takes', 'take', 'took', 'keeps', 'keep', 'kept', 'retains', 'retain', 'retained', 'holds', 'hold', 'held',
+  'reelection', 'relection', 'election', 'elections', 'race', 'seat', 'seats', 'day', 'night', 'today',
+  'update', 'breaking', 'live', 'video', 'photos', 'watch',
+]);
+
+export function significantWords(title: string): Set<string> {
+  const words = title
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !subjectStop.has(word));
+  return new Set(words);
+}
+
+/** True when two headlines are covering the same local story under different wording. */
+export function sameSubject(left: Set<string>, right: Set<string>): boolean {
+  if (!left.size || !right.size) return false;
+  let overlap = 0;
+  for (const word of left) {
+    if (right.has(word)) overlap += 1;
+  }
+  if (overlap < 3) return false;
+  const union = left.size + right.size - overlap;
+  return overlap / union >= 0.45;
+}
+
+function firstUniqueBySubject<T>(items: T[], titleOf: (item: T) => string, linkOf?: (item: T) => string): T[] {
+  const kept: T[] = [];
+  const subjects: Set<string>[] = [];
+  const links = new Set<string>();
+  for (const item of items) {
+    const link = linkOf?.(item);
+    if (link && links.has(link)) continue;
+    const words = significantWords(titleOf(item));
+    if (subjects.some((seen) => sameSubject(seen, words))) continue;
+    if (link) links.add(link);
+    subjects.push(words);
+    kept.push(item);
+  }
+  return kept;
+}
+
 export function latestHeadlines(
   desk: { id: string; data: { title: string; description: string; pubDate: Date; place: string } }[],
   external: ExternalStory[],
@@ -83,10 +133,16 @@ export function latestHeadlines(
       external: true,
     })),
   ];
-  const seen = new Set<string>();
-  return items
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .filter((item) => (seen.has(item.href) ? false : (seen.add(item.href), true)));
+  // Desk notes first when two pieces cover the same subject on the same day.
+  return firstUniqueBySubject(
+    items.sort((a, b) => {
+      const byDate = b.date.getTime() - a.date.getTime();
+      if (byDate) return byDate;
+      return Number(a.external) - Number(b.external);
+    }),
+    (item) => item.title,
+    (item) => item.href,
+  );
 }
 
 export type ExternalStory = {
@@ -329,11 +385,15 @@ export async function getExternalNews(limit = 8, perSource = Infinity, matching?
   const lists = await Promise.all(sources.map(loadSource));
   const seen = new Set<string>();
   const seenTitles = new Set<string>();
+  const subjects: Set<string>[] = [];
   const accept = (story: ExternalStory) => {
     const title = story.title.toLowerCase().replace(/\s+/g, ' ').trim();
     if (seen.has(story.link) || seenTitles.has(title)) return false;
+    const words = significantWords(story.title);
+    if (subjects.some((seenSubject) => sameSubject(seenSubject, words))) return false;
     seen.add(story.link);
     seenTitles.add(title);
+    subjects.push(words);
     return true;
   };
 

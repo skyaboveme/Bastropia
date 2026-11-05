@@ -8,6 +8,7 @@ import HomeBanner from '../components/HomeBanner.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
+import { offsiteAttrs } from '../lib/links';
 import { siteDescription } from '../data/site';
 import { electionDay } from '../data/vote';
 import { townByName, townPath } from '../data/towns';
@@ -132,16 +133,16 @@ const deskStories = pageHeadlines
         {lead && (
           <article class="story-lead">
             <p class="kicker">{lead.label} · {formatMedium(lead.date)}</p>
-            <h1><a href={lead.href} rel={lead.external ? 'noopener' : undefined}>{lead.title}</a></h1>
+            <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
             {lead.summary && <p class="dek">{lead.summary}</p>}
-            <p class="more"><a href={lead.href} rel={lead.external ? 'noopener' : undefined}>Read the story</a></p>
+            <p class="more"><a href={lead.href} {...offsiteAttrs(lead.href)}>Read the story</a></p>
           </article>
         )}
         <div class="story-pair">
           {secondary.map((story) => (
             <article class="story-sub">
               <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
-              <h2><a href={story.href} rel={story.external ? 'noopener' : undefined}>{story.title}</a></h2>
+              <h2><a href={story.href} {...offsiteAttrs(story.href)}>{story.title}</a></h2>
               {story.summary && <p class="dek">{story.summary}</p>}
             </article>
           ))}
@@ -153,7 +154,7 @@ const deskStories = pageHeadlines
         {briefs.map((story) => (
           <article class="brief">
             <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
-            <h3><a href={story.href} rel={story.external ? 'noopener' : undefined}>{story.title}</a></h3>
+            <h3><a href={story.href} {...offsiteAttrs(story.href)}>{story.title}</a></h3>
           </article>
         ))}
         {notices.filter((notice) => notice.id !== 'outdoor-burning-status').slice(0, 3).map((notice) => (
@@ -198,9 +199,17 @@ const deskStories = pageHeadlines
                 {homeScores.map((score) => (
                   <li>
                     <a href="/scores">
-                      <span class="when">{score.when}</span>
-                      <strong>{score.school} {score.schoolScore}–{score.opponentScore}</strong>
-                      <span class="where">{score.result === 'won' ? 'Beat' : score.result === 'lost' ? 'Lost to' : 'Tied'} {score.opponent}</span>
+                      <span class="when">{score.next?.when ?? score.last?.when ?? score.when}</span>
+                      <strong>
+                        {score.next
+                          ? `${score.next.side === 'Away' ? '@' : 'vs'} ${score.next.opponent}`
+                          : `${score.school} ${score.schoolScore}–${score.opponentScore}`}
+                      </strong>
+                      <span class="where">
+                        {score.last
+                          ? `${score.last.result === 'won' ? 'W' : score.last.result === 'lost' ? 'L' : 'T'} ${score.last.schoolScore}–${score.last.opponentScore} ${score.last.opponent}`
+                          : 'Upcoming'}
+                      </span>
                     </a>
                   </li>
                 ))}
@@ -226,7 +235,7 @@ const deskStories = pageHeadlines
                 <ul class="featured-news">
                   {panel.items.map((story) => (
                     <li>
-                      <a href={story.href} rel={story.external ? 'noopener' : undefined}>
+                      <a href={story.href} {...offsiteAttrs(story.href)}>
                         <em>{story.label}</em>
                         <strong>{story.title}</strong>
                       </a>

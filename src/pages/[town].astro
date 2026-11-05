@@ -10,6 +10,7 @@ import { districtsFor, notesForTown, schoolWeekChecked } from '../data/schoolWee
 import { youtubeChannels, channelPage } from '../data/youtubeChannels';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { getExternalNews } from '../lib/externalNews';
+import { offsiteAttrs } from '../lib/links';
 import { phoneHref } from '../lib/format';
 import { eventKey, formatMedium, labelFromKey } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
@@ -88,7 +89,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
           <ul class="agenda">
             {notes.map((note) => (
               <li>
-                <a href={note.sourceUrl} rel="noopener">
+                <a href={note.sourceUrl} {...offsiteAttrs(note.sourceUrl)}>
                   <span class="when">{note.endDate ? `${labelFromKey(note.date)} – ${labelFromKey(note.endDate)}` : labelFromKey(note.date)}</span>
                   <strong>{note.title}</strong>
                   <span class="where">{note.detail}</span>
@@ -112,9 +113,14 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
           const score = townScores.find((item) => item.id === school.id);
           return (
             <p class="meta">
-              {score
-                ? `${school.school} ${score.result === 'won' ? 'beat' : score.result === 'lost' ? 'lost to' : 'tied'} ${score.opponent}, ${score.schoolScore}–${score.opponentScore}, ${score.when}.`
-                : `${school.school}’s latest final is not on the school page right now.`}
+              {score?.next
+                ? `${school.school} plays ${score.next.side === 'Away' ? `at ${score.next.opponent}` : score.next.opponent}${score.next.when ? `, ${score.next.when}` : ''}${score.next.kickoff ? ` at ${score.next.kickoff}` : ''}.`
+                : null}
+              {score?.last
+                ? `${score.next ? ' ' : ''}${school.school} ${score.last.result === 'won' ? 'beat' : score.last.result === 'lost' ? 'lost to' : 'tied'} ${score.last.opponent}, ${score.last.schoolScore}–${score.last.opponentScore}, ${score.last.when}.`
+                : score?.next
+                  ? null
+                  : `${school.school}’s latest final is not on the school page right now.`}
               {' '}
               <a class="text-link" href="/scores">Scoreboard</a>
             </p>
@@ -149,7 +155,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
             {wires.map((story) => (
               <article class="brief">
                 <p class="kicker">{story.source.name}</p>
-                <h3><a href={story.link} rel="noopener">{story.title}</a></h3>
+                <h3><a href={story.link} {...offsiteAttrs(story.link)}>{story.title}</a></h3>
               </article>
             ))}
             {!localNews.length && !wires.length && <p class="meta">No recent headline names {town.name}.</p>}
@@ -164,7 +170,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
             <ul class="stream-list">
               {channels.map((channel) => (
                 <li class="stream">
-                  <h3><a href={channelPage(channel)} rel="noopener">{channel.name}</a></h3>
+                  <h3><a href={channelPage(channel)} {...offsiteAttrs(channelPage(channel))}>{channel.name}</a></h3>
                   <p class="meta">{channel.note}</p>
                 </li>
               ))}

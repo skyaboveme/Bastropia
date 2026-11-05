@@ -115,5 +115,51 @@ const jsonLd = stringify(graph(nodes));
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      (function () {
+        function offsite(href) {
+          if (!href) return false;
+          var value = String(href).trim();
+          if (!value || value.charAt(0) === '#' || value.charAt(0) === '?') return false;
+          if (value.charAt(0) === '/' && value.charAt(1) !== '/') return false;
+          if (/^(mailto|tel|sms|javascript):/i.test(value)) return false;
+          try {
+            var url = new URL(value, location.href);
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+            var host = url.hostname.replace(/^www\./i, '').toLowerCase();
+            var here = location.hostname.replace(/^www\./i, '').toLowerCase();
+            return host !== here;
+          } catch (error) {
+            return false;
+          }
+        }
+
+        function mark(anchor) {
+          if (!anchor || anchor.target === '_blank') return;
+          if (!offsite(anchor.getAttribute('href'))) return;
+          anchor.target = '_blank';
+          var rel = anchor.getAttribute('rel') || '';
+          if (!/\bnoopener\b/i.test(rel)) rel = (rel + ' noopener').trim();
+          if (!/\bnoreferrer\b/i.test(rel)) rel = (rel + ' noreferrer').trim();
+          anchor.setAttribute('rel', rel);
+        }
+
+        function markAll(root) {
+          var links = (root || document).querySelectorAll('a[href]');
+          for (var i = 0; i < links.length; i += 1) mark(links[i]);
+        }
+
+        markAll(document);
+        document.addEventListener(
+          'click',
+          function (event) {
+            var node = event.target;
+            if (!node || !node.closest) return;
+            mark(node.closest('a[href]'));
+          },
+          true,
+        );
+      })();
+    </script>
   </body>
 </html>

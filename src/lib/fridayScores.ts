@@ -3,16 +3,38 @@ const headers = {
   accept: 'text/html',
 };
 
+export type GameResult = {
+  opponent: string;
+  schoolScore: number;
+  opponentScore: number;
+  result: 'won' | 'lost' | 'tied';
+  when: string;
+  kickoff: string;
+  place: string;
+  side: 'Home' | 'Away' | '';
+};
+
+export type UpcomingGame = {
+  opponent: string;
+  when: string;
+  kickoff: string;
+  side: 'Home' | 'Away' | '';
+};
+
+/** Last final plus the next listed kickoff for one county varsity team. */
 export type SchoolScore = {
   id: string;
   school: string;
   mascot: string;
   href: string;
   watch: string;
+  last: GameResult | null;
+  next: UpcomingGame | null;
+  /** Flattened last-game fields for older call sites. */
   opponent: string;
   schoolScore: number;
   opponentScore: number;
-  result: 'won' | 'lost' | 'tied';
+  result: 'won' | 'lost' | 'tied' | '';
   when: string;
   kickoff: string;
   place: string;
@@ -52,47 +74,163 @@ export const footballSchools: { id: string; school: string; mascot: string; href
 
 const cache: { at: number; value: SchoolScore[] } = { at: 0, value: [] };
 
-function visible(html: string) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&#x27;|&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+type GlanceTeam = {
+  teamId: string;
+  schoolName: string;
+  score: number | null;
+  result: string | null;
+};
+
+type GlanceGame = {
+  hasResult: boolean;
+  timestamp: string;
+  homeAwayType: number;
+  teams: GlanceTeam[];
+};
+
+function stampParts(iso: string) {
+  const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (!match) return { when: '', kickoff: '' };
+  const when = `${monthNames[Number(match[2]) - 1]} ${Number(match[3])}, ${match[1]}`;
+  let hour = Number(match[4]);
+  const minute = match[5];
+  const suffix = hour >= 12 ? 'pm' : 'am';
+  hour = hour % 12 || 12;
+  const kickoff = minute === '00' ? `${hour} ${suffix}` : `${hour}:${minute} ${suffix}`;
+  return { when, kickoff };
 }
 
-export function parseLatestGame(
-  html: string,
-  school: (typeof footballSchools)[number],
-): SchoolScore | null {
-  const text = visible(html);
-  const last = text.split('Last Game')[1] ?? '';
-  const match = last.match(
-    /On (?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ([A-Z][a-z]{2,8} \d{1,2}, \d{4}), the .+? team (won|lost|tied) their(?: ([A-Za-z0-9 .'-]{2,80}?))? game against (.+?) by a score of (\d+)-(\d+)/,
-  );
+function sideOf(homeAwayType: number): 'Home' | 'Away' | '' {
+  if (homeAwayType === 1) return 'Home';
+  if (homeAwayType === 0) return 'Away';
+  return '';
+}
+
+function shortSchool(name: string) {
+  return name.replace(/ High School$/i, '').trim();
+}
+
+function resultOf(code: string | null | undefined): GameResult['result'] {
+  if (code === 'W') return 'won';
+  if (code === 'L') return 'lost';
+  return 'tied';
+}
+
+function fromGlance(game: GlanceGame, schoolId: string): { us: GlanceTeam; opp: GlanceTeam } | null {
+  const us = game.teams.find((team) => team.teamId === schoolId);
+  const opp = game.teams.find((team) => team.teamId !== schoolId);
+  if (!us || !opp) return null;
+  return { us, opp };
+}
+
+function parseNextData(html: string) {
+  const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
   if (!match) return null;
-  const kickoff = last.match(/@ (\d{1,2}:\d{2}\s*[ap]m)/i)?.[1] ?? '';
-  const side = last.startsWith(' Home Game') ? 'Home' : last.startsWith(' Away Game') ? 'Away' : '';
-  const place = (match[3] ?? '').replace(/\bStd\b/, 'Stadium').trim();
+  try {
+    return JSON.parse(match[1]) as {
+      props?: {
+        pageProps?: {
+          schoolId?: string;
+          featuredGameData?: {
+            date?: string;
+            hasResult?: boolean;
+            teams?: { teamId: string; name: string; homeAwayType: number }[];
+          };
+          wallCards?: { schedule?: { data?: GlanceGame[] } };
+        };
+      };
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function parseTeamBoard(html: string, school: (typeof footballSchools)[number]): SchoolScore | null {
+  const data = parseNextData(html);
+  const page = data?.props?.pageProps;
+  const schoolId = page?.schoolId;
+  const games = page?.wallCards?.schedule?.data;
+  if (!schoolId || !games?.length) return null;
+
+  const finished = [...games].filter((game) => game.hasResult).reverse();
+  const upcoming = games.find((game) => !game.hasResult);
+
+  let last: GameResult | null = null;
+  for (const game of finished) {
+    const pair = fromGlance(game, schoolId);
+    if (!pair || pair.us.score == null || pair.opp.score == null) continue;
+    const stamp = stampParts(game.timestamp);
+    last = {
+      opponent: shortSchool(pair.opp.schoolName),
+      schoolScore: Number(pair.us.score),
+      opponentScore: Number(pair.opp.score),
+      result: resultOf(pair.us.result),
+      when: stamp.when,
+      kickoff: stamp.kickoff,
+      place: '',
+      side: sideOf(game.homeAwayType),
+    };
+    break;
+  }
+
+  let next: UpcomingGame | null = null;
+  if (upcoming) {
+    const pair = fromGlance(upcoming, schoolId);
+    if (pair) {
+      const stamp = stampParts(upcoming.timestamp);
+      next = {
+        opponent: shortSchool(pair.opp.schoolName),
+        when: stamp.when,
+        kickoff: stamp.kickoff,
+        side: sideOf(upcoming.homeAwayType),
+      };
+    }
+  } else if (page.featuredGameData && !page.featuredGameData.hasResult && page.featuredGameData.teams?.length) {
+    const featured = page.featuredGameData;
+    const us = featured.teams.find((team) => team.teamId === schoolId);
+    const opp = featured.teams.find((team) => team.teamId !== schoolId);
+    if (us && opp && featured.date) {
+      const stamp = stampParts(featured.date);
+      next = {
+        opponent: shortSchool(opp.name),
+        when: stamp.when,
+        kickoff: stamp.kickoff,
+        side: sideOf(us.homeAwayType),
+      };
+    }
+  }
+
+  if (!last && !next) return null;
+
   return {
     ...school,
-    opponent: match[4].replace(/ High School$/, ''),
-    schoolScore: Number(match[5]),
-    opponentScore: Number(match[6]),
-    result: match[2] as SchoolScore['result'],
-    when: match[1],
-    kickoff,
-    place,
-    side,
+    last,
+    next,
+    opponent: last?.opponent ?? '',
+    schoolScore: last?.schoolScore ?? 0,
+    opponentScore: last?.opponentScore ?? 0,
+    result: last?.result ?? '',
+    when: last?.when ?? next?.when ?? '',
+    kickoff: last?.kickoff ?? next?.kickoff ?? '',
+    place: last?.place ?? '',
+    side: last?.side ?? next?.side ?? '',
   };
+}
+
+/** @deprecated Prefer parseTeamBoard. Kept for the old Last Game HTML copy. */
+export function parseLatestGame(html: string, school: (typeof footballSchools)[number]): SchoolScore | null {
+  return parseTeamBoard(html, school);
 }
 
 async function loadSchool(school: (typeof footballSchools)[number]) {
   const response = await fetch(school.href, { headers, signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new Error(`${school.school} ${response.status}`);
-  return parseLatestGame(await response.text(), school);
+  return parseTeamBoard(await response.text(), school);
 }
 
 export async function getFridayScores(): Promise<SchoolScore[]> {

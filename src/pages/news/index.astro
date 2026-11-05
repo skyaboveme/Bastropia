@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { getExternalNews, latestHeadlines } from '../../lib/externalNews';
+import { offsiteAttrs } from '../../lib/links';
 import { linkList } from '../../lib/schema';
 import { formatMedium } from '../../lib/time';
 
@@ -24,7 +25,7 @@ const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
       <div class="news-list">
         {headlines.map((story) => (
           <article class="story-card">
-            <a href={story.href} rel={story.external ? 'noopener' : undefined}>
+            <a href={story.href} {...offsiteAttrs(story.href)}>
               <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
               <h3>{story.title}</h3>
               {story.summary && <p class="meta">{story.summary}</p>}
