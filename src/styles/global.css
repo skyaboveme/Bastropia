@@ -210,7 +210,8 @@ main { padding-bottom: 3rem; }
 .cluster { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.9rem; }
 
 /* ---------- Front page ---------- */
-.home-banner { margin: 1.2rem 0 0; }
+.site-banner { margin: 1.6rem auto 1.4rem; }
+.home-banner { margin: 0; }
 .home-banner-frame { position: relative; aspect-ratio: 12 / 5; background: var(--paper-2); border-bottom: 4px solid var(--river); overflow: hidden; }
 .home-banner-slide { position: absolute; inset: 0; }
 .home-banner-slide[hidden] { display: none; }

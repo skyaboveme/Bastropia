@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import HomeBanner from '../components/HomeBanner.astro';
 import { siteDescription, siteName } from '../data/site';
 import { breadcrumb, graph, organization, stringify, webPage, website } from '../lib/schema';
 
@@ -11,14 +12,17 @@ interface Props {
   image?: string;
   imageAlt?: string;
   noindex?: boolean;
+  /** Rotating sponsored banner. Off on the private desk. */
+  banner?: boolean;
   pageType?: string;
   canonicalPath?: string;
   extra?: Record<string, unknown>[];
 }
 
-const { title, description = siteDescription, image, imageAlt, noindex = false, pageType = 'WebPage', canonicalPath, extra = [] } = Astro.props;
+const { title, description = siteDescription, image, imageAlt, noindex = false, banner, pageType = 'WebPage', canonicalPath, extra = [] } = Astro.props;
 const fullTitle = title === siteName ? `${siteName} — Everything happening in Bastrop County` : `${title} · ${siteName}`;
 const requestPath = Astro.url.pathname.length > 1 && Astro.url.pathname.endsWith('/') ? Astro.url.pathname.slice(0, -1) : Astro.url.pathname;
+const showBanner = banner ?? !(requestPath === '/desk' || requestPath.startsWith('/desk/'));
 const path = canonicalPath ?? requestPath;
 const canonical = new URL(path, Astro.site);
 const sharePath = image || '/brand/og.png';
@@ -113,6 +117,11 @@ const jsonLd = stringify(graph(nodes));
     <Header />
     <main id="main">
       <slot />
+      {showBanner && (
+        <div class="wrap site-banner">
+          <HomeBanner />
+        </div>
+      )}
     </main>
     <Footer />
     <script is:inline>

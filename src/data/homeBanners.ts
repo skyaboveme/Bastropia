@@ -7,7 +7,7 @@ export type HomeBanner = {
 };
 
 /**
- * Front-page banners. Each file is 1200×500.
+ * Sitewide rotating banners. Each file is 1200×500.
  * Add one object per advertiser. The spot rotates when there is more than one.
  */
 export const homeBanners: HomeBanner[] = [
