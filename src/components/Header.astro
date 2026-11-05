@@ -38,7 +38,6 @@ const links = [
   { href: '/news', label: 'News' },
   { href: '/events', label: 'Events' },
   { href: '/this-weekend', label: 'This weekend' },
-  { href: '/live', label: 'Live' },
   { href: '/videos', label: 'Videos' },
   { href: '/weather', label: 'Weather' },
   { href: '/government', label: 'Government' },
@@ -96,37 +95,58 @@ function current(href: string) {
 
   <div class="county-strip" id="county-strip">
     <a href="https://waterdata.usgs.gov/monitoring-location/08159200/">
-      <span>Colorado River</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 10.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0M3 14.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0M3 18.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0"/></svg>
+        Colorado River
+      </span>
       <strong data-now="river">—</strong>
       <em data-now="river-detail">Bastrop gauge</em>
     </a>
     <a href="https://www.tceq.texas.gov/cgi-bin/compliance/monops/daily_summary.pl?cams=1612">
-      <span>Air</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 8.5c2.2 0 3.3 1.7 5.5 1.7S12.3 8.5 14.5 8.5 17.8 10.2 20 10.2M3.5 13c2.2 0 3.3 1.7 5.5 1.7S12.3 13 14.5 13s3.3 1.7 5.5 1.7M3.5 17.5c2.2 0 3.3 1.7 5.5 1.7S12.3 17.5 14.5 17.5s3.3 1.7 5.5 1.7"/></svg>
+        Air
+      </span>
       <strong data-now="air">—</strong>
       <em data-now="air-detail">Bastrop</em>
     </a>
     <a href="/roads">
-      <span>SH 71</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m12 3.5 8.5 17h-17L12 3.5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4.5M12 17.5v.2"/></svg>
+        SH 71
+      </span>
       <strong data-now="sh71">—</strong>
       <em data-now="sh71-detail">Construction</em>
     </a>
     <a href="/roads">
-      <span>US 290</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m12 3.5 8.5 17h-17L12 3.5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4.5M12 17.5v.2"/></svg>
+        US 290
+      </span>
       <strong data-now="us290">—</strong>
       <em data-now="us290-detail">Construction</em>
     </a>
     <a href="/schools">
-      <span>Schools</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3.5 9.5 8.5-3 8.5 3-8.5 3-8.5-3Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 11.2v4.1c0 .7 2.2 2.2 5 2.2s5-1.5 5-2.2v-4.1M20.5 9.5v6"/></svg>
+        Schools
+      </span>
       <strong data-now="schools">—</strong>
       <em data-now="schools-detail">Four districts</em>
     </a>
     <a href="https://www.bluebonnet.coop/outages">
-      <span>Power</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M13 3.5 6.5 13h5l-1 7.5L18 10.5h-5L13 3.5Z"/></svg>
+        Power
+      </span>
       <strong data-now="power">—</strong>
       <em data-now="power-detail">Bluebonnet</em>
     </a>
     <a href="/roads">
-      <span>Roads</span>
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 4.5 4.5 19.5h15L17 4.5H7Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 8v2.2M12 12.5v2.2M12 17v1"/></svg>
+        Roads
+      </span>
       <strong data-now="closed">—</strong>
       <em data-now="closed-detail">Closures</em>
     </a>

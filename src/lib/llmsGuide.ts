@@ -6,7 +6,7 @@ import { electionDay, voteIsLive, voteSource } from '../data/vote';
 import { eventKey, formatLong, labelFromKey, whenLabel } from './time';
 
 const pages: { path: string; label: string; note: string }[] = [
-  { path: '/', label: 'Front page', note: 'A rotating sponsor banner, then today’s news, weather, burn ban, and upcoming events' },
+  { path: '/', label: 'Front page', note: 'Today’s news, Around the county, a rotating sponsor banner, and upcoming events' },
   { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings. /calendar opens the month view' },
   { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source' },
@@ -19,7 +19,6 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/phone-numbers', label: 'Phone numbers', note: 'Sheriff, tax office, city hall, water, libraries, trash and recycling day, and school districts, with hours and the date each page was checked' },
   { path: '/schools', label: 'School status', note: 'Closed, delayed, or a normal day for Bastrop ISD, Elgin ISD, Smithville ISD, and McDade ISD' },
   { path: '/alerts', label: 'Status alerts', note: 'One email or text list per item: burn ban, school status, power, SH 71, US 290, county roads, or a named road' },
-  { path: '/live', label: 'Live', note: 'Newest video from Bastrop ISD, Elgin ISD, Smithville ISD, and the City of Bastrop, plus links that open on their own site' },
   { path: '/videos', label: 'Videos', note: 'County live and recorded sources, plus videos about Bastrop from other channels' },
   { path: '/go-vote', label: 'Go Vote', note: 'Election Day is over. This address redirects to /results' },
   { path: '/election-night', label: 'Election night', note: 'Redirects to /results' },

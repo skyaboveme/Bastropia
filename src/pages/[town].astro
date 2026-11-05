@@ -158,7 +158,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
         <div>
           <div class="section-head">
             <h2>Channels</h2>
-            <a href="/live">Live</a>
+            <a href="/videos">Videos</a>
           </div>
           {channels.length ? (
             <ul class="stream-list">
@@ -170,7 +170,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
               ))}
             </ul>
           ) : (
-            <p class="meta">No local channel is on the live page for {town.name}. <a class="text-link" href="/phone-numbers">Phone numbers</a></p>
+            <p class="meta">No local channel is listed for {town.name}. <a class="text-link" href="/phone-numbers">Phone numbers</a></p>
           )}
           <p class="more"><a href="/phone-numbers">Sheriff, tax office, library, schools</a></p>
         </div>

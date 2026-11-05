@@ -6,6 +6,8 @@ export type NewsSource = {
   hosts: string[];
   /** Austin newsrooms. Kept for the county RSS, and only when a story names the county or a town in it. */
   wire?: boolean;
+  /** HTML tag or section page instead of an RSS feed. */
+  html?: boolean;
 };
 
 export const newsSources: NewsSource[] = [
@@ -32,11 +34,18 @@ export const newsSources: NewsSource[] = [
   },
   {
     id: 'fox7',
-    name: 'FOX 7',
-    home: 'https://www.fox7austin.com/local-news',
-    feed: 'https://www.fox7austin.com/rss/category/local-news',
+    name: 'FOX 7 Austin',
+    home: 'https://www.fox7austin.com/tag/us/tx/bastrop-county',
+    feed: 'https://www.fox7austin.com/tag/us/tx/bastrop-county',
     hosts: ['fox7austin.com', 'www.fox7austin.com'],
-    wire: true,
+    html: true,
+  },
+  {
+    id: 'bastrop-edc',
+    name: 'Bastrop EDC',
+    home: 'https://www.bastropedc.org/media-center/news',
+    feed: 'https://www.bastropedc.org/eg/news/157/rss',
+    hosts: ['bastropedc.org', 'www.bastropedc.org'],
   },
 ];
 
@@ -210,6 +219,49 @@ export function parseFeed(xml: string, source: NewsSource): ExternalStory[] {
   return stories;
 }
 
+function foxDate(value: string) {
+  const raw = value.trim();
+  if (!raw) return new Date(Number.NaN);
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return new Date(`${raw}:00`);
+  return new Date(raw);
+}
+
+/** FOX 7 tag pages list stories in HTML, not RSS. */
+export function parseFoxTagPage(html: string, source: NewsSource): ExternalStory[] {
+  const stories: ExternalStory[] = [];
+  const seen = new Set<string>();
+  for (const match of html.matchAll(/<article class="article tag-article[\s\S]*?<\/article>/gi)) {
+    const block = match[0];
+    const path = block.match(/href="(\/news\/[^"]+)"/)?.[1] ?? '';
+    if (!path) continue;
+    let url: URL;
+    try {
+      url = new URL(path, source.home);
+    } catch {
+      continue;
+    }
+    if (url.protocol !== 'https:' || !source.hosts.includes(url.hostname) || seen.has(url.pathname)) continue;
+    const title =
+      plain(block.match(/class="[^"]*tag-article__title[^"]*"[^>]*>([\s\S]*?)<\//)?.[1] ?? '', 180) ||
+      plain(block.match(/alt="([^"]+)"/)?.[1] ?? '', 180);
+    const published = foxDate(block.match(/<time[^>]*datetime="([^"]+)"/)?.[1] ?? '');
+    if (!title || Number.isNaN(published.getTime())) continue;
+    seen.add(url.pathname);
+    stories.push(
+      finish({
+        title,
+        link: url.toString(),
+        published,
+        categories: ['Bastrop County'],
+        author: '',
+        summary: closeSummary(plain(block.match(/tag-article__description(?!--)[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? '', 220)),
+        source: { id: source.id, name: source.name, home: source.home },
+      }),
+    );
+  }
+  return stories;
+}
+
 const metroRoundup = /\baustin[-\s]?(area|metro)\b/i;
 
 function isLocal(story: ExternalStory) {
@@ -223,6 +275,10 @@ function isLocal(story: ExternalStory) {
   }
   // The Courier’s article feed is the Elgin paper. A column can omit the town name.
   if (story.source.id === 'elgin-courier') return true;
+  // FOX 7’s Bastrop County tag page is already limited to that tag.
+  if (story.source.id === 'fox7') return true;
+  // The EDC news feed is the Bastrop Economic Development Corporation desk.
+  if (story.source.id === 'bastrop-edc') return true;
   return false;
 }
 
@@ -233,13 +289,16 @@ async function loadSource(source: NewsSource): Promise<ExternalStory[]> {
     const response = await fetch(source.feed, {
       headers: {
         'user-agent': 'BastropiaBot/1.0 (+https://bastropia.com)',
-        accept: 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
+        accept: source.html
+          ? 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'
+          : 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
       },
       signal: AbortSignal.timeout(12000),
     });
     if (!response.ok) throw new Error(`${source.name} feed returned ${response.status}`);
     const body = await response.text();
-    const items = parseFeed(body, source).filter(isLocal);
+    const parsed = source.html ? parseFoxTagPage(body, source) : parseFeed(body, source);
+    const items = parsed.filter(isLocal);
     cache.set(source.id, { at: Date.now(), items });
     return items;
   } catch (error) {
@@ -270,16 +329,36 @@ export async function getExternalNews(limit = 8, perSource = Infinity, matching?
   const lists = await Promise.all(sources.map(loadSource));
   const seen = new Set<string>();
   const seenTitles = new Set<string>();
-  return lists
+  const accept = (story: ExternalStory) => {
+    const title = story.title.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (seen.has(story.link) || seenTitles.has(title)) return false;
+    seen.add(story.link);
+    seenTitles.add(title);
+    return true;
+  };
+
+  const queues = lists
     .map((items) => (matching ? items.filter((story) => matching.test(`${story.title} ${story.summary}`)) : items))
-    .flatMap((items) => takeSource(items, perSource))
-    .sort((a, b) => b.published.getTime() - a.published.getTime())
-    .filter((story) => {
-      const title = story.title.toLowerCase().replace(/\s+/g, ' ').trim();
-      if (seen.has(story.link) || seenTitles.has(title)) return false;
-      seen.add(story.link);
-      seenTitles.add(title);
-      return true;
-    })
-    .slice(0, limit);
+    .map((items) => takeSource(items, perSource));
+
+  // Seat every outlet once first so a quieter desk (EDC, a town paper) is not buried by a busy wire day.
+  const lead: ExternalStory[] = [];
+  for (const queue of queues) {
+    for (const story of queue) {
+      if (!accept(story)) continue;
+      lead.push(story);
+      break;
+    }
+  }
+  lead.sort((a, b) => b.published.getTime() - a.published.getTime());
+  const picked = lead.slice(0, limit);
+  if (picked.length >= limit) return picked;
+
+  const rest = queues.flat().sort((a, b) => b.published.getTime() - a.published.getTime());
+  for (const story of rest) {
+    if (!accept(story)) continue;
+    picked.push(story);
+    if (picked.length >= limit) break;
+  }
+  return picked;
 }

@@ -24,6 +24,9 @@ The script reads:
 - City of Elgin calendar
 - City of Smithville calendar
 - Bastrop County calendar
+- Bastrop EDC events feed
+- Explore Bastrop County calendar
+- AllEvents Paige
 
 It keeps events in the next 75 days, skips county holidays and staff paydays, skips anything already on the calendar, and writes at most 40 new Markdown files in `src/content/events/`. Each file keeps the source URL.
 

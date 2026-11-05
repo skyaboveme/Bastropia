@@ -6,6 +6,7 @@
  *
  *   node scripts/event-scout.mjs            post new listings
  *   node scripts/event-scout.mjs --dry-run  print what it would post
+ *   node scripts/event-scout.mjs --source=bastrop-edc  only that calendar
  *   node scripts/event-scout.mjs --images-only  save posters for listings already on the site
  *
  * A poster is saved only when that event's own page has one. The generic
@@ -21,6 +22,7 @@ const eventsDir = path.join(root, 'src', 'content', 'events');
 const photoDir = path.join(root, 'public', 'images', 'events');
 const logDir = path.join(root, 'data', 'scout');
 const dryRun = process.argv.includes('--dry-run');
+const sourceFilter = (process.argv.find((arg) => arg.startsWith('--source=')) || '').slice('--source='.length);
 const horizonDays = 75;
 const maxNew = 40;
 const agent = 'BastropiaBot/1.0 (+https://bastropia.com)';
@@ -55,6 +57,38 @@ const sources = [
     label: 'Bastrop County calendar',
     url: 'https://www.bastropcounty.gov/page/calendar/3596/65/calendar.ics',
     page: 'https://www.bastropcounty.gov/page/calendar',
+  },
+  {
+    id: 'bastrop-edc',
+    kind: 'rss',
+    city: 'Bastrop',
+    organizer: 'Bastrop Economic Development Corporation',
+    label: 'Bastrop EDC events',
+    url: 'https://www.bastropedc.org/eg/events/rss',
+    page: 'https://www.bastropedc.org/media-center/events/?v=list',
+  },
+  {
+    id: 'explore',
+    kind: 'ics',
+    city: 'Countywide',
+    organizer: 'Explore Bastrop County',
+    label: 'Explore Bastrop County calendar',
+    url: 'https://explorebastropcounty.com/calendar-events/list/?ical=1',
+    pages: (page) =>
+      page <= 1
+        ? 'https://explorebastropcounty.com/calendar-events/list/?ical=1'
+        : `https://explorebastropcounty.com/calendar-events/list/page/${page}/?ical=1`,
+    maxPages: 3,
+    page: 'https://explorebastropcounty.com/calendar-events/list/',
+  },
+  {
+    id: 'allevents-paige',
+    kind: 'jsonld',
+    city: 'Paige',
+    organizer: 'AllEvents',
+    label: 'AllEvents Paige',
+    url: 'https://allevents.in/paige',
+    page: 'https://allevents.in/paige',
   },
 ];
 
@@ -144,7 +178,7 @@ function categoryFor(title, section) {
     [/art|craft|fiber|paint|gallery|quilt/, 'arts'],
     [/food|dinner|tasting|brunch|bbq|barbecue/, 'food'],
     [/hike|trail|park run|outdoor/, 'outdoors'],
-    [/library|class|workshop|school|reading/, 'education'],
+    [/library|class|workshop|school|reading|seminar|course/, 'education'],
   ];
   for (const [pattern, category] of rules) {
     if (pattern.test(text)) return category;
@@ -261,11 +295,140 @@ function fromIcsStamp(value) {
   if (/^\d{8}$/.test(value)) {
     return { date: `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`, startTime: '', endTime: '', allDay: true };
   }
-  const match = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
-  if (!match) return null;
-  const instant = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]), Number(match[6])));
+  const utc = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+  if (utc) {
+    const instant = new Date(
+      Date.UTC(Number(utc[1]), Number(utc[2]) - 1, Number(utc[3]), Number(utc[4]), Number(utc[5]), Number(utc[6])),
+    );
+    const bag = chicagoParts(instant);
+    return { date: `${bag.year}-${bag.month}-${bag.day}`, startTime: `${bag.hour}:${bag.minute}`, endTime: '', allDay: false };
+  }
+  // The Events Calendar writes TZID=America/Chicago as a floating local stamp.
+  const local = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/);
+  if (!local) return null;
+  return {
+    date: `${local[1]}-${local[2]}-${local[3]}`,
+    startTime: `${local[4]}:${local[5]}`,
+    endTime: '',
+    allDay: false,
+  };
+}
+
+function cityFromLocation(location, fallback) {
+  const text = location.toLowerCase();
+  for (const city of ['Cedar Creek', 'Smithville', 'Elgin', 'McDade', 'Paige', 'Bastrop']) {
+    if (text.includes(city.toLowerCase())) return city;
+  }
+  return fallback;
+}
+
+function venueFromLocation(location, fallback) {
+  if (!location) return fallback;
+  const first = location.split(',')[0].trim();
+  return first || fallback;
+}
+
+function fromRssStamp(value) {
+  const instant = new Date(value);
+  if (Number.isNaN(instant.getTime())) return null;
   const bag = chicagoParts(instant);
   return { date: `${bag.year}-${bag.month}-${bag.day}`, startTime: `${bag.hour}:${bag.minute}`, endTime: '', allDay: false };
+}
+
+function rssField(block, name) {
+  const match = block.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, 'i'));
+  return match ? stripTags(match[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')) : '';
+}
+
+function parseRss(xml, source) {
+  const found = [];
+  for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+    const block = match[1];
+    const title = rssField(block, 'title');
+    const when = fromRssStamp(rssField(block, 'pubDate'));
+    const link = rssField(block, 'link');
+    if (!title || !when || !link) continue;
+    let sourceUrl = link;
+    try {
+      // Keep ?t= so the same seminar on two Saturdays stays two listings.
+      sourceUrl = new URL(link).toString();
+    } catch {
+      continue;
+    }
+    const details = rssField(block, 'description').slice(0, 500);
+    found.push({
+      title,
+      date: when.date,
+      startTime: when.startTime === '00:00' ? '' : when.startTime,
+      endTime: '',
+      allDay: when.startTime === '00:00',
+      section: '',
+      city: source.city,
+      venue: source.organizer,
+      organizer: source.organizer,
+      sourceUrl,
+      sourceLabel: source.label,
+      category: categoryFor(title, ''),
+      details,
+    });
+  }
+  return found;
+}
+
+function parseJsonLdEvents(html, source) {
+  const found = [];
+  for (const match of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)) {
+    let data;
+    try {
+      data = JSON.parse(match[1].trim() || 'null');
+    } catch {
+      continue;
+    }
+    const elements = data?.['@type'] === 'ItemList' ? data.itemListElement || [] : [];
+    for (const element of elements) {
+      const event = element?.item || element;
+      if (!event || event['@type'] !== 'Event') continue;
+      const title = decode(String(event.name || '')).trim();
+      const startRaw = String(event.startDate || '').slice(0, 10);
+      if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(startRaw)) continue;
+      let sourceUrl = String(event.url || '').trim();
+      try {
+        sourceUrl = new URL(sourceUrl).toString();
+      } catch {
+        continue;
+      }
+      const place = Array.isArray(event.location) ? event.location[0] : event.location;
+      const address = place?.address;
+      const locality = typeof address === 'object' ? address?.addressLocality || '' : '';
+      const street = typeof address === 'object' ? address?.streetAddress || '' : '';
+      const placeName = typeof place?.name === 'string' ? place.name : '';
+      const where = [placeName, street, locality].filter(Boolean).join(', ');
+      // Require a Bastrop County town in the place text so Austin spillover is dropped.
+      const city = cityFromLocation(`${placeName} ${street} ${locality}`, '');
+      if (!city) continue;
+      const details = decode(String(event.description || '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 500);
+      const imageValue = event.image;
+      const remoteImage = typeof imageValue === 'string' ? imageValue : Array.isArray(imageValue) ? String(imageValue[0] || '') : '';
+      found.push({
+        title,
+        date: startRaw,
+        startTime: '',
+        endTime: '',
+        allDay: true,
+        section: '',
+        city,
+        venue: venueFromLocation(placeName || where, source.organizer),
+        address: where || undefined,
+        organizer: source.organizer,
+        sourceUrl,
+        sourceLabel: source.label,
+        category: categoryFor(title, ''),
+        details,
+        remoteImage,
+      });
+    }
+  }
+  return found;
 }
 
 function parseIcs(text, source) {
@@ -278,6 +441,7 @@ function parseIcs(text, source) {
     const end = fromIcsStamp(icsValue(block, 'DTEND'));
     const description = icsText(icsValue(block, 'DESCRIPTION')).slice(0, 500);
     const location = icsText(icsValue(block, 'LOCATION'));
+    const url = icsText(icsValue(block, 'URL'));
     found.push({
       title,
       date: start.date,
@@ -285,11 +449,11 @@ function parseIcs(text, source) {
       endTime: end && !end.allDay && end.date === start.date ? end.startTime : '',
       allDay: start.allDay,
       section: '',
-      city: source.city,
-      venue: location || source.organizer,
-      address: location,
+      city: cityFromLocation(location, source.city),
+      venue: venueFromLocation(location, source.organizer),
+      address: location || undefined,
       organizer: source.organizer,
-      sourceUrl: source.page,
+      sourceUrl: url || source.page,
       sourceLabel: source.label,
       category: categoryFor(title, ''),
       details: description,
@@ -341,6 +505,7 @@ function looseTitle(title) {
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
     .toLowerCase()
+    .replace(/\s*[-|]\s*explore bastrop county\s*$/i, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -433,7 +598,33 @@ function monthsAhead(today, count) {
 
 async function collect(source, today) {
   if (source.kind === 'ics') {
+    if (typeof source.pages === 'function') {
+      const batches = [];
+      const seen = new Set();
+      for (let page = 1; page <= (source.maxPages || 3); page += 1) {
+        let text;
+        try {
+          text = await fetchText(source.pages(page));
+        } catch {
+          break;
+        }
+        if (!/BEGIN:VCALENDAR/i.test(text)) break;
+        for (const event of parseIcs(text, source)) {
+          const key = event.uid || `${looseTitle(event.title)}|${event.date}|${event.sourceUrl}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          batches.push(event);
+        }
+      }
+      return batches;
+    }
     return parseIcs(await fetchText(source.url), source);
+  }
+  if (source.kind === 'rss') {
+    return parseRss(await fetchText(source.url), source);
+  }
+  if (source.kind === 'jsonld') {
+    return parseJsonLdEvents(await fetchText(source.url), source);
   }
   const batches = [];
   for (const { year, month } of monthsAhead(today, 3)) {
@@ -470,14 +661,33 @@ function pageMeta(html, pageUrl) {
   } catch {
     return { image: '', title };
   }
-  if (image.protocol !== 'https:' || image.hostname !== page.hostname) return { image: '', title };
+  if (image.protocol !== 'https:') return { image: '', title };
+  const sameHost = image.hostname === page.hostname;
+  const alleventsCdn = /allevents\.in$/i.test(page.hostname) && /(^|\.)allevents\.in$/i.test(image.hostname);
+  if (!sameHost && !alleventsCdn) return { image: '', title };
   if (genericPhoto.test(image.href)) return { image: '', title };
   return { image: image.href, title };
 }
 
 /** Save the city's event poster, resized. Returns a site path, or '' when the calendar has no photo. */
-async function saveEventPhoto(pageUrl, name, expectedTitle) {
-  if (!pageUrl.includes('EID=')) return '';
+function canFetchPhoto(pageUrl) {
+  return (
+    pageUrl.includes('EID=') ||
+    /explorebastropcounty\.com\/calendar-event\//i.test(pageUrl) ||
+    /allevents\.in\//i.test(pageUrl)
+  );
+}
+
+function looksLikeImage(bytes, contentType, remoteUrl) {
+  if ((contentType || '').startsWith('image/')) return true;
+  if (/^https:\/\/[^/]*allevents\.in\//i.test(remoteUrl)) return true;
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return true;
+  if (bytes[0] === 0x89 && bytes[1] === 0x50) return true;
+  if (bytes.toString('ascii', 0, 4) === 'RIFF') return true;
+  return false;
+}
+
+async function writeEventPhoto(remote, name) {
   const publicPath = `/images/events/${name}.jpg`;
   const dest = path.join(photoDir, `${name}.jpg`);
   try {
@@ -486,22 +696,14 @@ async function saveEventPhoto(pageUrl, name, expectedTitle) {
   } catch {
     // Not saved yet.
   }
-  const html = await fetchText(pageUrl);
-  const meta = pageMeta(html, pageUrl);
-  if (expectedTitle && looseTitle(meta.title) !== looseTitle(expectedTitle)) {
-    console.log(`photo skipped  ${name}  page is "${meta.title || 'untitled'}"`);
-    return '';
-  }
-  const remote = meta.image;
-  if (!remote) return '';
   const response = await fetch(remote, {
-    headers: { 'user-agent': agent, accept: 'image/*' },
+    headers: { 'user-agent': agent, accept: 'image/*,*/*;q=0.8' },
     signal: AbortSignal.timeout(20000),
   });
   if (!response.ok) return '';
-  if (!(response.headers.get('content-type') || '').startsWith('image/')) return '';
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length < 8000 || bytes.length > 12_000_000) return '';
+  if (!looksLikeImage(bytes, response.headers.get('content-type') || '', remote)) return '';
   await mkdir(photoDir, { recursive: true });
   const raw = path.join(photoDir, `${name}.src`);
   await writeFile(raw, bytes);
@@ -513,6 +715,25 @@ async function saveEventPhoto(pageUrl, name, expectedTitle) {
   return publicPath;
 }
 
+async function saveEventPhoto(pageUrl, name, expectedTitle, remoteImage = '') {
+  if (remoteImage) {
+    try {
+      return await writeEventPhoto(remoteImage, name);
+    } catch {
+      // Fall through to the event page.
+    }
+  }
+  if (!canFetchPhoto(pageUrl)) return '';
+  const html = await fetchText(pageUrl);
+  const meta = pageMeta(html, pageUrl);
+  if (expectedTitle && looseTitle(meta.title) !== looseTitle(expectedTitle)) {
+    console.log(`photo skipped  ${name}  page is "${meta.title || 'untitled'}"`);
+    return '';
+  }
+  if (!meta.image) return '';
+  return writeEventPhoto(meta.image, name);
+}
+
 function withImage(raw, imagePath) {
   if (/^image:/m.test(raw)) return raw;
   const close = raw.indexOf('\n---', 4);
@@ -521,12 +742,12 @@ function withImage(raw, imagePath) {
 }
 
 async function attachMissingPhotos(listings) {
-  const pending = listings.filter((listing) => listing.sourceUrl.includes('EID=') && !listing.image).slice(0, 60);
+  const pending = listings.filter((listing) => canFetchPhoto(listing.sourceUrl) && !listing.image).slice(0, 60);
   let saved = 0;
   for (const listing of pending) {
     const name = listing.file.replace(/\.md$/, '');
     try {
-      const image = dryRun ? '' : await saveEventPhoto(listing.sourceUrl, name, listing.title);
+      const image = dryRun ? '' : await saveEventPhoto(listing.sourceUrl, name, listing.title, '');
       if (!image) {
         console.log(`no photo  ${listing.title}`);
         continue;
@@ -579,13 +800,19 @@ const seen = new Set();
 const fresh = [];
 const catalog = [];
 
-if (!imagesOnly) for (const source of sources) {
+const activeSources = sourceFilter ? sources.filter((source) => source.id === sourceFilter) : sources;
+if (sourceFilter && !activeSources.length) {
+  console.error(`No source matches --source=${sourceFilter}`);
+  process.exit(1);
+}
+
+if (!imagesOnly) for (const source of activeSources) {
   try {
     const events = await collect(source, today);
     catalog.push(...events);
     let kept = 0;
     for (const event of events) {
-      const key = event.sourceUrl.includes('EID=') ? event.sourceUrl : `${looseTitle(event.title)}|${event.date}`;
+      const key = canFetchPhoto(event.sourceUrl) ? event.sourceUrl : `${looseTitle(event.title)}|${event.date}`;
       if (seen.has(key)) continue;
       seen.add(key);
       if (!inWindow(event.date, today)) {
@@ -624,9 +851,9 @@ if (!imagesOnly) for (const event of posting) {
   let file = `${slug(event.title, event.date)}.md`;
   if (listings.some((item) => item.file === file)) file = file.replace(/\.md$/, '-2.md');
   const full = path.join(eventsDir, file);
-  if (!dryRun && event.sourceUrl.includes('EID=')) {
+  if (!dryRun && (event.remoteImage || canFetchPhoto(event.sourceUrl))) {
     try {
-      event.image = await saveEventPhoto(event.sourceUrl, file.replace(/\.md$/, ''), event.title);
+      event.image = await saveEventPhoto(event.sourceUrl, file.replace(/\.md$/, ''), event.title, event.remoteImage || '');
     } catch (error) {
       console.error(`photo failed for ${event.title}: ${error instanceof Error ? error.message : error}`);
     }
@@ -638,7 +865,7 @@ if (!imagesOnly) for (const event of posting) {
 }
 
 if (imagesOnly) {
-  for (const source of sources) {
+  for (const source of activeSources) {
     if (source.kind !== 'civicengage') continue;
     try {
       const events = await collect(source, today);

@@ -39,7 +39,7 @@ export const placements = [
     id: 'home-banner',
     name: 'Front page banner',
     page: 'Home',
-    where: 'The wide banner above Results',
+    where: 'Under Around the county on the homepage',
     detail: 'A 1200×500 image. It runs the full width of the page and rotates with the other banners in this spot.',
     rate: 400,
     unit: 'month',

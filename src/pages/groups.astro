@@ -26,10 +26,6 @@ const topics = [...new Set(highlights.map((item) => item.data.topic).filter((top
   />
   <div class="wrap">
     <section class="section" id="highlights" style="margin-top:0;">
-      <div class="section-head">
-        <h2>From public groups</h2>
-        <a href="#directory">All groups</a>
-      </div>
       {highlights.length === 0 ? (
         <p class="meta">No public posts are summarized yet. <a class="text-link" href="#directory">The group directory is below.</a></p>
       ) : (

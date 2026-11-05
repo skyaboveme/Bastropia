@@ -58,5 +58,6 @@ export default defineConfig({
   ],
   redirects: {
     '/events/submit': '/submit',
+    '/live': '/videos',
   },
 });

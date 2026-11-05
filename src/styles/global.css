@@ -109,7 +109,24 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .county-strip a { text-decoration: none; display: grid; gap: 0.08rem; border-top: 3px solid var(--river); padding-top: 0.35rem; }
 .county-strip a.is-alert { border-top-color: #c5161d; }
-.county-strip span { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--river-deep); }
+.county-strip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--river-deep);
+}
+.county-strip .strip-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
+  color: currentColor;
+}
+.county-strip a.is-alert span,
+.county-strip a.is-alert .strip-icon { color: #c5161d; }
 .county-strip strong { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; line-height: 1.1; }
 .county-strip em { font-style: normal; color: var(--ink-soft); font-size: 0.82rem; }
 .strip-also {
