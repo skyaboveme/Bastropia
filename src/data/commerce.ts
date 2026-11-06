@@ -40,7 +40,7 @@ export const placements = [
     name: 'Site banner',
     page: 'Every page',
     where: 'Near the bottom of every public page',
-    detail: 'A 1200×500 image. It runs the full width and rotates with the other banners in this spot on every public page.',
+    detail: 'A 1200×500 image. It runs the full width about midway down every public page and rotates with the other banners in this spot.',
     rate: 400,
     unit: 'month',
   },

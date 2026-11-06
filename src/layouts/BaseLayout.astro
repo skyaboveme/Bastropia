@@ -119,11 +119,52 @@ const jsonLd = stringify(graph(nodes));
     <main id="main">
       <slot />
       {showBanner && (
-        <div class="wrap site-banner">
+        <div class="wrap site-banner" data-site-banner hidden>
           <HomeBanner />
         </div>
       )}
     </main>
+    {showBanner && (
+      <script is:inline>
+        (function () {
+          var main = document.getElementById('main');
+          var banner = main && main.querySelector('[data-site-banner]');
+          if (!main || !banner) return;
+
+          function blocks(parent) {
+            return Array.prototype.filter.call(parent.children, function (el) {
+              return el !== banner && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE';
+            });
+          }
+
+          var root = main;
+          var kids = blocks(main);
+
+          // One shell (homepage stack, article wrap): place midway inside it.
+          if (kids.length === 1 && blocks(kids[0]).length >= 2) {
+            root = kids[0];
+            kids = blocks(root);
+          } else if (kids.length >= 2 && kids[0].classList && kids[0].classList.contains('page-head')) {
+            // Page head + content wrap: place midway inside the wrap.
+            var shell = kids[1];
+            if (shell && blocks(shell).length >= 2) {
+              root = shell;
+              kids = blocks(root);
+            }
+          }
+
+          if (!kids.length) {
+            banner.hidden = false;
+            return;
+          }
+
+          var mid = Math.floor(kids.length / 2);
+          var anchor = kids[Math.max(0, mid - 1)];
+          anchor.after(banner);
+          banner.hidden = false;
+        })();
+      </script>
+    )}
     <Footer />
     <script is:inline>
       (function () {
