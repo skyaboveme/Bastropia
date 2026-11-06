@@ -4,7 +4,6 @@ export const prerender = false;
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
-import AdSlot from '../../components/AdSlot.astro';
 import { getExternalNews, latestHeadlines } from '../../lib/externalNews';
 import { offsiteAttrs } from '../../lib/links';
 import { linkList } from '../../lib/schema';
@@ -21,19 +20,16 @@ const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
 >
   <PageHead kicker="Desk" title="News from Bastrop County" lede="Short briefings with a link back to the public source. This is a community desk, not a city hall feed." />
   <div class="wrap">
-    <div class="split">
-      <div class="news-list">
-        {headlines.map((story) => (
-          <article class="story-card">
-            <a href={story.href} {...offsiteAttrs(story.href)}>
-              <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
-              <h3>{story.title}</h3>
-              {story.summary && <p class="meta">{story.summary}</p>}
-            </a>
-          </article>
-        ))}
-      </div>
-      <AdSlot placement="news-rail" />
+    <div class="news-list">
+      {headlines.map((story) => (
+        <article class="story-card">
+          <a href={story.href} {...offsiteAttrs(story.href)}>
+            <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
+            <h3>{story.title}</h3>
+            {story.summary && <p class="meta">{story.summary}</p>}
+          </a>
+        </article>
+      ))}
     </div>
     <p class="disclaimer">
       Headlines open on the site that published them. Bastropia does not write or edit them.
