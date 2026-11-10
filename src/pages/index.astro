@@ -19,7 +19,6 @@ import { streams } from '../data/streams';
 import { capOrganizer, filterEvents, sortByTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, formatMedium, labelFromKey, thisWeekendKeys, whenLabel } from '../lib/time';
-import { getElectionBoard } from '../lib/electionResults';
 const now = new Date();
 const today = eventKey(now);
 const homeTown = readTown(Astro.cookies.get(townCookie)?.value);
@@ -41,11 +40,8 @@ const boosted = picks.some((event) => tierOf(event) !== 'community');
 const byTime = <T extends { data: { pubDate: Date } }>(a: T, b: T) => b.data.pubDate.getTime() - a.data.pubDate.getTime();
 const notices = (await getCollection('updates')).sort(byTime);
 const news = await getCollection('news');
-const decisions = (await getCollection('decisions')).sort((a, b) => b.data.meetingDate.localeCompare(a.data.meetingDate));
-const latestDecision = decisions[0];
-const [externalNews, board, scores] = await Promise.all([
+const [externalNews, scores] = await Promise.all([
   getExternalNews(20, 5),
-  getElectionBoard(now),
   homePage?.football.length ? getFridayScores() : Promise.resolve([]),
 ]);
 const homeScores = (homePage ? scores.filter((score) => homePage.football.includes(score.id)) : []).map((score) => ({
@@ -119,18 +115,6 @@ const deskStories = pageHeadlines
   ]}
 >
   <div class="wrap home-stack">
-    <section class="desk-row" aria-label="Results and court">
-      <a class="desk-card" href="/results">
-        <p class="kicker">November 3, 2026</p>
-        <h2>Results</h2>
-        <p>{board?.status ?? 'The county report did not load. Open the elections office page from Results.'}</p>
-      </a>
-      <a class="desk-card" href="/government/court-decisions">
-        <p class="kicker">Commissioners Court</p>
-        <h2>What the court decided</h2>
-        <p>{latestDecision ? latestDecision.data.description : 'Summaries post here after the minutes do.'}</p>
-      </a>
-    </section>
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
         {lead && (
