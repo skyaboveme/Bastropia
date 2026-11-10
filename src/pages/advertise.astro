@@ -19,84 +19,145 @@ const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: ite
 const imagePlacement = new Set(['home-banner', 'event-banner']);
 ---
 
-<BaseLayout title="Advertise" description="Buy a labeled ad on Bastropia. Choose a placement, a start date, and how long to run it.">
+<BaseLayout
+  title="Advertise"
+  description="Reach Bastrop County neighbors where they already look for weekends, news, and local plans. Reserve a labeled placement on Bastropia."
+  banner={false}
+>
   <PageHead
-    kicker="Sponsors"
-    title="Put your business on the county desk"
-    lede="Ads are labeled and kept off the burn-ban page and the emergency numbers. The site banner and event banner are priced by the month. The weekend sponsor covers Friday, Saturday, and Sunday. You reserve a placement here. Bastropia confirms the dates are open and sends an invoice. The ad goes up after payment."
+    kicker="Advertise"
+    title="Be where the county already looks"
+    lede="Bastrop County is filling up with new households, new Saturdays, and new businesses. Bastropia is the local desk they open for what is happening here — not another Austin feed."
   />
   <div class="wrap">
-    <FormError />
-    <form id="ad-form" class="form" action="/api/intake" method="post">
-      <input type="hidden" name="type" value="ad" />
-      <input type="hidden" name="from" value="/advertise" />
-      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-      <div class="place-grid">
-        {placements.map((placement) => {
-          const holders = booked.filter((item) => item.placement === placement.id);
-          const holder = holders[0];
-          const liveNames = placement.id === 'home-banner' ? bannerNames : placement.id === 'event-banner' ? eventNames : [];
-          return (
-            <label class="choice">
-              <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'home-banner'} />
-              <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
-              <h2 style="font-size:1.7rem;">{placement.name}</h2>
-              <p class="meta">{placement.where}</p>
-              <p style="margin-top:0.4rem;">{placement.detail}</p>
-              {imagePlacement.has(placement.id) && (liveNames.length > 0 || holders.length > 0) && (
-                <p class="badge">
-                  {placement.id === 'home-banner' ? 'In the rotation' : 'This month'}: {[...new Set([...liveNames, ...holders.map((item) => item.name)])].join(', ')}
-                </p>
-              )}
-              {!imagePlacement.has(placement.id) && holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
-            </label>
-          );
-        })}
+    <div class="prose">
+      <p>
+        Census estimates put Bastrop County at about <strong>119,000 residents in 2025</strong> — roughly a
+        <strong>21% jump since 2020</strong>, enough to rank among the country’s fastest-growing counties.
+        People are moving east of Austin for space, schools, and a town they can still name. They still need a plumber,
+        a landscaper, a church, a clinic, a Saturday market, and a place to eat after the game.
+      </p>
+      <p>
+        Those neighbors live on their phones. They check burn bans before lighting a fire pit, scan weekend plans before
+        leaving the driveway, and look up Friday scores and public meetings the same way they used to flip a paper.
+        Facebook groups are loud and hard to search. Highway billboards talk to cars that are already past you.
+        <strong>Bastropia is the quiet county desk</strong> they return to on purpose.
+      </p>
+
+      <h2>Why advertise here</h2>
+      <ul>
+        <li>
+          <strong>Local intent.</strong> People land here for events, news, weather, scores, and government — then see your name next to the thing they came to do.
+        </li>
+        <li>
+          <strong>A growing market.</strong> New residents do not have a favorite HVAC tech or florist yet. The business that shows up first often keeps them.
+        </li>
+        <li>
+          <strong>Countywide reach without countywide waste.</strong> One placement covers Bastrop, Elgin, Smithville, Cedar Creek, and the towns in between — not a metro buy priced for downtown Austin.
+        </li>
+        <li>
+          <strong>Trust that survives the click.</strong> Ads are labeled Sponsored. They stay off the burn-ban page and the emergency numbers. Readers can tell the desk from the sponsor, which is how both stay believable.
+        </li>
+        <li>
+          <strong>Simple creative.</strong> Site and event banners are a clear 1200×500 frame. Weekend sponsorship is a short line next to Friday–Sunday plans. No agency stack required.
+        </li>
+        <li>
+          <strong>You own the destination.</strong> Every ad opens your site, Eventbrite, or booking page. We invoice after you reserve. The placement goes live after payment.
+        </li>
+      </ul>
+
+      <h2>Who it fits</h2>
+      <p>
+        Home services, restaurants, churches, clinics, real estate, retailers, festivals, and civic fundraisers —
+        anyone who wins when a neighbor in this county chooses them this week. If your customers live between the Colorado
+        and the Lost Pines, this is their calendar and their county news desk.
+      </p>
+      <p>
+        Pick a placement below. Tell us when to start. We confirm the dates are open and send the invoice.
+      </p>
+    </div>
+
+    <section class="section" id="placements" style="margin-top:2rem;">
+      <div class="section-head">
+        <h2>Choose a placement</h2>
       </div>
-      <div class="fields">
-        <label class="field">
-          <span id="ad-span">Months</span>
-          <input name="count" type="number" min="1" max="12" value="1" required />
+      <FormError />
+      <form id="ad-form" class="form" action="/api/intake" method="post">
+        <input type="hidden" name="type" value="ad" />
+        <input type="hidden" name="from" value="/advertise" />
+        <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="place-grid">
+          {placements.map((placement) => {
+            const holders = booked.filter((item) => item.placement === placement.id);
+            const holder = holders[0];
+            const liveNames = placement.id === 'home-banner' ? bannerNames : placement.id === 'event-banner' ? eventNames : [];
+            return (
+              <label class="choice">
+                <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'home-banner'} />
+                <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
+                <h2 style="font-size:1.7rem;">{placement.name}</h2>
+                <p class="meta">{placement.where}</p>
+                <p style="margin-top:0.4rem;">{placement.detail}</p>
+                {imagePlacement.has(placement.id) && (liveNames.length > 0 || holders.length > 0) && (
+                  <p class="badge">
+                    {placement.id === 'home-banner' ? 'In the rotation' : 'This month'}: {[...new Set([...liveNames, ...holders.map((item) => item.name)])].join(', ')}
+                  </p>
+                )}
+                {!imagePlacement.has(placement.id) && holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
+              </label>
+            );
+          })}
+        </div>
+        <div class="fields">
+          <label class="field">
+            <span id="ad-span">Months</span>
+            <input name="count" type="number" min="1" max="12" value="1" required />
+          </label>
+          <label class="field">
+            <span>Start date</span>
+            <input name="start" type="date" value={start} required />
+          </label>
+          <label class="field">
+            <span>Business name</span>
+            <input name="business" required maxlength="80" />
+          </label>
+          <label class="field">
+            <span>Contact name</span>
+            <input name="contact" required maxlength="80" autocomplete="name" />
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" required autocomplete="email" />
+          </label>
+          <label class="field">
+            <span>Phone</span>
+            <input name="phone" type="tel" autocomplete="tel" />
+          </label>
+          <label class="field wide">
+            <span>Website the ad should open</span>
+            <input name="website" type="url" required placeholder="https://" />
+          </label>
+          <label class="field wide">
+            <span>Ad line, up to 90 characters</span>
+            <input name="line" required maxlength="90" placeholder="Saturday produce on Main Street" />
+          </label>
+          <label class="field wide">
+            <span>Notes</span>
+            <textarea name="notes" rows="4" maxlength="1200" placeholder="Anything the desk should know. Political ads need the paid-for line in this box."></textarea>
+          </label>
+        </div>
+        <p class="price-line">Estimated total <strong id="ad-total">{money(placements.find((item) => item.id === 'home-banner')?.rate ?? placements[0].rate)}</strong></p>
+        <label>
+          <input type="checkbox" name="terms" value="yes" required /> The ad will say Sponsored. It will not imitate the county, a city, or an emergency notice. I understand this reservation is invoiced by the desk and is not charged on this form.
         </label>
-        <label class="field">
-          <span>Start date</span>
-          <input name="start" type="date" value={start} required />
-        </label>
-        <label class="field">
-          <span>Business name</span>
-          <input name="business" required maxlength="80" />
-        </label>
-        <label class="field">
-          <span>Contact name</span>
-          <input name="contact" required maxlength="80" autocomplete="name" />
-        </label>
-        <label class="field">
-          <span>Email</span>
-          <input name="email" type="email" required autocomplete="email" />
-        </label>
-        <label class="field">
-          <span>Phone</span>
-          <input name="phone" type="tel" autocomplete="tel" />
-        </label>
-        <label class="field wide">
-          <span>Website the ad should open</span>
-          <input name="website" type="url" required placeholder="https://" />
-        </label>
-        <label class="field wide">
-          <span>Ad line, up to 90 characters</span>
-          <input name="line" required maxlength="90" placeholder="Saturday produce on Main Street" />
-        </label>
-        <label class="field wide">
-          <span>Notes</span>
-          <textarea name="notes" rows="4" maxlength="1200" placeholder="Anything the desk should know. Political ads need the paid-for line in this box."></textarea>
-        </label>
-      </div>
-      <p class="price-line">Estimated total <strong id="ad-total">{money(placements[0].rate)}</strong></p>
-      <label>
-        <input type="checkbox" name="terms" value="yes" required /> The ad will say Sponsored. It will not imitate the county, a city, or an emergency notice. I understand this reservation is invoiced by the desk and is not charged on this form.
-      </label>
-      <button class="button" type="submit">Reserve this placement</button>
-    </form>
+        <button class="button" type="submit">Reserve this placement</button>
+      </form>
+    </section>
+
+    <p class="disclaimer" style="margin-top:1.5rem;">
+      Population figures are U.S. Census Bureau county estimates (about 118,900 residents in 2025; roughly 21% growth from 2020 to 2025).
+      Bastropia does not sell personal data. Ads are labeled and kept off emergency pages.
+    </p>
   </div>
 </BaseLayout>
 <script define:vars={{ offers }}>
