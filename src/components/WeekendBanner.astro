@@ -1,0 +1,119 @@
+---
+import { weekendBannerAds } from '../lib/ads';
+
+const banners = await weekendBannerAds();
+const rotating = banners.length > 1;
+---
+
+<section class="home-banner weekend-banner" aria-roledescription="carousel" aria-label="Weekend sponsor">
+  <div class="home-banner-frame weekend-banner-frame" data-weekend-banner-frame>
+    {banners.length > 0 ? (
+      banners.map((banner, index) => (
+        <a
+          class:list={['home-banner-slide', { 'is-on': !rotating && index === 0 }]}
+          href={banner.go}
+          target="_blank"
+          rel="sponsored noopener noreferrer"
+          data-slide
+          data-ad-id={banner.id}
+          hidden={rotating || index !== 0}
+        >
+          <img src={banner.src} alt={banner.alt || banner.name} width="1200" height="500" decoding="async" fetchpriority={index === 0 ? 'high' : 'low'} />
+        </a>
+      ))
+    ) : (
+      <a class="home-banner-open" href="/advertise?placement=weekend-banner">
+        <p class="kicker">Sponsored</p>
+        <strong>Your weekend banner here</strong>
+        <span>1200 × 500. One monthly sponsor on This weekend.</span>
+      </a>
+    )}
+  </div>
+  {rotating && (
+    <div class="home-banner-controls">
+      <button type="button" data-weekend-banner-prev aria-label="Previous banner">‹</button>
+      <div class="home-banner-dots">
+        {banners.map((banner) => (
+          <button type="button" data-weekend-banner-dot aria-label={banner.name}></button>
+        ))}
+      </div>
+      <button type="button" data-weekend-banner-next aria-label="Next banner">›</button>
+    </div>
+  )}
+</section>
+
+{banners.length > 0 && (
+  <script is:inline>
+    const frame = document.querySelector('[data-weekend-banner-frame]');
+    const root = frame && frame.closest('.weekend-banner');
+    const seen = (window.__bastropiaAds = window.__bastropiaAds || new Set());
+    const ping = (id) => {
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      const body = new URLSearchParams({ id, placement: 'weekend-banner' });
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/ad-stat', body);
+      else fetch('/api/ad-stat', { method: 'POST', body, keepalive: true });
+    };
+    if (frame && root) {
+      const slides = [...frame.querySelectorAll('[data-slide]')];
+      const dots = [...root.querySelectorAll('[data-weekend-banner-dot]')];
+      let index = 0;
+      let timer = 0;
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const show = (next) => {
+        index = (next + slides.length) % slides.length;
+        slides.forEach((slide, slideIndex) => {
+          const on = slideIndex === index;
+          slide.classList.toggle('is-on', on);
+          slide.hidden = !on;
+          if (on) ping(slide.getAttribute('data-ad-id'));
+        });
+        dots.forEach((dot, dotIndex) => {
+          if (dotIndex === index) dot.setAttribute('aria-current', 'true');
+          else dot.removeAttribute('aria-current');
+        });
+      };
+
+      const stop = () => window.clearInterval(timer);
+      const start = () => {
+        stop();
+        if (motion || slides.length < 2) return;
+        timer = window.setInterval(() => show(index + 1), 6000);
+      };
+
+      root.querySelector('[data-weekend-banner-prev]')?.addEventListener('click', () => {
+        show(index - 1);
+        start();
+      });
+      root.querySelector('[data-weekend-banner-next]')?.addEventListener('click', () => {
+        show(index + 1);
+        start();
+      });
+      dots.forEach((dot, dotIndex) => {
+        dot.addEventListener('click', () => {
+          show(dotIndex);
+          start();
+        });
+      });
+
+      root.addEventListener('pointerenter', stop);
+      root.addEventListener('pointerleave', start);
+      root.addEventListener('focusin', stop);
+      root.addEventListener('focusout', start);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else start();
+      });
+
+      show(Math.floor(Math.random() * slides.length));
+      start();
+    }
+  </script>
+)}
+
+<style>
+  .weekend-banner { margin: 1.25rem 0; }
+  .weekend-banner-frame { background: #1a1406; }
+  .weekend-banner-frame img { object-fit: cover; }
+</style>

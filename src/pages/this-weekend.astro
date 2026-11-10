@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import EventCard from '../components/EventCard.astro';
-import AdSlot from '../components/AdSlot.astro';
+import WeekendBanner from '../components/WeekendBanner.astro';
 import { filterEvents, sortByDayThenTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, labelFromKey, thisWeekendKeys } from '../lib/time';
@@ -17,30 +17,53 @@ const all = await getCollection('events');
 const tierOf = (event: (typeof all)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const events = filterEvents(all, { when: 'weekend' }, now);
 const span = days.length < 2 ? labelFromKey(days[0]) : `${labelFromKey(days[0])} through ${labelFromKey(days[days.length - 1])}`;
+const bannerAt = Math.max(1, Math.floor(days.length / 2));
+const daysBefore = days.slice(0, bannerAt);
+const daysAfter = days.slice(bannerAt);
+const byDay = days.map((day) => ({
+  day,
+  items: sortByDayThenTier(
+    events.filter((event) => eventKey(event.data.start) === day),
+    tierOf,
+  ),
+}));
+const before = byDay.filter((item) => daysBefore.includes(item.day));
+const after = byDay.filter((item) => daysAfter.includes(item.day));
 ---
 
-<BaseLayout title="This weekend" description="Friday, Saturday, and Sunday plans across Bastrop County.">
+<BaseLayout
+  title="This weekend"
+  description="Friday, Saturday, and Sunday plans across Bastrop County."
+  banner={false}
+>
   <PageHead
     kicker="Friday to Sunday"
     title="This weekend in the county"
     lede={`${span}. Events that have already ended are left off. If your plans are not here, the desk has not heard about them yet.`}
   />
   <div class="wrap">
-    <AdSlot placement="weekend-sponsor" />
-    <div class="weekend-grid" style="margin-top:1rem;">
-      {days.map((day) => {
-        const items = sortByDayThenTier(
-          events.filter((event) => eventKey(event.data.start) === day),
-          tierOf,
-        );
-        return (
+    {before.length > 0 && (
+      <div class="weekend-grid">
+        {before.map(({ day, items }) => (
           <section class="day-card">
-              <p class="kicker">{labelFromKey(day)}</p>
-              {items.map((event) => <EventCard event={event} tier={tierOf(event)} compact />)}
-              {!items.length && <p class="meta">Nothing listed.</p>}
+            <p class="kicker">{labelFromKey(day)}</p>
+            {items.map((event) => <EventCard event={event} tier={tierOf(event)} compact />)}
+            {!items.length && <p class="meta">Nothing listed.</p>}
           </section>
-        );
-      })}
-    </div>
+        ))}
+      </div>
+    )}
+    <WeekendBanner />
+    {after.length > 0 && (
+      <div class="weekend-grid">
+        {after.map(({ day, items }) => (
+          <section class="day-card">
+            <p class="kicker">{labelFromKey(day)}</p>
+            {items.map((event) => <EventCard event={event} tier={tierOf(event)} compact />)}
+            {!items.length && <p class="meta">Nothing listed.</p>}
+          </section>
+        ))}
+      </div>
+    )}
   </div>
 </BaseLayout>

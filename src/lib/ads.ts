@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers';
 import { placements, type PlacementId } from '../data/commerce';
 import { eventBanners } from '../data/eventBanners';
 import { homeBanners } from '../data/homeBanners';
+import { weekendBanners } from '../data/weekendBanners';
 import { httpUrl } from './intake';
 import { eventKey } from './time';
 
@@ -17,8 +18,8 @@ type Kv = {
 
 const catalogKey = 'ad:catalog';
 const holdsKey = 'ad:holds';
-const textPlacements = new Set<PlacementId>(['weekend-sponsor']);
-const imagePlacements = new Set<PlacementId>(['home-banner', 'event-banner']);
+const textPlacements = new Set<PlacementId>([]);
+const imagePlacements = new Set<PlacementId>(['home-banner', 'event-banner', 'weekend-banner']);
 
 export type StoredAd = {
   id: string;
@@ -77,7 +78,11 @@ function safeId(id: string) {
 }
 
 export function isFileAd(id: string) {
-  return homeBanners.some((banner) => banner.id === id) || eventBanners.some((banner) => banner.id === id);
+  return (
+    homeBanners.some((banner) => banner.id === id) ||
+    eventBanners.some((banner) => banner.id === id) ||
+    weekendBanners.some((banner) => banner.id === id)
+  );
 }
 
 function fileBanner(id: string) {
@@ -85,6 +90,8 @@ function fileBanner(id: string) {
   if (home) return { ...home, placements: ['home-banner'] as PlacementId[] };
   const event = eventBanners.find((banner) => banner.id === id);
   if (event) return { ...event, placements: ['event-banner'] as PlacementId[] };
+  const weekend = weekendBanners.find((banner) => banner.id === id);
+  if (weekend) return { ...weekend, placements: ['weekend-banner'] as PlacementId[] };
   return null;
 }
 
@@ -123,7 +130,10 @@ function goHref(id: string, placement: PlacementId) {
   return `/go/${id}?from=${placement}`;
 }
 
-async function imageAds(placement: 'home-banner' | 'event-banner', files: { id: string; name: string; src: string; alt: string; href: string }[]): Promise<LiveAd[]> {
+async function imageAds(
+  placement: 'home-banner' | 'event-banner' | 'weekend-banner',
+  files: { id: string; name: string; src: string; alt: string; href: string }[],
+): Promise<LiveAd[]> {
   try {
     const held = new Set(await readHolds());
     const fromFiles: LiveAd[] = files
@@ -173,6 +183,10 @@ export async function eventBannerAds(): Promise<LiveAd[]> {
   return imageAds('event-banner', eventBanners);
 }
 
+export async function weekendBannerAds(): Promise<LiveAd[]> {
+  return imageAds('weekend-banner', weekendBanners);
+}
+
 export async function textAds(placement: PlacementId): Promise<LiveAd[]> {
   if (!textPlacements.has(placement)) return [];
   try {
@@ -199,6 +213,10 @@ export async function homeBannerNames() {
 
 export async function eventBannerNames() {
   return (await eventBannerAds()).map((item) => item.name);
+}
+
+export async function weekendBannerNames() {
+  return (await weekendBannerAds()).map((item) => item.name);
 }
 
 export function imageKind(bytes: Uint8Array) {
@@ -476,6 +494,7 @@ export async function deskAds(): Promise<DeskAd[]> {
   const ids = [
     ...homeBanners.map((banner) => banner.id),
     ...eventBanners.map((banner) => banner.id),
+    ...weekendBanners.map((banner) => banner.id),
     ...uploaded.map((item) => item.id),
   ];
   const cards = await Promise.all(

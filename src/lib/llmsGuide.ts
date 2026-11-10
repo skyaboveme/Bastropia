@@ -8,7 +8,7 @@ import { eventKey, formatLong, labelFromKey, whenLabel } from './time';
 const pages: { path: string; label: string; note: string }[] = [
   { path: '/', label: 'Front page', note: 'Today’s news, Around the county, upcoming events, and a rotating sponsor banner about midway down this and other public pages' },
   { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings, with a monthly event banner midway through the list. The sitewide rotating banner is off on this page. /calendar opens the month view' },
-  { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans' },
+  { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans, with a monthly weekend banner midway through the days. The sitewide rotating banner is off on this page' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source' },
   { path: '/groups', label: 'Social', note: 'Public-group highlights, then the directory of Facebook groups and pages. /social opens the highlights' },
   { path: '/rss.xml', label: 'County RSS', note: 'Bastrop County news from this desk, county papers, and Austin newsrooms that name the county' },

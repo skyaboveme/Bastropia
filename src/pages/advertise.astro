@@ -5,18 +5,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
 import { placements } from '../data/commerce';
-import { eventBannerNames, homeBannerNames } from '../lib/ads';
 import { money } from '../lib/format';
-import { activeSponsors } from '../lib/intake';
-import { addDays, eventKey, labelFromKey } from '../lib/time';
+import { addDays, eventKey } from '../lib/time';
 
-const today = eventKey(new Date());
-const booked = await activeSponsors(today);
-const [bannerNames, eventNames] = await Promise.all([homeBannerNames(), eventBannerNames()]);
 const selected = Astro.url.searchParams.get('placement');
-const start = addDays(today, 7);
+const start = addDays(eventKey(new Date()), 7);
 const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: item.rate, unit: item.unit }]));
-const imagePlacement = new Set(['home-banner', 'event-banner']);
+const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?? placements[0].rate;
 ---
 
 <BaseLayout
@@ -25,88 +20,92 @@ const imagePlacement = new Set(['home-banner', 'event-banner']);
   banner={false}
 >
   <PageHead
-    kicker="Advertise"
-    title="Be where the county already looks"
-    lede="Bastrop County is filling up with new households, new Saturdays, and new businesses. Bastropia is the local desk they open for what is happening here — not another Austin feed."
+    kicker="Advertise with Bastropia"
+    title="Show up where the county already looks"
+    lede="New neighbors are moving in. They need a Saturday plan, a reliable trade, a place to eat after the game. Put your name on the desk they open first."
   />
-  <div class="wrap">
-    <div class="prose">
+  <div class="wrap advertise">
+    <section class="ad-stats" aria-label="Bastrop County at a glance">
       <p>
-        Census estimates put Bastrop County at about <strong>119,000 residents in 2025</strong> — roughly a
-        <strong>21% jump since 2020</strong>, enough to rank among the country’s fastest-growing counties.
-        People are moving east of Austin for space, schools, and a town they can still name. They still need a plumber,
-        a landscaper, a church, a clinic, a Saturday market, and a place to eat after the game.
+        <strong>~119,000</strong>
+        <span>residents in 2025</span>
       </p>
       <p>
-        Those neighbors live on their phones. They check burn bans before lighting a fire pit, scan weekend plans before
-        leaving the driveway, and look up Friday scores and public meetings the same way they used to flip a paper.
-        Facebook groups are loud and hard to search. Highway billboards talk to cars that are already past you.
-        <strong>Bastropia is the quiet county desk</strong> they return to on purpose.
+        <strong>+21%</strong>
+        <span>growth since 2020</span>
       </p>
+      <p>
+        <strong>Countywide</strong>
+        <span>Bastrop to Smithville</span>
+      </p>
+    </section>
 
-      <h2>Why advertise here</h2>
-      <ul>
-        <li>
-          <strong>Local intent.</strong> People land here for events, news, weather, scores, and government — then see your name next to the thing they came to do.
-        </li>
-        <li>
-          <strong>A growing market.</strong> New residents do not have a favorite HVAC tech or florist yet. The business that shows up first often keeps them.
-        </li>
-        <li>
-          <strong>Countywide reach without countywide waste.</strong> One placement covers Bastrop, Elgin, Smithville, Cedar Creek, and the towns in between — not a metro buy priced for downtown Austin.
-        </li>
-        <li>
-          <strong>Trust that survives the click.</strong> Ads are labeled Sponsored. They stay off the burn-ban page and the emergency numbers. Readers can tell the desk from the sponsor, which is how both stay believable.
-        </li>
-        <li>
-          <strong>Simple creative.</strong> Site and event banners are a clear 1200×500 frame. Weekend sponsorship is a short line next to Friday–Sunday plans. No agency stack required.
-        </li>
-        <li>
-          <strong>You own the destination.</strong> Every ad opens your site, Eventbrite, or booking page. We invoice after you reserve. The placement goes live after payment.
-        </li>
-      </ul>
-
-      <h2>Who it fits</h2>
+    <div class="prose ad-pitch">
       <p>
-        Home services, restaurants, churches, clinics, real estate, retailers, festivals, and civic fundraisers —
-        anyone who wins when a neighbor in this county chooses them this week. If your customers live between the Colorado
-        and the Lost Pines, this is their calendar and their county news desk.
+        Census estimates put Bastrop County among the fastest-growing places in the country. People are moving east of
+        Austin for space and a town they can still name — and they still need a plumber, a landscaper, a church, a clinic,
+        and a table for Friday night.
       </p>
       <p>
-        Pick a placement below. Tell us when to start. We confirm the dates are open and send the invoice.
+        They live on their phones. They check burn bans, weekend plans, scores, and meetings the way they used to flip a
+        paper. Facebook groups are loud. Highway boards talk to cars that already passed. Bastropia is the quiet county
+        desk they return to on purpose.
       </p>
     </div>
 
-    <section class="section" id="placements" style="margin-top:2rem;">
-      <div class="section-head">
-        <h2>Choose a placement</h2>
+    <section class="ad-benefits" aria-label="Why advertise here">
+      <h2>Why it works</h2>
+      <div class="ad-benefit-grid">
+        <article>
+          <h3>Local intent</h3>
+          <p>People land here for events, news, weather, and scores — then see your name next to the reason they came.</p>
+        </article>
+        <article>
+          <h3>A growing market</h3>
+          <p>New residents do not have a favorite HVAC tech or florist yet. The business that shows up first often keeps them.</p>
+        </article>
+        <article>
+          <h3>Countywide without waste</h3>
+          <p>One placement covers Bastrop, Elgin, Smithville, Cedar Creek, and the towns in between — not a metro buy priced for downtown Austin.</p>
+        </article>
+        <article>
+          <h3>Trust that lasts</h3>
+          <p>Ads are labeled Sponsored and stay off burn-ban and emergency pages. Readers can tell the desk from the sponsor.</p>
+        </article>
+        <article>
+          <h3>Simple creative</h3>
+          <p>Run of Site, Events, and Weekend banners share a clear 1200×500 frame. No agency stack required.</p>
+        </article>
+        <article>
+          <h3>You own the click</h3>
+          <p>Every ad opens your site, Eventbrite, or booking page. We invoice after you reserve. It goes live after payment.</p>
+        </article>
       </div>
+    </section>
+
+    <section class="section ad-book" id="placements">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Reserve a spot</p>
+          <h2>Pick a banner</h2>
+        </div>
+      </div>
+      <p class="ad-book-lede">Tell us where you want to show up and when to start. We confirm the dates are open and send the invoice.</p>
       <FormError />
       <form id="ad-form" class="form" action="/api/intake" method="post">
         <input type="hidden" name="type" value="ad" />
         <input type="hidden" name="from" value="/advertise" />
         <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <div class="place-grid">
-          {placements.map((placement) => {
-            const holders = booked.filter((item) => item.placement === placement.id);
-            const holder = holders[0];
-            const liveNames = placement.id === 'home-banner' ? bannerNames : placement.id === 'event-banner' ? eventNames : [];
-            return (
-              <label class="choice">
-                <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'home-banner'} />
-                <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
-                <h2 style="font-size:1.7rem;">{placement.name}</h2>
-                <p class="meta">{placement.where}</p>
-                <p style="margin-top:0.4rem;">{placement.detail}</p>
-                {imagePlacement.has(placement.id) && (liveNames.length > 0 || holders.length > 0) && (
-                  <p class="badge">
-                    {placement.id === 'home-banner' ? 'In the rotation' : 'This month'}: {[...new Set([...liveNames, ...holders.map((item) => item.name)])].join(', ')}
-                  </p>
-                )}
-                {!imagePlacement.has(placement.id) && holder && <p class="badge">Booked through {labelFromKey(holder.until)} · {holder.name}</p>}
-              </label>
-            );
-          })}
+        <div class="place-grid ad-places">
+          {placements.map((placement) => (
+            <label class="choice">
+              <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'home-banner'} />
+              <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
+              <h3>{placement.name}</h3>
+              <p class="meta">{placement.where}</p>
+              <p class="ad-place-detail">{placement.detail}</p>
+            </label>
+          ))}
         </div>
         <div class="fields">
           <label class="field">
@@ -146,7 +145,7 @@ const imagePlacement = new Set(['home-banner', 'event-banner']);
             <textarea name="notes" rows="4" maxlength="1200" placeholder="Anything the desk should know. Political ads need the paid-for line in this box."></textarea>
           </label>
         </div>
-        <p class="price-line">Estimated total <strong id="ad-total">{money(placements.find((item) => item.id === 'home-banner')?.rate ?? placements[0].rate)}</strong></p>
+        <p class="price-line">Estimated total <strong id="ad-total">{money(defaultRate)}</strong></p>
         <label>
           <input type="checkbox" name="terms" value="yes" required /> The ad will say Sponsored. It will not imitate the county, a city, or an emergency notice. I understand this reservation is invoiced by the desk and is not charged on this form.
         </label>
@@ -154,12 +153,87 @@ const imagePlacement = new Set(['home-banner', 'event-banner']);
       </form>
     </section>
 
-    <p class="disclaimer" style="margin-top:1.5rem;">
+    <p class="disclaimer">
       Population figures are U.S. Census Bureau county estimates (about 118,900 residents in 2025; roughly 21% growth from 2020 to 2025).
       Bastropia does not sell personal data. Ads are labeled and kept off emergency pages.
     </p>
   </div>
 </BaseLayout>
+
+<style>
+  .advertise { padding-bottom: 2rem; }
+  .ad-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 0 0 1.6rem;
+    padding: 1rem 0 1.15rem;
+    border-top: 4px solid var(--ink);
+    border-bottom: 1px solid var(--line);
+  }
+  .ad-stats p { margin: 0; display: grid; gap: 0.15rem; }
+  .ad-stats strong {
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--river-deep);
+  }
+  .ad-stats span {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .ad-pitch { max-width: 44rem; }
+  .ad-benefits { margin-top: 2rem; }
+  .ad-benefits > h2 {
+    font-size: clamp(1.7rem, 3vw, 2.2rem);
+    margin: 0 0 0.85rem;
+    padding-top: 0.55rem;
+    border-top: 4px solid var(--ink);
+  }
+  .ad-benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem 1.4rem;
+  }
+  .ad-benefit-grid article {
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--line);
+  }
+  .ad-benefit-grid h3 {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0 0 0.35rem;
+  }
+  .ad-benefit-grid p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .ad-book { margin-top: 2.4rem; }
+  .ad-book-lede {
+    margin: 0 0 1rem;
+    max-width: 40rem;
+    color: var(--ink-soft);
+  }
+  .ad-places { grid-template-columns: repeat(3, 1fr); }
+  .ad-places .choice h3 {
+    font-family: var(--serif);
+    font-size: 1.55rem;
+    font-weight: 600;
+    margin: 0.2rem 0 0.35rem;
+  }
+  .ad-place-detail { margin: 0.45rem 0 0; font-size: 0.98rem; line-height: 1.4; }
+  .advertise .disclaimer { margin-top: 1.6rem; }
+  @media (max-width: 900px) {
+    .ad-stats,
+    .ad-benefit-grid,
+    .ad-places { grid-template-columns: 1fr; }
+  }
+</style>
+
 <script define:vars={{ offers }}>
   const form = document.querySelector('#ad-form');
   const total = document.querySelector('#ad-total');
