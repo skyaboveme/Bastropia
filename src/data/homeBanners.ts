@@ -32,4 +32,18 @@ export const homeBanners: HomeBanner[] = [
     alt: 'String Prairie Heating & Air. Cool air. Warm homes. Real neighbors. Call or book online at (512) 924-9744.',
     href: 'https://stringprairieheatingandair.com/',
   },
+  {
+    id: 'rosatex-landscaping',
+    name: 'RosaTex Landscaping',
+    src: '/images/banners/rosatex-landscaping.jpg',
+    alt: 'RosaTex Landscaping. Keep your property looking its best. Lawn mowing, tree trimming, junk removal, and mushroom compost. Call or text (512) 798-2569.',
+    href: 'https://rosatexlandscaping.com/',
+  },
+  {
+    id: 'rosanky-baptist-church',
+    name: 'Rosanky Baptist Church',
+    src: '/images/banners/rosanky-baptist-church.jpg',
+    alt: 'Rosanky Baptist Church. A place for faith, family, and community in Bastrop County. Bible study 9:00 AM, worship 10:00 AM every Sunday. 2160 FM 535, Rosanky. Call (512) 360-3968.',
+    href: 'https://www.rosankybc.org/',
+  },
 ];
