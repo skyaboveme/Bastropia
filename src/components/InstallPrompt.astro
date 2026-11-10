@@ -1,0 +1,117 @@
+---
+---
+
+<dialog class="install-pop" id="install-pop" aria-labelledby="install-pop-title" hidden>
+  <button class="newsletter-dismiss" type="button" data-install-dismiss aria-label="Close">×</button>
+  <p class="kicker">On your phone</p>
+  <h2 id="install-pop-title">Add Bastropia to your home screen</h2>
+  <p class="dek" data-install-copy>
+    Keep the burn ban, weekend list, and county desk one tap away — no app store.
+  </p>
+  <button class="button" type="button" data-install-action hidden>Add to home screen</button>
+  <ol class="install-steps" data-install-ios hidden>
+    <li>Tap the Share button in Safari.</li>
+    <li>Choose <strong>Add to Home Screen</strong>.</li>
+    <li>Tap <strong>Add</strong>.</li>
+  </ol>
+  <button class="newsletter-later" type="button" data-install-dismiss>Not now</button>
+</dialog>
+
+<script is:inline>
+  (function () {
+    var storageKey = 'bastropia-install';
+    var dialog = document.getElementById('install-pop');
+    if (!dialog) return;
+
+    var deferred = null;
+    var action = dialog.querySelector('[data-install-action]');
+    var ios = dialog.querySelector('[data-install-ios]');
+    var copy = dialog.querySelector('[data-install-copy]');
+
+    function read() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function remember(status) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ status: status, at: Date.now() }));
+      } catch (error) {
+        /* private browsing */
+      }
+    }
+
+    function isIos() {
+      return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    function isStandalone() {
+      return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    }
+
+    function show() {
+      dialog.hidden = false;
+      if (typeof dialog.showModal === 'function' && !dialog.open) dialog.showModal();
+    }
+
+    function hide() {
+      if (dialog.open) dialog.close();
+      dialog.hidden = true;
+    }
+
+    var choice = read();
+    if (isStandalone()) return;
+    if (choice && choice.status === 'installed') return;
+    if (choice && choice.status === 'dismissed' && choice.at && Date.now() - choice.at < 21 * 24 * 60 * 60 * 1000) return;
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    }
+
+    window.addEventListener('beforeinstallprompt', function (event) {
+      event.preventDefault();
+      deferred = event;
+      if (action) action.hidden = false;
+      if (ios) ios.hidden = true;
+      if (copy) copy.textContent = 'Keep the burn ban, weekend list, and county desk one tap away — no app store.';
+      setTimeout(show, 4500);
+    });
+
+    if (isIos()) {
+      if (action) action.hidden = true;
+      if (ios) ios.hidden = false;
+      if (copy) copy.textContent = 'Safari can pin Bastropia next to your other apps.';
+      setTimeout(show, 6000);
+    }
+
+    if (action) {
+      action.addEventListener('click', function () {
+        if (!deferred) return;
+        deferred.prompt();
+        deferred.userChoice.then(function (result) {
+          if (result && result.outcome === 'accepted') remember('installed');
+          else remember('dismissed');
+          deferred = null;
+          hide();
+        });
+      });
+    }
+
+    dialog.querySelectorAll('[data-install-dismiss]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        remember('dismissed');
+        hide();
+      });
+    });
+
+    dialog.addEventListener('click', function (event) {
+      if (event.target === dialog) {
+        remember('dismissed');
+        hide();
+      }
+    });
+  })();
+</script>

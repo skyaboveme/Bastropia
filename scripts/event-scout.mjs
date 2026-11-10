@@ -173,7 +173,7 @@ function categoryFor(title, section) {
     [/board|commission|council|court|committee|zoning|planning/, 'government'],
     [/market|bazaar|vendor/, 'markets'],
     [/concert|music|band\b|singer|karaoke/, 'music'],
-    [/yoga|tai chi|fitness|kickball|zumba|clinic|vaccine|wellness/, 'health'],
+    [/yoga|tai chi|fitness|kickball|zumba|clinic|vaccine|wellness|stretch|slow flow|fit and strong|core body|mind.?body|meditation|pilates|restorative/, 'health'],
     [/story\s*time|kids|children|family|baby|toddler|bilingue|halloween|trunk/, 'family'],
     [/art|craft|fiber|paint|gallery|quilt/, 'arts'],
     [/food|dinner|tasting|brunch|bbq|barbecue/, 'food'],
@@ -183,6 +183,8 @@ function categoryFor(title, section) {
   for (const [pattern, category] of rules) {
     if (pattern.test(text)) return category;
   }
+  // Indoor rec-center classes are health, not outdoors, even when the calendar section says Parks & Recreation.
+  if (/recreation center|rec center/i.test(text) && /with |league|class/.test(text)) return 'health';
   if (/park|recreation/i.test(section)) return 'outdoors';
   if (/library/i.test(section)) return 'education';
   return 'community';

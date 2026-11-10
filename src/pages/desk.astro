@@ -67,6 +67,9 @@ const upgrades = allowed ? await readUpgrades() : [];
                 ))}
               </dl>
               {order.type === 'event' && <pre class="markdown">{eventMarkdown(order.fields)}</pre>}
+              {order.type === 'tip' && order.fields.photoKey && (
+                <p><a class="button button-ghost" href={`/api/tip-image/${order.id}`}>Open tip photo</a></p>
+              )}
               {order.status === 'pending' && (
                 <form class="cluster" action="/api/desk" method="post">
                   <input type="hidden" name="id" value={order.id} />

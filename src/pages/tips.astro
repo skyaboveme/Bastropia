@@ -1,0 +1,90 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FormError from '../components/FormError.astro';
+import { cities } from '../data/taxonomy';
+import { facebookGroup, facebookGroupMembers, facebookGroupReason } from '../data/site';
+import { listPublishedTips } from '../lib/readerTips';
+import { formatMedium } from '../lib/time';
+
+const tips = await listPublishedTips();
+---
+
+<BaseLayout
+  title="Send a tip or photo"
+  description="Send Bastropia a photo or tip for the site and the Facebook group."
+>
+  <PageHead
+    kicker="Neighbors"
+    title="Send a tip or photo"
+    lede={`A road washout, a new storefront, a sunset over the pines — the desk reads every note. Strong ones land on the site and in the Facebook group (${facebookGroupMembers} members). ${facebookGroupReason}`}
+  />
+  <div class="wrap">
+    <FormError />
+    <form class="form" action="/api/tip" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="from" value="/tips" />
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="fields">
+        <label class="field wide">
+          <span>What’s going on?</span>
+          <textarea name="body" rows="5" required minlength="20" maxlength="1500" placeholder="A short tip neighbors would thank you for."></textarea>
+        </label>
+        <label class="field">
+          <span>Town</span>
+          <select name="place" required>
+            {cities.map((city) => <option value={city}>{city}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span>Your name</span>
+          <input name="contact" autocomplete="name" maxlength="80" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field wide">
+          <span>Photo</span>
+          <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" />
+          <span class="meta">Optional. JPEG, PNG, or WebP, under 4 MB.</span>
+        </label>
+        <label class="field wide">
+          <span>Or a photo link</span>
+          <input name="photoUrl" type="url" maxlength="300" placeholder="https://" />
+        </label>
+        <label class="field wide">
+          <input type="checkbox" name="share" value="yes" checked />
+          Okay to share on bastropia.com and in the <a href={facebookGroup}>Bastropia Facebook group</a> with my first name or as anonymous.
+        </label>
+      </div>
+      <button class="button" type="submit">Send to the desk</button>
+    </form>
+
+    {tips.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <p class="kicker">From neighbors</p>
+            <h2>Recently posted</h2>
+          </div>
+        </div>
+        <div class="card-list">
+          {tips.map((tip) => (
+            <article class="detail-main">
+              <p class="kicker">{tip.place} · {formatMedium(new Date(tip.createdAt))}</p>
+              {tip.photoUrl && <img class="event-photo" src={tip.photoUrl} alt="" loading="lazy" />}
+              <p>{tip.body}</p>
+              {tip.credit && <p class="meta">— {tip.credit}</p>}
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <p class="disclaimer">
+      Do not send emergencies here — call 911. Tips are reviewed before they are public. We may edit for length and clarity.
+    </p>
+  </div>
+</BaseLayout>

@@ -4,6 +4,7 @@ export const prerender = false;
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
+import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../../lib/externalNews';
 import { offsiteAttrs } from '../../lib/links';
 import { linkList } from '../../lib/schema';
@@ -38,5 +39,6 @@ const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
       Rosanky, Tahitian Village, and The Colony have no paper of their own, so a story is marked with that place when a headline names it.
       A Community Impact headline about The Colony is marked Sponsored.
     </p>
+    <NewsletterSignup />
   </div>
 </BaseLayout>

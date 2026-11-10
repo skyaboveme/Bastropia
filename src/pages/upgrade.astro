@@ -6,14 +6,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
 import { listingTiers } from '../data/commerce';
+import { filterEvents } from '../lib/events';
 import { money } from '../lib/format';
 import { activeUpgrades } from '../lib/intake';
 import { eventKey, formatMedium } from '../lib/time';
 
 const selectedEvent = Astro.url.searchParams.get('event');
 const selectedTier = Astro.url.searchParams.get('tier');
-const events = (await getCollection('events')).sort((a, b) => a.data.start.getTime() - b.data.start.getTime());
-const upgrades = await activeUpgrades(eventKey(new Date()));
+const now = new Date();
+const allEvents = await getCollection('events');
+let events = filterEvents(allEvents, { when: 'upcoming', classes: 'include' }, now);
+if (selectedEvent && !events.some((event) => event.id === selectedEvent)) {
+  const selected = allEvents.find((event) => event.id === selectedEvent);
+  if (selected) events = [selected, ...events];
+}
+const upgrades = await activeUpgrades(eventKey(now));
 const prices = Object.fromEntries(listingTiers.map((tier) => [tier.id, tier.price]));
 ---
 

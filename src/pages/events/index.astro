@@ -6,8 +6,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import EventCard from '../../components/EventCard.astro';
 import EventBanner from '../../components/EventBanner.astro';
+import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
-import { filterEvents, sortByDayThenTier } from '../../lib/events';
+import { filterEvents, isClassListing, sortByDayThenTier } from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
 import { eventNode, linkList } from '../../lib/schema';
 import { eventKey, labelFromKey, monthGrid, monthTitle } from '../../lib/time';
@@ -19,12 +20,15 @@ const query = {
   city: params.get('city'),
   q: params.get('q'),
   date: params.get('date'),
+  classes: params.get('classes'),
 };
 const view = params.get('view') === 'month' ? 'month' : 'list';
 const events = await getCollection('events');
 const upgrades = await activeUpgrades(eventKey(new Date()));
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const visible = sortByDayThenTier(filterEvents(events, query), tierOf);
+const classesOn = query.classes === '1' || query.classes === 'classes';
+
 const bannerAt = Math.min(5, visible.length);
 const listBefore = visible.slice(0, bannerAt);
 const listAfter = visible.slice(bannerAt);
@@ -38,6 +42,7 @@ const monthName = monthTitle(year, month);
 const cells = monthGrid(year, month);
 const counts = new Map<string, number>();
 for (const event of events) {
+  if (isClassListing(event)) continue;
   const key = eventKey(event.data.start);
   counts.set(key, (counts.get(key) ?? 0) + 1);
 }
@@ -50,7 +55,7 @@ const previous = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).p
 const next = month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padStart(2, '0')}`;
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const activeWhen = query.date ? '' : query.when || 'upcoming';
-const filtered = Boolean(query.when || query.category || query.city || query.q || query.date);
+const filtered = Boolean(query.when || query.category || query.city || query.q || query.date || classesOn);
 
 function href(overrides: Record<string, string | null>) {
   const next = new URLSearchParams();
@@ -60,6 +65,7 @@ function href(overrides: Record<string, string | null>) {
     city: query.city,
     q: query.q,
     date: query.date,
+    classes: query.classes,
     ...overrides,
   };
   for (const [key, value] of Object.entries(merged)) {
@@ -146,9 +152,10 @@ function href(overrides: Record<string, string | null>) {
       </div>
       <div class="filter-row">
         <span>What</span>
-        <a class="chip" href={href({ category: null })} aria-current={query.category ? undefined : 'true'}>All</a>
+        <a class="chip" href={href({ category: null, classes: null })} aria-current={!query.category && !classesOn ? 'true' : undefined}>All</a>
+        <a class="chip" href={href({ classes: '1', category: null })} aria-current={classesOn ? 'true' : undefined}>Classes</a>
         {categories.map((category) => (
-          <a class="chip" href={href({ category })} aria-current={query.category === category ? 'true' : undefined}>{categoryMeta[category].label}</a>
+          <a class="chip" href={href({ category, classes: null })} aria-current={query.category === category ? 'true' : undefined}>{categoryMeta[category].label}</a>
         ))}
       </div>
       <div class="filter-row">
@@ -160,6 +167,7 @@ function href(overrides: Record<string, string | null>) {
       </div>
     </div>
     {query.date && <p class="lede">Showing {labelFromKey(query.date)}.</p>}
+    {classesOn && <p class="lede">Rec-center fitness and wellness classes. One-off events stay on the main calendar.</p>}
     {visible.length ? (
       <>
         <div class="card-list">
@@ -175,5 +183,6 @@ function href(overrides: Record<string, string | null>) {
     )}
     </>
     )}
+    <NewsletterSignup />
   </div>
 </BaseLayout>

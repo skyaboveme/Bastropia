@@ -6,7 +6,7 @@ end: "2026-11-11T19:00:00-06:00"
 schedule: timed
 city: "Elgin"
 venue: "Elgin Recreation Center"
-category: outdoors
+category: health
 cost: "See the listing"
 tier: community
 organizer: "City of Elgin"

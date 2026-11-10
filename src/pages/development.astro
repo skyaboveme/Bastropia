@@ -1,0 +1,68 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+import {
+  developmentKindLabel,
+  developmentKinds,
+  developmentProjects,
+  type DevelopmentKind,
+} from '../data/development';
+import { formatMedium } from '../lib/time';
+
+const kind = (Astro.url.searchParams.get('kind') || 'all') as DevelopmentKind | 'all';
+const projects = developmentProjects
+  .filter((project) => kind === 'all' || project.kind === kind)
+  .sort((a, b) => b.updated.localeCompare(a.updated));
+
+function href(next: string) {
+  return next === 'all' ? '/development' : `/development?kind=${next}`;
+}
+---
+
+<BaseLayout
+  title="Development tracker"
+  description="Data centers, annexations, and new retail under watch in Bastrop County."
+  noindex={kind !== 'all'}
+>
+  <PageHead
+    kicker="Growth"
+    title="What’s being built in Bastrop County"
+    lede="Data centers, annexations, and retail pads — the ongoing story neighbors search for. Each card links the desk note and the public source."
+  />
+  <div class="wrap">
+    <div class="filters">
+      <div class="filter-row">
+        <span>Show</span>
+        {developmentKinds.map((item) => (
+          <a class="chip" href={href(item.id)} aria-current={kind === item.id ? 'true' : undefined}>{item.label}</a>
+        ))}
+      </div>
+    </div>
+
+    <div class="card-list" style="margin-top:1rem;">
+      {projects.map((project) => (
+        <article class="detail-main">
+          <p class="kicker">{developmentKindLabel[project.kind]} · {project.place} · {project.status}</p>
+          <h2 style="font-size:1.55rem;">
+            {project.newsPath ? <a class="text-link" href={project.newsPath}>{project.title}</a> : project.title}
+          </h2>
+          <p>{project.summary}</p>
+          <p class="meta">
+            Updated {formatMedium(new Date(`${project.updated}T12:00:00`))}.
+            Source: <a href={project.sourceUrl}>{project.sourceLabel}</a>
+            {project.newsPath && <> · <a href={project.newsPath}>Bastropia note</a></>}
+          </p>
+        </article>
+      ))}
+      {!projects.length && <p class="lede">Nothing is filed in that filter yet.</p>}
+    </div>
+
+    <p class="disclaimer">
+      This tracker summarizes public reporting. Permits, annexations, and council votes can change. Send a tip if you see a filing or a pad we missed — <a class="text-link" href="/tips">reader tips</a>.
+    </p>
+    <NewsletterSignup heading="Get the weekend — and growth notes when they land" />
+  </div>
+</BaseLayout>

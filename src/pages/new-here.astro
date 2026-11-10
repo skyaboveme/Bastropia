@@ -1,0 +1,182 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+import { countyOfficials, newResidentGuide, starterChecklist, taxDates } from '../data/newResident';
+import { facebookGroup, facebookGroupMembers } from '../data/site';
+import { serviceGroups } from '../data/services';
+import { phoneHref } from '../lib/format';
+
+const trash = serviceGroups.find((group) => group.id === 'trash');
+const utilities = serviceGroups.find((group) => group.id === 'roads');
+const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(item.name)) ?? [];
+---
+
+<BaseLayout
+  title={newResidentGuide.title}
+  description={newResidentGuide.summary}
+  pageType="Article"
+>
+  <PageHead
+    kicker="Guide"
+    title={newResidentGuide.title}
+    lede={newResidentGuide.summary}
+  />
+  <div class="wrap">
+    <NewsletterSignup
+      id="guide-signup"
+      heading="Email me the weekend — keep this guide bookmarked"
+      dek="This page is the free new-resident checklist. The Thursday email is the weekend lineup at 7 AM, so you are not hunting calendars alone."
+    />
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">First week</p>
+          <h2>Checklist</h2>
+        </div>
+      </div>
+      <ul class="guide-list">
+        {starterChecklist.map((item) => <li>{item}</li>)}
+      </ul>
+    </section>
+
+    <section class="section" id="commissioner">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Representation</p>
+          <h2>Who your commissioner is</h2>
+          <p class="meta">
+            County roads, precinct budgets, and a lot of land-use fights run through Commissioners Court.
+            <a class="text-link" href={newResidentGuide.precinctMapUrl}>Find your precinct on the county map</a>.
+          </p>
+        </div>
+      </div>
+      <article class="service" style="padding:0.9rem 1rem; margin-bottom:0.8rem;">
+        <h3>{countyOfficials.judge.name}</h3>
+        <p class="meta">{countyOfficials.judge.role}. {countyOfficials.judge.detail}</p>
+        <p class="cluster">
+          <a class="button button-dark" href={phoneHref(countyOfficials.judge.phone)}>{countyOfficials.judge.phone}</a>
+          <a class="button button-ghost" href={countyOfficials.judge.href}>County site</a>
+        </p>
+      </article>
+      <div class="service-grid">
+        {countyOfficials.commissioners.map((person) => (
+          <article class="service" style="padding:0.9rem 1rem;">
+            <p class="kicker">Precinct {person.precinct}</p>
+            <h3>{person.name}</h3>
+            <p class="meta">{person.area}</p>
+            <p class="cluster">
+              <a class="button button-dark" href={phoneHref(person.phone)}>{person.phone}</a>
+              <a class="button button-ghost" href={person.href}>Office page</a>
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section" id="utilities">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Power and water</p>
+          <h2>Utilities</h2>
+          <p class="meta">Most of the county is Bluebonnet Electric and Aqua Water. Inside city limits, start with that city’s utility desk.</p>
+        </div>
+      </div>
+      <div class="service-grid">
+        {power.map((item) => (
+          <article class="service" style="padding:0.9rem 1rem;">
+            <h3>{item.name}</h3>
+            <p class="meta">{item.detail}</p>
+            {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
+            <p class="cluster">
+              {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
+              {item.href && <a class="button button-ghost" href={item.href}>Website</a>}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section" id="trash">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Pickup day</p>
+          <h2>Trash and recycling</h2>
+          <p class="meta">{trash?.intro}</p>
+        </div>
+      </div>
+      <div class="service-grid">
+        {trash?.items.map((item) => (
+          <article class="service" style="padding:0.9rem 1rem;">
+            <h3>{item.name}</h3>
+            <p class="meta">{item.detail}</p>
+            {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
+            <p class="cluster">
+              {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
+              {item.href && <a class="button button-ghost" href={item.href}>Schedule</a>}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section" id="taxes">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Calendar</p>
+          <h2>Tax dates</h2>
+          <p class="meta">{taxDates.intro}</p>
+        </div>
+      </div>
+      <div class="card-list">
+        {taxDates.items.map((item) => (
+          <article class="detail-main">
+            <p class="kicker">{item.label}</p>
+            <p>{item.detail}</p>
+          </article>
+        ))}
+      </div>
+      <div class="service-grid" style="margin-top:1rem;">
+        <article class="service" style="padding:0.9rem 1rem;">
+          <h3>{taxDates.taxOffice.name}</h3>
+          <p class="meta">{taxDates.taxOffice.address}</p>
+          <p class="cluster">
+            <a class="button button-dark" href={phoneHref(taxDates.taxOffice.phone)}>{taxDates.taxOffice.phone}</a>
+            <a class="button button-ghost" href={taxDates.taxOffice.href}>Locations</a>
+          </p>
+        </article>
+        <article class="service" style="padding:0.9rem 1rem;">
+          <h3>{taxDates.appraisal.name}</h3>
+          <p class="meta">Values, homestead exemptions, and protests.</p>
+          <p class="cluster">
+            <a class="button button-dark" href={phoneHref(taxDates.appraisal.phone)}>{taxDates.appraisal.phone}</a>
+            <a class="button button-ghost" href={taxDates.appraisal.href}>Appraisal district</a>
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Neighbors</p>
+          <h2>Still stuck?</h2>
+          <p class="meta">
+            The <a class="text-link" href={facebookGroup}>Bastropia Facebook group</a> ({facebookGroupMembers} members) is faster for “who hauls trash on my road” questions.
+            Official emergencies stay on 911 and <a class="text-link" href="/phone-numbers">the phone list</a>.
+          </p>
+        </div>
+      </div>
+      <p class="cluster">
+        <a class="button" href="/development">County development tracker</a>
+        <a class="button button-ghost" href="/tips">Send a tip or photo</a>
+        <a class="button button-ghost" href="/burn-ban">Burn ban</a>
+      </p>
+    </section>
+
+    <p class="disclaimer">
+      Checked {newResidentGuide.checked}. Office hours and routes change. The linked city, county, and utility pages are the authority.
+    </p>
+  </div>
+</BaseLayout>

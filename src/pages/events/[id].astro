@@ -4,6 +4,7 @@ export const prerender = false;
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
+import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categoryMeta } from '../../data/taxonomy';
 import { listingTiers } from '../../data/commerce';
 import { phoneHref } from '../../lib/format';
@@ -90,8 +91,10 @@ const calendarHref = event ? googleCalendarUrl(event, pageUrl) : '';
           <a class="button button-dark" href={`/upgrade?event=${event.id}`}>Upgrade this listing</a>
         </aside>
       </div>
+      <NewsletterSignup />
     </div>
   ) : (
     <PageHead kicker="Calendar" title="That listing is not on the desk" lede="It may have been renamed. Browse the calendar or submit it again." />
   )}
 </BaseLayout>
+

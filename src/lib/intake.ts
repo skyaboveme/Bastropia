@@ -9,7 +9,7 @@ const intakeDir = path.join(process.cwd(), 'data', 'intake');
 const sponsorsFile = path.join(process.cwd(), 'data', 'sponsors.json');
 const upgradesFile = path.join(process.cwd(), 'data', 'upgrades.json');
 
-export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter' | 'alert';
+export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter' | 'alert' | 'tip';
 
 export type IntakeRecord = {
   id: string;

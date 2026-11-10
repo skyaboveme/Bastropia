@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { newsNode } from '../../lib/schema';
 import { formatLong } from '../../lib/time';
 
@@ -33,5 +34,6 @@ const { Content } = await render(story);
       <Content />
       {story.data.sourceUrl && <p>Source: <a href={story.data.sourceUrl}>{story.data.sourceLabel ?? 'Public source'}</a></p>}
     </div>
+    <NewsletterSignup />
   </article>
 </BaseLayout>

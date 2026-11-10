@@ -6,9 +6,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/EventCard.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
 import { offsiteAttrs } from '../lib/links';
-import { siteDescription } from '../data/site';
+import {
+  newsletterFormAction,
+  newsletterOffer,
+  newsletterSampleHref,
+  newsletterSampleLabel,
+  siteDescription,
+} from '../data/site';
 import { electionDay } from '../data/vote';
 import { townByName, townPath } from '../data/towns';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
@@ -374,28 +381,30 @@ const deskStories = pageHeadlines
 
     <CountyFeeds allFeeds />
 
-    <section class="band newsletter" id="newsletter">
-      <div>
-        <p class="kicker">Weekly</p>
-        <h2>Sign up for our weekly newsletter</h2>
-        <p class="dek">Be in the know about everything happening in Bastrop County.</p>
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Desk tools</p>
+          <h2>Keep these open</h2>
+        </div>
       </div>
-      <form class="form" data-newsletter-form action="https://app.kit.com/forms/9966284/subscriptions" method="post">
-        <label class="field">
-          <span>Email</span>
-          <input name="email_address" type="email" required autocomplete="email" />
-        </label>
-        <button class="button" type="submit">Sign up</button>
-      </form>
+      <p class="cluster">
+        <a class="button" href="/development">Development tracker</a>
+        <a class="button button-ghost" href="/new-here">New resident guide</a>
+        <a class="button button-ghost" href="/tips">Send a tip or photo</a>
+      </p>
     </section>
+
+    <NewsletterSignup />
   </div>
 
   <dialog class="newsletter-pop" id="newsletter-pop" aria-labelledby="newsletter-pop-title">
     <button class="newsletter-dismiss" type="button" data-newsletter-dismiss aria-label="Close">×</button>
     <p class="kicker">Weekly</p>
-    <h2 id="newsletter-pop-title">Sign up for our weekly newsletter</h2>
-    <p class="dek">Be in the know about everything happening in Bastrop County.</p>
-    <form class="form" data-newsletter-form action="https://app.kit.com/forms/9966284/subscriptions" method="post">
+    <h2 id="newsletter-pop-title">Get the weekend by email</h2>
+    <p class="dek">{newsletterOffer}</p>
+    <p class="meta"><a class="text-link" href={newsletterSampleHref}>{newsletterSampleLabel}</a></p>
+    <form class="form" data-newsletter-form action={newsletterFormAction} method="post">
       <label class="field">
         <span>Email</span>
         <input name="email_address" type="email" required autocomplete="email" />

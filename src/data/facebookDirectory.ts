@@ -159,7 +159,7 @@ export const directoryShelves: DirectoryShelf[] = [
       {
         "name": "Bastropia",
         "href": "https://www.facebook.com/groups/bastropia",
-        "detail": "Public · Bastrop County"
+        "detail": "Public · about 98 members · Bastrop County · neighbors posting news, weekend plans, roads, and burn bans"
       }
     ]
   },

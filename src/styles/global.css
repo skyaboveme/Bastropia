@@ -392,6 +392,7 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .band .form { margin-top: 0; }
 .band .field span { color: #dfeae4; }
 .newsletter { align-items: center; }
+.newsletter .meta { margin-top: 0.45rem; }
 .newsletter .form .button { width: 100%; }
 
 .newsletter-pop {
@@ -406,6 +407,8 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .newsletter-pop .kicker { color: var(--river); }
 .newsletter-pop h2 { color: var(--sun); font-size: clamp(1.8rem, 4vw, 2.3rem); margin-top: 0.35rem; }
 .newsletter-pop .dek { color: #cfe0d7; margin-top: 0.55rem; }
+.newsletter-pop .meta { margin-top: 0.45rem; color: #cfe0d7; }
+.newsletter-pop .meta a { color: var(--sun); }
 .newsletter-pop .field span { color: #dfeae4; }
 .newsletter-pop .form .button { width: 100%; }
 .election-night-pop .button { display: flex; width: 100%; margin-top: 1rem; }
@@ -432,6 +435,37 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
   text-underline-offset: 0.18em;
 }
 .newsletter-later:hover { color: #fff; }
+
+.install-pop {
+  position: relative;
+  border: 0;
+  padding: 1.7rem 1.5rem 1.3rem;
+  width: min(28rem, calc(100vw - 2rem));
+  background: var(--pine-deep);
+  color: #f4efe6;
+}
+.install-pop::backdrop { background: rgba(16, 24, 20, 0.66); }
+.install-pop .kicker { color: var(--river); }
+.install-pop h2 { color: var(--sun); font-size: clamp(1.6rem, 4vw, 2.1rem); margin-top: 0.35rem; }
+.install-pop .dek { color: #cfe0d7; margin-top: 0.55rem; }
+.install-pop .button { width: 100%; margin-top: 1rem; }
+.install-steps {
+  margin: 0.9rem 0 0;
+  padding-left: 1.15rem;
+  color: #cfe0d7;
+  line-height: 1.5;
+}
+.install-steps li { margin: 0.35rem 0; }
+
+.guide-list {
+  margin: 0.6rem 0 0;
+  padding-left: 1.2rem;
+  list-style: disc;
+  font-family: var(--text);
+  font-size: 1.08rem;
+  line-height: 1.55;
+}
+.guide-list li { margin: 0.4rem 0; }
 
 .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
 .calendar p, .calendar a { min-height: 4.6rem; background: transparent; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.4rem; text-decoration: none; }

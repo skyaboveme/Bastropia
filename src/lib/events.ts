@@ -10,7 +10,20 @@ export type EventQuery = {
   city?: string | null;
   q?: string | null;
   date?: string | null;
+  /** Rec-center fitness and wellness series. Hidden from the main calendar unless this is set. */
+  classes?: string | null;
 };
+
+const classTitle =
+  /yoga|tai chi|fitness|zumba|kickball|stretch|slow flow|fit and strong|core body|mind.?body|restorative|pilates|meditation|strength and condition|workout/;
+
+/** Recurring indoor rec-center classes that bury one-off events if left in the main list. */
+export function isClassListing(event: ListedEvent) {
+  const venue = event.data.venue.toLowerCase();
+  const title = event.data.title.toLowerCase();
+  if (!/recreation center|rec center/.test(venue)) return false;
+  return classTitle.test(title);
+}
 
 /** An event is over once its end has passed. All-day and agenda listings last through that Chicago date. */
 export function hasEnded(event: ListedEvent, now = new Date()) {
@@ -37,11 +50,16 @@ export function filterEvents(events: ListedEvent[], query: EventQuery, now = new
   const today = chicagoParts(now).key;
   const weekend = new Set(thisWeekendKeys(now));
   const needle = query.q?.trim().toLowerCase() ?? '';
+  const classesOnly = query.classes === '1' || query.classes === 'classes';
+  const includeClasses = query.classes === 'include';
 
   return events
     .filter((event) => {
       const key = eventKey(event.data.start);
       const hour = chicagoParts(event.data.start).hour;
+      const classListing = isClassListing(event);
+      if (!includeClasses && (classesOnly ? !classListing : classListing)) return false;
+
       if (query.city && event.data.city !== query.city) return false;
       if (query.category && event.data.category !== query.category) return false;
       if (needle) {

@@ -26,6 +26,14 @@ const record = id ? await getIntake(id) : null;
         {record.type === 'event' && <p>A person will read this before it goes on the calendar. You will get email if the address you gave works.</p>}
         {record.type === 'newsletter' && <p>Your address is stored with the other newsletter signups. It is not sold with the ad inventory.</p>}
         {record.type === 'alert' && <p>You are on that item’s list. It is separate from the weekly newsletter. Email is the notice, and a mobile number stays on the same list for a text.</p>}
+        {record.type === 'tip' && (
+          <p>
+            A person will read this before it is public. Strong tips and photos can land on the site and in the Bastropia Facebook group.
+            {record.fields.photoKey && (
+              <> Photo filed with this tip.</>
+            )}
+          </p>
+        )}
       </article>
     )}
   </div>
