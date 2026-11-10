@@ -16,7 +16,7 @@ type Kv = {
 
 const catalogKey = 'ad:catalog';
 const holdsKey = 'ad:holds';
-const textPlacements = new Set<PlacementId>(['river-banner', 'weekend-sponsor', 'news-rail', 'calendar-sponsor']);
+const textPlacements = new Set<PlacementId>(['weekend-sponsor', 'calendar-sponsor']);
 
 export type StoredAd = {
   id: string;

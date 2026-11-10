@@ -22,7 +22,7 @@ const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: ite
   <PageHead
     kicker="Sponsors"
     title="Put your business on the county desk"
-    lede="Ads are labeled and kept off the burn-ban page and the emergency numbers. River, news, and calendar placements are priced by the month. The weekend sponsor covers Friday, Saturday, and Sunday. You reserve a placement here. Bastropia confirms the dates are open and sends an invoice. The ad goes up after payment."
+    lede="Ads are labeled and kept off the burn-ban page and the emergency numbers. The site banner and calendar sponsor are priced by the month. The weekend sponsor covers Friday, Saturday, and Sunday. You reserve a placement here. Bastropia confirms the dates are open and sends an invoice. The ad goes up after payment."
   />
   <div class="wrap">
     <FormError />
@@ -36,7 +36,7 @@ const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: ite
           const holder = holders[0];
           return (
             <label class="choice">
-              <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'river-banner'} />
+              <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'home-banner'} />
               <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
               <h2 style="font-size:1.7rem;">{placement.name}</h2>
               <p class="meta">{placement.where}</p>

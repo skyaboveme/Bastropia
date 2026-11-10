@@ -1,14 +1,5 @@
 export const placements = [
   {
-    id: 'river-banner',
-    name: 'River banner',
-    page: 'Home',
-    where: 'Under the weekend plans on the homepage',
-    detail: 'One advertiser. The first thing people see after today’s events.',
-    rate: 300,
-    unit: 'month',
-  },
-  {
     id: 'weekend-sponsor',
     name: 'Weekend sponsor',
     page: 'This weekend',
@@ -16,15 +7,6 @@ export const placements = [
     detail: 'Friday, Saturday, and Sunday. For restaurants, markets, and anything that belongs on a Saturday.',
     rate: 75,
     unit: 'weekend',
-  },
-  {
-    id: 'news-rail',
-    name: 'News rail',
-    page: 'News',
-    where: 'Beside the county news list',
-    detail: 'A quiet placement for shops, clinics, and services people look up on purpose.',
-    rate: 150,
-    unit: 'month',
   },
   {
     id: 'calendar-sponsor',
