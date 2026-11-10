@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+import {
+  newsletterOffer,
+  newsletterSampleHref,
+  newsletterSampleLabel,
+} from '../data/site';
+
+const reasons = [
+  {
+    title: 'Friday plans, before Friday arrives',
+    text: 'Every Thursday at 7 AM you get the weekend lineup — markets, music, festivals, and the quiet things that only show up on a city calendar. Read it with coffee. Decide before the good seats are gone.',
+  },
+  {
+    title: 'One email, not a doomscroll',
+    text: 'Facebook groups are loud. This is one short letter. No algorithm, no “you may also like,” no nine other people’s yard-sale photos. Just what is happening in Bastrop County this weekend.',
+  },
+  {
+    title: 'Free, forever',
+    text: 'There is no paywall and no “premium tier.” The desk is free to read. The newsletter is free to join. Unsubscribe whenever you want — the link is in every issue.',
+  },
+  {
+    title: 'Written here, for here',
+    text: 'It is not a statewide digest with Bastrop buried in the footnotes. Listings come from Elgin, Smithville, Cedar Creek, McDade, Paige, and the county seat — the same calendar you already use on this site.',
+  },
+  {
+    title: 'Separate from emergency alerts',
+    text: 'School delays, burn bans, and road closures have their own lists on the alerts page. The weekly letter stays about the weekend. You choose what lands in your inbox.',
+  },
+];
+---
+
+<BaseLayout
+  title="Newsletter"
+  description="Free Bastrop County weekend newsletter every Thursday at 7 AM — why neighbors subscribe, and how to join."
+>
+  <PageHead
+    kicker="Free email"
+    title="The weekend, in your inbox"
+    lede={newsletterOffer}
+  />
+  <div class="wrap">
+    <NewsletterSignup
+      id="newsletter"
+      heading="Subscribe free"
+      dek="One email a week. The Friday-to-Sunday plans across Bastrop County, sent Thursday morning."
+    />
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Why subscribe</p>
+          <h2>Why neighbors keep this email</h2>
+        </div>
+      </div>
+      <div class="card-list">
+        {reasons.map((reason) => (
+          <article class="detail-main">
+            <h3 style="font-size:1.35rem;">{reason.title}</h3>
+            <p>{reason.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section prose">
+      <h2>What you will get</h2>
+      <p>
+        A Thursday morning note with the best of the weekend calendar: tonight’s show, Saturday’s market, Sunday’s hike or honor walk.
+        When something big is coming — a festival, a parade, election night — it shows up there first so you are not hunting six Facebook groups at 9 p.m. Friday.
+      </p>
+      <p>
+        See what this week looks like on the site: <a href={newsletterSampleHref}>{newsletterSampleLabel}</a>.
+        That living list is what the email is built from.
+      </p>
+      <p>
+        Status alerts (burn ban, schools, power, SH 71, US 290) are optional and separate — join those on
+        <a href="/alerts">the alerts page</a> if you want them.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

@@ -13,6 +13,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, and new retail under watch in Bastrop County' },
   { path: '/new-here', label: 'New resident guide', note: 'Utilities, trash day, tax dates, and which commissioner covers your road' },
   { path: '/tips', label: 'Send a tip or photo', note: 'Neighbor tips and photos for the site and the Facebook group' },
+  { path: '/newsletter', label: 'Newsletter', note: 'Free weekend email every Thursday at 7 AM, with reasons to subscribe' },
   { path: '/groups', label: 'Social', note: 'Public-group highlights, then the directory of Facebook groups and pages. /social opens the highlights' },
   { path: '/rss.xml', label: 'County RSS', note: 'Bastrop County news from this desk, county papers, and Austin newsrooms that name the county' },
   { path: '/events.xml', label: 'Events RSS', note: 'Feed of upcoming listings' },
