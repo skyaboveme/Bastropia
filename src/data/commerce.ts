@@ -9,12 +9,12 @@ export const placements = [
     unit: 'weekend',
   },
   {
-    id: 'calendar-sponsor',
-    name: 'Calendar sponsor',
-    page: 'Calendar',
-    where: 'Under the month grid',
-    detail: 'Seen by people already planning a day in the county.',
-    rate: 200,
+    id: 'event-banner',
+    name: 'Event banner',
+    page: 'Events',
+    where: 'At the top of the events calendar',
+    detail: 'A 1200×500 image. One monthly sponsor on the events page, same size as the site banner.',
+    rate: 300,
     unit: 'month',
   },
   {

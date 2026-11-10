@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { env } from 'cloudflare:workers';
 import { placements, type PlacementId } from '../data/commerce';
+import { eventBanners } from '../data/eventBanners';
 import { homeBanners } from '../data/homeBanners';
 import { httpUrl } from './intake';
 import { eventKey } from './time';
@@ -16,7 +17,8 @@ type Kv = {
 
 const catalogKey = 'ad:catalog';
 const holdsKey = 'ad:holds';
-const textPlacements = new Set<PlacementId>(['weekend-sponsor', 'calendar-sponsor']);
+const textPlacements = new Set<PlacementId>(['weekend-sponsor']);
+const imagePlacements = new Set<PlacementId>(['home-banner', 'event-banner']);
 
 export type StoredAd = {
   id: string;
@@ -75,7 +77,15 @@ function safeId(id: string) {
 }
 
 export function isFileAd(id: string) {
-  return homeBanners.some((banner) => banner.id === id);
+  return homeBanners.some((banner) => banner.id === id) || eventBanners.some((banner) => banner.id === id);
+}
+
+function fileBanner(id: string) {
+  const home = homeBanners.find((banner) => banner.id === id);
+  if (home) return { ...home, placements: ['home-banner'] as PlacementId[] };
+  const event = eventBanners.find((banner) => banner.id === id);
+  if (event) return { ...event, placements: ['event-banner'] as PlacementId[] };
+  return null;
 }
 
 function isPlacement(value: string): value is PlacementId {
@@ -113,46 +123,54 @@ function goHref(id: string, placement: PlacementId) {
   return `/go/${id}?from=${placement}`;
 }
 
-export async function bannerAds(): Promise<LiveAd[]> {
+async function imageAds(placement: 'home-banner' | 'event-banner', files: { id: string; name: string; src: string; alt: string; href: string }[]): Promise<LiveAd[]> {
   try {
-  const held = new Set(await readHolds());
-  const files: LiveAd[] = homeBanners
-    .filter((banner) => banner.id && banner.src && banner.href && !held.has(banner.id))
-    .map((banner) => ({
-      id: banner.id,
-      name: banner.name,
-      href: banner.href,
-      go: goHref(banner.id, 'home-banner'),
-      src: banner.src,
-      alt: banner.alt,
-      line: '',
-      placement: 'home-banner',
-    }));
-  const uploaded: LiveAd[] = (await readCatalog())
-    .filter((item) => item.active && item.imageType && item.placements.includes('home-banner'))
-    .map((item) => ({
-      id: item.id,
-      name: item.name,
-      href: item.href,
-      go: goHref(item.id, 'home-banner'),
-      src: `/ads/image/${item.id}?v=${encodeURIComponent(item.updatedAt)}`,
-      alt: item.alt || item.name,
-      line: item.line,
-      placement: 'home-banner',
-    }));
-  return [...files, ...uploaded];
+    const held = new Set(await readHolds());
+    const fromFiles: LiveAd[] = files
+      .filter((banner) => banner.id && banner.src && banner.href && !held.has(banner.id))
+      .map((banner) => ({
+        id: banner.id,
+        name: banner.name,
+        href: banner.href,
+        go: goHref(banner.id, placement),
+        src: banner.src,
+        alt: banner.alt,
+        line: '',
+        placement,
+      }));
+    const uploaded: LiveAd[] = (await readCatalog())
+      .filter((item) => item.active && item.imageType && item.placements.includes(placement))
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        href: item.href,
+        go: goHref(item.id, placement),
+        src: `/ads/image/${item.id}?v=${encodeURIComponent(item.updatedAt)}`,
+        alt: item.alt || item.name,
+        line: item.line,
+        placement,
+      }));
+    return [...fromFiles, ...uploaded];
   } catch {
-    return homeBanners.filter((banner) => banner.id && banner.src && banner.href).map((banner) => ({
+    return files.filter((banner) => banner.id && banner.src && banner.href).map((banner) => ({
       id: banner.id,
       name: banner.name,
       href: banner.href,
-      go: goHref(banner.id, 'home-banner'),
+      go: goHref(banner.id, placement),
       src: banner.src,
       alt: banner.alt,
       line: '',
-      placement: 'home-banner' as const,
+      placement,
     }));
   }
+}
+
+export async function bannerAds(): Promise<LiveAd[]> {
+  return imageAds('home-banner', homeBanners);
+}
+
+export async function eventBannerAds(): Promise<LiveAd[]> {
+  return imageAds('event-banner', eventBanners);
 }
 
 export async function textAds(placement: PlacementId): Promise<LiveAd[]> {
@@ -177,6 +195,10 @@ export async function textAds(placement: PlacementId): Promise<LiveAd[]> {
 
 export async function homeBannerNames() {
   return (await bannerAds()).map((item) => item.name);
+}
+
+export async function eventBannerNames() {
+  return (await eventBannerAds()).map((item) => item.name);
 }
 
 export function imageKind(bytes: Uint8Array) {
@@ -233,7 +255,7 @@ export async function createAdvertiser(form: FormData) {
   const parsed = readAdForm(form);
   if (!parsed.ok) return parsed;
   const file = form.get('image');
-  const wantsBanner = parsed.value.placements.includes('home-banner');
+  const wantsBanner = parsed.value.placements.some((item) => imagePlacements.has(item));
   let imageType = '';
   let bytes: ArrayBuffer | null = null;
   if (file instanceof File && file.size > 0) {
@@ -276,7 +298,7 @@ export async function updateAdvertiser(id: string, form: FormData) {
     imageType = imageKind(new Uint8Array(bytes));
     if (!imageType) return { ok: false as const, error: 'image' };
   }
-  if (parsed.value.placements.includes('home-banner') && !imageType) return { ok: false as const, error: 'image' };
+  if (parsed.value.placements.some((item) => imagePlacements.has(item)) && !imageType) return { ok: false as const, error: 'image' };
   const kv = store();
   if (!kv) return { ok: false as const, error: 'save' };
   const next: StoredAd = {
@@ -351,14 +373,14 @@ async function listKeys(prefix: string) {
 
 async function knownAd(id: string) {
   if (!safeId(id)) return null;
-  const file = homeBanners.find((banner) => banner.id === id);
+  const file = fileBanner(id);
   if (file) {
     const held = (await readHolds()).includes(id);
     return {
       id,
       name: file.name,
       href: file.href,
-      placements: ['home-banner'] as PlacementId[],
+      placements: file.placements,
       active: !held,
     };
   }
@@ -416,7 +438,7 @@ export async function statsFor(id: string): Promise<AdDay[]> {
 }
 
 async function reportFromId(id: string): Promise<AdReport | null> {
-  const file = homeBanners.find((banner) => banner.id === id);
+  const file = fileBanner(id);
   const uploaded = (await readCatalog()).find((item) => item.id === id);
   if (!file && !uploaded) return null;
   const held = file ? (await readHolds()).includes(id) : false;
@@ -428,7 +450,7 @@ async function reportFromId(id: string): Promise<AdReport | null> {
     email: uploaded?.email || '',
     line: uploaded?.line || '',
     alt: file?.alt || uploaded?.alt || '',
-    placements: file ? ['home-banner'] : uploaded?.placements || [],
+    placements: file ? file.placements : uploaded?.placements || [],
     active: file ? !held : Boolean(uploaded?.active),
     source: file ? 'file' : 'upload',
     src: file?.src || (uploaded?.imageType ? `/ads/image/${id}?v=${encodeURIComponent(uploaded.updatedAt)}` : ''),
@@ -451,7 +473,11 @@ export type DeskAd = AdReport & { token: string };
 
 export async function deskAds(): Promise<DeskAd[]> {
   const uploaded = await readCatalog();
-  const ids = [...homeBanners.map((banner) => banner.id), ...uploaded.map((item) => item.id)];
+  const ids = [
+    ...homeBanners.map((banner) => banner.id),
+    ...eventBanners.map((banner) => banner.id),
+    ...uploaded.map((item) => item.id),
+  ];
   const cards = await Promise.all(
     ids.map(async (id) => {
       const [token, report] = await Promise.all([reportToken(id), reportFromId(id)]);

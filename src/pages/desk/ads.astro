@@ -21,7 +21,7 @@ const problems: Record<string, string> = {
   email: 'That email address is missing the @.',
   pages: 'Pick at least one page.',
   line: 'A text placement needs one line, up to 90 characters.',
-  image: 'The site banner needs a JPG, PNG, or WebP under 1.5 MB.',
+  image: 'A banner placement needs a JPG, PNG, or WebP under 1.5 MB.',
   confirm: 'Check the box before deleting an advertiser.',
   save: 'The ad could not be saved. Try it again.',
 };
@@ -31,7 +31,7 @@ const problems: Record<string, string> = {
   <PageHead
     kicker="Publisher"
     title="Advertisers"
-    lede="Upload a business, then pick the pages. The site banner rotates through every banner on that spot. A text placement shows every advertiser assigned to it. Each advertiser has a report link for views and clicks."
+    lede="Upload a business, then pick the pages. Image banners use a 1200×500 frame. The site banner can rotate; the event banner is the monthly sponsor on /events. A text placement shows every advertiser assigned to it. Each advertiser has a report link for views and clicks."
   />
   <div class="wrap">
     {!allowed && locked && (

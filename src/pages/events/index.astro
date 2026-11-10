@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import EventCard from '../../components/EventCard.astro';
-import AdSlot from '../../components/AdSlot.astro';
+import EventBanner from '../../components/EventBanner.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
 import { filterEvents, sortByDayThenTier } from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
@@ -81,6 +81,7 @@ function href(overrides: Record<string, string | null>) {
       : 'Festivals, meetings, markets, and ordinary Tuesday plans. Filter the list, or switch to the month.'}
   />
   <div class="wrap">
+    <EventBanner />
     <div class="filters">
       <div class="filter-row">
         <span>View</span>
@@ -113,7 +114,6 @@ function href(overrides: Record<string, string | null>) {
             {!monthEvents.length && <p>Nothing is filed for this month yet.</p>}
           </div>
         </section>
-        <AdSlot placement="calendar-sponsor" />
       </>
     ) : (
     <>

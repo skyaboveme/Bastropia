@@ -11,7 +11,7 @@ interface Props {
 
 const { placement } = Astro.props;
 const meta = placements.find((item) => item.id === placement);
-const managed = meta && placement !== 'home-banner' ? await textAds(placement) : [];
+const managed = meta && placement !== 'home-banner' && placement !== 'event-banner' ? await textAds(placement) : [];
 const sponsor = managed.length ? null : await activeSponsor(placement, eventKey(new Date()));
 ---
 
