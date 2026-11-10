@@ -9,8 +9,16 @@ const rotating = banners.length > 1;
   <div class="home-banner-frame" data-banner-frame>
     {banners.length > 0 ? (
       banners.map((banner, index) => (
-        <a class:list={['home-banner-slide', { 'is-on': index === 0 }]} href={banner.go} target="_blank" rel="sponsored noopener noreferrer" data-slide data-ad-id={banner.id} hidden={index !== 0}>
-          <img src={banner.src} alt={banner.alt || banner.name} width="1200" height="500" decoding={index === 0 ? 'async' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'low'} />
+        <a
+          class:list={['home-banner-slide', { 'is-on': !rotating && index === 0 }]}
+          href={banner.go}
+          target="_blank"
+          rel="sponsored noopener noreferrer"
+          data-slide
+          data-ad-id={banner.id}
+          hidden={rotating || index !== 0}
+        >
+          <img src={banner.src} alt={banner.alt || banner.name} width="1200" height="500" decoding="async" fetchpriority={index === 0 ? 'high' : 'low'} />
         </a>
       ))
     ) : (
@@ -25,8 +33,8 @@ const rotating = banners.length > 1;
     <div class="home-banner-controls">
       <button type="button" data-banner-prev aria-label="Previous banner">‹</button>
       <div class="home-banner-dots">
-        {banners.map((banner, index) => (
-          <button type="button" data-banner-dot aria-label={banner.name} aria-current={index === 0 ? 'true' : undefined}></button>
+        {banners.map((banner) => (
+          <button type="button" data-banner-dot aria-label={banner.name}></button>
         ))}
       </div>
       <button type="button" data-banner-next aria-label="Next banner">›</button>
@@ -110,7 +118,7 @@ const rotating = banners.length > 1;
         start();
       }, { passive: true });
 
-      show(0);
+      show(Math.floor(Math.random() * slides.length));
       start();
     }
   </script>

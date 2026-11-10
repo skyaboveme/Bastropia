@@ -28,8 +28,8 @@ export const homeBanners: HomeBanner[] = [
   {
     id: 'string-prairie-heating',
     name: 'String Prairie Heating & Air',
-    src: '/images/banners/string-prairie-heating.png',
-    alt: 'String Prairie Heating & Air. Cool air. Warm homes. Real neighbors. Call or book online at (512) 924-9744.',
+    src: '/images/banners/string-prairie-heating.jpg',
+    alt: 'String Prairie Heating & Air. Cool air. Warm homes. Family-owned AC and heating for Bastrop County. Call (512) 924-9744.',
     href: 'https://stringprairieheatingandair.com/',
   },
   {
