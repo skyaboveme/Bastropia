@@ -131,6 +131,14 @@ const jsonLd = stringify(graph(nodes));
           var banner = main && main.querySelector('[data-site-banner]');
           if (!main || !banner) return;
 
+          // News and other long reads can ask for the banner after the story.
+          var end = main.querySelector('[data-banner-end]');
+          if (end) {
+            end.after(banner);
+            banner.hidden = false;
+            return;
+          }
+
           function blocks(parent) {
             return Array.prototype.filter.call(parent.children, function (el) {
               return el !== banner && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE';

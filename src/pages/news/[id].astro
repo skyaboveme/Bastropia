@@ -20,7 +20,7 @@ const { Content } = await render(story);
   pageType="NewsArticle"
   extra={[newsNode(story)]}
 >
-  <article class="wrap">
+  <article class="wrap" data-banner-end>
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
       <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
       <h1>{story.data.title}</h1>

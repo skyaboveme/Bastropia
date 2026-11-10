@@ -80,7 +80,17 @@ function current(href: string) {
       <span class="ear-sub">{forecast ? `${weatherLabel(forecast.code)} in ${weatherTown}` : 'County forecast'}</span>
     </a>
     <a class="brand" href="/">
-      <img src="/brand/logo-trim.png" alt="Bastropia" width="865" height="923" />
+      <picture>
+        <source srcset="/brand/logo-masthead.webp" type="image/webp" />
+        <img
+          src="/brand/logo-masthead.png"
+          alt="Bastropia"
+          width="440"
+          height="470"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </picture>
     </a>
     <a class="ear ear-right" href="/burn-ban" aria-label={`Burn ban: ${burnStatus}. Checked ${checkedLabel}`}>
       <span class="ear-label">Burn ban</span>
