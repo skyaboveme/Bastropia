@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { businesses } from '../data/businesses';
+---
+
+<BaseLayout
+  title="Local businesses"
+  description="Bastropia landing pages for local businesses in Bastrop County."
+>
+  <PageHead
+    kicker="Partners"
+    title="Local business pages"
+    lede="These are dedicated Bastropia pages for local businesses. Each one keeps the business’s own phone, hours, and site linked."
+  />
+  <div class="wrap">
+    <div class="card-list">
+      {businesses.map((business) => (
+        <article class="detail-main">
+          <p class="kicker">{business.category} · {business.place}</p>
+          <h2 style="font-size:1.55rem;"><a class="text-link" href={`/${business.slug}`}>{business.name}</a></h2>
+          <p>{business.summary}</p>
+          <p class="meta"><a href={`/${business.slug}`}>bastropia.com/{business.slug}</a></p>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

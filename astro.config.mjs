@@ -14,5 +14,11 @@ export default defineConfig({
   redirects: {
     '/events/submit': '/submit',
     '/live': '/videos',
+    // Business landings use branded PascalCase paths; send lowercase guesses there.
+    '/barronhomes': '/BarronHomes',
+    '/stringprairieheatingandair': '/StringPrairieHeatingandAir',
+    '/barefootflowerfarms': '/BarefootFlowerFarms',
+    '/lostpinestoyota': '/LostPinesToyota',
+    '/rosatexlandscaping': '/RosaTexLandscaping',
   },
 });

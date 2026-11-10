@@ -45,6 +45,7 @@ const hubs: Entry[] = [
   { path: '/calendar', priority: '0.7' },
   { path: '/about', priority: '0.6' },
   { path: '/advertise', priority: '0.6' },
+  { path: '/businesses', priority: '0.6' },
   { path: '/submit', priority: '0.6' },
   { path: '/tips', priority: '0.6' },
   { path: '/upgrade', priority: '0.6' },
