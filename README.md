@@ -38,7 +38,8 @@ A Grok skill at `.grok/skills/event-scout/SKILL.md` runs the same scout. The bot
 
 ## Burn ban
 
-`src/data/burnBan.ts` is the status shown in the header. Change it when [the county outdoor burning page](https://www.bastropcounty.gov/page/em.outdoor_burning) changes. The county page is the order.
+`src/data/burnBan.ts` is the status shown in the header. Check [the county outdoor burning page](https://www.bastropcounty.gov/page/em.outdoor_burning) daily and update `checked` even when the status is unchanged. Change `inEffect` when the county posts a new order. The county page is the order. The masthead must say “No burn ban” or “Ban in effect”, never a bare “Burn”.
+
 
 ## Ads and upgrades
 
