@@ -82,10 +82,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 .ear-right { justify-self: end; text-align: right; }
 .ear-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--river-deep); }
 .ear strong { font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.4rem); font-weight: 580; line-height: 1; }
-.ear strong.is-stop { font-size: clamp(1.55rem, 2.5vw, 2.2rem); white-space: nowrap; }
+.ear strong.is-ok,
+.ear strong.is-stop { font-size: clamp(1.35rem, 2.3vw, 1.95rem); white-space: nowrap; }
 .ear strong.is-ok { color: var(--ok); }
 .ear strong.is-stop { color: var(--stop); }
 .burn-word { display: inline-flex; align-items: center; gap: 0.12em; }
+
 .ear-right .burn-word { justify-content: flex-end; }
 .burn-mark { width: 0.78em; height: 0.78em; flex: none; color: var(--sun-deep); }
 .is-stop .burn-mark, .pill-stop .burn-mark { color: var(--stop); }
@@ -549,7 +551,9 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
   .brand img { height: 170px; }
   .ear { max-width: none; }
   .ear strong { font-size: 2.2rem; }
-  .ear strong.is-stop { font-size: 1.45rem; }
+  .ear strong.is-ok,
+  .ear strong.is-stop { font-size: 1.35rem; }
+
   .county-strip {
     display: flex;
     gap: 0.5rem;

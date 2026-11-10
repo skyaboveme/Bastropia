@@ -93,7 +93,7 @@ function current(href: string) {
         />
       </picture>
     </a>
-    <a class="ear ear-right" href="/burn-ban" aria-label={`Burn ban: ${burnStatus}. Checked ${checkedLabel}`}>
+    <a class="ear ear-right" href="/burn-ban" aria-label={`${burnStatus} in Bastrop County. Checked ${checkedLabel}`}>
       <span class="ear-label">Burn ban</span>
       <strong class:list={['burn-word', burnBan.inEffect ? 'is-stop' : 'is-ok']}>
         <BurnMark banned={burnBan.inEffect} />
@@ -101,6 +101,7 @@ function current(href: string) {
       </strong>
       <span class="ear-sub">Checked {checkedLabel}</span>
     </a>
+
   </div>
 
   <div class="county-strip" id="county-strip">
