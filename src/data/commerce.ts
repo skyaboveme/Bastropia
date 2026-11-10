@@ -12,7 +12,7 @@ export const placements = [
     id: 'event-banner',
     name: 'Event banner',
     page: 'Events',
-    where: 'Midway through the events list',
+    where: 'After the first five events on the list',
     detail: 'A 1200×500 image. One monthly sponsor on the events page. The Run of Site Banner does not run there.',
     rate: 300,
     unit: 'month',

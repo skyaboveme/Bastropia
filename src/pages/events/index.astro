@@ -25,7 +25,7 @@ const events = await getCollection('events');
 const upgrades = await activeUpgrades(eventKey(new Date()));
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const visible = sortByDayThenTier(filterEvents(events, query), tierOf);
-const bannerAt = Math.max(1, Math.floor(visible.length / 2));
+const bannerAt = Math.min(5, visible.length);
 const listBefore = visible.slice(0, bannerAt);
 const listAfter = visible.slice(bannerAt);
 const today = eventKey(new Date());
@@ -43,7 +43,7 @@ for (const event of events) {
 }
 const monthKey = `${year}-${String(month).padStart(2, '0')}`;
 const monthEvents = filterEvents(events, { when: 'all' }).filter((event) => eventKey(event.data.start).startsWith(monthKey));
-const monthBannerAt = Math.max(1, Math.floor(monthEvents.length / 2));
+const monthBannerAt = Math.min(5, monthEvents.length);
 const monthBefore = monthEvents.slice(0, monthBannerAt);
 const monthAfter = monthEvents.slice(monthBannerAt);
 const previous = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, '0')}`;
