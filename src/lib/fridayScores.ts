@@ -21,6 +21,14 @@ export type UpcomingGame = {
   side: 'Home' | 'Away' | '';
 };
 
+export type GameHighlight = {
+  id: string;
+  title: string;
+  href: string;
+  image: string;
+  kind: string;
+};
+
 /** Last final plus the next listed kickoff for one county varsity team. */
 export type SchoolScore = {
   id: string;
@@ -28,8 +36,11 @@ export type SchoolScore = {
   mascot: string;
   href: string;
   watch: string;
+  logo: string;
+  color: string;
   last: GameResult | null;
   next: UpcomingGame | null;
+  highlights: GameHighlight[];
   /** Flattened last-game fields for older call sites. */
   opponent: string;
   schoolScore: number;
@@ -41,13 +52,22 @@ export type SchoolScore = {
   side: 'Home' | 'Away' | '';
 };
 
-export const footballSchools: { id: string; school: string; mascot: string; href: string; watch: string }[] = [
+export const footballSchools: {
+  id: string;
+  school: string;
+  mascot: string;
+  href: string;
+  watch: string;
+  logo?: string;
+  color?: string;
+}[] = [
   {
     id: 'bastrop',
     school: 'Bastrop',
     mascot: 'Bears',
     href: 'https://www.maxpreps.com/tx/bastrop/bastrop-bears/football/',
     watch: 'https://www.nfhsnetwork.com/schools/bastrop-high-school-bastrop-tx',
+    color: '#8F0018',
   },
   {
     id: 'cedar-creek',
@@ -55,6 +75,7 @@ export const footballSchools: { id: string; school: string; mascot: string; href
     mascot: 'Eagles',
     href: 'https://www.maxpreps.com/tx/cedar-creek/cedar-creek-eagles/football/',
     watch: 'https://www.nfhsnetwork.com/schools/cedar-creek-high-school-bastrop-tx',
+    color: '#022C66',
   },
   {
     id: 'elgin',
@@ -62,6 +83,7 @@ export const footballSchools: { id: string; school: string; mascot: string; href
     mascot: 'Wildcats',
     href: 'https://www.maxpreps.com/tx/elgin/elgin-wildcats/football/',
     watch: 'https://www.nfhsnetwork.com/schools/elgin-high-school-elgin-tx',
+    color: '#754ACC',
   },
   {
     id: 'smithville',
@@ -69,6 +91,7 @@ export const footballSchools: { id: string; school: string; mascot: string; href
     mascot: 'Tigers',
     href: 'https://www.maxpreps.com/tx/smithville/smithville-tigers/football/',
     watch: 'https://www.nfhsnetwork.com/schools/smithville-high-school-smithville-tx',
+    color: '#CC4E10',
   },
 ];
 
@@ -136,6 +159,7 @@ function parseNextData(html: string) {
       props?: {
         pageProps?: {
           schoolId?: string;
+          teamContext?: { data?: { schoolMascotUrl?: string; schoolColor1?: string } };
           featuredGameData?: {
             date?: string;
             hasResult?: boolean;
@@ -150,12 +174,76 @@ function parseNextData(html: string) {
   }
 }
 
+function decodeHtml(value: string) {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function cleanHighlightTitle(label: string) {
+  return decodeHtml(label)
+    .replace(/\s*[—–-]\s*(?:Texan Live|Dave Campbell'?s Texas Sports|Vype Broadcast|Rudder)\s*$/i, '')
+    .replace(/^(Game Teaser|Team Highlights|Highlights|Game Recap):\s*/i, '')
+    .replace(/\s*Varsity (?:Boys )?Football\s*/i, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function highlightKind(label: string) {
+  const text = label.toLowerCase();
+  if (text.includes('game teaser')) return 'Teaser';
+  if (text.includes('game recap')) return 'Recap';
+  if (text.includes('team highlights') || text.includes('highlights')) return 'Highlights';
+  return 'Clip';
+}
+
+const highlightKindRank: Record<string, number> = {
+  Teaser: 0,
+  Highlights: 1,
+  Recap: 2,
+  Clip: 3,
+};
+
+/** Pull recent football highlight cards from an NFHS Network school page. */
+export function parseNfhsHighlights(html: string, limit = 3): GameHighlight[] {
+  const pattern =
+    /href="(\/highlights\/hlt[a-z0-9]+)"[^>]*aria-label="([^"]+)"[\s\S]{0,2200}?url\((https:\/\/(?:delivery\.vod|recaps)\.nfhsnetwork\.com[^)\s"]+)/gi;
+  const seen = new Set<string>();
+  const items: GameHighlight[] = [];
+  for (const match of html.matchAll(pattern)) {
+    const path = match[1];
+    const label = decodeHtml(match[2]);
+    const image = match[3];
+    if (seen.has(path)) continue;
+    if (!/football/i.test(label)) continue;
+    if (!/game teaser|highlights|game recap/i.test(label)) continue;
+    seen.add(path);
+    items.push({
+      id: path.replace('/highlights/', ''),
+      title: cleanHighlightTitle(label),
+      href: `https://www.nfhsnetwork.com${path}`,
+      image,
+      kind: highlightKind(label),
+    });
+  }
+  items.sort((a, b) => (highlightKindRank[a.kind] ?? 9) - (highlightKindRank[b.kind] ?? 9));
+  return items.slice(0, limit);
+}
+
 export function parseTeamBoard(html: string, school: (typeof footballSchools)[number]): SchoolScore | null {
   const data = parseNextData(html);
   const page = data?.props?.pageProps;
   const schoolId = page?.schoolId;
   const games = page?.wallCards?.schedule?.data;
   if (!schoolId || !games?.length) return null;
+
+  const logo = page.teamContext?.data?.schoolMascotUrl || school.logo || '';
+  const color = page.teamContext?.data?.schoolColor1
+    ? `#${page.teamContext.data.schoolColor1.replace(/^#/, '')}`
+    : school.color || '#10281f';
 
   const finished = [...games].filter((game) => game.hasResult).reverse();
   const upcoming = games.find((game) => !game.hasResult);
@@ -209,8 +297,11 @@ export function parseTeamBoard(html: string, school: (typeof footballSchools)[nu
 
   return {
     ...school,
+    logo,
+    color,
     last,
     next,
+    highlights: [],
     opponent: last?.opponent ?? '',
     schoolScore: last?.schoolScore ?? 0,
     opponentScore: last?.opponentScore ?? 0,
@@ -227,10 +318,21 @@ export function parseLatestGame(html: string, school: (typeof footballSchools)[n
   return parseTeamBoard(html, school);
 }
 
+async function loadHighlights(watch: string) {
+  const response = await fetch(watch, { headers, signal: AbortSignal.timeout(8000) });
+  if (!response.ok) return [] as GameHighlight[];
+  return parseNfhsHighlights(await response.text(), 3);
+}
+
 async function loadSchool(school: (typeof footballSchools)[number]) {
-  const response = await fetch(school.href, { headers, signal: AbortSignal.timeout(8000) });
-  if (!response.ok) throw new Error(`${school.school} ${response.status}`);
-  return parseTeamBoard(await response.text(), school);
+  const [boardResponse, highlights] = await Promise.all([
+    fetch(school.href, { headers, signal: AbortSignal.timeout(8000) }),
+    loadHighlights(school.watch).catch(() => [] as GameHighlight[]),
+  ]);
+  if (!boardResponse.ok) throw new Error(`${school.school} ${boardResponse.status}`);
+  const board = parseTeamBoard(await boardResponse.text(), school);
+  if (!board) return null;
+  return { ...board, highlights };
 }
 
 export async function getFridayScores(): Promise<SchoolScore[]> {

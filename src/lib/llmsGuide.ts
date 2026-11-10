@@ -23,7 +23,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/go-vote', label: 'Go Vote', note: 'Election Day is over. This address redirects to /results' },
   { path: '/election-night', label: 'Election night', note: 'Redirects to /results' },
   { path: '/results', label: 'Election results', note: 'Unofficial November 3, 2026 race-by-race totals from https://results.enr.clarityelections.com/TX/Bastrop/, Associated Press calls, vote centers, and the elections office central-count camera' },
-  { path: '/scores', label: 'Friday night scores', note: 'Latest finals for Bastrop, Cedar Creek, Elgin, and Smithville football' },
+  { path: '/scores', label: 'Friday night scores', note: 'Next kickoff, latest finals, team logos, and NFHS Network highlight clips for Bastrop, Cedar Creek, Elgin, and Smithville football' },
   { path: '/roads', label: 'Highway alerts', note: 'DriveTexas closures and crashes, then construction on SH 71, US 290, and other county roads' },
   { path: '/government/court-decisions', label: 'What the court decided', note: 'Three bullets after each Commissioners Court meeting, once the minutes are posted' },
   { path: '/about', label: 'About', note: 'What Bastropia is and is not' },

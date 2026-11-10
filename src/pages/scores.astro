@@ -8,41 +8,62 @@ import { offsiteAttrs } from '../lib/links';
 
 const scores = await getFridayScores();
 const bySchool = new Map(scores.map((score) => [score.id, score]));
+const boards = footballSchools.map((school) => {
+  const score = bySchool.get(school.id);
+  return {
+    school,
+    score,
+    logo: score?.logo || school.logo || '',
+    color: score?.color || school.color || '#10281f',
+    highlights: score?.highlights ?? [],
+  };
+});
 ---
 
 <BaseLayout
   title="Friday night scores"
-  description="Next kickoff and latest final for Bastrop, Cedar Creek, Elgin, and Smithville football, from MaxPreps."
+  description="Next kickoff, latest final, team logos, and NFHS Network highlights for Bastrop, Cedar Creek, Elgin, and Smithville football."
 >
   <PageHead
     kicker="Football"
     title="Friday night scoreboard"
-    lede="Bastrop, Cedar Creek, Elgin, and Smithville. Next game, opponent, and the last final MaxPreps has posted—including a Thursday kickoff."
+    lede="Bastrop, Cedar Creek, Elgin, and Smithville. Logos from MaxPreps. Highlights open on the NFHS Network when Texan Live posts a teaser or recap."
   />
   <div class="wrap">
     <div class="score-grid">
-      {footballSchools.map((school) => {
-        const score = bySchool.get(school.id);
+      {boards.map(({ school, score, logo, color, highlights }) => {
         const next = score?.next;
         const last = score?.last;
         return (
-          <article class="score-card">
-            <p class="kicker">{school.school} {school.mascot}</p>
+          <article class="score-card" style={`--team:${color}`}>
+            <header class="score-head">
+              {logo ? (
+                <img class="score-logo" src={logo} alt={`${school.school} ${school.mascot}`} width="96" height="96" loading="lazy" referrerpolicy="no-referrer" />
+              ) : (
+                <span class="score-logo score-logo-fallback" aria-hidden="true">{school.school.slice(0, 1)}</span>
+              )}
+              <div>
+                <p class="kicker">{school.school}</p>
+                <h2 class="score-school">{school.mascot}</h2>
+              </div>
+            </header>
+
             {next ? (
-              <>
+              <div class="score-block">
                 <p class="score-label">Next</p>
-                <h2>{next.side === 'Away' ? `@ ${next.opponent}` : `vs ${next.opponent}`}</h2>
+                <p class="score-matchup">{next.side === 'Away' ? `@ ${next.opponent}` : `vs ${next.opponent}`}</p>
                 <p class="meta">{[next.when, next.kickoff, next.side].filter(Boolean).join(' · ')}</p>
-              </>
+              </div>
             ) : (
-              <>
+              <div class="score-block">
                 <p class="score-label">Next</p>
-                <h2>—</h2>
-                <p>No upcoming game is listed right now.</p>
-              </>
+                <p class="score-matchup">—</p>
+                <p class="meta">No upcoming game is listed right now.</p>
+              </div>
             )}
+
             {last ? (
-              <div class="score-last">
+              <div class="score-block score-last">
                 <p class="score-label">Last</p>
                 <p class="score-line">
                   <strong>{last.result === 'won' ? 'W' : last.result === 'lost' ? 'L' : 'T'} {last.schoolScore}–{last.opponentScore}</strong>
@@ -53,41 +74,138 @@ const bySchool = new Map(scores.map((score) => [score.id, score]));
                 <p class="meta">{[last.when, last.kickoff, last.side].filter(Boolean).join(' · ')}</p>
               </div>
             ) : (
-              <div class="score-last">
+              <div class="score-block score-last">
                 <p class="score-label">Last</p>
                 <p class="meta">The latest final is not on the school page right now.</p>
               </div>
             )}
+
+            {highlights.length > 0 && (
+              <div class="score-highlights">
+                <p class="score-label">Highlights</p>
+                <ul>
+                  {highlights.map((clip) => (
+                    <li>
+                      <a class="highlight-card" href={clip.href} {...offsiteAttrs(clip.href)}>
+                        <span class="highlight-thumb">
+                          <img src={clip.image} alt="" width="320" height="180" loading="lazy" />
+                          <span class="highlight-play" aria-hidden="true">▶</span>
+                        </span>
+                        <span class="highlight-copy">
+                          <em>{clip.kind}</em>
+                          <strong>{clip.title}</strong>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <p class="cluster">
               <a class="text-link" href={school.href} {...offsiteAttrs(school.href)}>MaxPreps</a>
-              <a class="text-link" href={school.watch} {...offsiteAttrs(school.watch)}>Watch</a>
+              <a class="text-link" href={school.watch} {...offsiteAttrs(school.watch)}>NFHS Network</a>
             </p>
           </article>
         );
       })}
     </div>
     <p class="disclaimer">
-      Next games and scores come from each school’s MaxPreps page. Bastropia does not keep the official book.
-      A week with no new final keeps the previous result until MaxPreps posts another.
+      Scores and logos come from each school’s MaxPreps page. Highlight teasers and recaps come from the NFHS Network school pages (often Texan Live).
+      NFHS does not allow embedding the player here, so each clip opens on their site. Bastropia does not keep the official book.
     </p>
   </div>
 </BaseLayout>
 
 <style>
-  .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-  .score-card { border-top: 4px solid var(--ink); padding-top: 0.7rem; }
+  .score-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .score-card {
+    border-top: 4px solid var(--team, var(--ink));
+    padding-top: 0.85rem;
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+  }
+  .score-head { display: grid; grid-template-columns: 4.2rem 1fr; gap: 0.75rem; align-items: center; margin-bottom: 0.2rem; }
+  .score-logo {
+    width: 4.2rem;
+    height: 4.2rem;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+    padding: 0.2rem;
+  }
+  .score-logo-fallback {
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--team, var(--ink));
+  }
+  .score-school { margin: 0.05rem 0 0; font-size: clamp(1.55rem, 2.6vw, 2rem); line-height: 1.1; }
   .score-label {
-    margin: 0.55rem 0 0.1rem;
+    margin: 0 0 0.12rem;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--river-deep);
   }
-  .score-card > .score-label:first-of-type { margin-top: 0.15rem; }
-  .score-card h2 { font-size: clamp(1.55rem, 2.8vw, 2.1rem); line-height: 1.15; margin: 0.15rem 0 0.2rem; }
-  .score-last { margin-top: 0.35rem; padding-top: 0.45rem; border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); }
+  .score-block { margin-top: 0.25rem; }
+  .score-matchup { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; line-height: 1.2; margin: 0.05rem 0; }
+  .score-last { margin-top: 0.45rem; padding-top: 0.5rem; border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); }
   .score-line { display: grid; gap: 0.1rem; margin: 0.15rem 0; }
   .score-line strong { font-family: var(--serif); font-size: 1.45rem; font-weight: 600; line-height: 1.1; }
-  @media (max-width: 800px) { .score-grid { grid-template-columns: 1fr 1fr; } }
+  .score-highlights { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); }
+  .score-highlights ul { list-style: none; margin: 0.35rem 0 0; padding: 0; display: grid; gap: 0.55rem; }
+  .highlight-card {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: inherit;
+    align-items: center;
+  }
+  .highlight-thumb {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #001b34;
+  }
+  .highlight-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .highlight-play {
+    position: absolute;
+    inset: auto auto 0.35rem 0.35rem;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, #fff 92%, transparent);
+    color: #10281f;
+    display: grid;
+    place-items: center;
+    font-size: 0.7rem;
+    padding-left: 0.08rem;
+  }
+  .highlight-copy { display: grid; gap: 0.12rem; min-width: 0; }
+  .highlight-copy em {
+    font-style: normal;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .highlight-copy strong {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .highlight-card:hover strong { text-decoration: underline; text-underline-offset: 0.08em; }
+  @media (max-width: 900px) {
+    .score-grid { grid-template-columns: 1fr; }
+    .highlight-card { grid-template-columns: 6.4rem 1fr; }
+  }
 </style>
