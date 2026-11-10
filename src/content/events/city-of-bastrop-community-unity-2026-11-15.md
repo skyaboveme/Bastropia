@@ -9,7 +9,7 @@ venue: "Bastrop Convention Center"
 address: "1408 Chestnut Street #B, Bastrop, TX 78602"
 category: community
 cost: "Free"
-tier: community
+tier: featured
 organizer: "City of Bastrop"
 sourceUrl: "https://www.eventbrite.com/e/city-of-bastrop-community-unity-2026-tickets-2003739037400"
 sourceLabel: "Eventbrite"

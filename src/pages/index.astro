@@ -16,7 +16,7 @@ import { readTown, townCookie } from '../lib/townChoice';
 import { eventNode, linkList, newsNode } from '../lib/schema';
 import { categoryMeta, cities } from '../data/taxonomy';
 import { streams } from '../data/streams';
-import { capOrganizer, filterEvents, sortByTier } from '../lib/events';
+import { capOrganizer, filterEvents, sortByDayThenTier, sortByTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, formatMedium, labelFromKey, thisWeekendKeys, whenLabel } from '../lib/time';
 const now = new Date();
@@ -285,7 +285,10 @@ const deskStories = pageHeadlines
       </div>
       <div class="weekend-grid">
         {weekend.map((day) => {
-          const items = weekendEvents.filter((event) => eventKey(event.data.start) === day && (!homeTown || event.data.city === homeTown));
+          const items = sortByDayThenTier(
+            weekendEvents.filter((event) => eventKey(event.data.start) === day && (!homeTown || event.data.city === homeTown)),
+            tierOf,
+          );
           return (
             <section class="day-card">
               <p class="kicker">{labelFromKey(day)}</p>

@@ -7,7 +7,7 @@ import PageHead from '../../components/PageHead.astro';
 import EventCard from '../../components/EventCard.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
-import { filterEvents } from '../../lib/events';
+import { filterEvents, sortByDayThenTier } from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
 import { eventNode, linkList } from '../../lib/schema';
 import { eventKey, labelFromKey, monthGrid, monthTitle } from '../../lib/time';
@@ -23,7 +23,8 @@ const query = {
 const view = params.get('view') === 'month' ? 'month' : 'list';
 const events = await getCollection('events');
 const upgrades = await activeUpgrades(eventKey(new Date()));
-const visible = filterEvents(events, query);
+const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
+const visible = sortByDayThenTier(filterEvents(events, query), tierOf);
 const today = eventKey(new Date());
 const [todayYear, todayMonth] = today.split('-').map(Number);
 const requested = params.get('month');
@@ -149,7 +150,7 @@ function href(overrides: Record<string, string | null>) {
     {query.date && <p class="lede">Showing {labelFromKey(query.date)}.</p>}
     {visible.length ? (
       <div class="card-list">
-        {visible.map((event) => <EventCard event={event} tier={resolveTier(event.id, event.data.tier, upgrades)} />)}
+        {visible.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
       </div>
     ) : (
       <p class="lede">Nothing matches. <a class="text-link" href="/submit">Submit a listing</a> or <a class="text-link" href="/events">clear the filters</a>.</p>

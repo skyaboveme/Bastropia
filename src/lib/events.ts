@@ -76,3 +76,14 @@ export function sortByTier(events: ListedEvent[], tierOf: (event: ListedEvent) =
     return a.data.start.getTime() - b.data.start.getTime();
   });
 }
+
+/** Keep calendar order, but pin Spotlight / Featured / Lost Pines to the top of each day. */
+export function sortByDayThenTier(events: ListedEvent[], tierOf: (event: ListedEvent) => Tier) {
+  return [...events].sort((a, b) => {
+    const day = eventKey(a.data.start).localeCompare(eventKey(b.data.start));
+    if (day !== 0) return day;
+    const rank = tierRank[tierOf(b)] - tierRank[tierOf(a)];
+    if (rank !== 0) return rank;
+    return a.data.start.getTime() - b.data.start.getTime();
+  });
+}
