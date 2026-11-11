@@ -6,6 +6,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/EventCard.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
+import DailyFeature from '../components/DailyFeature.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
 import { offsiteAttrs } from '../lib/links';
@@ -124,10 +125,11 @@ const deskStories = pageHeadlines
   <div class="wrap home-stack">
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
+        <DailyFeature level="h1" />
         {lead && (
-          <article class="story-lead">
+          <article class="story-lead story-follow">
             <p class="kicker">{lead.label} · {formatMedium(lead.date)}</p>
-            <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
+            <h2><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h2>
             {lead.summary && <p class="dek">{lead.summary}</p>}
             <p class="more"><a href={lead.href} {...offsiteAttrs(lead.href)}>Read the story</a></p>
           </article>
