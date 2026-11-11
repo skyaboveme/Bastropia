@@ -1,7 +1,7 @@
 ---
 title: City asks TCEQ for a public meeting on the Cedar Creek gas plant
 description: Council’s Nov. 3 resolution targets a proposed 48-turbine plant tied to a data-center campus near Cedar Creek.
-pubDate: 2026-11-10T08:15:00-06:00
+pubDate: 2026-11-04T08:00:00-06:00
 place: Cedar Creek
 image: /images/news/bastrop-gas-plant-tceq-meeting.jpg
 sourceUrl: https://www.kxan.com/news/local/bastrop/bastrop-gas-plant-data-center-tceq/

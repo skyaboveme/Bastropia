@@ -1,21 +1,25 @@
 ---
 import { dailyDate, dailyEditions } from '../data/daily';
-import { formatMedium } from '../lib/time';
+import { eventKey, formatMedium } from '../lib/time';
 
 interface Props {
   /** Home uses h1. The news page already has a page title. */
   level?: 'h1' | 'h2';
   /** List earlier editions under the player. */
   archive?: boolean;
+  /** When true, only render if the newest edition is today’s Chicago date. */
+  todayOnly?: boolean;
 }
 
-const { level = 'h2', archive = false } = Astro.props;
+const { level = 'h2', archive = false, todayOnly = false } = Astro.props;
 const current = dailyEditions[0];
+const today = eventKey(new Date());
 const Title = level;
 const showArchive = archive && dailyEditions.length > 1;
+const show = Boolean(current && (!todayOnly || current.date === today));
 ---
 
-{current && (
+{show && current && (
   <section class="daily-feature" aria-labelledby="daily-heading" data-daily>
     <p class="kicker" data-daily-kicker>Bastropia Daily · {formatMedium(dailyDate(current))}</p>
     <Title id="daily-heading" class="daily-title">{current.title}</Title>

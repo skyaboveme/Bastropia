@@ -331,7 +331,7 @@ export const serviceGroups: ServiceGroup[] = [
         detail: 'Electric service for much of the county. Member services (800) 842-7708 or (512) 332-7800. Outages (800) 949-4414.',
         phone: '(800) 842-7708',
         hours: 'Monday–Friday, 8 am–5 pm',
-        checked: '2026-11-10',
+        checked: '2026-11-11',
         href: 'https://www.bluebonnet.coop/contact-us',
       },
       {

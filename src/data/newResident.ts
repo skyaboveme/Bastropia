@@ -5,7 +5,7 @@ export const newResidentGuide = {
   title: 'New to Bastrop County',
   summary:
     'Utilities, trash day, tax dates, and which commissioner covers your road — the desk notes neighbors ask for first.',
-  checked: '2026-11-10',
+  checked: '2026-11-11',
   precinctMapUrl: 'https://www.bastropcounty.gov/page/com.main',
   kitTagId: newsletterNewResidentTagId,
 };

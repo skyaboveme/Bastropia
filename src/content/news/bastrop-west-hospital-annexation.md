@@ -1,7 +1,7 @@
 ---
 title: Council pulls 222 acres into the city for Bastrop West
 description: A 4–0 vote on Oct. 27 annexes land east of FM 20 for a planned hospital, hotel, and mixed-use stretch south of SH 71.
-pubDate: 2026-11-10T08:00:00-06:00
+pubDate: 2026-10-28T09:00:00-05:00
 place: Bastrop
 image: /images/news/bastrop-west-hospital-annexation.jpg
 sourceUrl: https://www.statesman.com/business/real-estate/article/bastrop-hospital-222-acre-annexation-22512206.php

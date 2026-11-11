@@ -38,7 +38,7 @@ export const developmentProjects: DevelopmentProject[] = [
     place: 'Cedar Creek',
     summary:
       'A proposed data-center campus near Cedar Creek tied to a Pacifico gas plant permit. City Council asked TCEQ for a public meeting; Anthropic has been named in public records as a planned tenant. A second reading of city data-center rules is on the calendar.',
-    updated: '2026-11-10',
+    updated: '2026-11-04',
     sourceUrl: 'https://www.kxan.com/news/local/bastrop/bastrop-gas-plant-data-center-tceq/',
     sourceLabel: 'KXAN',
     newsPath: '/news/bastrop-gas-plant-tceq-meeting',
