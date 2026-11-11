@@ -7,39 +7,36 @@ import { getIntake } from '../lib/intake';
 import { money } from '../lib/format';
 
 const id = Astro.url.searchParams.get('id') ?? '';
+const kind = Astro.url.searchParams.get('kind') ?? '';
 const record = id ? await getIntake(id) : null;
+const type = record?.type || kind;
+
+const copy: Record<string, string> = {
+  ad: 'This reserves the placement. Bastropia checks that the dates are open and sends an invoice. The ad is labeled Sponsored and goes up after payment.',
+  upgrade: 'This requests the upgrade. It starts after the invoice is paid and the desk applies it to the listing.',
+  event: 'A person will read this before it goes on the calendar. You will get email if the address you gave works.',
+  newsletter: 'Your address is stored with the other newsletter signups. It is not sold with the ad inventory.',
+  alert:
+    'You are on that item’s list. It is separate from the weekly newsletter. Email is the notice, and a mobile number stays on the same list for a text.',
+  tip: 'A person will read this before it is public. Strong tips and photos can land on the site and in the Bastropia Facebook group.',
+  business:
+    'A person will read this before it goes on the directory. Free listings show name, trade, town, and how to reach you. If you want a full branded partner page later, say so when the desk writes back.',
+};
 ---
 
 <BaseLayout title="Received" description="Your note is on the Bastropia desk." noindex>
   <PageHead
     kicker="Desk"
-    title={record ? 'The desk has it' : 'Received'}
-    lede={record ? record.summary : 'If this was a real submission, the confirmation includes an order number.'}
+    title={record || id ? 'The desk has it' : 'Received'}
+    lede={record ? record.summary : id ? 'Your note was emailed to the desk.' : 'If this was a real submission, the confirmation includes an order number.'}
   />
   <div class="wrap">
-    {record && (
+    {(record || id) && (
       <article class="detail-main">
-        <p class="kicker">{record.id}</p>
-        {record.total > 0 && <p class="price-line">{money(record.total)}</p>}
-        {record.type === 'ad' && <p>This reserves the placement. Bastropia checks that the dates are open and sends an invoice. The ad is labeled Sponsored and goes up after payment.</p>}
-        {record.type === 'upgrade' && <p>This requests the upgrade. It starts after the invoice is paid and the desk applies it to the listing.</p>}
-        {record.type === 'event' && <p>A person will read this before it goes on the calendar. You will get email if the address you gave works.</p>}
-        {record.type === 'newsletter' && <p>Your address is stored with the other newsletter signups. It is not sold with the ad inventory.</p>}
-        {record.type === 'alert' && <p>You are on that item’s list. It is separate from the weekly newsletter. Email is the notice, and a mobile number stays on the same list for a text.</p>}
-        {record.type === 'tip' && (
-          <p>
-            A person will read this before it is public. Strong tips and photos can land on the site and in the Bastropia Facebook group.
-            {record.fields.photoKey && (
-              <> Photo filed with this tip.</>
-            )}
-          </p>
-        )}
-        {record.type === 'business' && (
-          <p>
-            A person will read this before it goes on the directory. Free listings show name, trade, town, and how to reach you.
-            If you want a full branded partner page later, say so when the desk writes back.
-          </p>
-        )}
+        {id && <p class="kicker">{id}</p>}
+        {record && record.total > 0 && <p class="price-line">{money(record.total)}</p>}
+        {type && copy[type] && <p>{copy[type]}</p>}
+        {record?.type === 'tip' && record.fields.photoKey && <p class="meta">Photo filed with this tip.</p>}
       </article>
     )}
   </div>

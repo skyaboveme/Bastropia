@@ -15,6 +15,10 @@ export const facebookGroupReason =
 
 export const newsletterFormAction = 'https://app.kit.com/forms/9966284/subscriptions';
 
+/** Formspree inbox for desk forms that are not Kit (events, businesses, ads, upgrades, tips). */
+export const formspreeEndpoint = 'https://formspree.io/f/xyewgorw';
+export const formspreeFormId = 'xyewgorw';
+
 export const newsletterOffer = 'The weekend lineup, every Thursday at 7 AM.';
 
 /** Live stand-in until a sent issue is published on the Kit archive. */

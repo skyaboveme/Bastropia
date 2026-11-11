@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { randomBytes } from 'node:crypto';
 import { saveAlertSubscriptions } from '../../lib/alertStore';
+import { formspreeSubject, formspreeIntakeTypes, notifyFormspree } from '../../lib/formspree';
 import { buildRecord, saveIntake, tagAlert } from '../../lib/intake';
 
 export const prerender = false;
@@ -38,8 +39,22 @@ export const POST: APIRoute = async ({ request }) => {
       /* The file copy can still stand if the key store is down. */
     }
     await tagAlert(built.record.fields);
+  } else if (formspreeIntakeTypes.has(built.record.type)) {
+    const emailed = await notifyFormspree({
+      email: built.record.fields.email,
+      subject: formspreeSubject(built.record.type, built.record.summary),
+      fields: {
+        type: built.record.type,
+        id: built.record.id,
+        summary: built.record.summary,
+        total: built.record.total ? String(built.record.total) : '',
+        ...built.record.fields,
+      },
+    });
+    if (!emailed) return bounce(`${from}?error=save`);
+    saved = true;
   }
   if (!saved) return bounce(`${from}?error=save`);
   if (built.record.type === 'alert') return bounce('/alerts?joined=1');
-  return bounce(`/thanks?id=${built.record.id}`);
+  return bounce(`/thanks?id=${built.record.id}&kind=${built.record.type}`);
 };

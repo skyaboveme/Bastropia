@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { randomBytes } from 'node:crypto';
 import { env } from 'cloudflare:workers';
+import { formspreeSubject, notifyFormspree } from '../../lib/formspree';
 import { saveIntake, type IntakeRecord } from '../../lib/intake';
+import { siteUrl } from '../../data/site';
 
 export const prerender = false;
 
@@ -98,8 +100,21 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     await saveIntake(record);
   } catch {
-    return bounce('/tips?error=save');
+    /* Local intake is best-effort on Workers; Formspree is the desk copy. */
   }
 
-  return bounce(`/thanks?id=${id}`);
+  const emailed = await notifyFormspree({
+    email,
+    subject: formspreeSubject('tip', record.summary),
+    fields: {
+      type: 'tip',
+      id,
+      summary: record.summary,
+      ...fields,
+      photoPage: fields.photoKey ? `${siteUrl}/api/tip-image/${id}` : '',
+    },
+  });
+  if (!emailed) return bounce('/tips?error=save');
+
+  return bounce(`/thanks?id=${id}&kind=tip`);
 };
