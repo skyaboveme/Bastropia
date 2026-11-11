@@ -1,5 +1,6 @@
 ---
-import { facebookGroup, facebookGroupReason, youtubeChannel } from '../data/site';
+import SocialIcons from './SocialIcons.astro';
+import { facebookGroupReason } from '../data/site';
 ---
 
 <footer class="site-footer">
@@ -19,6 +20,8 @@ import { facebookGroup, facebookGroupReason, youtubeChannel } from '../data/site
         </picture>
       </a>
       <p class="legal">Everything in Bastrop County.</p>
+      <SocialIcons class="footer-social" />
+      <p class="meta">{facebookGroupReason}</p>
     </div>
     <div>
       <h3>Sections</h3>
@@ -45,9 +48,6 @@ import { facebookGroup, facebookGroupReason, youtubeChannel } from '../data/site
       <p><a href="/advertise">Advertise</a></p>
       <p><a href="/businesses">Business directory</a></p>
       <p><a href="/businesses/submit">List your business</a></p>
-      <p><a href={facebookGroup}>Facebook Group</a></p>
-      <p class="meta">{facebookGroupReason}</p>
-      <p><a href={youtubeChannel}>YouTube</a></p>
       <p><a href="/about">About Bastropia</a></p>
       <p><a href="/rss.xml">RSS</a></p>
       <p><a href="/llms.txt">llms.txt</a></p>
