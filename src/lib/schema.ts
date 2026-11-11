@@ -1,5 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
-import { facebookGroup, siteDescription, siteName, siteUrl } from '../data/site';
+import { facebookGroup, siteDescription, siteName, siteUrl, youtubeChannel } from '../data/site';
 import { eventKey, TZ } from './time';
 
 export const orgId = `${siteUrl}/#organization`;
@@ -34,7 +34,7 @@ export function organization() {
       '@type': 'AdministrativeArea',
       name: 'Bastrop County, Texas',
     },
-    sameAs: [facebookGroup],
+    sameAs: [facebookGroup, youtubeChannel],
     knowsAbout: [
       'Bastrop County events',
       'Bastrop Texas',
