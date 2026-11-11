@@ -12,6 +12,9 @@
 /brand/*
   Cache-Control: public, max-age=604800
 
+/media/*
+  Cache-Control: public, max-age=604800
+
 /apple-touch-icon.png
   Cache-Control: public, max-age=604800
 
