@@ -1,7 +1,7 @@
 ---
 import BurnMark from './BurnMark.astro';
 import { burnBan, burnStatus } from '../data/burnBan';
-import { facebookGroup, facebookGroupMembers, facebookGroupReason } from '../data/site';
+import { facebookGroup, facebookGroupReason, youtubeChannel } from '../data/site';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
 import { eventKey, formatLong, labelFromKey } from '../lib/time';
 import { getForecast, isTown, weatherLabel } from '../lib/weather';
@@ -69,7 +69,8 @@ function current(href: string) {
     <div class="utility-inner">
       <p>{today}</p>
       <div class="utility-links">
-        <a href={facebookGroup} title={facebookGroupReason}>{facebookGroupMembers} neighbors on Facebook</a>
+        <a href={facebookGroup} title={facebookGroupReason}>Facebook Group</a>
+        <a href={youtubeChannel}>YouTube</a>
         <a href="/new-here">New here</a>
         <a href="/newsletter">Newsletter</a>
         <a href="/submit">Add an event</a>
