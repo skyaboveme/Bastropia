@@ -3,6 +3,7 @@ title: How a listing gets onto this calendar
 description: Churches, schools, nonprofits, and neighbors can submit a gathering. Paid upgrades are separate from the free listing.
 pubDate: 2026-10-18T09:00:00-05:00
 place: Countywide
+image: /images/news/how-listings-work.jpg
 ---
 
 Bastropia publishes events after a person looks at them. A free community listing needs a name, a date, a place, and enough detail that a neighbor can decide whether to go.

@@ -3,6 +3,7 @@ title: One Elgin High student stabbed; another held
 description: Authorities say a Friday morning fight on campus left one student hurt and one in custody. Names are not out.
 pubDate: 2026-11-03T12:00:00-06:00
 place: Elgin
+image: /images/news/elgin-high-stabbing.jpg
 sourceUrl: https://www.elgincourier.com/article/5016,stabbing-reported-at-elgin-high
 sourceLabel: Elgin Courier
 ---

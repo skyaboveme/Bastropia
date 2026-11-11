@@ -77,18 +77,18 @@ function href(overrides: Record<string, string | null>) {
 ---
 
 <BaseLayout
-  title="Events"
-  description="What’s happening in Bastrop County — filter by day, town, and the kind of plans you want."
+  title="Bastrop County Events Calendar"
+  description="Bastrop County events calendar — filter by day, town, and the kind of plans you want."
   noindex={filtered}
   banner={false}
   extra={[
-    ...(filtered ? [] : [linkList('Events in Bastrop County', visible.slice(0, 30).map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]),
+    ...(filtered ? [] : [linkList('Bastrop County Events Calendar', visible.slice(0, 30).map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]),
     ...visible.map((event) => eventNode(event)),
   ]}
 >
   <PageHead
     kicker={view === 'month' ? 'Month' : 'Calendar'}
-    title={view === 'month' ? monthName : 'Events in Bastrop County'}
+    title={view === 'month' ? monthName : 'Bastrop County Events Calendar'}
     lede={view === 'month'
       ? 'Pick a day. The number on it is how many listings the desk has, not how busy the town will be.'
       : 'Festivals, meetings, markets, and ordinary Tuesday plans. Filter the list, or switch to the month.'}

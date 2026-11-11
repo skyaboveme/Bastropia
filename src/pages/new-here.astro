@@ -2,14 +2,18 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
-import { countyOfficials, newResidentGuide, starterChecklist, taxDates } from '../data/newResident';
+import {
+  countyOfficials,
+  newResidentGuide,
+  starterChecklist,
+  taxDates,
+  utilityContacts,
+} from '../data/newResident';
 import { facebookGroup, facebookGroupMembers } from '../data/site';
 import { serviceGroups } from '../data/services';
 import { phoneHref } from '../lib/format';
 
 const trash = serviceGroups.find((group) => group.id === 'trash');
-const utilities = serviceGroups.find((group) => group.id === 'roads');
-const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(item.name)) ?? [];
 ---
 
 <BaseLayout
@@ -25,9 +29,18 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
   <div class="wrap">
     <NewsletterSignup
       id="guide-signup"
-      heading="Email me the weekend — keep this guide bookmarked"
-      dek="This page is the free new-resident checklist. The Thursday email is the weekend lineup at 7 AM, so you are not hunting calendars alone."
+      heading="Get the new-resident email"
+      dek="This guide stays free on the site. Leave your email and we tag you as a new neighbor, then send the Thursday weekend lineup at 7 AM so you are not hunting calendars alone."
+      buttonLabel="Email me the weekend list"
+      tagIds={[newResidentGuide.kitTagId]}
     />
+
+    <p class="cluster" style="margin-top:1rem;">
+      <a class="button button-ghost" href="#commissioner">Commissioner</a>
+      <a class="button button-ghost" href="#utilities">Utilities</a>
+      <a class="button button-ghost" href="#trash">Trash day</a>
+      <a class="button button-ghost" href="#taxes">Tax dates</a>
+    </p>
 
     <section class="section">
       <div class="section-head">
@@ -37,7 +50,11 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
         </div>
       </div>
       <ul class="guide-list">
-        {starterChecklist.map((item) => <li>{item}</li>)}
+        {starterChecklist.map((item) => (
+          <li>
+            {item.href ? <a class="text-link" href={item.href}>{item.text}</a> : item.text}
+          </li>
+        ))}
       </ul>
     </section>
 
@@ -53,12 +70,18 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
         </div>
       </div>
       <article class="service" style="padding:0.9rem 1rem; margin-bottom:0.8rem;">
+        <p class="kicker">{countyOfficials.judge.role}</p>
         <h3>{countyOfficials.judge.name}</h3>
-        <p class="meta">{countyOfficials.judge.role}. {countyOfficials.judge.detail}</p>
+        <p class="meta">{countyOfficials.judge.detail}</p>
         <p class="cluster">
           <a class="button button-dark" href={phoneHref(countyOfficials.judge.phone)}>{countyOfficials.judge.phone}</a>
-          <a class="button button-ghost" href={countyOfficials.judge.href}>County site</a>
+          <a class="button button-ghost" href={countyOfficials.judge.href}>County Judge page</a>
         </p>
+      </article>
+      <article class="service" style="padding:0.9rem 1rem; margin-bottom:0.8rem;">
+        <p class="kicker">{countyOfficials.judgeElect.role}</p>
+        <h3>{countyOfficials.judgeElect.name}</h3>
+        <p class="meta">{countyOfficials.judgeElect.detail}</p>
       </article>
       <div class="service-grid">
         {countyOfficials.commissioners.map((person) => (
@@ -68,6 +91,7 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
             <p class="meta">{person.area}</p>
             <p class="cluster">
               <a class="button button-dark" href={phoneHref(person.phone)}>{person.phone}</a>
+              <a class="button button-ghost" href={`mailto:${person.email}`}>Email</a>
               <a class="button button-ghost" href={person.href}>Office page</a>
             </p>
           </article>
@@ -84,14 +108,16 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
         </div>
       </div>
       <div class="service-grid">
-        {power.map((item) => (
+        {utilityContacts.map((item) => (
           <article class="service" style="padding:0.9rem 1rem;">
             <h3>{item.name}</h3>
             <p class="meta">{item.detail}</p>
             {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
             <p class="cluster">
               {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
-              {item.href && <a class="button button-ghost" href={item.href}>Website</a>}
+              {item.phoneAlt && <a class="button button-ghost" href={phoneHref(item.phoneAlt)}>{item.phoneAlt}</a>}
+              {item.href && <a class="button button-ghost" href={item.href}>{item.name.includes('City') ? 'Phone list' : 'Website'}</a>}
+              {item.contactHref && <a class="button button-ghost" href={item.contactHref}>Contact</a>}
             </p>
           </article>
         ))}
@@ -103,7 +129,7 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
         <div>
           <p class="kicker">Pickup day</p>
           <h2>Trash and recycling</h2>
-          <p class="meta">{trash?.intro}</p>
+          <p class="meta">{trash?.intro} Outside those city routes, neighbors usually arrange a private hauler — ask in the Facebook group if you need a name.</p>
         </div>
       </div>
       <div class="service-grid">
@@ -133,7 +159,15 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
         {taxDates.items.map((item) => (
           <article class="detail-main">
             <p class="kicker">{item.label}</p>
-            <p>{item.detail}</p>
+            <p>
+              {item.detail}
+              {item.href && (
+                <>
+                  {' '}
+                  <a class="text-link" href={item.href}>Official page</a>
+                </>
+              )}
+            </p>
           </article>
         ))}
       </div>
@@ -156,6 +190,15 @@ const power = utilities?.items.filter((item) => /Bluebonnet|Aqua|utility/i.test(
         </article>
       </div>
     </section>
+
+    <NewsletterSignup
+      id="guide-signup-bottom"
+      compact
+      heading="Keep the guide — get the weekend"
+      dek="Same free checklist above. The Thursday email is the county’s weekend plans at 7 AM."
+      buttonLabel="Sign up for the weekend list"
+      tagIds={[newResidentGuide.kitTagId]}
+    />
 
     <section class="section">
       <div class="section-head">

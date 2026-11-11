@@ -42,6 +42,7 @@ const links = [
   { href: '/weather', label: 'Weather' },
   { href: '/government', label: 'Government' },
   { href: '/groups', label: 'Social' },
+  { href: '/businesses', label: 'Businesses' },
   { href: '/advertise', label: 'Advertise' },
 ];
 const voteLink = { href: '/go-vote', label: 'Go Vote' };
@@ -50,6 +51,7 @@ function current(href: string) {
   if (href === '/') return path === '/';
   if (href === '/events') return path === '/events' || path.startsWith('/events/') || path === '/calendar';
   if (href === '/groups') return path === '/groups' || path.startsWith('/groups/') || path === '/social' || path.startsWith('/social/');
+  if (href === '/businesses') return path === '/businesses' || path.startsWith('/businesses/');
   return path === href || path.startsWith(`${href}/`);
 }
 ---
@@ -68,6 +70,7 @@ function current(href: string) {
       <p>{today}</p>
       <div class="utility-links">
         <a href={facebookGroup} title={facebookGroupReason}>{facebookGroupMembers} neighbors on Facebook</a>
+        <a href="/new-here">New here</a>
         <a href="/newsletter">Newsletter</a>
         <a href="/submit">Add an event</a>
       </div>

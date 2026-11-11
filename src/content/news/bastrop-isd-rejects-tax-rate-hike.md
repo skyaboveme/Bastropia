@@ -3,6 +3,7 @@ title: Bastrop ISD voters turn down the 1.3-cent tax hike
 description: Unofficial returns show about two-thirds against Proposition A for the 2026–27 budget year.
 pubDate: 2026-11-03T22:30:00-06:00
 place: Bastrop
+image: /images/news/bastrop-isd-rejects-tax-rate-hike.jpg
 sourceUrl: https://communityimpact.com/bastrop-cedar-creek/election/bastrop-isd-voters-reject-tax-rate-increase-in-early-results/
 sourceLabel: Community Impact
 ---

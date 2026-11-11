@@ -3,6 +3,7 @@ title: Next Commissioners Court is November 23
 description: Monday’s regular term is done. The fiscal year order puts the next one on Nov. 23 at the Pecan Street annex.
 pubDate: 2026-11-10T09:00:00-06:00
 place: Bastrop
+image: /images/news/commissioners-court-november-9.jpg
 sourceUrl: https://www.bastropcounty.gov/upload/page/0331/docs/Commissioners_Court_Dates_26-27.pdf
 sourceLabel: Meeting order for fiscal year 2026–2027
 ---

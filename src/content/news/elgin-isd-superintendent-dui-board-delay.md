@@ -3,6 +3,7 @@ title: Elgin ISD board puts off a call on the superintendent
 description: Trustees met Thursday after Superintendent Christopher Bailey’s DUI charge and did not decide his future that night.
 pubDate: 2026-11-06T10:00:00-06:00
 place: Elgin
+image: /images/news/elgin-isd-superintendent-dui-board-delay.jpg
 sourceUrl: https://www.elgincourier.com/article/5023,elgin-isd-holds-off-on-decision-following-superintendent-s-dui-arrest
 sourceLabel: Elgin Courier
 ---

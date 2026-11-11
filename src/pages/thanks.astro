@@ -34,6 +34,12 @@ const record = id ? await getIntake(id) : null;
             )}
           </p>
         )}
+        {record.type === 'business' && (
+          <p>
+            A person will read this before it goes on the directory. Free listings show name, trade, town, and how to reach you.
+            If you want a full branded partner page later, say so when the desk writes back.
+          </p>
+        )}
       </article>
     )}
   </div>

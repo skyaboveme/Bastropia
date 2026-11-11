@@ -3,6 +3,7 @@ title: Burleson Crossing East starts its second retail phase
 description: State filings put about $10.8 million of new building work on SH 71, with Ulta, TJ Maxx, and Burlington in the mix.
 pubDate: 2026-11-10T08:30:00-06:00
 place: Bastrop
+image: /images/news/burleson-crossing-east-phase-2.jpg
 sourceUrl: https://www.mysanantonio.com/business/article/burleson-crossing-bastrop-retail-expansion-22507238.php
 sourceLabel: MySA
 ---

@@ -9,7 +9,7 @@ function bounce(location: string) {
   return new Response(null, { status: 303, headers: { Location: location } });
 }
 
-const origins = new Set(['/', '/advertise', '/upgrade', '/submit', '/alerts']);
+const origins = new Set(['/', '/advertise', '/upgrade', '/submit', '/alerts', '/businesses/submit']);
 
 export const POST: APIRoute = async ({ request }) => {
   const length = Number(request.headers.get('content-length') || 0);

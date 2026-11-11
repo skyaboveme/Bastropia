@@ -3,6 +3,7 @@ title: Voters open more of the county to alcohol sales
 description: On Nov. 3, precinct and city measures cleared the way for mixed-beverage licenses in places that had been dry or limited.
 pubDate: 2026-11-05T17:30:00-06:00
 place: Countywide
+image: /images/news/county-alcohol-sales-measures-pass.jpg
 sourceUrl: https://communityimpact.com/bastrop-cedar-creek/election/how-bastrop-county-s-alcohol-rules-are-changing/
 sourceLabel: Community Impact
 ---

@@ -3,6 +3,7 @@ title: Dock Jackson takes the county judge’s race
 description: Unofficial returns put Jackson ahead of incumbent Gregory Klaus, about 51.5% to 48.5%.
 pubDate: 2026-11-04T00:30:00-06:00
 place: Countywide
+image: /images/news/dock-jackson-county-judge.jpg
 sourceUrl: https://www.elgincourier.com/article/5020,dock-jackson-claims-bastrop-county-judge-seat-in-close-election
 sourceLabel: Elgin Courier
 ---

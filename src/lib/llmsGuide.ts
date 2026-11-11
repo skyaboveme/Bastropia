@@ -56,6 +56,8 @@ export async function llmsIndex() {
     ...towns.map((town) => `- [This week in ${town}](${link(`/${town.toLowerCase().replace(/ /g, '-')}`)}): Weather, this week’s listings, school dates, and headlines for ${town}`),
     '',
     '## Local businesses',
+    `- [Business directory](${link('/businesses')}): browse by category and town`,
+    `- [List your business free](${link('/businesses/submit')})`,
     ...businesses.map((business) => `- [${business.name}](${link(`/${business.slug}`)}): ${business.summary}`),
     '',
     '## Optional',

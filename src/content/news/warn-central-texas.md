@@ -3,6 +3,7 @@ title: Register a cell phone for Warn Central Texas
 description: County emergency alerts do not automatically find a mobile phone. The signup is free.
 pubDate: 2026-10-20T10:00:00-05:00
 place: Countywide
+image: /images/news/warn-central-texas.jpg
 sourceUrl: https://warncentraltexas.org/communities/bastrop-county/
 sourceLabel: Warn Central Texas
 ---

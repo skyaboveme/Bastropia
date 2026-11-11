@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import FormError from '../../components/FormError.astro';
+import { businessCategories } from '../../data/businesses';
+import { cities } from '../../data/taxonomy';
+
+const categories = [
+  ...businessCategories(),
+  'Plumbing',
+  'Electrical',
+  'Roofing',
+  'Restaurant',
+  'Retail',
+  'Professional services',
+  'Other',
+].filter((item, index, list) => list.indexOf(item) === index);
+const towns = cities.filter((city) => city !== 'Countywide');
+---
+
+<BaseLayout
+  title="List your business"
+  description="Submit a free Bastrop County business directory listing. A person reviews it before it is public."
+>
+  <PageHead
+    kicker="Directory"
+    title="List your business free"
+    lede="Name, trade, town, and how neighbors reach you. The desk reviews it before it goes on the directory. Want a full branded page later? Ask about a paid partner listing after you are approved."
+  />
+  <div class="wrap">
+    <p class="cluster">
+      <a class="button button-ghost" href="/businesses">Back to the directory</a>
+      <a class="button button-ghost" href="/advertise">Paid partner pages</a>
+    </p>
+    <FormError />
+    <form class="form" action="/api/intake" method="post">
+      <input type="hidden" name="type" value="business" />
+      <input type="hidden" name="from" value="/businesses/submit" />
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="fields">
+        <label class="field wide">
+          <span>Business name</span>
+          <input name="business" required maxlength="100" />
+        </label>
+        <label class="field">
+          <span>Category</span>
+          <select name="category" required>
+            {categories.map((category) => <option value={category}>{category}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span>Primary town</span>
+          <select name="city" required>
+            {towns.map((city) => <option value={city}>{city}</option>)}
+          </select>
+        </label>
+        <label class="field wide">
+          <span>Towns you serve</span>
+          <input name="areas" maxlength="200" placeholder="Smithville, Bastrop, Rosanky" />
+        </label>
+        <label class="field">
+          <span>Phone</span>
+          <input name="phone" type="tel" required autocomplete="tel" />
+        </label>
+        <label class="field">
+          <span>Website</span>
+          <input name="website" type="url" placeholder="https://" />
+        </label>
+        <label class="field">
+          <span>Your name</span>
+          <input name="contact" required autocomplete="name" maxlength="80" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field wide">
+          <span>Street address, if customers visit</span>
+          <input name="address" maxlength="160" />
+        </label>
+        <label class="field wide">
+          <span>What should neighbors know?</span>
+          <textarea
+            name="details"
+            required
+            minlength="20"
+            rows="6"
+            maxlength="1200"
+            placeholder="What you do, who you serve, hours if you have them, and anything that helps a neighbor decide to call."
+          ></textarea>
+        </label>
+      </div>
+      <button class="button" type="submit">Send it to the desk</button>
+      <p class="meta">Free directory listing. Reviewed before it is public. Partner landing pages are a separate paid option.</p>
+    </form>
+  </div>
+</BaseLayout>

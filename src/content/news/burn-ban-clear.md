@@ -3,6 +3,7 @@ title: No burn ban is listed for Bastrop County
 description: The county outdoor-burning page says a ban is not in effect. Check it again before you light anything.
 pubDate: 2026-10-31T08:00:00-05:00
 place: Countywide
+image: /images/news/burn-ban-clear.jpg
 sourceUrl: https://www.bastropcounty.gov/page/em.outdoor_burning
 sourceLabel: Bastrop County outdoor burning
 ---

@@ -3,6 +3,7 @@ title: Burlington files a $3.3 million store for Burleson Crossing East
 description: State papers call for a 22,520-square-foot building, with work listed from mid-November into September 2027.
 pubDate: 2026-10-26T10:00:00-05:00
 place: Bastrop
+image: /images/news/burlington-burleson-crossing.jpg
 sourceUrl: https://www.bastropedc.org/media-center/news/p/item/70182/burlington-plans-33m-store-in-burleson-crossing-east
 sourceLabel: Bastrop EDC
 ---

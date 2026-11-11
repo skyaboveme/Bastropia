@@ -708,3 +708,69 @@ export const businesses: Business[] = [
 export function businessBySlug(slug: string) {
   return businesses.find((business) => business.slug === slug);
 }
+
+/** Towns used for directory filters. Prefer service areas; fall back to locality. */
+const directoryTowns = [
+  'Bastrop',
+  'Elgin',
+  'Smithville',
+  'Cedar Creek',
+  'McDade',
+  'Paige',
+  'Rosanky',
+] as const;
+
+export type DirectoryTown = (typeof directoryTowns)[number];
+
+export function businessCategories() {
+  return [...new Set(businesses.map((business) => business.category))].sort((a, b) => a.localeCompare(b));
+}
+
+export function businessTowns(): DirectoryTown[] {
+  const found = new Set<DirectoryTown>();
+  for (const business of businesses) {
+    for (const town of directoryTowns) {
+      if (businessServesTown(business, town)) found.add(town);
+    }
+  }
+  return directoryTowns.filter((town) => found.has(town));
+}
+
+export function businessServesTown(business: Business, town: string) {
+  const needle = town.toLowerCase();
+  if (business.address.locality.toLowerCase() === needle) return true;
+  if (business.place.toLowerCase().includes(needle)) return true;
+  return business.areas.some((area) => {
+    const value = area.toLowerCase();
+    if (value === needle) return true;
+    if (value.includes(`${needle} county`)) return true;
+    return value === `${needle} county`;
+  });
+}
+
+export function filterBusinesses(query: { category?: string | null; town?: string | null }) {
+  return businesses.filter((business) => {
+    if (query.category && business.category !== query.category) return false;
+    if (query.town && !businessServesTown(business, query.town)) return false;
+    return true;
+  });
+}
+
+export function businessesByCategory(list = businesses) {
+  const groups = new Map<string, Business[]>();
+  for (const business of list) {
+    const bucket = groups.get(business.category) ?? [];
+    bucket.push(business);
+    groups.set(business.category, bucket);
+  }
+  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+}
+
+export function businessesByTown(list = businesses) {
+  return businessTowns()
+    .map((town) => ({
+      town,
+      businesses: list.filter((business) => businessServesTown(business, town)),
+    }))
+    .filter((group) => group.businesses.length > 0);
+}

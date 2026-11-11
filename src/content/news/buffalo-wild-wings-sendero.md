@@ -3,6 +3,7 @@ title: Buffalo Wild Wings files for a Sendero build-out
 description: State papers put a 4,659-square-foot renovation on SH 71, with work penciled from December into late January.
 pubDate: 2026-11-05T16:40:00-06:00
 place: Bastrop
+image: /images/news/buffalo-wild-wings-sendero.jpg
 sourceUrl: https://communityimpact.com/bastrop-cedar-creek/dining/buffalo-wild-wings-plans-bastrop-debut/
 sourceLabel: Community Impact
 ---

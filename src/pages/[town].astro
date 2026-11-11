@@ -54,10 +54,10 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
   </BaseLayout>
 ) : (
   <BaseLayout
-    title={`This week in ${town.name}`}
+    title={`Things to do in ${town.name} this week`}
     description={`${town.lede} Bastrop County, Texas.`}
   >
-    <PageHead kicker="Town" title={`This week in ${town.name}`} lede={town.lede} />
+    <PageHead kicker="Town" title={`Things to do in ${town.name} this week`} lede={town.lede} />
     <div class="wrap">
       <p class="cluster">
         <button class="button button-dark" type="button" id="use-town" data-town={town.name}>Use {town.name} on the front page</button>

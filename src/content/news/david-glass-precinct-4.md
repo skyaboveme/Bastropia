@@ -3,6 +3,7 @@ title: David Glass keeps Precinct 4
 description: The incumbent commissioner took about three-quarters of the unofficial vote against a write-in.
 pubDate: 2026-11-04T00:40:00-06:00
 place: Countywide
+image: /images/news/david-glass-precinct-4.jpg
 sourceUrl: https://www.elgincourier.com/article/5021,david-glass-wins-reelection-as-bastrop-county-commissioner
 sourceLabel: Elgin Courier
 ---

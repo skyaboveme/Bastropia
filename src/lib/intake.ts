@@ -9,7 +9,7 @@ const intakeDir = path.join(process.cwd(), 'data', 'intake');
 const sponsorsFile = path.join(process.cwd(), 'data', 'sponsors.json');
 const upgradesFile = path.join(process.cwd(), 'data', 'upgrades.json');
 
-export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter' | 'alert' | 'tip';
+export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter' | 'alert' | 'tip' | 'business';
 
 export type IntakeRecord = {
   id: string;
@@ -127,7 +127,14 @@ export async function updateIntakeStatus(id: string, status: IntakeRecord['statu
 export function buildRecord(input: Record<string, string>, id: string, now = new Date()) {
   const type = input.type;
   const email = clean(input.email, 160).toLowerCase();
-  if (type !== 'ad' && type !== 'upgrade' && type !== 'event' && type !== 'newsletter' && type !== 'alert') {
+  if (
+    type !== 'ad' &&
+    type !== 'upgrade' &&
+    type !== 'event' &&
+    type !== 'newsletter' &&
+    type !== 'alert' &&
+    type !== 'business'
+  ) {
     return { ok: false as const, error: 'form' };
   }
   if (!emailOk(email)) return { ok: false as const, error: 'email' };
@@ -239,6 +246,31 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
       phone: clean(input.phone, 30),
     });
     summary = `${title} on ${date} in ${fields.city || 'Bastrop County'}`;
+  }
+
+  if (type === 'business') {
+    const business = clean(input.business, 100);
+    const category = clean(input.category, 60);
+    const city = clean(input.city, 40);
+    const phone = clean(input.phone, 30);
+    const contact = clean(input.contact, 80);
+    const details = clean(input.details, 1200);
+    const digits = phone.replace(/\D/g, '');
+    if (!business || !category || !city || digits.length < 10 || !contact || details.length < 20) {
+      return { ok: false as const, error: 'details' };
+    }
+    Object.assign(fields, {
+      business,
+      category,
+      city,
+      areas: clean(input.areas, 200),
+      phone,
+      website: httpUrl(clean(input.website, 300)),
+      address: clean(input.address, 160),
+      details,
+      contact,
+    });
+    summary = `${business} (${category}) in ${city}`;
   }
 
   const record: IntakeRecord = {

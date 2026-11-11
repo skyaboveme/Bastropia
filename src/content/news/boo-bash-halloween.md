@@ -3,6 +3,7 @@ title: Boo Bash was downtown Bastrop on Saturday
 description: The free Halloween gathering was on North Main Street and Spring Street on Saturday, October 31.
 pubDate: 2026-10-31T07:00:00-05:00
 place: Bastrop
+image: /images/news/boo-bash-halloween.jpg
 sourceUrl: https://bastropcountycalendar.com/
 sourceLabel: Public community listing
 ---

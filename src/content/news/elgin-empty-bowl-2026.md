@@ -3,6 +3,7 @@ title: Elgin Empty Bowl raises about $9,500 for the food pantry
 description: More than 100 people turned out Nov. 7 at Elgin High for the ninth annual SOUPer Bowl.
 pubDate: 2026-11-10T08:45:00-06:00
 place: Elgin
+image: /images/news/elgin-empty-bowl-2026.jpg
 sourceUrl: https://www.elgincourier.com/article/5030,elgin-empty-bowl-serves-up-support-for-families-in-need
 sourceLabel: Elgin Courier
 ---

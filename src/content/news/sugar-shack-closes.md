@@ -3,6 +3,7 @@ title: Sugar Shack on Main Street is closed
 description: The candy shop that opened in 1995 told customers the chapter was over in a Nov. 2 post.
 pubDate: 2026-11-04T13:00:00-06:00
 place: Bastrop
+image: /images/news/sugar-shack-closes.jpg
 sourceUrl: https://communityimpact.com/bastrop-cedar-creek/dining/a-bittersweet-goodbye-bastrop-s-sugar-shack-shutters/
 sourceLabel: Community Impact
 ---

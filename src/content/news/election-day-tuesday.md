@@ -3,6 +3,7 @@ title: Election Day is over. Results are up.
 description: Unofficial November 3 totals are on the Results page. Polling places and the Go Vote guide are closed.
 pubDate: 2026-11-03T07:00:00-06:00
 place: Countywide
+image: /images/news/election-day-tuesday.jpg
 sourceUrl: https://results.enr.clarityelections.com/TX/Bastrop/
 sourceLabel: Bastrop County election results
 ---
