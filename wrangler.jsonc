@@ -2,6 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "bastropia",
   "account_id": "aa96f50b9174b128d2cbe8f6db54b940",
+  "main": "./src/worker.ts",
   "compatibility_date": "2026-10-28",
   "compatibility_flags": ["nodejs_compat"],
   "upload_source_maps": true,
