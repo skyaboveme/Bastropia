@@ -1,7 +1,7 @@
 /** Update this file when the county posts a new outdoor-burning order. Check the county page daily. */
 export const burnBan = {
   inEffect: false,
-  checked: '2026-11-10',
+  checked: '2026-11-11',
   headline: 'No burn ban is listed',
   summary:
     'The Bastrop County outdoor burning page says there is no burn ban in effect. That can change the same day.',
