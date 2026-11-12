@@ -18,6 +18,14 @@ export type DailyEdition = {
  */
 export const dailyEditions: DailyEdition[] = [
   {
+    date: '2026-11-12',
+    title: 'Bastropia Daily | Thursday, Nov. 12',
+    caption:
+      'Bastrop County weather is sunny with a weekend rain chance, then the free Community Unity Thanksgiving meal Sunday, Nov. 15 at the Bastrop Convention & Exhibit Center, a $1.5M Fast N Fuel store planned near Hunters Crossing on SH 304, and weekend events Heroes & Hot Rods and Smithville’s Airing of the Quilts.',
+    src: '/media/bastropia-daily-2026-11-12.mp4',
+    poster: '/media/bastropia-daily-2026-11-12-poster.jpg',
+  },
+  {
     date: '2026-11-11',
     title: 'Bastropia Daily — Nov. 11, 2026: Veterans Day, election results and the weekend lineup',
     caption:
