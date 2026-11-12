@@ -46,4 +46,11 @@ export const homeBanners: HomeBanner[] = [
     alt: 'Rosanky Baptist Church. A place for faith, family, and community in Bastrop County. Bible study 9:00 AM, worship 10:00 AM every Sunday. 2160 FM 535, Rosanky. Call (512) 360-3968.',
     href: 'https://www.rosankybc.org/',
   },
+  {
+    id: 'highline',
+    name: 'Highline',
+    src: '/images/banners/highline.jpg',
+    alt: 'Highline. Now serving Bastrop County. Rural internet. City-speed fiber. Fast, reliable fiber for rural homes. Check availability at highlinefast.com.',
+    href: 'https://refer.highlinefast.com/stevegibson2',
+  },
 ];
