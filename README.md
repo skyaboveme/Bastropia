@@ -26,7 +26,7 @@ The build uses the Node adapter so the desk, weather, and order forms keep worki
 
 ## Publish a listing
 
-Submissions are saved in `data/intake/` and reviewed on the desk. To put one on the public calendar, add a Markdown file in `src/content/events/`. The desk prints a starter file for each submission. News goes in `src/content/news/`. Public-notice summaries go in `src/content/updates/`.
+Submissions are saved in Cloudflare KV (`SESSION`) and reviewed on `/desk`. Desk forms also email Formspree as a backup copy. To put a listing on the public calendar, add a Markdown file in `src/content/events/`. The desk prints a starter file for each submission. News goes in `src/content/news/`. Public-notice summaries go in `src/content/updates/`. Social highlights go in `src/content/social/` and show on `/groups#highlights`.
 
 ## Event scout
 
@@ -45,9 +45,13 @@ A Grok skill at `.grok/skills/event-scout/SKILL.md` runs the same scout. The bot
 
 - `/advertise` reserves a weekly placement. Prices are calculated on the server.
 - `/upgrade` requests Spotlight ($35), Featured ($89), or Lost Pines ($189) for a listing that is already published.
-- Nothing is charged on the form. After you invoice and get paid, open `/desk` and place the ad or apply the upgrade. That writes `data/sponsors.json` or `data/upgrades.json`, and the live pages pick it up.
+- Nothing is charged on the form. After you invoice and get paid, open `/desk` and place the ad or apply the upgrade. That writes sponsors and upgrades into Cloudflare KV, and the live pages pick them up.
 
 Set `BASTROPIA_DESK_KEY` before the site is on a public server. Without it, the desk only answers on localhost.
+
+## Status alerts
+
+`/alerts` tags the address in Kit and stores the list in KV. A Worker cron every 15 minutes compares burn ban, school, power, and road status. On a change it emails matching subscribers through Resend (`RESEND_API_KEY`, optional `RESEND_FROM`). Phone numbers are stored for a later text path. SMS is not sent yet.
 
 Government pages and the burn-ban page do not carry ads.
 

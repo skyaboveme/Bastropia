@@ -1,4 +1,5 @@
 import { handle } from '@astrojs/cloudflare/handler';
+import { runAlertWatch } from './lib/alertWatch';
 
 const APEX_HOST = 'bastropia.com';
 const WWW_HOST = `www.${APEX_HOST}`;
@@ -34,5 +35,13 @@ export default {
 
     const response = await handle(request, env, ctx);
     return withSecurityHeaders(response);
+  },
+
+  async scheduled(_controller: ScheduledController, _env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(
+      runAlertWatch().catch((error) => {
+        console.error('alert watch failed', error);
+      }),
+    );
   },
 };

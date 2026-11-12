@@ -29,5 +29,8 @@
   "routes": [
     { "pattern": "bastropia.com", "custom_domain": true },
     { "pattern": "www.bastropia.com", "custom_domain": true }
-  ]
+  ],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  }
 }

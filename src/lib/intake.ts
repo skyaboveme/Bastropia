@@ -1,13 +1,11 @@
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
 import { alertTopics } from '../data/alerts';
 import { placementById, tierById, type ListingTierId, type PlacementId } from '../data/commerce';
+import { sessionKv } from './sessionKv';
 import { addDays, addMonths } from './time';
 import type { Tier } from '../data/taxonomy';
 
-const intakeDir = path.join(process.cwd(), 'data', 'intake');
-const sponsorsFile = path.join(process.cwd(), 'data', 'sponsors.json');
-const upgradesFile = path.join(process.cwd(), 'data', 'upgrades.json');
+const sponsorsKey = 'desk:sponsors';
+const upgradesKey = 'desk:upgrades';
 
 export type IntakeType = 'ad' | 'upgrade' | 'event' | 'newsletter' | 'alert' | 'tip' | 'business';
 
@@ -59,12 +57,22 @@ export function httpUrl(value: string) {
   }
 }
 
-async function readJson<T>(file: string, fallback: T): Promise<T> {
-  try {
-    return JSON.parse(await readFile(file, 'utf8')) as T;
-  } catch {
-    return fallback;
-  }
+function isIntake(value: unknown): value is IntakeRecord {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as IntakeRecord;
+  return typeof item.id === 'string' && typeof item.type === 'string' && typeof item.createdAt === 'string';
+}
+
+function isSponsor(value: unknown): value is Sponsor {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Sponsor;
+  return typeof item.orderId === 'string' && typeof item.until === 'string' && typeof item.placement === 'string';
+}
+
+function isUpgrade(value: unknown): value is Upgrade {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Upgrade;
+  return typeof item.orderId === 'string' && typeof item.eventId === 'string' && typeof item.until === 'string';
 }
 
 export async function tagAlert(fields: Record<string, string>) {
@@ -90,30 +98,34 @@ export async function tagAlert(fields: Record<string, string>) {
 }
 
 export async function saveIntake(record: IntakeRecord) {
-  await mkdir(intakeDir, { recursive: true });
-  await writeFile(path.join(intakeDir, `${record.id}.json`), JSON.stringify(record, null, 2));
+  const kv = sessionKv();
+  if (!kv) throw new Error('intake store unavailable');
+  await kv.put(`intake:${record.id}`, JSON.stringify(record));
   return record;
 }
 
 export async function getIntake(id: string) {
   if (!/^BAS-[A-F0-9]{8}$/.test(id)) return null;
-  try {
-    return JSON.parse(await readFile(path.join(intakeDir, `${id}.json`), 'utf8')) as IntakeRecord;
-  } catch {
-    return null;
-  }
+  const kv = sessionKv();
+  if (!kv) return null;
+  const value = await kv.get(`intake:${id}`, 'json');
+  return isIntake(value) ? value : null;
 }
 
 export async function listIntake() {
-  try {
-    const files = (await readdir(intakeDir)).filter((file) => file.endsWith('.json'));
-    const records = await Promise.all(
-      files.map(async (file) => JSON.parse(await readFile(path.join(intakeDir, file), 'utf8')) as IntakeRecord),
-    );
-    return records.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  } catch {
-    return [];
-  }
+  const kv = sessionKv();
+  if (!kv) return [];
+  const records: IntakeRecord[] = [];
+  let cursor: string | undefined;
+  do {
+    const listed = await kv.list({ prefix: 'intake:', cursor });
+    const rows = await Promise.all(listed.keys.map(async (key) => kv.get(key.name, 'json')));
+    for (const row of rows) {
+      if (isIntake(row)) records.push(row);
+    }
+    cursor = listed.list_complete === false ? listed.cursor : undefined;
+  } while (cursor);
+  return records.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function updateIntakeStatus(id: string, status: IntakeRecord['status']) {
@@ -286,8 +298,10 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
 }
 
 export async function readSponsors() {
-  const sponsors = await readJson<Sponsor[]>(sponsorsFile, []);
-  return sponsors.filter((item) => item.until);
+  const kv = sessionKv();
+  if (!kv) return [];
+  const value = await kv.get(sponsorsKey, 'json');
+  return Array.isArray(value) ? value.filter(isSponsor).filter((item) => item.until) : [];
 }
 
 export async function activeSponsors(todayKey: string) {
@@ -299,13 +313,18 @@ export async function activeSponsor(placement: string, todayKey: string) {
 }
 
 export async function placeSponsor(sponsor: Sponsor) {
+  const kv = sessionKv();
+  if (!kv) throw new Error('sponsor store unavailable');
   const sponsors = (await readSponsors()).filter((item) => item.orderId !== sponsor.orderId);
   sponsors.push(sponsor);
-  await writeFile(sponsorsFile, JSON.stringify(sponsors, null, 2));
+  await kv.put(sponsorsKey, JSON.stringify(sponsors));
 }
 
 export async function readUpgrades() {
-  return readJson<Upgrade[]>(upgradesFile, []);
+  const kv = sessionKv();
+  if (!kv) return [];
+  const value = await kv.get(upgradesKey, 'json');
+  return Array.isArray(value) ? value.filter(isUpgrade) : [];
 }
 
 export async function activeUpgrades(todayKey: string) {
@@ -318,9 +337,11 @@ export function resolveTier(eventId: string, fallback: Tier, upgrades: Upgrade[]
 }
 
 export async function placeUpgrade(upgrade: Upgrade) {
+  const kv = sessionKv();
+  if (!kv) throw new Error('upgrade store unavailable');
   const upgrades = (await readUpgrades()).filter((item) => item.orderId !== upgrade.orderId);
   upgrades.push(upgrade);
-  await writeFile(upgradesFile, JSON.stringify(upgrades, null, 2));
+  await kv.put(upgradesKey, JSON.stringify(upgrades));
 }
 
 export function eventMarkdown(fields: Record<string, string>) {

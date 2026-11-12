@@ -1,12 +1,17 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { directoryShelves, directorySource } from '../data/facebookDirectory';
+import { formatMedium } from '../lib/time';
 
 const pageIds = new Set(['news-pages', 'official', 'parties', 'nonprofits', 'places']);
 const groups = directoryShelves.filter((shelf) => !pageIds.has(shelf.id));
 const pages = directoryShelves.filter((shelf) => pageIds.has(shelf.id));
 const total = directoryShelves.reduce((count, shelf) => count + shelf.items.length, 0);
+const highlights = (await getCollection('social')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 ---
 
 <BaseLayout
@@ -19,6 +24,30 @@ const total = directoryShelves.reduce((count, shelf) => count + shelf.items.leng
     lede="Public Facebook groups and pages around Bastrop County. A private group has to approve you before you can read it."
   />
   <div class="wrap">
+    {highlights.length > 0 && (
+      <section class="section" id="highlights">
+        <div class="section-head">
+          <div>
+            <p class="kicker">From the rooms</p>
+            <h2>Highlights</h2>
+            <p class="meta">Public posts the desk filed from county Facebook groups. Not the whole feed — only what is worth a second look.</p>
+          </div>
+          <p class="meta">{highlights.length} note{highlights.length === 1 ? '' : 's'}</p>
+        </div>
+        <div class="news-list">
+          {highlights.map((item) => (
+            <article class="update-card">
+              <a href={`/social/${item.id}`}>
+                <p class="kicker">{item.data.group} · {formatMedium(item.data.pubDate)}</p>
+                <h3>{item.data.title}</h3>
+                <p class="meta">{item.data.summary}</p>
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
     <p class="meta" id="directory">{total} Facebook rooms and pages. Member counts are approximate.</p>
     <nav class="filters" aria-label="Jump to a category">
       <div>
