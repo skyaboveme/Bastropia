@@ -7,16 +7,19 @@ import {
   directoryByCategory,
   directoryByTown,
   directoryCategories,
+  directoryEntries,
   directoryTownOptions,
   filterDirectory,
 } from '../data/directory';
+import { listLiveBusinesses, toDirectoryEntry } from '../lib/businessDb';
 
 const params = Astro.url.searchParams;
 const category = params.get('category');
 const town = params.get('town');
 const q = params.get('q');
 const filtered = Boolean(category || town || q);
-const visible = filterDirectory({ category, town, q });
+const listed = (await listLiveBusinesses()).map(toDirectoryEntry);
+const visible = filterDirectory({ category, town, q }, [...listed, ...directoryEntries]);
 const byCategory = directoryByCategory(visible);
 const byTown = directoryByTown(visible);
 const categories = directoryCategories();

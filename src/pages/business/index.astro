@@ -1,0 +1,114 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import FormError from '../../components/FormError.astro';
+import { cities } from '../../data/taxonomy';
+import { accountFromToken, businessCookieName, listBizEvents, listSpecials, statsFor } from '../../lib/businessDb';
+
+const session = await accountFromToken(Astro.cookies.get(businessCookieName())?.value);
+const business = session?.business;
+const specials = business ? await listSpecials(business.id) : [];
+const events = business ? await listBizEvents(business.id) : [];
+const stats = business ? await statsFor(business.id) : [];
+const totals = stats.reduce(
+  (sum, day) => ({
+    views: sum.views + day.views,
+    site: sum.site + day.site_clicks,
+    phone: sum.phone + day.phone_clicks,
+  }),
+  { views: 0, site: 0, phone: 0 },
+);
+const towns = cities.filter((city) => city !== 'Countywide');
+---
+
+<BaseLayout title="Your business" description="Edit your free Bastropia listing, specials, and events." noindex>
+  <PageHead
+    kicker="Business"
+    title={business ? business.name : 'Business login'}
+    lede={business ? 'This listing is free. Update the public card, and add specials or events when you have them.' : 'Sign in with the username the desk gave you.'}
+  />
+  <div class="wrap">
+    {!business && (
+      <form class="form" action="/api/business" method="post">
+        <FormError />
+        <input type="hidden" name="action" value="login" />
+        <label class="field"><span>Username</span><input name="username" required autocomplete="username" /></label>
+        <label class="field"><span>Password</span><input name="password" type="password" required autocomplete="current-password" /></label>
+        <button class="button" type="submit">Sign in</button>
+      </form>
+    )}
+    {business && (
+      <>
+        <p class="cluster">
+          <a class="button button-ghost" href={`/businesses/l/${business.slug}`}>View public listing</a>
+          <form action="/api/business" method="post"><input type="hidden" name="action" value="logout" /><button class="button button-ghost" type="submit">Sign out</button></form>
+        </p>
+        <p class="meta">Last 30 days · {totals.views} listing views · {totals.site} website clicks · {totals.phone} phone clicks. Status: {business.status}.</p>
+        {business.status !== 'live' && <p>The desk has not published this listing yet. You can still edit the details.</p>}
+        <form class="form" action="/api/business" method="post">
+          <input type="hidden" name="action" value="save" />
+          <div class="fields">
+            <label class="field wide"><span>Business name</span><input name="name" required value={business.name} /></label>
+            <label class="field"><span>Category</span><input name="category" required value={business.category} /></label>
+            <label class="field">
+              <span>Town</span>
+              <select name="city" required>
+                {towns.map((city) => <option value={city} selected={city === business.city}>{city}</option>)}
+              </select>
+            </label>
+            <label class="field wide"><span>Towns you serve</span><input name="areas" value={business.areas} /></label>
+            <label class="field"><span>Phone</span><input name="phone" required value={business.phone} /></label>
+            <label class="field"><span>Website</span><input name="website" value={business.website} /></label>
+            <label class="field"><span>Contact name</span><input name="contact" value={business.contact} /></label>
+            <label class="field"><span>Email</span><input name="email" type="email" required value={business.email} /></label>
+            <label class="field wide"><span>Address</span><input name="address" value={business.address} /></label>
+            <label class="field wide"><span>What neighbors should know</span><textarea name="details" required rows="5">{business.details}</textarea></label>
+          </div>
+          <button class="button" type="submit">Save listing</button>
+        </form>
+
+        <section class="section">
+          <h2>Specials</h2>
+          <p class="meta">Saved here until there are enough for a county specials page. Live ones also show on your listing.</p>
+          {specials.map((item) => (
+            <form action="/api/business" method="post">
+              <input type="hidden" name="action" value="delete-special" />
+              <input type="hidden" name="id" value={item.id} />
+              <p><strong>{item.title}</strong> — {item.details} <button class="button button-ghost" type="submit">Remove</button></p>
+            </form>
+          ))}
+          <form class="form" action="/api/business" method="post">
+            <input type="hidden" name="action" value="special" />
+            <label class="field"><span>Title</span><input name="title" required maxlength="120" /></label>
+            <label class="field"><span>Details</span><textarea name="details" required rows="3"></textarea></label>
+            <label class="field"><span>Starts</span><input name="starts" type="date" /></label>
+            <label class="field"><span>Ends</span><input name="ends" type="date" /></label>
+            <button class="button" type="submit">Add special</button>
+          </form>
+        </section>
+
+        <section class="section">
+          <h2>Events</h2>
+          {events.map((item) => (
+            <form action="/api/business" method="post">
+              <input type="hidden" name="action" value="delete-event" />
+              <input type="hidden" name="id" value={item.id} />
+              <p><strong>{item.title}</strong> · {item.starts}{item.venue ? ` · ${item.venue}` : ''} <button class="button button-ghost" type="submit">Remove</button></p>
+            </form>
+          ))}
+          <form class="form" action="/api/business" method="post">
+            <input type="hidden" name="action" value="event" />
+            <label class="field"><span>Title</span><input name="title" required maxlength="120" /></label>
+            <label class="field"><span>Starts</span><input name="starts" type="datetime-local" required /></label>
+            <label class="field"><span>Ends</span><input name="ends" type="datetime-local" /></label>
+            <label class="field"><span>Venue</span><input name="venue" /></label>
+            <label class="field wide"><span>Details</span><textarea name="details" rows="3"></textarea></label>
+            <button class="button" type="submit">Add event</button>
+          </form>
+        </section>
+      </>
+    )}
+  </div>
+</BaseLayout>

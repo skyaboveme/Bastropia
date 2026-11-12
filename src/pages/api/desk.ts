@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       secure: url.protocol === 'https:',
     });
     const next = String(form.get('next') || '');
-    return bounce(next === '/desk/ads' ? next : '/desk');
+    return bounce(next === '/desk/ads' || next === '/desk/businesses' ? next : '/desk');
   }
 
   if (!deskAuthorized(url.hostname, cookies.get('bastropia_desk')?.value)) {

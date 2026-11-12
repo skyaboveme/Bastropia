@@ -12,7 +12,10 @@ const messages: Record<string, string> = {
   phone: 'Use a 10-digit mobile number, or leave that box empty.',
   form: 'That form could not be read. Try it again.',
   save: 'That request could not be sent to the desk. Try it again in a minute.',
-  auth: 'That desk password did not match.',
+  auth: 'That password did not match.',
+  login: 'That username or password did not match.',
+  username: 'Usernames are at least 3 letters or numbers.',
+  password: 'Passwords need at least 8 characters.',
   photo: 'Use a JPEG, PNG, or WebP under 4 MB, or send a link instead.',
 };
 const error = Astro.url.searchParams.get('error');

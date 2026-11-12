@@ -34,7 +34,7 @@ const towns = cities.filter((city) => city !== 'Countywide');
       <a class="button button-ghost" href="/advertise">Paid partner pages</a>
     </p>
     <FormError />
-    <form class="form" action="/api/intake" method="post">
+    <form class="form" action="/api/business-submit" method="post">
       <input type="hidden" name="type" value="business" />
       <input type="hidden" name="from" value="/businesses/submit" />
       <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -91,7 +91,7 @@ const towns = cities.filter((city) => city !== 'Countywide');
           ></textarea>
         </label>
       </div>
-      <button class="button" type="submit">Send it to the desk</button>
+      <button class="button" type="submit">Submit your business</button>
       <p class="meta">Free directory listing. Reviewed before it is public. Partner landing pages are a separate paid option.</p>
     </form>
   </div>

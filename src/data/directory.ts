@@ -6,7 +6,7 @@
 import chamberRaw from './chamberDirectory.json';
 import { businesses, type Business } from './businesses';
 
-export type DirectorySource = 'partner' | 'chamber';
+export type DirectorySource = 'partner' | 'chamber' | 'listed';
 
 export type DirectoryEntry = {
   id: string;
@@ -21,6 +21,7 @@ export type DirectoryEntry = {
   summary: string;
   source: DirectorySource;
   partnerSlug?: string;
+  areas?: string;
 };
 
 type ChamberRecord = {
@@ -194,6 +195,10 @@ export function entryServesTown(entry: DirectoryEntry, town: string) {
   const needle = town.toLowerCase();
   if (entry.town?.toLowerCase() === needle) return true;
   if (entry.place.toLowerCase().includes(needle)) return true;
+  if (entry.source === 'listed') {
+    const blob = `${entry.town ?? ''} ${entry.place} ${entry.areas ?? ''}`.toLowerCase();
+    return blob.includes(needle);
+  }
   if (entry.source === 'partner' && entry.partnerSlug) {
     const business = businesses.find((item) => item.slug === entry.partnerSlug);
     if (!business) return false;
@@ -205,13 +210,16 @@ export function entryServesTown(entry: DirectoryEntry, town: string) {
   return false;
 }
 
-export function filterDirectory(query: {
-  category?: string | null;
-  town?: string | null;
-  q?: string | null;
-}) {
+export function filterDirectory(
+  query: {
+    category?: string | null;
+    town?: string | null;
+    q?: string | null;
+  },
+  entries = directoryEntries,
+) {
   const needle = query.q?.trim().toLowerCase();
-  return directoryEntries.filter((entry) => {
+  return entries.filter((entry) => {
     if (query.category && entry.category !== query.category) return false;
     if (query.town && !entryServesTown(entry, query.town)) return false;
     if (needle) {

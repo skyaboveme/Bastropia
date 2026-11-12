@@ -1,0 +1,57 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import { bumpStat, getBusiness, listBizEvents, listSpecials } from '../../../lib/businessDb';
+
+const business = await getBusiness(Astro.params.slug ?? '');
+if (!business || business.status !== 'live') return Astro.redirect('/businesses');
+await bumpStat(business.id, 'views');
+const specials = await listSpecials(business.id);
+const events = (await listBizEvents(business.id)).filter((item) => item.starts >= new Date().toISOString().slice(0, 10));
+const phoneDigits = business.phone.replace(/\D/g, '');
+---
+
+<BaseLayout title={business.name} description={business.details.slice(0, 160)}>
+  <article class="wrap">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+      <p class="kicker">{business.category} · {business.city}</p>
+      <h1>{business.name}</h1>
+      <p class="lede">{business.details}</p>
+    </header>
+    <p class="cluster">
+      {phoneDigits && <a class="button" href={`/go/biz/${business.id}?to=phone`}>Call {business.phone}</a>}
+      {business.website && <a class="button button-ghost" href={`/go/biz/${business.id}?to=site`}>Website</a>}
+      <a class="button button-ghost" href="/businesses">Directory</a>
+    </p>
+    <dl class="facts">
+      {business.address && <div><dt>Address</dt><dd>{business.address}</dd></div>}
+      {business.areas && <div><dt>Also serves</dt><dd>{business.areas}</dd></div>}
+    </dl>
+    {specials.length > 0 && (
+      <section class="section">
+        <h2>Specials</h2>
+        {specials.map((item) => (
+          <article>
+            <h3>{item.title}</h3>
+            <p>{item.details}</p>
+            {(item.starts || item.ends) && <p class="meta">{[item.starts, item.ends].filter(Boolean).join(' – ')}</p>}
+          </article>
+        ))}
+      </section>
+    )}
+    {events.length > 0 && (
+      <section class="section">
+        <h2>Events</h2>
+        {events.map((item) => (
+          <article>
+            <h3>{item.title}</h3>
+            <p class="meta">{item.starts}{item.ends ? ` – ${item.ends}` : ''}{item.venue ? ` · ${item.venue}` : ''}</p>
+            {item.details && <p>{item.details}</p>}
+          </article>
+        ))}
+      </section>
+    )}
+  </article>
+</BaseLayout>

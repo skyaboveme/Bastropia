@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { serviceGroups } from '../data/services';
+import { listLiveBusinesses } from '../lib/businessDb';
 import { formatMedium } from '../lib/time';
 
 const q = Astro.url.searchParams.get('q')?.trim() ?? '';
@@ -25,6 +26,11 @@ const decisions = needle
       `${meeting.data.title} ${meeting.data.description}`.toLowerCase().includes(needle),
     )
   : [];
+const businesses = needle
+  ? (await listLiveBusinesses()).filter((business) =>
+      `${business.name} ${business.category} ${business.city} ${business.areas} ${business.details}`.toLowerCase().includes(needle),
+    )
+  : [];
 const services = needle
   ? serviceGroups.flatMap((group) =>
       group.items
@@ -32,7 +38,7 @@ const services = needle
         .map((item) => ({ ...item, group: group.title })),
     )
   : [];
-const total = events.length + news.length + updates.length + decisions.length + services.length;
+const total = events.length + news.length + updates.length + decisions.length + services.length + businesses.length;
 ---
 
 <BaseLayout title="Search" description="Search events, news, public notices, and services in Bastrop County." noindex>
@@ -56,6 +62,9 @@ const total = events.length + news.length + updates.length + decisions.length + 
         ))}
         {decisions.map((meeting) => (
           <a class="text-link" href="/government/court-decisions">Court · {meeting.data.title}</a>
+        ))}
+        {businesses.map((business) => (
+          <a class="text-link" href={`/businesses/l/${business.slug}`}>Business · {business.name}</a>
         ))}
         {services.map((service) => (
           <p>{service.group} · {service.name}{service.phone ? ` · ${service.phone}` : ''}</p>

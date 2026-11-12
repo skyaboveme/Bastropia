@@ -26,6 +26,14 @@
       "id": "096bc1b30b154282a5b0397d8dd4b5d5"
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bastropia-businesses",
+      "database_id": "299e6f33-da56-42cd-81fd-a61b7c163147",
+      "migrations_dir": "migrations"
+    }
+  ],
   "routes": [
     { "pattern": "bastropia.com", "custom_domain": true },
     { "pattern": "www.bastropia.com", "custom_domain": true }

@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { businesses } from '../data/businesses';
 import { siteUrl } from '../data/site';
+import { listLiveBusinesses } from '../lib/businessDb';
 
 export const prerender = false;
 
@@ -65,16 +66,18 @@ const hubs: Entry[] = [
 ];
 
 export const GET: APIRoute = async () => {
-  const [events, news, social, updates] = await Promise.all([
+  const [events, news, social, updates, listed] = await Promise.all([
     getCollection('events'),
     getCollection('news'),
     getCollection('social'),
     getCollection('updates'),
+    listLiveBusinesses(),
   ]);
 
   const entries: Entry[] = [
     ...hubs,
     ...businesses.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
+    ...listed.map((business) => ({ path: `/businesses/l/${business.slug}`, priority: '0.6' })),
     ...events.map((event) => ({
       path: `/events/${event.id}`,
       lastmod: event.data.start,

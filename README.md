@@ -41,6 +41,10 @@ A Grok skill at `.grok/skills/event-scout/SKILL.md` runs the same scout. The bot
 `src/data/burnBan.ts` is the status shown in the header. Check [the county outdoor burning page](https://www.bastropcounty.gov/page/em.outdoor_burning) daily and update `checked` even when the status is unchanged. Change `inEffect` when the county posts a new order. The county page is the order. The masthead must say “No burn ban” or “Ban in effect”, never a bare “Burn”.
 
 
+## Free business listings
+
+Neighbors submit at `/businesses/submit`. Rows land in the Cloudflare D1 database `bastropia-businesses`. You approve them at `/desk/businesses` and set a username and password. The owner signs in at `/business` to edit the listing, see views and clicks, and add specials or events. Live listings show on `/businesses` and in site search. A county specials page waits until there are enough specials.
+
 ## Ads and upgrades
 
 - `/advertise` reserves a weekly placement. Prices are calculated on the server.
