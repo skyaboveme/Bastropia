@@ -14,7 +14,10 @@ export type DailyForecast = {
   high: number;
   low: number;
   code: number;
+  /** Chance of rain, 0–100. */
   rain: number;
+  /** Forecast amount for the day, in inches. */
+  inches: number;
 };
 
 export type Forecast = {
@@ -59,6 +62,31 @@ export function weatherLabel(code: number) {
 
 export function isTown(value: string | null): value is TownName {
   return Boolean(value && value in forecastTowns);
+}
+
+export function rainAmount(inches: number) {
+  if (!Number.isFinite(inches) || inches < 0.01) return '0 in';
+  if (inches < 0.1) return `${inches.toFixed(2)} in`;
+  return `${inches.toFixed(1)} in`;
+}
+
+function roundInches(inches: number) {
+  if (!Number.isFinite(inches) || inches <= 0) return 0;
+  return Math.round(inches * 100) / 100;
+}
+
+function inchesByDay(values: { validTime?: string; value?: number | null }[]) {
+  const byDay = new Map<string, number>();
+  for (const item of values) {
+    const start = item.validTime?.split('/')[0];
+    if (!start) continue;
+    const date = chicagoDate(start);
+    const mm = Number(item.value) || 0;
+    byDay.set(date, (byDay.get(date) ?? 0) + mm);
+  }
+  const inches = new Map<string, number>();
+  for (const [date, mm] of byDay) inches.set(date, roundInches(mm / 25.4));
+  return inches;
 }
 
 /** Rough WMO-style code from an NWS short forecast phrase. */
@@ -119,6 +147,14 @@ async function forecastFromNws(town: TownName): Promise<Forecast> {
   const now = hourly[0];
   if (!now) throw new Error('NWS hourly empty');
 
+  let amounts = new Map<string, number>();
+  try {
+    const gridPayload = await nwsJson(`https://api.weather.gov/gridpoints/${grid}`);
+    amounts = inchesByDay(gridPayload.properties?.quantitativePrecipitation?.values ?? []);
+  } catch {
+    /* The chance of rain still stands when the amount is missing. */
+  }
+
   const byDay = new Map<string, DailyForecast>();
   for (const period of periods) {
     const date = chicagoDate(period.startTime);
@@ -131,6 +167,7 @@ async function forecastFromNws(town: TownName): Promise<Forecast> {
         low: period.temperature,
         code: codeFromPhrase(period.shortForecast),
         rain,
+        inches: amounts.get(date) ?? 0,
       });
       continue;
     }
@@ -171,11 +208,12 @@ async function forecastFromOpenMeteo(town: TownName): Promise<Forecast> {
     'current',
     'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m',
   );
-  url.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max');
+  url.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum');
   url.searchParams.set('timezone', 'America/Chicago');
   url.searchParams.set('forecast_days', '7');
   url.searchParams.set('temperature_unit', 'fahrenheit');
   url.searchParams.set('wind_speed_unit', 'mph');
+  url.searchParams.set('precipitation_unit', 'inch');
   const response = await fetch(url, { signal: AbortSignal.timeout(6000) });
   if (!response.ok) throw new Error(`Open-Meteo ${response.status}`);
   const data = await response.json();
@@ -192,6 +230,7 @@ async function forecastFromOpenMeteo(town: TownName): Promise<Forecast> {
       low: Math.round(data.daily.temperature_2m_min[index]),
       code: data.daily.weather_code[index],
       rain: data.daily.precipitation_probability_max[index] ?? 0,
+      inches: roundInches(Number(data.daily.precipitation_sum?.[index]) || 0),
     })),
   };
 }

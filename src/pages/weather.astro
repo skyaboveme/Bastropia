@@ -3,7 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import { forecastTowns, getAlerts, getForecast, isTown, weatherLabel, type TownName } from '../lib/weather';
+import { forecastTowns, getAlerts, getForecast, isTown, rainAmount, weatherLabel, type TownName } from '../lib/weather';
 import { labelFromKey } from '../lib/time';
 
 const requested = Astro.url.searchParams.get('town');
@@ -44,7 +44,8 @@ const alerts = await getAlerts();
                 <strong>{day.high}°</strong>
                 <p class="meta">Low {day.low}°</p>
                 <p class="meta">{weatherLabel(day.code)}</p>
-                <p class="meta">{day.rain}% rain</p>
+                <p class="meta">{day.rain}% chance</p>
+                <p class="meta">{rainAmount(day.inches)}</p>
               </article>
             ))}
           </div>
