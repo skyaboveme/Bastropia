@@ -18,6 +18,14 @@ export type DailyEdition = {
  */
 export const dailyEditions: DailyEdition[] = [
   {
+    date: '2026-11-13',
+    title: 'Bastropia Daily | Friday, Nov. 13',
+    caption:
+      'Weather: sunny near 79 today, showers likely Saturday night with about a quarter inch of rain. City of Bastrop responds to questions about ICE presence; 10 Bastrop business updates; county disaster recovery and hazard mitigation workshops; weekend events.',
+    src: '/media/bastropia-daily-2026-11-13.mp4',
+    poster: '/media/bastropia-daily-2026-11-13-poster.jpg',
+  },
+  {
     date: '2026-11-12',
     title: 'Bastropia Daily | Thursday, Nov. 12',
     caption:
