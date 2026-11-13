@@ -164,6 +164,14 @@ function current(href: string) {
       <strong data-now="closed">—</strong>
       <em data-now="closed-detail">Closures</em>
     </a>
+    <a href="/weather">
+      <span>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3.2C12 3.2 7.2 9 7.2 12.4a4.8 4.8 0 0 0 9.6 0C16.8 9 12 3.2 12 3.2Z"/></svg>
+        Rain
+      </span>
+      <strong data-now="rain">—</strong>
+      <em data-now="rain-detail">Last 7 days</em>
+    </a>
   </div>
   <p class="strip-also"><a href="/alerts">Email or text when one of these changes</a></p>
   <p class="strip-also" data-now="also" hidden></p>
@@ -182,6 +190,10 @@ function current(href: string) {
         if (data.air) {
           set('air', data.air.label);
           set('air-detail', data.air.detail);
+        }
+        if (data.rain) {
+          set('rain', data.rain.label);
+          set('rain-detail', data.rain.detail);
         }
         const sh = (data.roads || []).find((road) => road.route === 'SH 71');
         const us = (data.roads || []).find((road) => road.route === 'US 290');

@@ -32,6 +32,7 @@ export type CountyNow = {
   closureLine: StatusLine;
   schools: StatusLine | null;
   power: StatusLine | null;
+  rain: StatusLine | null;
 };
 
 const cache: { at: number; value: CountyNow } | null = { at: 0, value: emptyNow() };
@@ -47,6 +48,7 @@ function emptyNow(): CountyNow {
     closureLine: { label: '—', detail: 'DriveTexas', href: '/roads' },
     schools: null,
     power: null,
+    rain: null,
   };
 }
 
@@ -150,6 +152,26 @@ async function air(): Promise<CountyNow['air']> {
   };
 }
 
+function rainLabel(inches: number) {
+  if (!Number.isFinite(inches) || inches < 0.005) return '0 in';
+  return `${inches.toFixed(2)} in`;
+}
+
+/** Model rainfall at the Bastrop coordinates, today and the six days before. */
+async function recentRain(): Promise<CountyNow['rain']> {
+  const url =
+    'https://api.open-meteo.com/v1/forecast?latitude=30.1105&longitude=-97.3153&daily=precipitation_sum&timezone=America/Chicago&past_days=6&forecast_days=1&precipitation_unit=inch';
+  const data = await getJson(url);
+  const days = data?.daily?.precipitation_sum;
+  if (!Array.isArray(days) || days.length < 7) return null;
+  const inches = days.slice(-7).reduce((sum: number, value: unknown) => sum + (Number(value) || 0), 0);
+  return {
+    label: rainLabel(inches),
+    detail: 'Last 7 days',
+    href: '/weather',
+  };
+}
+
 async function roads(): Promise<{ watched: CountyNow['roads']; alerts: RoadAlert[] }> {
   const request = {
     action: 'table/query',
@@ -188,12 +210,13 @@ async function roads(): Promise<{ watched: CountyNow['roads']; alerts: RoadAlert
 
 export async function getCountyNow(): Promise<CountyNow> {
   if (cache && Date.now() - cache.at < tenMinutes) return cache.value;
-  const [riverResult, airResult, roadResult, schoolDays, powerResult] = await Promise.all([
+  const [riverResult, airResult, roadResult, schoolDays, powerResult, rainResult] = await Promise.all([
     river().catch(() => null),
     air().catch(() => null),
     roads().catch(() => null),
     getSchoolDays().catch(() => null),
     getPower().catch(() => null),
+    recentRain().catch(() => null),
   ]);
   const alerts = roadResult?.alerts ?? [];
   const closures = alerts.filter((alert) => alert.kind === 'crash' || alert.kind === 'closure');
@@ -206,6 +229,7 @@ export async function getCountyNow(): Promise<CountyNow> {
     closureLine: closureLine(alerts),
     schools: schoolDays ? schoolSummary(schoolDays) : null,
     power: powerResult,
+    rain: rainResult,
   };
   cache.at = Date.now();
   cache.value = value;
