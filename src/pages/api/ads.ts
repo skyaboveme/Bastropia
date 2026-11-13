@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createAdvertiser, deleteAdvertiser, setShowing, updateAdvertiser } from '../../lib/ads';
+import { createAdvertiser, deleteAdvertiser, saveFileContact, setShowing, updateAdvertiser } from '../../lib/ads';
 import { deskAuthorized } from '../../lib/auth';
 
 export const prerender = false;
@@ -15,6 +15,11 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   const form = await request.formData();
   const action = String(form.get('action') || '');
   const id = String(form.get('id') || '');
+
+  if (action === 'contact') {
+    const saved = await saveFileContact(id, String(form.get('contact') || ''));
+    return bounce(saved ? '/desk/ads?saved=1' : '/desk/ads?error=save');
+  }
 
   if (action === 'hold' || action === 'release') {
     const saved = await setShowing(id, action === 'release');

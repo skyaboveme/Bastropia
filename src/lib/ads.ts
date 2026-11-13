@@ -18,6 +18,7 @@ type Kv = {
 
 const catalogKey = 'ad:catalog';
 const holdsKey = 'ad:holds';
+const notesKey = 'ad:notes';
 const textPlacements = new Set<PlacementId>([]);
 const imagePlacements = new Set<PlacementId>(['home-banner', 'event-banner', 'weekend-banner']);
 
@@ -124,6 +125,32 @@ async function readHolds() {
   if (!kv) return [] as string[];
   const value = await kv.get(holdsKey, 'json');
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+async function readNotes(): Promise<Record<string, string>> {
+  const kv = store();
+  if (!kv) return {};
+  const value = await kv.get(notesKey, 'json');
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const notes: Record<string, string> = {};
+  for (const [id, note] of Object.entries(value as Record<string, unknown>)) {
+    if (!safeId(id) || !note || typeof note !== 'object') continue;
+    const contact = (note as { contact?: unknown }).contact;
+    if (typeof contact === 'string' && contact) notes[id] = contact;
+  }
+  return notes;
+}
+
+export async function saveFileContact(id: string, contact: string) {
+  if (!safeId(id) || !isFileAd(id)) return false;
+  const kv = store();
+  if (!kv) return false;
+  const notes = await readNotes();
+  const cleaned = clean(contact, 120);
+  if (cleaned) notes[id] = cleaned;
+  else delete notes[id];
+  await kv.put(notesKey, JSON.stringify(Object.fromEntries(Object.entries(notes).map(([key, value]) => [key, { contact: value }]))));
+  return true;
 }
 
 function goHref(id: string, placement: PlacementId) {
@@ -460,12 +487,13 @@ async function reportFromId(id: string): Promise<AdReport | null> {
   const uploaded = (await readCatalog()).find((item) => item.id === id);
   if (!file && !uploaded) return null;
   const held = file ? (await readHolds()).includes(id) : false;
+  const contact = file ? (await readNotes())[id] || '' : '';
   const days = await statsFor(id);
   return {
     id,
     name: file?.name || uploaded?.name || 'Advertiser',
     href: file?.href || uploaded?.href || '',
-    email: uploaded?.email || '',
+    email: file ? contact : uploaded?.email || '',
     line: uploaded?.line || '',
     alt: file?.alt || uploaded?.alt || '',
     placements: file ? file.placements : uploaded?.placements || [],
