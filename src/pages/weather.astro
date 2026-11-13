@@ -22,7 +22,7 @@ const alerts = await getAlerts();
     title={`${town} weather`}
     lede="Conditions at the county seat are not the conditions in Smithville or Cedar Creek. Pick the town you are actually standing in."
   />
-  <div class="wrap">
+  <div class="wrap" data-banner-end>
     <div class="filter-row">
       {Object.keys(forecastTowns).map((name) => (
         <a class="chip" href={`/weather?town=${encodeURIComponent(name)}`} aria-current={name === town ? 'true' : undefined}>{name}</a>
