@@ -18,6 +18,14 @@ export type DailyEdition = {
  */
 export const dailyEditions: DailyEdition[] = [
   {
+    date: '2026-11-14',
+    title: 'Bastropia Daily — Saturday, Nov. 14, 2026',
+    caption:
+      'Weekend weather with close to an inch of rain tonight and Sunday, Smithville’s Airing of the Quilts, the Garden Club Tour of Homes, Heroes & Hot Rods, the Veterans Banquet, and Sunday’s Community Unity meal and Rosanky Pinewood Derby.',
+    src: '/media/bastropia-daily-2026-11-14.mp4',
+    poster: '/media/bastropia-daily-2026-11-14-poster.jpg',
+  },
+  {
     date: '2026-11-13',
     title: 'Bastropia Daily | Friday, Nov. 13',
     caption:
