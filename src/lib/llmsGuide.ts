@@ -10,7 +10,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings, with a monthly event banner after the first five listings. The sitewide rotating banner is off on this page. /calendar opens the month view' },
   { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans, with a monthly weekend banner midway through the days. The sitewide rotating banner is off on this page' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source' },
-  { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, and new retail under watch in Bastrop County' },
+  { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, restaurants, industry, expansions, and new retail under watch in Bastrop County' },
   { path: '/new-here', label: 'New resident guide', note: 'Utilities, trash day, tax dates, and which commissioner covers your road' },
   { path: '/tips', label: 'Send a tip or photo', note: 'Neighbor tips and photos for the site and the Facebook group' },
   { path: '/newsletter', label: 'Newsletter', note: 'Free weekend email every Thursday at 7 AM, with reasons to subscribe' },

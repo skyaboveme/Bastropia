@@ -109,6 +109,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   transition: opacity 3.2s ease-in-out;
 }
 .header-hero img.is-on { opacity: 1; }
+.header-hero.is-stadium img { object-position: center 58%; }
+.header-hero.is-parade img { object-position: center 48%; }
 .header-hero::after {
   content: "";
   position: absolute;
@@ -166,45 +168,60 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .county-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
+  gap: 0.7rem 1.1rem;
   width: min(var(--wrap), calc(100% - 2.4rem));
   margin: 0 auto 0.65rem;
 }
-.county-strip a { text-decoration: none; display: grid; gap: 0.04rem; border-top: 3px solid var(--river); padding-top: 0.28rem; min-width: 0; }
+.county-strip a { text-decoration: none; display: grid; gap: 0.16rem; border-top: 3px solid var(--river); padding-top: 0.38rem; min-width: 0; }
 .county-strip a.is-alert { border-top-color: #c5161d; }
-.county-strip span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28em;
+.county-strip .strip-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
   min-width: 0;
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+}
+.county-strip .strip-name {
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--river-deep);
+  line-height: 1.1;
+  white-space: nowrap;
 }
 .county-strip .strip-icon {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 1.15rem;
+  height: 1.15rem;
   flex: none;
-  color: currentColor;
+  align-self: center;
+  color: var(--river-deep);
 }
-.county-strip a.is-alert span,
+.has-hero .county-strip a {
+  background: rgba(251, 250, 246, 0.94);
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.6rem 0.4rem;
+}
+.has-hero .strip-also {
+  color: var(--ink);
+  background: rgba(251, 250, 246, 0.94);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.6rem;
+}
+.county-strip a.is-alert .strip-name,
 .county-strip a.is-alert .strip-icon { color: #c5161d; }
 .county-strip strong {
   font-family: var(--serif);
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: 1.1;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 1.22rem;
+  font-weight: 650;
+  line-height: 1;
+  flex: none;
   white-space: nowrap;
 }
 .county-strip em {
   font-style: normal;
   color: var(--ink-soft);
-  font-size: 0.75rem;
+  font-size: 0.86rem;
   line-height: 1.25;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -671,34 +688,36 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
   .ear strong.is-stop { font-size: 1.35rem; }
 
   .county-strip {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+    overflow: visible;
+    width: min(var(--wrap), calc(100% - 1.6rem));
+    margin: 0.15rem auto 0.5rem;
+    padding: 0;
+    scroll-snap-type: none;
+  }
+  .county-strip a {
     width: auto;
     max-width: none;
-    margin: 0;
-    padding: 0.1rem 1.2rem 0.45rem;
-    scrollbar-width: none;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--river);
+    padding: 0.5rem 0.7rem 0.42rem;
+    background: rgba(251, 250, 246, 0.94);
+    border-radius: 0.4rem;
   }
-  .county-strip::-webkit-scrollbar { display: none; }
-  .county-strip a {
-    flex: 0 0 auto;
-    width: 7.6rem;
-    scroll-snap-align: start;
-    border-top-width: 2px;
-    padding-top: 0.22rem;
-  }
-  .county-strip span { font-size: 0.58rem; letter-spacing: 0.08em; }
-  .county-strip .strip-icon { width: 0.78rem; height: 0.78rem; }
-  .county-strip strong { font-size: 1.02rem; }
-  .county-strip em { font-size: 0.68rem; }
+  .county-strip .strip-name { font-size: 1.12rem; letter-spacing: 0.02em; }
+  .county-strip .strip-icon { width: 1.2rem; height: 1.2rem; }
+  .county-strip strong { font-size: 1.32rem; }
+  .county-strip em { font-size: 0.98rem; white-space: normal; }
   .strip-also {
-    width: min(var(--wrap), calc(100% - 2.4rem));
-    margin: 0 auto 0.45rem;
-    font-size: 0.78rem;
+    width: min(var(--wrap), calc(100% - 1.6rem));
+    margin: 0 auto 0.5rem;
+    font-size: 0.98rem;
+    color: var(--ink);
+    background: rgba(251, 250, 246, 0.94);
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.7rem;
   }
   .home-stack { display: flex; flex-direction: column; }
   .home-stack > .front { order: 1; }

@@ -1,4 +1,4 @@
-export type DevelopmentKind = 'data-center' | 'annexation' | 'retail' | 'other';
+export type DevelopmentKind = 'data-center' | 'annexation' | 'retail' | 'restaurant' | 'industry' | 'expansion' | 'other';
 
 export type DevelopmentProject = {
   id: string;
@@ -18,6 +18,9 @@ export const developmentKinds: { id: DevelopmentKind | 'all'; label: string }[] 
   { id: 'data-center', label: 'Data centers' },
   { id: 'annexation', label: 'Annexations' },
   { id: 'retail', label: 'Retail' },
+  { id: 'restaurant', label: 'Restaurants' },
+  { id: 'industry', label: 'Industries' },
+  { id: 'expansion', label: 'Expansions' },
   { id: 'other', label: 'Other' },
 ];
 
@@ -25,6 +28,9 @@ export const developmentKindLabel: Record<DevelopmentKind, string> = {
   'data-center': 'Data center',
   annexation: 'Annexation',
   retail: 'Retail',
+  restaurant: 'Restaurant',
+  industry: 'Industry',
+  expansion: 'Expansion',
   other: 'Other',
 };
 
@@ -72,7 +78,7 @@ export const developmentProjects: DevelopmentProject[] = [
   {
     id: 'burleson-crossing-east',
     title: 'Burleson Crossing East Phase 2',
-    kind: 'retail',
+    kind: 'expansion',
     status: 'Underway',
     place: 'Bastrop',
     summary: 'The next phase of the Burleson Crossing East retail pad continues along SH 71 west of downtown.',
@@ -84,7 +90,7 @@ export const developmentProjects: DevelopmentProject[] = [
   {
     id: 'bww-sendero',
     title: 'Buffalo Wild Wings at Sendero',
-    kind: 'retail',
+    kind: 'restaurant',
     status: 'Plans filed',
     place: 'Bastrop',
     summary: 'Buffalo Wild Wings filed for a build-out at the Sendero mixed-use site on SH 71.',
@@ -96,7 +102,7 @@ export const developmentProjects: DevelopmentProject[] = [
   {
     id: 'taco-casa-chestnut',
     title: 'Taco Casa on Chestnut',
-    kind: 'retail',
+    kind: 'restaurant',
     status: 'Announced',
     place: 'Bastrop',
     summary: 'Taco Casa is lined up for a Chestnut Street location in Bastrop.',
