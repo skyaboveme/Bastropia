@@ -20,7 +20,15 @@ const catalogKey = 'ad:catalog';
 const holdsKey = 'ad:holds';
 const notesKey = 'ad:notes';
 const textPlacements = new Set<PlacementId>([]);
-const imagePlacements = new Set<PlacementId>(['home-banner', 'event-banner', 'weekend-banner']);
+const imagePlacements = new Set<PlacementId>([
+  'home-banner',
+  'front-banner',
+  'news-banner',
+  'scores-banner',
+  'event-banner',
+  'weather-banner',
+  'weekend-banner',
+]);
 
 export type StoredAd = {
   id: string;
@@ -158,7 +166,7 @@ function goHref(id: string, placement: PlacementId) {
 }
 
 async function imageAds(
-  placement: 'home-banner' | 'event-banner' | 'weekend-banner',
+  placement: PlacementId,
   files: { id: string; name: string; src: string; alt: string; href: string }[],
 ): Promise<LiveAd[]> {
   try {
@@ -202,16 +210,22 @@ async function imageAds(
   }
 }
 
+export async function placementAds(placement: PlacementId): Promise<LiveAd[]> {
+  const files =
+    placement === 'home-banner' ? homeBanners : placement === 'event-banner' ? eventBanners : placement === 'weekend-banner' ? weekendBanners : [];
+  return imageAds(placement, files);
+}
+
 export async function bannerAds(): Promise<LiveAd[]> {
-  return imageAds('home-banner', homeBanners);
+  return placementAds('home-banner');
 }
 
 export async function eventBannerAds(): Promise<LiveAd[]> {
-  return imageAds('event-banner', eventBanners);
+  return placementAds('event-banner');
 }
 
 export async function weekendBannerAds(): Promise<LiveAd[]> {
-  return imageAds('weekend-banner', weekendBanners);
+  return placementAds('weekend-banner');
 }
 
 export async function textAds(placement: PlacementId): Promise<LiveAd[]> {

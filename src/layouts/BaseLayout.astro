@@ -44,6 +44,7 @@ const sections: Record<string, string> = {
   calendar: 'Calendar',
   'this-weekend': 'This weekend',
   weather: 'Weather',
+  now: 'Right now',
   'burn-ban': 'Burn ban',
   videos: 'Videos',
   about: 'About',
@@ -181,7 +182,14 @@ const trail = crumbs.length ? [{ name: 'Front page', path: '/' }, ...crumbs] : [
           var banner = main && main.querySelector('[data-site-banner]');
           if (!main || !banner) return;
 
-          // News and other long reads can ask for the banner after the story.
+          var slot = main.querySelector('[data-banner-slot]');
+          if (slot) {
+            slot.replaceWith(banner);
+            banner.hidden = false;
+            return;
+          }
+
+          // Government keeps the strip below the emergency panel and the notices.
           var end = main.querySelector('[data-banner-end]');
           if (end) {
             end.after(banner);
@@ -189,36 +197,13 @@ const trail = crumbs.length ? [{ name: 'Front page', path: '/' }, ...crumbs] : [
             return;
           }
 
-          function blocks(parent) {
-            return Array.prototype.filter.call(parent.children, function (el) {
-              return el !== banner && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE';
-            });
-          }
-
-          var root = main;
-          var kids = blocks(main);
-
-          // One shell (homepage stack, article wrap): place midway inside it.
-          if (kids.length === 1 && blocks(kids[0]).length >= 2) {
-            root = kids[0];
-            kids = blocks(root);
-          } else if (kids.length >= 2 && kids[0].classList && kids[0].classList.contains('page-head')) {
-            // Page head + content wrap: place midway inside the wrap.
-            var shell = kids[1];
-            if (shell && blocks(shell).length >= 2) {
-              root = shell;
-              kids = blocks(root);
-            }
-          }
-
-          if (!kids.length) {
+          var head = main.querySelector('.page-head');
+          if (head) {
+            head.after(banner);
             banner.hidden = false;
             return;
           }
 
-          var mid = Math.floor(kids.length / 2);
-          var anchor = kids[Math.max(0, mid - 1)];
-          anchor.after(banner);
           banner.hidden = false;
         })();
       </script>

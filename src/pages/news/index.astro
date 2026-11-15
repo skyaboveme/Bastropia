@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import DailyFeature from '../../components/DailyFeature.astro';
+import SponsorBanner from '../../components/SponsorBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../../lib/externalNews';
 import { offsiteAttrs } from '../../lib/links';
@@ -21,9 +22,10 @@ const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
   extra={[linkList('Bastropia news', stories.map((story) => ({ name: story.data.title, path: `/news/${story.id}` })))]}
 >
   <PageHead kicker="Desk" title="News from Bastrop County" lede="Short briefings with a link back to the public source. This is a community desk, not a city hall feed." />
-  <div class="wrap" data-banner-end>
+  <div class="wrap">
     <DailyFeature level="h2" archive />
   </div>
+  <SponsorBanner placement="news-banner" size="poster" />
   <div class="wrap">
     <div class="news-list">
       {headlines.map((story) => (

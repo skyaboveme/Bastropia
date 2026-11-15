@@ -1,0 +1,274 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { burnBan, burnStatus } from '../data/burnBan';
+import { getCountyNow } from '../lib/countyNow';
+import { getSchoolDays, schoolSummary } from '../lib/interruptions';
+import { offsiteAttrs } from '../lib/links';
+import { readTown, townCookie } from '../lib/townChoice';
+import { getAlerts, getForecast, isTown, weatherLabel } from '../lib/weather';
+
+const saved = readTown(Astro.cookies.get(townCookie)?.value);
+const town = isTown(saved) ? saved : 'Bastrop';
+const checkedLabel = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC',
+  month: 'long',
+  day: 'numeric',
+}).format(new Date(`${burnBan.checked}T12:00:00Z`));
+
+const [county, forecast, alerts, schools] = await Promise.all([
+  getCountyNow(),
+  getForecast(town),
+  getAlerts(),
+  getSchoolDays(),
+]);
+
+const schoolLine = schoolSummary(schools);
+const highway = (route: string) => county.roads.find((road) => road.route === route);
+const sh71 = highway('SH 71');
+const us290 = highway('US 290');
+
+function quiet(label: string) {
+  return label === 'Normal day' || label === 'None reported' || label === 'None listed' || label === 'No burn ban';
+}
+
+const cards = [
+  {
+    href: `/weather?town=${encodeURIComponent(town)}`,
+    kicker: 'Right now',
+    value: forecast ? `${forecast.temp}°` : '—',
+    detail: forecast
+      ? `${weatherLabel(forecast.code)} in ${town}. Feels like ${forecast.feels}°. Wind ${forecast.wind} mph.`
+      : 'The forecast did not load.',
+    alert: false,
+  },
+  {
+    href: '/burn-ban',
+    kicker: 'Burn ban',
+    value: burnStatus,
+    detail: `Checked ${checkedLabel}.`,
+    alert: burnBan.inEffect,
+  },
+  {
+    href: county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/',
+    kicker: 'Colorado River',
+    value: county.river?.label ?? '—',
+    detail: county.river?.detail || 'The Bastrop gauge did not load.',
+    alert: false,
+  },
+  {
+    href: county.air?.href ?? 'https://www.tceq.texas.gov/cgi-bin/compliance/monops/daily_summary.pl?cams=1612',
+    kicker: 'Air',
+    value: county.air?.label ?? '—',
+    detail: county.air?.detail || 'The air reading did not load.',
+    alert: Boolean(county.air && Number(county.air.label) > 100),
+  },
+  {
+    href: '/roads',
+    kicker: 'SH 71',
+    value: sh71?.label ?? '—',
+    detail: sh71?.label === 'None listed' ? 'No alert filed.' : sh71?.detail || 'DriveTexas did not load.',
+    alert: Boolean(sh71 && !quiet(sh71.label)),
+  },
+  {
+    href: '/roads',
+    kicker: 'US 290',
+    value: us290?.label ?? '—',
+    detail: us290?.label === 'None listed' ? 'No alert filed.' : us290?.detail || 'DriveTexas did not load.',
+    alert: Boolean(us290 && !quiet(us290.label)),
+  },
+  {
+    href: '/schools',
+    kicker: 'Schools',
+    value: schoolLine.label,
+    detail: schoolLine.detail,
+    alert: !quiet(schoolLine.label),
+  },
+  {
+    href: county.power?.href ?? 'https://www.bluebonnet.coop/outages',
+    kicker: 'Power',
+    value: county.power?.label ?? '—',
+    detail: county.power?.detail || 'Bluebonnet did not load.',
+    alert: Boolean(county.power && !quiet(county.power.label)),
+  },
+  {
+    href: '/roads',
+    kicker: 'Roads',
+    value: county.closureLine.label,
+    detail: county.closureLine.label === 'None reported' ? 'No closure or crash in the county file.' : county.closureLine.detail,
+    alert: !quiet(county.closureLine.label),
+  },
+  {
+    href: '/weather',
+    kicker: 'Rain',
+    value: county.rain?.label ?? '—',
+    detail: county.rain ? `${county.rain.detail}, Bastrop.` : 'The seven-day total did not load.',
+    alert: false,
+  },
+];
+---
+
+<BaseLayout
+  title="Right now"
+  description="Weather, burn ban, river, air, highways, schools, power, road closures, and the last seven days of rain in Bastrop County."
+>
+  <PageHead
+    kicker="County"
+    title="Right now"
+    lede={`The numbers from the top of every page, with room to read them. Weather follows ${town}.`}
+  />
+  <div class="wrap">
+    {alerts && alerts.length > 0 && (
+      <div class="now-alerts">
+        {alerts.map((alert) => (
+          <article class="alert">
+            <p class="kicker">{alert.severity}</p>
+            <h2>{alert.event}</h2>
+            <p>{alert.headline}</p>
+          </article>
+        ))}
+      </div>
+    )}
+    <div class="now-grid">
+      {cards.map((card) => (
+        <a class:list={['now-card', { 'is-alert': card.alert }]} href={card.href} {...offsiteAttrs(card.href)}>
+          <p class="kicker">{card.kicker}</p>
+          <strong>{card.value}</strong>
+          <span>{card.detail}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+  <div class="wrap">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Schools</p>
+          <h2>Four districts</h2>
+        </div>
+        <p class="cluster"><a href="/schools">School status</a></p>
+      </div>
+      <div class="now-grid now-grid-detail">
+        {schools.map((day) => (
+          <article class:list={['now-card', { 'is-alert': day.status === 'closed' || day.status === 'delayed' }]}>
+            <p class="kicker">{day.name}</p>
+            <strong>{day.label}</strong>
+            <span>{day.note}</span>
+            <a href={day.href} {...offsiteAttrs(day.href)}>District page</a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">DriveTexas</p>
+          <h2>Highways and closures</h2>
+        </div>
+        <p class="cluster"><a href="/roads">Highway alerts</a></p>
+      </div>
+      <div class="now-grid now-grid-detail">
+        {[sh71, us290].flatMap((road) => (road ? [road] : [])).map((road) => (
+          <article class:list={['now-card', { 'is-alert': !quiet(road.label) }]}>
+            <p class="kicker">{road.route} · construction</p>
+            <strong>{road.label}</strong>
+            <span>{road.label === 'None listed' ? 'No alert filed on this highway.' : road.detail}</span>
+          </article>
+        ))}
+      </div>
+      {county.closures.length > 0 && (
+        <div class="now-list">
+          {county.closures.map((item) => (
+            <article>
+              <h3>{item.kind === 'crash' ? 'Crash' : 'Closed'} · {item.route}</h3>
+              <p>{item.detail}</p>
+              {(item.from || item.to) && <p class="meta">{item.from}{item.to ? ` to ${item.to}` : ''}</p>}
+            </article>
+          ))}
+        </div>
+      )}
+      {county.others.length > 0 && (
+        <div class="now-list">
+          <h3>Other work zones</h3>
+          {county.others.map((item) => (
+            <article>
+              <h3>{item.route}</h3>
+              <p>{item.detail}</p>
+              {(item.from || item.to) && <p class="meta">{item.from}{item.to ? ` to ${item.to}` : ''}</p>}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <p class="cluster"><a class="button" href="/alerts">Email or text when one of these changes</a></p>
+    <p class="disclaimer">
+      Weather is the forecast for {town}. The river is the USGS gauge at Bastrop and can be provisional.
+      Air is a model index, linked to the TCEQ monitor page. Rain is the last seven days at the Bastrop coordinates.
+      Roads come from the DriveTexas file for this county. Each school line is that district’s homepage today.
+      Power is Bluebonnet’s outage count. The county page is the burn-ban order.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .section-head { flex-wrap: wrap; }
+  .section-head h2 { flex: 1 1 12rem; }
+  .now-alerts { display: grid; gap: 0.7rem; margin-bottom: 1rem; }
+  .now-alerts h2 { font-size: 1.45rem; margin: 0.15rem 0; }
+  .now-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+  .now-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    min-width: 0;
+    min-height: 8.4rem;
+    padding: 0.8rem 0.85rem 0.95rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--river);
+    color: inherit;
+    text-decoration: none;
+  }
+  .now-card.is-alert { border-top-color: var(--stop); }
+  .now-card .kicker { margin: 0; }
+  .now-card strong {
+    font-family: var(--serif);
+    font-size: clamp(1.45rem, 6vw, 2.2rem);
+    font-weight: 560;
+    line-height: 1.05;
+  }
+  .now-card span {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+  a.now-card span {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .now-card > a { margin-top: auto; color: var(--river-deep); font-weight: 650; }
+  .now-grid-detail { grid-template-columns: 1fr; margin-top: 0.8rem; }
+  .now-list { display: grid; gap: 0.8rem; margin-top: 1.1rem; }
+  .now-list h3 { margin: 0; font-size: 1.25rem; }
+  .now-list p { margin: 0.2rem 0 0; }
+  @media (min-width: 700px) {
+    .now-grid-detail { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 860px) {
+    .now-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.9rem; }
+    .now-grid-detail { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 380px) {
+    .now-grid { grid-template-columns: 1fr; }
+  }
+</style>

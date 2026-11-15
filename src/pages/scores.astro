@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import SponsorBanner from '../components/SponsorBanner.astro';
 import { getCollegeScores } from '../lib/collegeScores';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { offsiteAttrs } from '../lib/links';
@@ -111,6 +112,8 @@ const boards = footballSchools.map((school) => {
         );
       })}
     </div>
+
+    <SponsorBanner placement="scores-banner" size="poster" />
 
     {colleges.length > 0 && (
       <section class="section">

@@ -31,7 +31,7 @@ const problems: Record<string, string> = {
   <PageHead
     kicker="Publisher"
     title="Advertisers"
-    lede="Upload a business, then pick the pages. Image banners use a 1200×500 frame. The Run of Site Banner can rotate; the event and weekend banners are monthly sponsors on /events and /this-weekend. Each advertiser has a report link for views and clicks."
+    lede="Upload a business, then pick the pages. Every banner is a 1200×500 image. Page sponsors show large. The run-of-site banner is the short one under the title and can rotate. An empty page sponsor stays blank. Each advertiser has a report link for views and clicks."
   />
   <div class="wrap">
     {!allowed && locked && (
@@ -78,7 +78,7 @@ const problems: Record<string, string> = {
             <input name="alt" maxlength="180" />
           </label>
           <label class="field">
-            <span>Banner image, 1200 × 500, JPG, PNG, or WebP</span>
+            <span>Banner image, 1200 × 500, JPG, PNG, or WebP. The run-of-site spot shows this same file shorter.</span>
             <input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
           </label>
           <fieldset class="check-row">

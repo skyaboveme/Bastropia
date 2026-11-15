@@ -7,6 +7,7 @@ import EventCard from '../components/EventCard.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
 import DailyFeature from '../components/DailyFeature.astro';
+import SponsorBanner from '../components/SponsorBanner.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
 import { offsiteAttrs } from '../lib/links';
@@ -129,10 +130,12 @@ const deskStories = pageHeadlines
     ...deskStories.map((story) => newsNode(story)),
   ]}
 >
+  <div data-banner-slot></div>
   <div class="wrap home-stack">
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
         <DailyFeature level="h1" todayOnly />
+        <SponsorBanner placement="front-banner" size="poster" />
         {lead && (
           <article class="story-lead story-follow">
             <p class="kicker">{lead.href === cartsStory ? 'Bastropia · Bastrop' : lead.label} · {formatMedium(lead.date)}</p>

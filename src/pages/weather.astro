@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import SponsorBanner from '../components/SponsorBanner.astro';
 import county from '../data/bastropCounty.json';
 import { forecastTowns, getAlerts, getCountySpots, getForecast, isTown, rainAmount, weatherLabel, type TownName } from '../lib/weather';
 import { labelFromKey } from '../lib/time';
@@ -27,7 +28,7 @@ const mapData = JSON.stringify({
     title={`${town} weather`}
     lede="Conditions at the county seat are not the conditions in Smithville or Cedar Creek. Pick the town you are actually standing in."
   />
-  <div class="wrap" data-banner-end>
+  <div class="wrap">
     <div class="filter-row">
       {Object.keys(forecastTowns).map((name) => (
         <a class="chip" href={`/weather?town=${encodeURIComponent(name)}`} aria-current={name === town ? 'true' : undefined}>{name}</a>
@@ -40,6 +41,7 @@ const mapData = JSON.stringify({
           <h2>{forecast.temp}° and {weatherLabel(forecast.code).toLowerCase()}</h2>
           <p class="lede" style="color:#d5e4dc;">Feels like {forecast.feels}°. Humidity {forecast.humidity}%. Wind {forecast.wind} mph.</p>
         </section>
+        <SponsorBanner placement="weather-banner" size="poster" />
         <section class="section">
           <h2>Next seven days</h2>
           <div class="forecast" style="margin-top:0.8rem;">

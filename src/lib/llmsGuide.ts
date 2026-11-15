@@ -6,10 +6,10 @@ import { electionDay, voteIsLive, voteSource } from '../data/vote';
 import { eventKey, formatLong, labelFromKey, whenLabel } from './time';
 
 const pages: { path: string; label: string; note: string }[] = [
-  { path: '/', label: 'Front page', note: 'Today’s news, Around the county, upcoming events, and a rotating sponsor banner about midway down this and other public pages' },
-  { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings, with a monthly event banner after the first five listings. The sitewide rotating banner is off on this page. /calendar opens the month view' },
-  { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans in the same list as the events calendar, with a monthly weekend banner after the first five listings. The sitewide rotating banner is off on this page' },
-  { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source' },
+  { path: '/', label: 'Front page', note: 'Today’s news, Around the county, and upcoming events. A short run-of-site banner sits above the daily video, and the front-page sponsor sits after it.' },
+  { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings. A short run-of-site banner sits under the title, and the events sponsor sits after the first five listings. /calendar opens the month view' },
+  { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans in the same list as the events calendar. A short run-of-site banner sits under the title, and the weekend sponsor sits after the first five listings.' },
+  { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source. A short run-of-site banner sits under the title, and the news sponsor sits after the daily video.' },
   { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, restaurants, industry, expansions, and new retail under watch in Bastrop County' },
   { path: '/new-here', label: 'New resident guide', note: 'Utilities, trash day, tax dates, and which commissioner covers your road' },
   { path: '/tips', label: 'Send a tip or photo', note: 'Neighbor tips and photos for the site and the Facebook group' },
@@ -18,7 +18,8 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/rss.xml', label: 'County RSS', note: 'Bastrop County news from this desk, county papers, and Austin newsrooms that name the county' },
   { path: '/events.xml', label: 'Events RSS', note: 'Feed of upcoming listings' },
   { path: '/burn-ban', label: 'Burn ban', note: 'Whether the county lists an outdoor burn ban' },
-  { path: '/weather', label: 'Weather', note: 'Forecast, a live radar map of Bastrop County, and National Weather Service alerts' },
+  { path: '/weather', label: 'Weather', note: 'Forecast, a live radar map of Bastrop County, and National Weather Service alerts. A short run-of-site banner sits under the title, and the weather sponsor sits after the current conditions.' },
+  { path: '/now', label: 'Right now', note: 'The county numbers from the top of every page: weather, burn ban, river gauge, air, SH 71, US 290, schools, power, road closures, and the last seven days of rain' },
   { path: '/government', label: 'Government', note: 'Emergency numbers, services, and public notices' },
   { path: '/phone-numbers', label: 'Phone numbers', note: 'Sheriff, tax office, city hall, water, libraries, trash and recycling day, and school districts, with hours and the date each page was checked' },
   { path: '/schools', label: 'School status', note: 'Closed, delayed, or a normal day for Bastrop ISD, Elgin ISD, Smithville ISD, and McDade ISD' },
@@ -27,7 +28,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/go-vote', label: 'Go Vote', note: 'Election Day is over. This address redirects to /results' },
   { path: '/election-night', label: 'Election night', note: 'Redirects to /results' },
   { path: '/results', label: 'Election results', note: 'Unofficial November 3, 2026 race-by-race totals from https://results.enr.clarityelections.com/TX/Bastrop/, Associated Press calls, vote centers, and the elections office central-count camera' },
-  { path: '/scores', label: 'Friday night scores', note: 'Next kickoff and latest finals for Bastrop, Cedar Creek, Elgin, and Smithville, plus latest scores for Texas, Texas A&M, Texas State, Texas Tech, Baylor, Houston, and UTSA' },
+  { path: '/scores', label: 'Friday night scores', note: 'Next kickoff and latest finals for Bastrop, Cedar Creek, Elgin, and Smithville, plus latest scores for Texas, Texas A&M, Texas State, Texas Tech, Baylor, Houston, and UTSA. A short run-of-site banner sits under the title, and the scores sponsor sits after the local scoreboard.' },
   { path: '/roads', label: 'Highway alerts', note: 'DriveTexas closures and crashes, then construction on SH 71, US 290, and other county roads' },
   { path: '/government/court-decisions', label: 'What the court decided', note: 'Three bullets after each Commissioners Court meeting, once the minutes are posted' },
   { path: '/about', label: 'About', note: 'What Bastropia is and is not' },
