@@ -60,7 +60,12 @@ const headlines = latestHeadlines(news, externalNews);
 const shownEvents = new Set([...todayEvents, ...weekendEvents, ...picks].map((event) => event.id));
 const hiddenStories = new Set(['/news/burn-ban-clear']);
 if (shownEvents.has('boo-bash')) hiddenStories.add('/news/boo-bash-halloween');
-let pageHeadlines = headlines.filter((story) => !hiddenStories.has(story.href));
+/** Our desk note covers this Community Impact story, so the wire item does not also run on the front page. */
+const communityImpactCarts = 'ev-chargers-and-e-bikes-1-47m-bastrop-carts-expansion-planned';
+const cartsStory = '/news/carts-bastrop-park-and-ride-upgrade-2027';
+let pageHeadlines = headlines.filter(
+  (story) => !hiddenStories.has(story.href) && !story.href.includes(communityImpactCarts),
+);
 if (today <= electionDay) {
   const election = pageHeadlines.find((story) => story.href === '/news/election-day-tuesday');
   if (election) pageHeadlines = [election, ...pageHeadlines.filter((story) => story.href !== election.href)];
@@ -69,11 +74,13 @@ if (today === '2026-11-05') {
   const careAVan = pageHeadlines.find((story) => story.href === '/news/care-a-van-lost-pines-elementary-nov-5-2026');
   if (careAVan) pageHeadlines = [careAVan, ...pageHeadlines.filter((story) => story.href !== careAVan.href)];
 }
+const cartsLead = pageHeadlines.find((story) => story.href === cartsStory);
+if (cartsLead) pageHeadlines = [cartsLead, ...pageHeadlines.filter((story) => story.href !== cartsStory)];
 const lead = pageHeadlines[0];
 const secondary = pageHeadlines.slice(1, 3);
 const briefs = pageHeadlines.slice(3, 7);
 const shown = new Set(pageHeadlines.slice(0, 7).map((story) => story.href));
-const unused = externalNews.filter((story) => !shown.has(story.link));
+const unused = externalNews.filter((story) => !shown.has(story.link) && !story.link.includes(communityImpactCarts));
 const seenSources = new Set(externalNews.filter((story) => shown.has(story.link)).map((story) => story.source.id));
 const around = [];
 for (const story of unused) {
@@ -128,7 +135,7 @@ const deskStories = pageHeadlines
         <DailyFeature level="h1" todayOnly />
         {lead && (
           <article class="story-lead story-follow">
-            <p class="kicker">{lead.label} · {formatMedium(lead.date)}</p>
+            <p class="kicker">{lead.href === cartsStory ? 'Bastropia · Bastrop' : lead.label} · {formatMedium(lead.date)}</p>
             <h2><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h2>
             {lead.summary && <p class="dek">{lead.summary}</p>}
             <p class="more"><a href={lead.href} {...offsiteAttrs(lead.href)}>Read the story</a></p>
