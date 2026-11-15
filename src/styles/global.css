@@ -111,6 +111,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .header-hero img.is-on { opacity: 1; }
 .header-hero.is-stadium img { object-position: center 58%; }
 .header-hero.is-parade img { object-position: center 48%; }
+.header-hero.is-weather img { object-position: center 40%; }
 .header-hero::after {
   content: "";
   position: absolute;

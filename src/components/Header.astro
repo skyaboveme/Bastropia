@@ -4,7 +4,7 @@ import SocialIcons from './SocialIcons.astro';
 import { burnBan, burnStatus } from '../data/burnBan';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
 import { eventKey, formatLong, labelFromKey } from '../lib/time';
-import { getForecast, isTown, weatherLabel } from '../lib/weather';
+import { getForecast, isTown, weatherHeroSrc, weatherLabel } from '../lib/weather';
 import { readTown, townCookie } from '../lib/townChoice';
 
 const path = Astro.url.pathname;
@@ -14,7 +14,15 @@ const checkedLabel = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 }).format(new Date(`${burnBan.checked}T12:00:00Z`));
 const savedTown = readTown(Astro.cookies.get(townCookie)?.value);
-const weatherTown = isTown(savedTown) ? savedTown : 'Bastrop';
+const requestedTown = path === '/weather' ? Astro.url.searchParams.get('town') : null;
+const weatherTown =
+  path === '/weather'
+    ? isTown(requestedTown)
+      ? requestedTown
+      : 'Bastrop'
+    : isTown(savedTown)
+      ? savedTown
+      : 'Bastrop';
 const forecast = await getForecast(weatherTown);
 const now = new Date();
 const today = formatLong(now);
@@ -32,6 +40,7 @@ const voteBanner =
         : `Election Day is ${labelFromKey(electionDay)}, polls open ${electionHours}. See hours and polling places.`;
 
 const paradeHero = path === '/events' || path === '/this-weekend';
+const weatherHero = path === '/weather';
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/scores', label: 'Scores' },
@@ -78,7 +87,7 @@ function current(href: string) {
     </div>
   </div>
 
-  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero }]}>
+  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero }]}>
     {path === '/' && (
       <div class="header-hero" data-header-hero aria-hidden="true">
         <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
@@ -94,6 +103,19 @@ function current(href: string) {
     {paradeHero && (
       <div class="header-hero is-parade" aria-hidden="true">
         <img class="is-on" src="/images/header/parade.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {weatherHero && (
+      <div class="header-hero is-weather" aria-hidden="true">
+        <img
+          class="is-on"
+          src={weatherHeroSrc(forecast?.scene ?? 'sunny')}
+          alt=""
+          width="1024"
+          height="434"
+          decoding="async"
+          fetchpriority="low"
+        />
       </div>
     )}
   <div class="masthead">

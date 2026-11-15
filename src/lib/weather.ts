@@ -27,8 +27,36 @@ export type Forecast = {
   humidity: number;
   wind: number;
   code: number;
+  /** Header photo for the current sky. */
+  scene: WeatherScene;
   daily: DailyForecast[];
 };
+
+export type WeatherScene = 'sunny' | 'rain' | 'storm' | 'rainbow';
+
+const weatherHeroes: Record<WeatherScene, string> = {
+  sunny: '/images/header/weather-sunny.webp',
+  rain: '/images/header/weather-rain.webp',
+  storm: '/images/header/weather-storm.webp',
+  rainbow: '/images/header/weather-rainbow.webp',
+};
+
+/** Which header photo matches the sky right now. */
+export function weatherScene(code: number, phrase = '', recentRain = false): WeatherScene {
+  const text = phrase.toLowerCase();
+  const storm = code >= 95 || /thunder|t-?storm/.test(text);
+  const wet = (code >= 45 && code <= 86) || /rain|shower|drizzle|snow|sleet|precip|fog|mist/.test(text);
+  const clearing = /then (mostly )?(sunny|clear|fair)|clearing/.test(text);
+  if (storm && !clearing) return 'storm';
+  if (clearing && (wet || recentRain)) return 'rainbow';
+  if (wet) return 'rain';
+  if (recentRain) return 'rainbow';
+  return 'sunny';
+}
+
+export function weatherHeroSrc(scene: WeatherScene) {
+  return weatherHeroes[scene];
+}
 
 export type WeatherAlert = {
   event: string;
@@ -73,6 +101,19 @@ export function rainAmount(inches: number) {
 function roundInches(inches: number) {
   if (!Number.isFinite(inches) || inches <= 0) return 0;
   return Math.round(inches * 100) / 100;
+}
+
+function recentInches(values: { validTime?: string; value?: number | null }[], now = Date.now()) {
+  const startWindow = now - 6 * 60 * 60 * 1000;
+  let mm = 0;
+  for (const item of values) {
+    const start = item.validTime?.split('/')[0];
+    if (!start) continue;
+    const at = Date.parse(start);
+    if (Number.isNaN(at) || at < startWindow || at > now) continue;
+    mm += Number(item.value) || 0;
+  }
+  return mm / 25.4;
 }
 
 function inchesByDay(values: { validTime?: string; value?: number | null }[]) {
@@ -148,9 +189,12 @@ async function forecastFromNws(town: TownName): Promise<Forecast> {
   if (!now) throw new Error('NWS hourly empty');
 
   let amounts = new Map<string, number>();
+  let fell = 0;
   try {
     const gridPayload = await nwsJson(`https://api.weather.gov/gridpoints/${grid}`);
-    amounts = inchesByDay(gridPayload.properties?.quantitativePrecipitation?.values ?? []);
+    const amountsRaw = gridPayload.properties?.quantitativePrecipitation?.values ?? [];
+    amounts = inchesByDay(amountsRaw);
+    fell = recentInches(amountsRaw);
   } catch {
     /* The chance of rain still stands when the amount is missing. */
   }
@@ -187,6 +231,8 @@ async function forecastFromNws(town: TownName): Promise<Forecast> {
     dewC == null
       ? now.temperature
       : Math.round(now.temperature - Math.max(0, (humidity - 40) / 4));
+  const phrase = now.shortForecast ?? '';
+  const code = codeFromPhrase(phrase);
 
   return {
     town,
@@ -194,7 +240,8 @@ async function forecastFromNws(town: TownName): Promise<Forecast> {
     feels,
     humidity,
     wind: windMph(now.windSpeed ?? '0'),
-    code: codeFromPhrase(now.shortForecast),
+    code,
+    scene: weatherScene(code, phrase, fell >= 0.02),
     daily: [...byDay.values()].slice(0, 7),
   };
 }
@@ -214,16 +261,29 @@ async function forecastFromOpenMeteo(town: TownName): Promise<Forecast> {
   url.searchParams.set('temperature_unit', 'fahrenheit');
   url.searchParams.set('wind_speed_unit', 'mph');
   url.searchParams.set('precipitation_unit', 'inch');
+  url.searchParams.set('hourly', 'precipitation');
+  url.searchParams.set('past_hours', '6');
   const response = await fetch(url, { signal: AbortSignal.timeout(6000) });
   if (!response.ok) throw new Error(`Open-Meteo ${response.status}`);
   const data = await response.json();
+  const code = data.current.weather_code;
+  const times = (data.hourly?.time ?? []) as string[];
+  const amounts = (data.hourly?.precipitation ?? []) as number[];
+  const nowMs = Date.now();
+  const startWindow = nowMs - 6 * 60 * 60 * 1000;
+  let fell = 0;
+  for (let index = 0; index < times.length; index++) {
+    const at = Date.parse(times[index]);
+    if (at >= startWindow && at <= nowMs) fell += Number(amounts[index]) || 0;
+  }
   return {
     town,
     temp: Math.round(data.current.temperature_2m),
     feels: Math.round(data.current.apparent_temperature),
     humidity: Math.round(data.current.relative_humidity_2m),
     wind: Math.round(data.current.wind_speed_10m),
-    code: data.current.weather_code,
+    code,
+    scene: weatherScene(code, '', fell >= 0.02),
     daily: data.daily.time.map((date: string, index: number) => ({
       date,
       high: Math.round(data.daily.temperature_2m_max[index]),
