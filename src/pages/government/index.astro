@@ -20,7 +20,7 @@ const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.g
     title="Government and emergency contacts"
     lede="The numbers and offices neighbors ask for, plus short summaries of public notices. Official pages are linked on every item that has one."
   />
-  <div class="wrap">
+  <div class="wrap" data-banner-end>
     <section class="notice">
       <p class="kicker" style="color: var(--river);">Emergency</p>
       <h2>Call {emergencyLine.phone}</h2>
@@ -53,7 +53,9 @@ const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.g
         ))}
       </div>
     </section>
+  </div>
 
+  <div class="wrap">
     {serviceGroups.map((group) => (
       <section class="section" id={group.id}>
         <div class="section-head">
