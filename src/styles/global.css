@@ -117,6 +117,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .header-hero.is-groups img { object-position: center 46%; }
 .header-hero.is-government img { object-position: center 42%; }
 .header-hero.is-news img { object-position: center 58%; }
+.header-hero.is-videos img { object-position: center 48%; }
 .header-hero::after {
   content: "";
   position: absolute;
