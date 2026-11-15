@@ -21,8 +21,10 @@ const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
   extra={[linkList('Bastropia news', stories.map((story) => ({ name: story.data.title, path: `/news/${story.id}` })))]}
 >
   <PageHead kicker="Desk" title="News from Bastrop County" lede="Short briefings with a link back to the public source. This is a community desk, not a city hall feed." />
-  <div class="wrap">
+  <div class="wrap" data-banner-end>
     <DailyFeature level="h2" archive />
+  </div>
+  <div class="wrap">
     <div class="news-list">
       {headlines.map((story) => (
         <article class="story-card">
