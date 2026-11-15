@@ -79,5 +79,34 @@ Disallow: /api/
 Disallow: /thanks
 Disallow: /search
 
+User-agent: Bytespider
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: YouBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /desk
+Disallow: /api/
+Disallow: /thanks
+Disallow: /search
+
 Sitemap: https://bastropia.com/sitemap.xml
 Sitemap: https://bastropia.com/sitemap-index.xml
+Sitemap: https://bastropia.com/news-sitemap.xml

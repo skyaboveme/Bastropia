@@ -18,6 +18,10 @@ function withSecurityHeaders(response: Response): Response {
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     if (!headers.has(key)) headers.set(key, value);
   }
+  const type = headers.get('content-type') ?? '';
+  if (type.includes('text/html')) {
+    headers.append('Link', `<https://${APEX_HOST}/llms.txt>; rel="describedby"; type="text/plain"`);
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,

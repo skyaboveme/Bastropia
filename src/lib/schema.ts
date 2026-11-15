@@ -1,5 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
-import { facebookGroup, siteDescription, siteName, siteUrl, youtubeChannel } from '../data/site';
+import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, youtubeChannel } from '../data/site';
 import { eventKey, TZ } from './time';
 
 export const orgId = `${siteUrl}/#organization`;
@@ -19,11 +19,15 @@ export function graph(nodes: Record<string, unknown>[]) {
 
 export function organization() {
   return {
-    '@type': 'Organization',
+    '@type': 'NewsMediaOrganization',
     '@id': orgId,
     name: siteName,
     url: `${siteUrl}/`,
     description: siteDescription,
+    publishingPrinciples: absolute('/about'),
+    correctionsPolicy: absolute('/tips'),
+    actionableFeedbackPolicy: absolute('/tips'),
+    masthead: absolute('/about'),
     logo: {
       '@type': 'ImageObject',
       url: absolute('/brand/logo.png'),
@@ -34,7 +38,7 @@ export function organization() {
       '@type': 'AdministrativeArea',
       name: 'Bastrop County, Texas',
     },
-    sameAs: [facebookGroup, youtubeChannel],
+    sameAs: [facebookPage, facebookGroup, youtubeChannel],
     knowsAbout: [
       'Bastrop County events',
       'Bastrop Texas',
@@ -200,12 +204,51 @@ export function newsNode(story: CollectionEntry<'news'>) {
     isAccessibleForFree: true,
     mainEntityOfPage: absolute(path),
     ...(story.data.image ? { image: [absolute(story.data.image)] } : {}),
-    author: { '@id': orgId },
+    dateline: story.data.place,
+    author: { '@type': 'Organization', name: 'Bastropia desk', url: absolute('/about') },
     publisher: {
-      '@type': 'Organization',
+      '@type': 'NewsMediaOrganization',
       name: siteName,
-      logo: { '@type': 'ImageObject', url: absolute('/brand/logo.png') },
+      logo: { '@type': 'ImageObject', url: absolute('/brand/logo.png'), width: 1024, height: 1024 },
     },
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['.page-head h1', '.page-head .lede'],
+    },
+    ...(story.data.sourceUrl ? { isBasedOn: story.data.sourceUrl } : {}),
+  };
+}
+
+export function directoryBusiness(business: {
+  slug: string;
+  name: string;
+  details: string;
+  phone: string;
+  website: string;
+  address: string;
+  city: string;
+  areas: string;
+}) {
+  const path = `/directory/l/${business.slug}`;
+  const digits = business.phone.replace(/\D/g, '');
+  const telephone = digits.length === 10 ? `+1${digits}` : digits.length === 11 ? `+${digits}` : '';
+  const areas = business.areas.split(',').map((name) => name.trim()).filter(Boolean);
+  return {
+    '@type': 'LocalBusiness',
+    '@id': `${absolute(path)}#business`,
+    name: business.name,
+    description: business.details,
+    url: absolute(path),
+    ...(telephone ? { telephone } : {}),
+    ...(business.website ? { sameAs: [business.website] } : {}),
+    address: {
+      '@type': 'PostalAddress',
+      ...(business.address ? { streetAddress: business.address } : {}),
+      addressLocality: business.city,
+      addressRegion: 'TX',
+      addressCountry: 'US',
+    },
+    areaServed: (areas.length ? areas : [business.city]).map((name) => ({ '@type': 'AdministrativeArea', name })),
   };
 }
 

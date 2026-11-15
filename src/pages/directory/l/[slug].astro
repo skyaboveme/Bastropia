@@ -4,6 +4,7 @@ export const prerender = false;
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHead from '../../../components/PageHead.astro';
 import { bumpStat, getBusiness, listBizEvents, listSpecials } from '../../../lib/businessDb';
+import { directoryBusiness } from '../../../lib/schema';
 
 const business = await getBusiness(Astro.params.slug ?? '');
 if (!business || business.status !== 'live') return Astro.redirect('/directory');
@@ -13,7 +14,7 @@ const events = (await listBizEvents(business.id)).filter((item) => item.starts >
 const phoneDigits = business.phone.replace(/\D/g, '');
 ---
 
-<BaseLayout title={business.name} description={business.details.slice(0, 160)}>
+<BaseLayout title={business.name} description={business.details.slice(0, 160)} extra={[directoryBusiness(business)]}>
   <article class="wrap">
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
       <p class="kicker">{business.category} · {business.city}</p>

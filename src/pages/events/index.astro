@@ -80,6 +80,7 @@ function href(overrides: Record<string, string | null>) {
   title="Bastrop County Events Calendar"
   description="Bastrop County events calendar — filter by day, town, and the kind of plans you want."
   noindex={filtered}
+  nofollow={false}
   banner={false}
   extra={[
     ...(filtered ? [] : [linkList('Bastrop County Events Calendar', visible.slice(0, 30).map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]),

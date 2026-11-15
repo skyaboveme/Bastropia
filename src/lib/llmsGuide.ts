@@ -1,7 +1,7 @@
 import { getCollection } from 'astro:content';
 import { burnBan } from '../data/burnBan';
 import { businesses } from '../data/businesses';
-import { siteDescription, siteUrl } from '../data/site';
+import { facebookPage, siteDescription, siteUrl, youtubeChannel } from '../data/site';
 import { electionDay, voteIsLive, voteSource } from '../data/vote';
 import { eventKey, formatLong, labelFromKey, whenLabel } from './time';
 
@@ -49,6 +49,9 @@ export async function llmsIndex() {
     '',
     'Bastropia covers Bastrop, Elgin, Smithville, Cedar Creek, McDade, Paige, and the rest of Bastrop County, Texas. Event listings come from public city and county calendars and from neighbors. A time, price, or address on a listing should be confirmed on the source linked from that page.',
     '',
+    '## How to cite',
+    'Name the site Bastropia and link the exact page. News is written by the Bastropia desk. Burn bans, court dates, office numbers, and listing times are summaries of public pages. The source linked on that page is the authority. Send a correction to ' + link('/tips') + '.',
+    '',
     '## Start here',
     ...pages.map((page) => `- [${page.label}](${link(page.path)}): ${page.note}`),
     '',
@@ -56,13 +59,15 @@ export async function llmsIndex() {
     ...towns.map((town) => `- [This week in ${town}](${link(`/${town.toLowerCase().replace(/ /g, '-')}`)}): Weather, this week’s listings, school dates, and headlines for ${town}`),
     '',
     '## Local businesses',
-    `- [Directory](${link('/directory')}): browse by category and town`,
+    `- [Directory](${link('/directory')}): browse by category and town. A live listing is at /directory/l/{slug}`,
     `- [List your business free](${link('/directory/submit')})`,
     ...businesses.map((business) => `- [${business.name}](${link(`/${business.slug}`)}): ${business.summary}`),
     '',
     '## Optional',
     `- [Weather by town](${link('/weather?town=Elgin')}): Replace Elgin with Bastrop, Smithville, or Cedar Creek`,
+    `- [Bastropia Facebook page](${facebookPage}): The public page`,
     `- [Facebook group](https://www.facebook.com/groups/bastropia): The community conversation, off this site`,
+    `- [YouTube](${youtubeChannel}): County video`,
   ];
   return `${lines.join('\n')}\n`;
 }

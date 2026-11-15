@@ -17,10 +17,14 @@ interface Props {
   banner?: boolean;
   pageType?: string;
   canonicalPath?: string;
+  /** When a page is noindex, follow still lets crawlers use its links. Desk pages leave this on. */
+  nofollow?: boolean;
+  published?: Date;
+  section?: string;
   extra?: Record<string, unknown>[];
 }
 
-const { title, description = siteDescription, image, imageAlt, noindex = false, banner, pageType = 'WebPage', canonicalPath, extra = [] } = Astro.props;
+const { title, description = siteDescription, image, imageAlt, noindex = false, nofollow = true, banner, pageType = 'WebPage', canonicalPath, published, section, extra = [] } = Astro.props;
 const fullTitle = title === siteName ? `${siteName} — Everything happening in Bastrop County` : `${title} · ${siteName}`;
 const requestPath = Astro.url.pathname.length > 1 && Astro.url.pathname.endsWith('/') ? Astro.url.pathname.slice(0, -1) : Astro.url.pathname;
 const showBanner = banner ?? !(requestPath === '/desk' || requestPath.startsWith('/desk/'));
@@ -70,6 +74,10 @@ const nodes = [
   ...extra,
 ];
 const jsonLd = stringify(graph(nodes));
+const robots = noindex
+  ? `noindex, ${nofollow ? 'nofollow' : 'follow'}`
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const trail = crumbs.length ? [{ name: 'Front page', path: '/' }, ...crumbs] : [];
 ---
 
 <!doctype html>
@@ -80,7 +88,7 @@ const jsonLd = stringify(graph(nodes));
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+    <meta name="robots" content={robots} />
     <meta name="fo-verify" content="59ee4acc-51b2-4e7b-b5e2-7be0bb4faab1" />
     <meta name="geo.region" content="US-TX" />
     <meta name="geo.placename" content="Bastrop County" />
@@ -111,6 +119,10 @@ const jsonLd = stringify(graph(nodes));
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={shareImage} />
     <meta name="twitter:image:alt" content={shareAlt} />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {published && <meta property="article:modified_time" content={published.toISOString()} />}
+    {section && <meta property="article:section" content={section} />}
+    {published && <meta property="article:author" content={new URL('/about', Astro.site).toString()} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -144,6 +156,17 @@ const jsonLd = stringify(graph(nodes));
     <a class="skip" href="#main">Skip to content</a>
     <Header />
     <main id="main">
+      {trail.length > 0 && (
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <ol>
+            {trail.map((crumb, index) => (
+              <li>
+                {index < trail.length - 1 ? <a href={crumb.path}>{crumb.name}</a> : <span>{crumb.name}</span>}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
       <slot />
       {showBanner && (
         <div class="wrap site-banner" data-site-banner hidden>

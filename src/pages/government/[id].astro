@@ -13,7 +13,7 @@ const { update } = Astro.props;
 const { Content } = await render(update);
 ---
 
-<BaseLayout title={update.data.title} description={update.data.description} pageType="Article" extra={[noticeNode(update)]}>
+<BaseLayout title={update.data.title} description={update.data.description} pageType="Article" published={update.data.pubDate} section={update.data.agency} extra={[noticeNode(update)]}>
   <article class="wrap">
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
       <p class="kicker">{update.data.agency} · {formatLong(update.data.pubDate)}</p>

@@ -19,12 +19,15 @@ const { Content } = await render(story);
   description={story.data.description}
   image={story.data.image}
   pageType="NewsArticle"
+  published={story.data.pubDate}
+  section={story.data.place}
   extra={[newsNode(story)]}
 >
   <article class="wrap" data-banner-end>
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
       <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
       <h1>{story.data.title}</h1>
+      <p class="meta">By the <a href="/about">Bastropia desk</a></p>
       <p class="lede">{story.data.description}</p>
     </header>
     {story.data.image && (
