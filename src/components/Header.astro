@@ -41,6 +41,10 @@ const voteBanner =
 
 const paradeHero = path === '/events' || path === '/this-weekend';
 const weatherHero = path === '/weather';
+const developmentHero = path === '/development';
+const directoryHero = path === '/directory';
+const groupsHero = path === '/groups';
+const governmentHero = path === '/government';
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/scores', label: 'Scores' },
@@ -87,7 +91,7 @@ function current(href: string) {
     </div>
   </div>
 
-  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero }]}>
+  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero || developmentHero || directoryHero || groupsHero || governmentHero }]}>
     {path === '/' && (
       <div class="header-hero" data-header-hero aria-hidden="true">
         <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
@@ -116,6 +120,26 @@ function current(href: string) {
           decoding="async"
           fetchpriority="low"
         />
+      </div>
+    )}
+    {developmentHero && (
+      <div class="header-hero is-development" aria-hidden="true">
+        <img class="is-on" src="/images/header/development.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {directoryHero && (
+      <div class="header-hero is-directory" aria-hidden="true">
+        <img class="is-on" src="/images/header/directory.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {groupsHero && (
+      <div class="header-hero is-groups" aria-hidden="true">
+        <img class="is-on" src="/images/header/groups.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {governmentHero && (
+      <div class="header-hero is-government" aria-hidden="true">
+        <img class="is-on" src="/images/header/government.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
       </div>
     )}
   <div class="masthead">

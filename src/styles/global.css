@@ -112,6 +112,10 @@ ul { margin: 0; padding: 0; list-style: none; }
 .header-hero.is-stadium img { object-position: center 58%; }
 .header-hero.is-parade img { object-position: center 48%; }
 .header-hero.is-weather img { object-position: center 40%; }
+.header-hero.is-development img { object-position: center 38%; }
+.header-hero.is-directory img { object-position: center 58%; }
+.header-hero.is-groups img { object-position: center 46%; }
+.header-hero.is-government img { object-position: center 42%; }
 .header-hero::after {
   content: "";
   position: absolute;
