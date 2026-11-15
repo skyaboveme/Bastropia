@@ -8,57 +8,151 @@ import { alertTopic, alertTopics } from '../data/alerts';
 
 const picked = alertTopic(Astro.url.searchParams.get('item') ?? '')?.id ?? '';
 const joined = Astro.url.searchParams.get('joined') === '1';
+
+const pitches: Record<string, string> = {
+  'burn-ban': 'Know if you can burn brush tonight, before you stack the pile.',
+  schools: 'A closing or a delay at Bastrop, Elgin, Smithville, or McDade — before the car line.',
+  power: 'When the lights go out on Bluebonnet, and when they come back on.',
+  'sh-71': 'A closure or a crash on the highway you actually drive.',
+  'us-290': 'A closure or a crash on US 290, before you are sitting in it.',
+  roads: 'A closure or a crash on any county road DriveTexas files.',
+};
+
+const reasons = [
+  {
+    title: 'Before you are already late',
+    text: 'A two-hour delay, a burn ban, or a shut highway is worth knowing at the house. Not at the school driveway, and not at the barricade.',
+  },
+  {
+    title: 'Only the list you join',
+    text: 'Watch the burn ban, the schools, the power, or one highway. A school delay does not go to the people watching the burn ban.',
+  },
+  {
+    title: 'Quiet until it matters',
+    text: 'No daily ping. No weekend roundup. The Thursday letter is a different signup. This one waits until the status you asked about changes.',
+  },
+];
 ---
 
 <BaseLayout
-  title="Status alerts"
-  description="Email or text when the burn ban, school status, power, or a named road changes in Bastrop County."
+  title="Text alerts"
+  description="A text when the burn ban, school status, power, or a road changes in Bastrop County. You pick the list. It stays quiet until that status changes."
 >
   <PageHead
-    kicker="When it changes"
-    title="One list per item"
-    lede="The weekly newsletter is the weekend. This is the burn ban that flips at 4 p.m., a two-hour delay, or a road that closes. Pick the item. Your email joins that list only."
+    kicker="On your phone"
+    title="A text when the county changes"
+    lede="School delayed. Burn ban on. Lights out. Highway closed. Put your number on the list that matters, and that change shows up as a text. Nothing else does."
   />
   <div class="wrap">
-    {joined && <p class="lede">You are on that list. It is separate from the weekly newsletter.</p>}
-    <form class="form" action="/api/intake" method="post">
+    <section class="why" aria-label="Why get the text">
+      {reasons.map((reason) => (
+        <article>
+          <h2>{reason.title}</h2>
+          <p>{reason.text}</p>
+        </article>
+      ))}
+    </section>
+
+    {joined && <p class="joined">You are on the list. When that status changes, the text goes to the number you gave us.</p>}
+
+    <form class="form alert-form" action="/api/intake" method="post">
       <FormError />
       <input type="hidden" name="type" value="alert" />
       <input type="hidden" name="from" value="/alerts" />
       <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" />
       <fieldset class="alert-picks">
-        <legend>Which change</legend>
+        <legend>What should we text you about?</legend>
         {alertTopics.map((topic) => (
           <label class="check">
             <input type="checkbox" name={`topic_${topic.id}`} value="yes" checked={picked === topic.id} />
-            <span><strong>{topic.label}</strong> — {topic.detail}</span>
+            <span>
+              <strong>{topic.label}</strong>
+              <em>{pitches[topic.id]}</em>
+            </span>
           </label>
         ))}
       </fieldset>
       <label class="field">
-        <span>A named road, if it is not already listed</span>
-        <input name="road" type="text" maxlength="40" placeholder="FM 969" />
+        <span>A road that is not on that list</span>
+        <input name="road" type="text" maxlength="40" placeholder="FM 969, or leave this blank" />
+      </label>
+      <label class="field">
+        <span>Mobile number</span>
+        <input name="phone" type="tel" autocomplete="tel" placeholder="(512) 555-0100" />
+        <span class="hint">The number we text.</span>
       </label>
       <label class="field">
         <span>Email</span>
         <input name="email" type="email" required autocomplete="email" />
+        <span class="hint">Kept on the same list, so we can still reach you.</span>
       </label>
-      <label class="field">
-        <span>Mobile number, for the text list</span>
-        <input name="phone" type="tel" autocomplete="tel" placeholder="(512) 555-0100" />
-      </label>
-      <button class="button" type="submit">Join that list</button>
+      <button class="button" type="submit">Text me when it changes</button>
     </form>
     <p class="disclaimer">
-      Each item is its own list. A school delay does not go to the burn-ban list. The weekly newsletter is separate — the weekend lineup, every Thursday at 7 AM, on the <a class="text-link" href="/newsletter">newsletter page</a>.
-      The address and the mobile number are stored on that list. The desk can see them under Status lists.
+      Free. Each item is its own list. This is not 911 — call if someone needs help now. Confirm a ban, a delay, or a closure on the official page.
+      The weekend lineup is a different note, every Thursday at 7 AM, on the <a class="text-link" href="/newsletter">newsletter page</a>.
     </p>
   </div>
 </BaseLayout>
 
 <style>
-  .alert-picks { border: 0; padding: 0; margin: 0 0 0.4rem; display: grid; gap: 0.55rem; }
-  .alert-picks input { width: auto; }
-  .check { display: grid; grid-template-columns: 1.1rem 1fr; gap: 0.55rem; align-items: start; }
+  .why {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
+    margin: 0.2rem 0 1.6rem;
+  }
+  .why article {
+    border-top: 3px solid var(--river);
+    padding-top: 0.7rem;
+  }
+  .why h2 {
+    font-size: 1.35rem;
+    line-height: 1.15;
+    margin: 0 0 0.4rem;
+  }
+  .why p { margin: 0; color: var(--ink-soft); }
+  .joined {
+    margin: 0 0 1rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--paper-2);
+    border-left: 3px solid var(--river);
+  }
+  .alert-form { max-width: 40rem; }
+  .alert-picks { border: 0; padding: 0; margin: 0 0 0.2rem; display: grid; gap: 0.55rem; }
+  .alert-picks legend {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    padding: 0;
+  }
+  .check {
+    display: grid;
+    grid-template-columns: 1.15rem 1fr;
+    gap: 0.7rem;
+    align-items: start;
+    padding: 0.75rem 0.85rem;
+    background: #fff;
+    border: 1px solid var(--line);
+  }
+  .check input { width: auto; margin-top: 0.35rem; }
+  .check strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .check em {
+    display: block;
+    margin-top: 0.15rem;
+    font-style: normal;
+    color: var(--ink-soft);
+  }
+  .hint { font-weight: 450; color: var(--ink-soft); font-size: 0.9rem; }
   .hp { position: absolute; left: -9999px; }
+  @media (max-width: 800px) {
+    .why { grid-template-columns: 1fr; gap: 1rem; }
+  }
 </style>

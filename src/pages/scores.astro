@@ -3,10 +3,11 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import { getCollegeScores } from '../lib/collegeScores';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { offsiteAttrs } from '../lib/links';
 
-const scores = await getFridayScores();
+const [scores, colleges] = await Promise.all([getFridayScores(), getCollegeScores()]);
 const bySchool = new Map(scores.map((score) => [score.id, score]));
 const boards = footballSchools.map((school) => {
   const score = bySchool.get(school.id);
@@ -22,7 +23,7 @@ const boards = footballSchools.map((school) => {
 
 <BaseLayout
   title="Friday night scores"
-  description="Next kickoff, latest final, team logos, and NFHS Network highlights for Bastrop, Cedar Creek, Elgin, and Smithville football."
+  description="Friday night scores for Bastrop, Cedar Creek, Elgin, and Smithville, plus the latest for Texas, Texas A&M, Texas State, Texas Tech, Baylor, Houston, and UTSA."
 >
   <PageHead
     kicker="Football"
@@ -110,15 +111,95 @@ const boards = footballSchools.map((school) => {
         );
       })}
     </div>
+
+    {colleges.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <p class="kicker">College</p>
+            <h2>Around the state</h2>
+          </div>
+        </div>
+        <p class="score-intro">Latest scores for the Texas teams neighbors follow.</p>
+        <div class="score-grid">
+          {colleges.map((team) => {
+            const last = team.last;
+            const next = team.next;
+            const record = [team.record, team.standing].filter(Boolean).join(' · ');
+            return (
+              <article class="score-card" style={`--team:${team.color}`}>
+                <header class="score-head">
+                  {team.logo ? (
+                    <img class="score-logo" src={team.logo} alt="" width="96" height="96" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : (
+                    <span class="score-logo score-logo-fallback" aria-hidden="true">{team.school.slice(0, 1)}</span>
+                  )}
+                  <div>
+                    <p class="kicker">{team.school}</p>
+                    <h2 class="score-school">{team.mascot}</h2>
+                    {record && <p class="meta">{record}</p>}
+                  </div>
+                </header>
+
+                {next ? (
+                  <div class="score-block">
+                    <p class="score-label">Next</p>
+                    <p class="score-matchup">{next.side === 'Away' ? `@ ${next.opponent}` : `vs ${next.opponent}`}</p>
+                    <p class="meta">{[next.when, next.kickoff, next.side].filter(Boolean).join(' · ') || 'Kickoff time is not set yet.'}</p>
+                  </div>
+                ) : (
+                  <div class="score-block">
+                    <p class="score-label">Next</p>
+                    <p class="score-matchup">—</p>
+                    <p class="meta">No upcoming game is listed right now.</p>
+                  </div>
+                )}
+
+                {last ? (
+                  <div class="score-block score-last">
+                    <p class="score-label">{team.live ? 'Now' : 'Last'}</p>
+                    {team.live ? (
+                      <p class="score-line">
+                        <strong>{last.schoolScore}–{last.opponentScore}</strong>
+                        <span>{last.side === 'Away' ? `@ ${last.opponent}` : `vs ${last.opponent}`}</span>
+                      </p>
+                    ) : (
+                      <p class="score-line">
+                        <strong>{last.result === 'won' ? 'W' : last.result === 'lost' ? 'L' : 'T'} {last.schoolScore}–{last.opponentScore}</strong>
+                        <span>
+                          {last.result === 'won' ? 'Beat' : last.result === 'lost' ? 'Lost to' : 'Tied'} {last.opponent}
+                        </span>
+                      </p>
+                    )}
+                    <p class="meta">{[team.live ? last.detail : last.when, team.live ? '' : last.kickoff, last.side].filter(Boolean).join(' · ')}</p>
+                  </div>
+                ) : (
+                  <div class="score-block score-last">
+                    <p class="score-label">Last</p>
+                    <p class="meta">The latest final is not listed right now.</p>
+                  </div>
+                )}
+
+                <p class="cluster">
+                  <a class="text-link" href={team.href} {...offsiteAttrs(team.href)}>ESPN</a>
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
     <p class="disclaimer">
-      Scores and logos come from each school’s MaxPreps page. Highlight teasers and recaps come from the NFHS Network school pages (often Texan Live).
-      NFHS does not allow embedding the player here, so each clip opens on their site. Bastropia does not keep the official book.
+      High school scores and logos come from each school’s MaxPreps page. Highlight teasers and recaps come from the NFHS Network school pages (often Texan Live).
+      NFHS does not allow embedding the player here, so each clip opens on their site. College scores, records, and logos come from ESPN. Bastropia does not keep the official book.
     </p>
   </div>
 </BaseLayout>
 
 <style>
   .score-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .score-intro { margin: 0.2rem 0 1rem; color: var(--ink-soft); }
   .score-card {
     border-top: 4px solid var(--team, var(--ink));
     padding-top: 0.85rem;

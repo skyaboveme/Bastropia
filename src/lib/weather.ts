@@ -235,6 +235,57 @@ async function forecastFromOpenMeteo(town: TownName): Promise<Forecast> {
   };
 }
 
+export type TownSpot = {
+  town: TownName;
+  latitude: number;
+  longitude: number;
+  temp: number | null;
+  label: string;
+};
+
+const spotCache = new Map<string, { at: number; value: TownSpot }>();
+
+async function spotFromNws(town: TownName): Promise<TownSpot> {
+  const place = forecastTowns[town];
+  const payload = await nwsJson(`https://api.weather.gov/gridpoints/${place.grid}/forecast/hourly`);
+  const now = (payload.properties?.periods ?? [])[0] as NwsPeriod | undefined;
+  if (!now) throw new Error('NWS hourly empty');
+  return {
+    town,
+    latitude: place.latitude,
+    longitude: place.longitude,
+    temp: Math.round(now.temperature),
+    label: weatherLabel(codeFromPhrase(now.shortForecast)),
+  };
+}
+
+/** Current temperature at each town on the county map. */
+export async function getCountySpots(): Promise<TownSpot[]> {
+  const names = Object.keys(forecastTowns) as TownName[];
+  return Promise.all(
+    names.map(async (town) => {
+      const hit = spotCache.get(town);
+      if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.value;
+      const place = forecastTowns[town];
+      try {
+        const spot = await spotFromNws(town);
+        spotCache.set(town, { at: Date.now(), value: spot });
+        return spot;
+      } catch {
+        return (
+          hit?.value ?? {
+            town,
+            latitude: place.latitude,
+            longitude: place.longitude,
+            temp: null,
+            label: '',
+          }
+        );
+      }
+    }),
+  );
+}
+
 export async function getForecast(town: TownName): Promise<Forecast | null> {
   const hit = cache.get(town);
   if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.value;
