@@ -64,7 +64,7 @@ const total = events.length + news.length + updates.length + decisions.length + 
           <a class="text-link" href="/government/court-decisions">Court · {meeting.data.title}</a>
         ))}
         {businesses.map((business) => (
-          <a class="text-link" href={`/businesses/l/${business.slug}`}>Business · {business.name}</a>
+          <a class="text-link" href={`/directory/l/${business.slug}`}>Business · {business.name}</a>
         ))}
         {services.map((service) => (
           <p>{service.group} · {service.name}{service.phone ? ` · ${service.phone}` : ''}</p>

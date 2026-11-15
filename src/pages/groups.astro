@@ -1,9 +1,26 @@
 ---
+export const prerender = false;
+
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { directoryShelves, directorySource } from '../data/facebookDirectory';
-import { formatMedium } from '../lib/time';
+import { getBastropiaGroupPosts } from '../lib/facebookGroup';
+import { offsiteAttrs } from '../lib/links';
+import { facebookGroup } from '../data/site';
+import { TZ, formatMedium } from '../lib/time';
+
+const posted = (date: Date) =>
+  new Intl.DateTimeFormat('en-US', {
+    timeZone: TZ,
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+
+const groupPosts = await getBastropiaGroupPosts();
 
 const pageIds = new Set(['news-pages', 'official', 'parties', 'nonprofits', 'places']);
 const groups = directoryShelves.filter((shelf) => !pageIds.has(shelf.id));
@@ -24,6 +41,30 @@ const highlights = (await getCollection('social')).sort(
     lede="Public Facebook groups and pages around Bastrop County. A private group has to approve you before you can read it."
   />
   <div class="wrap">
+    <section class="section" id="bastropia-group">
+      <div class="section-head">
+        <div>
+          <p class="kicker">The group</p>
+          <h2>From the Bastropia group</h2>
+          <p class="meta">Public posts from the Bastropia Facebook group, newest first.</p>
+        </div>
+        <a href={facebookGroup} {...offsiteAttrs(facebookGroup)}>Open the group</a>
+      </div>
+      {groupPosts.length > 0 ? (
+        <div class="group-posts">
+          {groupPosts.map((post) => (
+            <article>
+              <p class="kicker">{post.author} · {posted(post.published)}</p>
+              {post.text.split(/\n+/).filter(Boolean).map((paragraph) => <p>{paragraph}</p>)}
+              <p class="more"><a href={post.url} {...offsiteAttrs(post.url)}>Read it in the group</a></p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p>The latest posts did not load from Facebook. <a class="text-link" href={facebookGroup} {...offsiteAttrs(facebookGroup)}>Read them in the group</a>.</p>
+      )}
+    </section>
+
     {highlights.length > 0 && (
       <section class="section" id="highlights">
         <div class="section-head">
@@ -129,3 +170,10 @@ const highlights = (await getCollection('social')).sort(
     </p>
   </div>
 </BaseLayout>
+
+<style>
+  .group-posts { display: grid; gap: 1.4rem; margin-top: 0.8rem; }
+  .group-posts article { border-top: 3px solid var(--river); padding-top: 0.7rem; }
+  .group-posts p { margin: 0.35rem 0 0; max-width: 42rem; }
+  .group-posts .kicker { margin-top: 0; }
+</style>

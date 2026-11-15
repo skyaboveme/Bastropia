@@ -47,8 +47,8 @@ const hubs: Entry[] = [
   { path: '/about', priority: '0.6' },
   { path: '/advertise', priority: '0.6' },
   { path: '/newsletter', priority: '0.7' },
-  { path: '/businesses', priority: '0.7' },
-  { path: '/businesses/submit', priority: '0.6' },
+  { path: '/directory', priority: '0.7' },
+  { path: '/directory/submit', priority: '0.6' },
   { path: '/submit', priority: '0.6' },
   { path: '/tips', priority: '0.6' },
   { path: '/upgrade', priority: '0.6' },
@@ -77,7 +77,7 @@ export const GET: APIRoute = async () => {
   const entries: Entry[] = [
     ...hubs,
     ...businesses.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
-    ...listed.map((business) => ({ path: `/businesses/l/${business.slug}`, priority: '0.6' })),
+    ...listed.map((business) => ({ path: `/directory/l/${business.slug}`, priority: '0.6' })),
     ...events.map((event) => ({
       path: `/events/${event.id}`,
       lastmod: event.data.start,

@@ -42,7 +42,7 @@ const towns = cities.filter((city) => city !== 'Countywide');
     {business && (
       <>
         <p class="cluster">
-          <a class="button button-ghost" href={`/businesses/l/${business.slug}`}>View public listing</a>
+          <a class="button button-ghost" href={`/directory/l/${business.slug}`}>View public listing</a>
           <form action="/api/business" method="post"><input type="hidden" name="action" value="logout" /><button class="button button-ghost" type="submit">Sign out</button></form>
         </p>
         <p class="meta">Last 30 days · {totals.views} listing views · {totals.site} website clicks · {totals.phone} phone clicks. Status: {business.status}.</p>

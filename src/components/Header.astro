@@ -31,6 +31,7 @@ const voteBanner =
         ? `Early voting is open today, ${earlyToday.hours}. Election Day is ${labelFromKey(electionDay)}.`
         : `Election Day is ${labelFromKey(electionDay)}, polls open ${electionHours}. See hours and polling places.`;
 
+const paradeHero = path === '/events' || path === '/this-weekend';
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/scores', label: 'Scores' },
@@ -42,7 +43,7 @@ const links = [
   { href: '/weather', label: 'Weather' },
   { href: '/government', label: 'Government' },
   { href: '/groups', label: 'Social' },
-  { href: '/businesses', label: 'Businesses' },
+  { href: '/directory', label: 'Directory' },
   { href: '/advertise', label: 'Advertise' },
 ];
 const voteLink = { href: '/go-vote', label: 'Go Vote' };
@@ -51,7 +52,7 @@ function current(href: string) {
   if (href === '/') return path === '/';
   if (href === '/events') return path === '/events' || path.startsWith('/events/') || path === '/calendar';
   if (href === '/groups') return path === '/groups' || path.startsWith('/groups/') || path === '/social' || path.startsWith('/social/');
-  if (href === '/businesses') return path === '/businesses' || path.startsWith('/businesses/');
+  if (href === '/directory') return path === '/directory' || path.startsWith('/directory/');
   return path === href || path.startsWith(`${href}/`);
 }
 ---
@@ -77,7 +78,7 @@ function current(href: string) {
     </div>
   </div>
 
-  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || path === '/events' }]}>
+  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero }]}>
     {path === '/' && (
       <div class="header-hero" data-header-hero aria-hidden="true">
         <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
@@ -90,7 +91,7 @@ function current(href: string) {
         <img class="is-on" src="/images/header/stadium.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
       </div>
     )}
-    {path === '/events' && (
+    {paradeHero && (
       <div class="header-hero is-parade" aria-hidden="true">
         <img class="is-on" src="/images/header/parade.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
       </div>

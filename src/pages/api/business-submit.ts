@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (input.company_website) return bounce('/thanks');
   const digits = (input.phone || '').replace(/\D/g, '');
   if (!input.business || !input.category || !input.city || digits.length < 10 || !input.email || (input.details || '').trim().length < 20) {
-    return bounce('/businesses/submit?error=details');
+    return bounce('/directory/submit?error=details');
   }
   try {
     const row = await insertBusiness({
@@ -45,6 +45,6 @@ export const POST: APIRoute = async ({ request }) => {
     });
     return bounce(`/thanks?id=${row.id}&kind=business`);
   } catch {
-    return bounce('/businesses/submit?error=save');
+    return bounce('/directory/submit?error=save');
   }
 };

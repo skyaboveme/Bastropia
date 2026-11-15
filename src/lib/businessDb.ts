@@ -257,7 +257,7 @@ export function toDirectoryEntry(biz: Biz): DirectoryEntry {
     phone: biz.phone,
     phoneHref,
     website: biz.website || null,
-    href: `/businesses/l/${biz.slug}`,
+    href: `/directory/l/${biz.slug}`,
     summary: biz.details,
     source: 'listed',
     areas: `${biz.city} ${biz.areas}`,

@@ -17,5 +17,5 @@ export const GET: APIRoute = async ({ params, url }) => {
     const tel = digits.length === 10 ? `tel:+1${digits}` : `tel:${digits}`;
     return Response.redirect(tel, 302);
   }
-  return Response.redirect(`/businesses/l/${business.slug}`, 302);
+  return Response.redirect(`/directory/l/${business.slug}`, 302);
 };
