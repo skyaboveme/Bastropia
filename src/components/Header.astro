@@ -77,6 +77,14 @@ function current(href: string) {
     </div>
   </div>
 
+  <div class:list={['header-stage', { 'has-hero': path === '/' }]}>
+    {path === '/' && (
+      <div class="header-hero" data-header-hero aria-hidden="true">
+        <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
+        <img src="/images/header/lost-pines.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
+        <img src="/images/header/bastrop-main.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
+      </div>
+    )}
   <div class="masthead">
     <a class="ear ear-left" href={`/weather?town=${encodeURIComponent(weatherTown)}`}>
       <span class="ear-label">Right now</span>
@@ -175,6 +183,7 @@ function current(href: string) {
   </div>
   <p class="strip-also"><a href="/alerts">Email or text when one of these changes</a></p>
   <p class="strip-also" data-now="also" hidden></p>
+  </div>
   <script is:inline>
     fetch('/api/now')
       .then((response) => response.json())
@@ -226,6 +235,23 @@ function current(href: string) {
       })
       .catch(() => {});
   </script>
+  {path === '/' && (
+    <script is:inline>
+      (function () {
+        var root = document.querySelector('[data-header-hero]');
+        if (!root) return;
+        var slides = root.querySelectorAll('img');
+        if (slides.length < 2) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var index = 0;
+        setInterval(function () {
+          slides[index].classList.remove('is-on');
+          index = (index + 1) % slides.length;
+          slides[index].classList.add('is-on');
+        }, 11000);
+      })();
+    </script>
+  )}
 
   <div class="sections-bar">
     <div class="sections-inner">
