@@ -45,6 +45,7 @@ const developmentHero = path === '/development';
 const directoryHero = path === '/directory';
 const groupsHero = path === '/groups';
 const governmentHero = path === '/government';
+const newsHero = path === '/news';
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/scores', label: 'Scores' },
@@ -91,7 +92,7 @@ function current(href: string) {
     </div>
   </div>
 
-  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero || developmentHero || directoryHero || groupsHero || governmentHero }]}>
+  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero || developmentHero || directoryHero || groupsHero || governmentHero || newsHero }]}>
     {path === '/' && (
       <div class="header-hero" data-header-hero aria-hidden="true">
         <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
@@ -140,6 +141,11 @@ function current(href: string) {
     {governmentHero && (
       <div class="header-hero is-government" aria-hidden="true">
         <img class="is-on" src="/images/header/government.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {newsHero && (
+      <div class="header-hero is-news" aria-hidden="true">
+        <img class="is-on" src="/images/header/news.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
       </div>
     )}
   <div class="masthead">
