@@ -1,4 +1,4 @@
-import { facebookGroup } from '../data/site';
+import { facebookPage } from '../data/site';
 
 export type GroupPost = {
   id: string;
@@ -55,7 +55,12 @@ function authorBefore(html: string) {
   return readJsonString(`"${last[1]}"`, 0) || 'Bastropia';
 }
 
-/** Posts Facebook includes on the public group page. Logged-out HTML usually has the latest few. */
+function postUrl(window: string, id: string) {
+  const match = window.match(/facebook\.com\\\/bastropia\\\/posts\\\/(\d+)/);
+  return `${facebookPage}/posts/${match?.[1] ?? id}/`;
+}
+
+/** Posts Facebook includes on the public page. Logged-out HTML usually has the latest few. */
 export function parseGroupPosts(html: string): GroupPost[] {
   const posts: GroupPost[] = [];
   const seen = new Set<string>();
@@ -76,7 +81,7 @@ export function parseGroupPosts(html: string): GroupPost[] {
       id,
       author: authorBefore(before),
       text,
-      url: `${facebookGroup}/posts/${id}/`,
+      url: postUrl(after, id),
       published,
     });
   }
@@ -94,7 +99,7 @@ function cookiePairs(lines: string[]) {
 async function freshGuestCookie() {
   try {
     const undici = await import(/* @vite-ignore */ 'undici');
-    const { headers: responseHeaders } = await undici.request(facebookGroup, {
+    const { headers: responseHeaders } = await undici.request(facebookPage, {
       method: 'GET',
       maxRedirections: 0,
       headers,
@@ -108,7 +113,7 @@ async function freshGuestCookie() {
   } catch {
     // Workers have no undici. The fetch below can still see set-cookie there.
   }
-  const response = await fetch(facebookGroup, { headers, redirect: 'manual', signal: AbortSignal.timeout(8000) });
+  const response = await fetch(facebookPage, { headers, redirect: 'manual', signal: AbortSignal.timeout(8000) });
   return cookiePairs(response.headers.getSetCookie?.() ?? []);
 }
 
@@ -123,7 +128,7 @@ async function guestCookieHeader() {
 }
 
 async function groupHtml(cookie: string) {
-  const response = await fetch(facebookGroup, {
+  const response = await fetch(facebookPage, {
     headers: cookie ? { ...headers, cookie } : headers,
     redirect: 'manual',
     signal: AbortSignal.timeout(8000),

@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
     return bounce('/tips?error=form');
   }
 
-  if (clean(form.get('company_website'))) return bounce('/thanks');
+  if (clean(form.get('bastro_hp')) || clean(form.get('company_website'))) return bounce('/thanks');
 
   const email = clean(form.get('email'), 160).toLowerCase();
   const body = clean(form.get('body'), 1500);

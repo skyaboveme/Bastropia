@@ -7,6 +7,8 @@ export const siteDescription =
 
 export const facebookGroup = 'https://www.facebook.com/groups/bastropia';
 
+export const facebookPage = 'https://www.facebook.com/bastropia';
+
 /** Approximate public member count. Update when the Facebook group page changes. */
 export const facebookGroupMembers = 98;
 

@@ -1,4 +1,4 @@
-import { formspreeEndpoint } from '../data/site';
+import { formspreeEndpoint, siteUrl } from '../data/site';
 
 /** Desk forms that are not Kit newsletter/alert signups. */
 export const formspreeIntakeTypes = new Set(['ad', 'upgrade', 'event', 'business', 'tip']);
@@ -21,9 +21,10 @@ export async function notifyFormspree({ email, subject, fields }: FormspreePaylo
   };
   for (const [key, value] of Object.entries(fields)) {
     if (!value) continue;
-    if (key === 'email') continue;
+    if (key === 'email' || key === 'from' || key === 'bastro_hp' || key === 'company_website') continue;
     body[key] = value.slice(0, 4000);
   }
+  if (!body.message && body.summary) body.message = body.summary;
 
   try {
     const response = await fetch(formspreeEndpoint, {
@@ -31,11 +32,19 @@ export async function notifyFormspree({ email, subject, fields }: FormspreePaylo
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        Origin: siteUrl,
+        Referer: `${siteUrl}/`,
       },
       body: JSON.stringify(body),
     });
-    return response.ok;
-  } catch {
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      console.error('formspree', response.status, detail.slice(0, 300));
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('formspree', error);
     return false;
   }
 }

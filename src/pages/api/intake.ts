@@ -21,7 +21,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (typeof value === 'string') input[key] = value;
   }
   const from = origins.has(input.from) ? input.from : '/';
-  if (input.company_website) return bounce('/thanks');
+  if (input.bastro_hp || input.company_website) return bounce('/thanks');
   const id = `BAS-${randomBytes(4).toString('hex').toUpperCase()}`;
   const built = buildRecord(input, id);
   if (!built.ok) return bounce(`${from}?error=${built.error}`);

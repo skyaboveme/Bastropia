@@ -95,7 +95,7 @@ const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?
       <form id="ad-form" class="form" action="/api/intake" method="post">
         <input type="hidden" name="type" value="ad" />
         <input type="hidden" name="from" value="/advertise" />
-        <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <input class="hp" type="text" name="bastro_hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <div class="place-grid ad-places">
           {placements.map((placement) => (
             <label class="choice">

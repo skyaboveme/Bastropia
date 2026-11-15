@@ -47,7 +47,7 @@ const prices = Object.fromEntries(listingTiers.map((tier) => [tier.id, tier.pric
     <form id="upgrade-form" class="form" action="/api/intake" method="post">
       <input type="hidden" name="type" value="upgrade" />
       <input type="hidden" name="from" value="/upgrade" />
-      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input class="hp" type="text" name="bastro_hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
       <div class="place-grid">
         {listingTiers.filter((tier) => tier.id !== 'community').map((tier) => (
           <label class="choice">
