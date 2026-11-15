@@ -22,8 +22,8 @@ export const dailyEditions: DailyEdition[] = [
     title: 'Bastropia Daily | Sunday, Nov. 15',
     caption:
       'Sunday edition: showers and thunderstorms today with a high near 55 and an inch or more of rain possible; warming to the mid-70s later in the week. The Lord’s Prayer, an invitation to worship this morning, and Bastrop County church events for Nov. 16–22.',
-    src: '/media/bastropia-daily-2026-11-15.mp4',
-    poster: '/media/bastropia-daily-2026-11-15-poster.jpg',
+    src: '/media/bastropia-daily-2026-11-15-v2.mp4',
+    poster: '/media/bastropia-daily-2026-11-15-v2-poster.jpg',
   },
   {
     date: '2026-11-14',
