@@ -618,6 +618,91 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .prose a { color: var(--river-deep); }
 .prose h2 { font-size: 1.7rem; margin-top: 1.5rem; }
 
+.stat-box {
+  margin: 1.15rem 0 1.3rem;
+  padding: 1rem 1.1rem 1.05rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--pine);
+}
+.stat-box-value {
+  font-family: var(--serif);
+  font-weight: 620;
+  font-size: clamp(1.9rem, 7.2vw, 2.75rem);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: var(--pine-deep);
+}
+.stat-box-label {
+  font-family: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.4;
+  margin: 0.4rem 0 0;
+  color: var(--ink);
+}
+.prose .stat-box-facts {
+  display: grid;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0.7rem 0 0;
+  border-top: 1px solid var(--line);
+}
+.prose .stat-box-facts li {
+  position: relative;
+  margin: 0;
+  padding-left: 0.9rem;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.prose .stat-box-facts li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 0.38rem;
+  height: 0.38rem;
+  background: var(--pine);
+}
+.stat-box-source,
+.prose .stat-box-source {
+  margin: 0.75rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.stat-box-source a { color: var(--river-deep); }
+.stat-box-note {
+  background: var(--paper-2);
+  border: 0;
+  border-left: 4px solid var(--sun);
+  padding: 0.85rem 1rem 0.95rem;
+}
+.stat-box-title {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sun-deep);
+}
+.stat-box-copy,
+.prose .stat-box-copy,
+.prose .stat-box-copy p {
+  margin: 0.35rem 0 0;
+  font-family: var(--text);
+  font-size: 1.02rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+@media (max-width: 480px) {
+  .stat-box { padding: 0.9rem 0.85rem 0.9rem; }
+}
+
 .detail { display: grid; grid-template-columns: 1fr 290px; gap: 1.4rem; align-items: start; }
 .detail-main, .side-card { padding: 1.1rem 1.2rem; }
 .side-card { display: grid; gap: 0.7rem; align-content: start; }

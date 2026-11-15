@@ -26,7 +26,7 @@ The build uses the Node adapter so the desk, weather, and order forms keep worki
 
 ## Publish a listing
 
-Submissions are saved in Cloudflare KV (`SESSION`) and reviewed on `/desk`. Desk forms also email Formspree as a backup copy. To put a listing on the public calendar, add a Markdown file in `src/content/events/`. The desk prints a starter file for each submission. News goes in `src/content/news/`. Public-notice summaries go in `src/content/updates/`. Social highlights go in `src/content/social/` and show on `/groups#highlights`.
+Submissions are saved in Cloudflare KV (`SESSION`) and reviewed on `/desk`. Desk forms also email Formspree as a backup copy. To put a listing on the public calendar, add a Markdown file in `src/content/events/`. The desk prints a starter file for each submission. News goes in `src/content/news/`. A story that needs a stat box or a short note is an `.mdx` file and uses `StatBox`. The comment at the top of `src/components/StatBox.astro` shows both variants. Public-notice summaries go in `src/content/updates/`. Social highlights go in `src/content/social/` and show on `/groups#highlights`.
 
 ## Event scout
 

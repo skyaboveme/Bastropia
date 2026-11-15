@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
+import mdx from '@astrojs/mdx';
 
 const site = 'https://bastropia.com';
 
@@ -12,6 +13,7 @@ export default defineConfig({
     imageService: 'passthrough',
     platformProxy: { enabled: true },
   }),
+  integrations: [mdx()],
   // Keep a real space between inline elements. Astro 7's default is JSX-style.
   compressHTML: true,
   redirects: {

@@ -1,0 +1,62 @@
+---
+/**
+ * Stat box and a lighter note for news stories.
+ *
+ * Plain `.md` stories stay as they are. A story that needs a box is `.mdx`
+ * in `src/content/news/` and imports this component:
+ *
+ *   import StatBox from '../../components/StatBox.astro';
+ *
+ *   <StatBox
+ *     value="$1.47 million"
+ *     label="Planned upgrade of the CARTS Bastrop park-and-ride, 310 Hospital Drive"
+ *     facts="Construction Jan. 2 – Aug. 30, 2027 · More parking, EV chargers, bike-share pod · About 28,000 sq. ft."
+ *     source="Texas Department of Licensing and Regulation filing, Oct. 19, 2026"
+ *     sourceUrl="https://www.tdlr.texas.gov/TABS/Projects/TABS2027003948"
+ *   />
+ *
+ *   <StatBox variant="note" title="What riders should know">
+ *     Bus service isn't changing now. Watch <a href="https://www.ridecarts.com/">ridecarts.com</a> for construction notices as January nears.
+ *   </StatBox>
+ *
+ * `facts` is one string. Pieces separated by " · " become a short list.
+ * `variant="note"` is the lighter box. Its body is the default slot, so a link can sit in the sentence.
+ */
+interface Props {
+  variant?: 'stat' | 'note';
+  value?: string;
+  label?: string;
+  facts?: string;
+  source?: string;
+  sourceUrl?: string;
+  title?: string;
+}
+
+const { variant = 'stat', value, label, facts, source, sourceUrl, title } = Astro.props;
+const factList = (facts ?? '')
+  .split(' · ')
+  .map((fact) => fact.trim())
+  .filter(Boolean);
+---
+
+{variant === 'note' ? (
+  <aside class="stat-box stat-box-note">
+    {title && <p class="stat-box-title">{title}</p>}
+    <div class="stat-box-copy"><slot /></div>
+  </aside>
+) : (
+  <aside class="stat-box">
+    {value && <p class="stat-box-value">{value}</p>}
+    {label && <p class="stat-box-label">{label}</p>}
+    {factList.length > 0 && (
+      <ul class="stat-box-facts">
+        {factList.map((fact) => <li>{fact}</li>)}
+      </ul>
+    )}
+    {source && (
+      <p class="stat-box-source">
+        {sourceUrl ? <a href={sourceUrl}>{source}</a> : source}
+      </p>
+    )}
+  </aside>
+)}
