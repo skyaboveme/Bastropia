@@ -47,6 +47,7 @@ const groupsHero = path === '/groups';
 const governmentHero = path === '/government';
 const newsHero = path === '/news';
 const videosHero = path === '/videos';
+const eatsHero = path === '/eats';
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/weather', label: 'Weather' },
@@ -93,7 +94,7 @@ function current(href: string) {
     </div>
   </div>
 
-  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero || developmentHero || directoryHero || groupsHero || governmentHero || newsHero || videosHero }]}>
+  <div class:list={['header-stage', { 'has-hero': path === '/' || path === '/scores' || paradeHero || weatherHero || developmentHero || directoryHero || groupsHero || governmentHero || newsHero || videosHero || eatsHero }]}>
     {path === '/' && (
       <div class="header-hero" data-header-hero aria-hidden="true">
         <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
@@ -152,6 +153,11 @@ function current(href: string) {
     {videosHero && (
       <div class="header-hero is-videos" aria-hidden="true">
         <img class="is-on" src="/images/header/videos.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {eatsHero && (
+      <div class="header-hero is-eats" aria-hidden="true">
+        <img class="is-on" src="/images/header/eats.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
       </div>
     )}
   <div class="masthead">
