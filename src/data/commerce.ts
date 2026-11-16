@@ -5,7 +5,7 @@ export const placements = [
     page: 'Front page',
     where: 'After the daily video',
     detail: 'Shown large, before the lead story. One sponsor for the month, or a short rotation if two reserve it.',
-    rate: 150,
+    rate: 250,
     unit: 'month',
   },
   {
@@ -49,9 +49,9 @@ export const placements = [
     name: 'Weekend sponsor',
     page: 'This weekend',
     where: 'After the first five weekend listings',
-    detail: 'Shown large. One sponsor for the month, or a short rotation if two reserve it.',
+    detail: 'Shown large. One sponsor for the weekend, or a short rotation if two reserve it.',
     rate: 150,
-    unit: 'month',
+    unit: 'weekend',
   },
   {
     id: 'home-banner',
@@ -59,7 +59,7 @@ export const placements = [
     page: 'Every page',
     where: 'A short strip on public pages',
     detail: 'On most pages it sits under the title. On the front page it sits above the daily video. On Government it sits below the emergency numbers and public notices. It rotates, and it stays off the burn ban, thanks, and the forms.',
-    rate: 400,
+    rate: 250,
     unit: 'month',
   },
 ] as const;
