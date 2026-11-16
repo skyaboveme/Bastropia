@@ -1,96 +1,39 @@
 ---
-import { dailyDate, dailyEditions } from '../data/daily';
-import { eventKey, formatMedium } from '../lib/time';
+import { tiktokProfile, youtubeChannel } from '../data/site';
+import { offsiteAttrs } from '../lib/links';
 
 interface Props {
   /** Home uses h1. The news page already has a page title. */
   level?: 'h1' | 'h2';
-  /** List earlier editions under the player. */
-  archive?: boolean;
-  /** When true, only render if the newest edition is today’s Chicago date. */
-  todayOnly?: boolean;
 }
 
-const { level = 'h2', archive = false, todayOnly = false } = Astro.props;
-const current = dailyEditions[0];
-const today = eventKey(new Date());
+const { level = 'h2' } = Astro.props;
 const Title = level;
-const showArchive = archive && dailyEditions.length > 1;
-const show = Boolean(current && (!todayOnly || current.date === today));
+
+/** Uploads playlist for channel UCdxOffp6asSKV6aPNT1vkdA (UU + id without UC). */
+const embedSrc = 'https://www.youtube-nocookie.com/embed/videoseries?list=UUdxOffp6asSKV6aPNT1vkdA';
+const subscribeHref = `${youtubeChannel}?sub_confirmation=1`;
+const episodesHref = `${youtubeChannel}/videos`;
 ---
 
-{show && current && (
-  <section class="daily-feature" aria-labelledby="daily-heading" data-daily>
-    <p class="kicker" data-daily-kicker>Bastropia Daily · {formatMedium(dailyDate(current))}</p>
-    <Title id="daily-heading" class="daily-title">{current.title}</Title>
-    <p class="dek" data-daily-caption>{current.caption}</p>
-    <video
-      class="daily-player"
-      controls
-      preload="metadata"
-      playsinline
-      poster={current.poster}
-      src={current.src}
-      width="1280"
-      height="720"
-      aria-labelledby="daily-heading"
-    ></video>
-    <p class="daily-note">AI-generated anchor and narration. Photos credited on screen.</p>
-    {showArchive && (
-      <div class="daily-archive">
-        <h3 class="daily-archive-title">Editions</h3>
-        <ul class="daily-editions">
-          {dailyEditions.map((edition, index) => (
-            <li>
-              <button
-                class="daily-edition"
-                type="button"
-                aria-current={index === 0 ? 'true' : undefined}
-                data-daily-src={edition.src}
-                data-daily-poster={edition.poster}
-                data-daily-title={edition.title}
-                data-daily-caption={edition.caption}
-                data-daily-kicker={`Bastropia Daily · ${formatMedium(dailyDate(edition))}`}
-              >
-                <img src={edition.poster} alt="" width="320" height="180" />
-                <span>
-                  <strong>{edition.title}</strong>
-                  <em>{edition.caption}</em>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </section>
-)}
-
-<script>
-  document.querySelectorAll<HTMLElement>('[data-daily]').forEach((root) => {
-    const video = root.querySelector('video');
-    const title = root.querySelector<HTMLElement>('.daily-title');
-    const caption = root.querySelector<HTMLElement>('[data-daily-caption]');
-    const kicker = root.querySelector<HTMLElement>('[data-daily-kicker]');
-    if (!video) return;
-
-    root.querySelectorAll<HTMLButtonElement>('[data-daily-src]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const nextSrc = button.dataset.dailySrc ?? '';
-        if (!nextSrc) return;
-        const currentPath = new URL(video.currentSrc || video.src, location.href).pathname;
-        const nextPath = new URL(nextSrc, location.href).pathname;
-        if (currentPath === nextPath) return;
-        video.pause();
-        video.poster = button.dataset.dailyPoster ?? '';
-        video.src = nextSrc;
-        video.load();
-        if (title) title.textContent = button.dataset.dailyTitle ?? '';
-        if (caption) caption.textContent = button.dataset.dailyCaption ?? '';
-        if (kicker && button.dataset.dailyKicker) kicker.textContent = button.dataset.dailyKicker;
-        root.querySelectorAll('[data-daily-src]').forEach((other) => other.removeAttribute('aria-current'));
-        button.setAttribute('aria-current', 'true');
-      });
-    });
-  });
-</script>
+<section class="daily-feature" aria-labelledby="daily-heading">
+  <p class="kicker">Latest episode</p>
+  <Title id="daily-heading" class="daily-title">Bastropia Daily</Title>
+  <p class="dek">The newest upload from the Bastropia YouTube channel.</p>
+  <div class="daily-player">
+    <iframe
+      src={embedSrc}
+      title="Latest Bastropia Daily episode"
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+    ></iframe>
+  </div>
+  <div class="daily-actions">
+    <a class="button" href={subscribeHref} {...offsiteAttrs(subscribeHref)}>Subscribe on YouTube</a>
+    <a class="button" href={tiktokProfile} {...offsiteAttrs(tiktokProfile)}>Follow on TikTok</a>
+    <a class="daily-more" href={episodesHref} {...offsiteAttrs(episodesHref)}>More episodes</a>
+  </div>
+  <p class="daily-note">AI-generated anchor and narration. Photos credited on screen.</p>
+</section>
