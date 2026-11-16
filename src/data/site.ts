@@ -17,6 +17,8 @@ export const facebookGroupReason =
 
 export const youtubeChannel = 'https://www.youtube.com/@Bastropia';
 
+export const tiktokProfile = 'https://www.tiktok.com/@bastropia';
+
 export const newsletterFormAction = 'https://app.kit.com/forms/9966284/subscriptions';
 
 /** Formspree inbox for desk forms that are not Kit (events, businesses, ads, upgrades, tips). */

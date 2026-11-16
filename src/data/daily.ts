@@ -10,11 +10,11 @@ export type DailyEdition = {
 };
 
 /**
- * Bastropia Daily editions, newest first.
- * Publish a day by adding one entry at the top (date, title, caption, src, poster)
- * and putting the mp4 and poster in public/media/. The homepage plays the first
- * entry. The news page plays it too and, once a second edition exists, lists
- * every edition under the player so a reader can switch days.
+ * Public mp4 editions, newest first.
+ * The homepage and the news page embed the latest upload from the Bastropia
+ * YouTube channel. They do not play these files. The mp4s and posters stay in
+ * public/media/ as source URLs for TikTok posting. Add a day by putting the
+ * files in public/media/ and listing them here.
  */
 export const dailyEditions: DailyEdition[] = [
   {
