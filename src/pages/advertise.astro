@@ -11,7 +11,9 @@ import { addDays, eventKey } from '../lib/time';
 const selected = Astro.url.searchParams.get('placement');
 const start = addDays(eventKey(new Date()), 7);
 const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: item.rate, unit: item.unit }]));
-const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?? placements[0].rate;
+const pageSponsors = placements.filter((item) => item.id !== 'home-banner');
+const siteBanner = placements.find((item) => item.id === 'home-banner') ?? placements[0];
+const defaultRate = siteBanner.rate;
 ---
 
 <BaseLayout
@@ -74,7 +76,7 @@ const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?
         </article>
         <article>
           <h3>Simple creative</h3>
-          <p>One 1200×500 image. Page sponsors show it large. The run-of-site banner shows the same file as a short strip under the title.</p>
+          <p>One 1200×500 image works for both. A page sponsor shows it large. The run-of-site banner shows that same file as a short strip.</p>
         </article>
         <article>
           <h3>You own the click</h3>
@@ -87,26 +89,43 @@ const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?
       <div class="section-head">
         <div>
           <p class="kicker">Reserve a spot</p>
-          <h2>Pick a banner</h2>
+          <h2>Two ways to show up</h2>
         </div>
       </div>
-      <p class="ad-book-lede">Tell us where you want to show up and when to start. We confirm the dates are open and send the invoice.</p>
+      <p class="ad-book-lede">A page sponsor is the large banner on one page. The run-of-site banner is the short strip readers see across the site. Tell us which one you want and when to start. We confirm the dates are open and send the invoice.</p>
       <FormError />
       <form id="ad-form" class="form" action="/api/intake" method="post">
         <input type="hidden" name="type" value="ad" />
         <input type="hidden" name="from" value="/advertise" />
         <input class="hp" type="text" name="bastro_hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <div class="place-grid ad-places">
-          {placements.map((placement) => (
+        <fieldset class="ad-offer">
+          <legend>Page sponsors</legend>
+          <p>The large banner. On a desktop it runs up to 840 pixels wide. On a phone it is full width. One advertiser owns the month. If two reserve the same page, they share a short rotation.</p>
+          <div class="place-grid ad-places">
+            {pageSponsors.map((placement) => (
+              <label class="choice">
+                <input type="radio" name="placement" value={placement.id} required checked={selected === placement.id} />
+                <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
+                <h3>{placement.name}</h3>
+                <p class="meta">{placement.where}</p>
+                <p class="ad-place-detail">{placement.detail}</p>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset class="ad-offer">
+          <legend>Run of site</legend>
+          <p>The same 1200×500 image, shown shorter. On a desktop the strip is about 416 pixels wide and centered. On a phone it is full width. It also appears on the six sponsor pages.</p>
+          <div class="place-grid ad-places">
             <label class="choice">
-              <input type="radio" name="placement" value={placement.id} required checked={selected ? selected === placement.id : placement.id === 'home-banner'} />
-              <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
-              <h3>{placement.name}</h3>
-              <p class="meta">{placement.where}</p>
-              <p class="ad-place-detail">{placement.detail}</p>
+              <input type="radio" name="placement" value={siteBanner.id} required checked={selected ? selected === siteBanner.id : true} />
+              <p class="kicker">{siteBanner.page} · {money(siteBanner.rate)} / {siteBanner.unit}</p>
+              <h3>{siteBanner.name}</h3>
+              <p class="meta">{siteBanner.where}</p>
+              <p class="ad-place-detail">{siteBanner.detail}</p>
             </label>
-          ))}
-        </div>
+          </div>
+        </fieldset>
         <div class="fields">
           <label class="field">
             <span id="ad-span">Months</span>
@@ -137,8 +156,8 @@ const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?
             <input name="website" type="url" required placeholder="https://" />
           </label>
           <label class="field wide">
-            <span>Ad line, up to 90 characters</span>
-            <input name="line" required maxlength="90" placeholder="Saturday produce on Main Street" />
+            <span>Line for the invoice, up to 90 characters</span>
+            <input name="line" required maxlength="90" placeholder="Main Street Produce, November" />
           </label>
           <label class="field wide">
             <span>Notes</span>
@@ -215,10 +234,28 @@ const defaultRate = placements.find((item) => item.id === 'home-banner')?.rate ?
   .ad-book { margin-top: 2.4rem; }
   .ad-book-lede {
     margin: 0 0 1rem;
-    max-width: 40rem;
+    max-width: 44rem;
+    color: var(--ink-soft);
+  }
+  .ad-offer {
+    margin: 0 0 1.4rem;
+    padding: 0;
+    border: 0;
+  }
+  .ad-offer legend {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    font-weight: 600;
+    padding: 0;
+    margin-bottom: 0.35rem;
+  }
+  .ad-offer > p {
+    margin: 0 0 0.85rem;
+    max-width: 44rem;
     color: var(--ink-soft);
   }
   .ad-places { grid-template-columns: repeat(3, 1fr); }
+  .ad-offer + .ad-offer .ad-places { grid-template-columns: minmax(0, 36rem); }
   .ad-places .choice h3 {
     font-family: var(--serif);
     font-size: 1.55rem;
