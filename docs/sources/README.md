@@ -4,6 +4,10 @@ These files are editorial reference only. They are not wired into the Astro site
 
 Data in this folder was compiled for Bastropia coverage of Bastrop County, Texas. Confirm deals, worship times, and official details against the named source before publishing.
 
+## News and video sources
+
+- `news-and-video-sources.md` — ranked monitoring guide of Bastrop County news outlets, official city and county sites, school districts, emergency/weather sources, and video/meeting platforms (YouTube, Facebook Live, BoardBook, Quorum/Google Drive, and others). Researched and URL-tested November 14, 2026 (America/Chicago). Use this as the daily news and video beat list. It is not a public site section by itself, but it can later support a sources or “where we check” page.
+
 ## Eats Beat
 
 Eats Beat is Bastropia's restaurant specials and happy hours column. It covers restaurants, bars, breweries, and similar venues in Bastrop, Elgin, and Smithville.
