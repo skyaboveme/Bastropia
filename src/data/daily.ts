@@ -18,6 +18,14 @@ export type DailyEdition = {
  */
 export const dailyEditions: DailyEdition[] = [
   {
+    date: '2026-11-16',
+    title: 'Bastropia Daily | Monday, Nov. 16',
+    caption:
+      'Weather: about three-quarters of an inch of rain fell over the past day; partly sunny near 60 today, sunny and 66 Tuesday. County hazard mitigation plan session today at 2 p.m.; Travis County water study eyes Bastrop and Lee County groundwater; Bastrop Bears beat Victoria West 62-43 and face Huntsville; HTeaO opening slips to spring 2027; CARTS plans a $1.47M park-and-ride upgrade.',
+    src: '/media/bastropia-daily-2026-11-16.mp4',
+    poster: '/media/bastropia-daily-2026-11-16-poster.jpg',
+  },
+  {
     date: '2026-11-15',
     title: 'Bastropia Daily | Sunday, Nov. 15',
     caption:
