@@ -438,10 +438,18 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; }
 .split { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2.2rem; align-items: start; }
 .weekend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 0.8rem; }
-.day-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0 0 1.4rem; }
-.day-pair h2 { font-size: 1.55rem; margin: 0.15rem 0 0.6rem; }
-.day-pair ul { margin: 0; padding-left: 1.1rem; }
-.day-pair li { margin: 0.4rem 0; }
+.day-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0 0 1.4rem; align-items: start; }
+.day-pair h2 { font-size: 1.55rem; margin: 0.15rem 0 0.7rem; }
+.deal-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+.deal { border-top: 1px solid var(--line); padding: 0.75rem 0 0.35rem; }
+.deal:first-child { border-top: 0; padding-top: 0; }
+.deal-what { font-family: var(--serif); font-weight: 600; font-size: 1.22rem; line-height: 1.15; margin: 0.65rem 0 0; }
+.deal-block:first-child .deal-what { margin-top: 0; }
+.deal-time { margin: 0.12rem 0 0; color: var(--ink-soft); font-size: 0.92rem; }
+.deal-off { margin: 0.08rem 0 0; }
+.deal-note { margin: 0.15rem 0 0; color: var(--ink-soft); font-size: 0.88rem; }
+.deal-place { margin: 0.4rem 0 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--river-deep); }
+.card-list .deal-block + .deal-block { margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--line); }
 
 .event-card, .story-card, .update-card, .stream, .day-card { background: transparent; border: 0; box-shadow: none; }
 .event-card { border-bottom: 1px solid var(--line); }
