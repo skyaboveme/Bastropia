@@ -3,6 +3,76 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import { addDays, chicagoParts, labelFromKey } from '../lib/time';
+
+type Deal = {
+  place: string;
+  city: string;
+  text: string;
+  days: number[];
+  from?: string;
+  until?: string;
+};
+
+const week = { from: '2026-11-16', until: '2026-11-22' };
+
+const deals: Deal[] = [
+  { place: 'Bastrop Beer Company', city: 'Bastrop', days: [2, 3, 4, 5], text: 'Happy hour 3:00–6:00 p.m. $1 off pints, domestic beer, and wines. 10% off all to-go craft beer.' },
+  { place: 'Casa Chapala', city: 'Bastrop', days: [1, 2, 3, 4], text: 'Happy hour 11:00 a.m.–7:00 p.m. $4 draft pints, $6 Casa Rita, $3.50 cantina tacos, and $6 shareable plates.' },
+  { place: 'Casa Chapala', city: 'Bastrop', days: [1], text: 'Kids eat free all day. Conditions were not posted. Lunch buffet $15.99, 11:00 a.m.–2:00 p.m., includes a drink.' },
+  { place: 'Casa Chapala', city: 'Bastrop', days: [0, 1, 2, 3, 4, 5, 6], text: 'Patio Rita, any flavor, all day.' },
+  { place: 'Casa Chapala', city: 'Bastrop', days: [0], text: 'Sunday brunch buffet, 9:00 a.m.–3:00 p.m.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [1], ...week, text: 'Happy hour all day, 11:00 a.m.–10:00 p.m. Prices not posted.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [2], ...week, text: 'Happy hour all day, listed as 11:00 p.m.–10:00 p.m. Call before you plan on it. Prices not posted.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [3], ...week, text: 'Margaritas, food, wine, and beer, 11:00 a.m.–10:00 p.m. Prices not posted.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [4], ...week, text: 'Happy hour all day, 11:00 a.m.–10:00 p.m. Prices not posted.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [5], ...week, text: 'Happy hour all day, 11:00 a.m.–11:00 p.m. Prices not posted.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [6], ...week, text: 'Happy hour all day, 10:00 a.m.–11:00 p.m. Prices not posted.' },
+  { place: 'Chapala Fiestas & Grill', city: 'Bastrop', days: [0], ...week, text: 'Happy hour all day, 10:00 a.m.–9:00 p.m. Prices not posted.' },
+  { place: "Chili's Grill & Bar", city: 'Bastrop', days: [1, 2, 3, 4, 5], text: 'Happy hour 3:00–6:00 p.m. $3 to $5 selected beers and house wine, $6 margarita of the month, $7 tequila classic margarita.' },
+  { place: 'Film Alley Bastrop', city: 'Bastrop', days: [4], text: 'Happy hour 12:00–7:00 p.m. Half-price arcade, half-price bowling, and half-price domestic pints.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [1], ...week, text: 'Lunch special 11:00 a.m.–3:00 p.m. The dish name was not on the board.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [2], ...week, text: 'Loaded potato soup, 11:00 a.m.–3:00 p.m.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [3], ...week, text: 'Homestyle chili and cornbread, 11:00 a.m.–3:00 p.m.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [4], ...week, text: 'Personal chicken pot pie, 11:00 a.m.–3:00 p.m.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [5], ...week, text: 'Broccoli cheese soup served over rice, 11:00 a.m.–3:00 p.m. Breakfast until 5:00 p.m.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [6], ...week, text: 'Breakfast till 5:00 p.m., 7:00 a.m.–5:00 p.m.' },
+  { place: "Maxine's Cafe & Bakery", city: 'Bastrop', days: [0], ...week, text: 'Breakfast all day, 7:00 a.m.–3:00 p.m.' },
+  { place: 'Old Town Restaurant & Bar', city: 'Bastrop', days: [1], ...week, text: 'Catfish basket, 11:00 a.m.–10:00 p.m. Happy hour 3:00–7:00 p.m., $1 off all drinks.' },
+  { place: 'Old Town Restaurant & Bar', city: 'Bastrop', days: [2], ...week, text: 'Chicken parmesan, 11:00 a.m.–10:00 p.m. Happy hour 3:00–7:00 p.m.: $3 Bud Light and Ziegenbock drafts, and $1 off all drinks.' },
+  { place: 'Old Town Restaurant & Bar', city: 'Bastrop', days: [3], ...week, text: 'Chicken fried steak and $1 wings, 11:00 a.m.–10:00 p.m. Well Wednesday 3:00–7:00 p.m.: $4.50 well drinks and $1 off all.' },
+  { place: 'Old Town Restaurant & Bar', city: 'Bastrop', days: [4], ...week, text: 'Meatloaf dinner, 11:00 a.m.–10:00 p.m. No happy hour is listed.' },
+  { place: 'Old Town Restaurant & Bar', city: 'Bastrop', days: [5], ...week, text: 'New York strip, 11:00 a.m.–10:00 p.m. No happy hour is listed.' },
+  { place: 'Piney Creek Chop House', city: 'Bastrop', days: [1, 2, 3, 4], text: 'Happy hour 5:00–7:00 p.m. $7 martinis and discounted appetizers.' },
+  { place: "Lightnin' Bar", city: 'Elgin', days: [2, 3, 4, 5], text: 'Happy hour 2:00–6:00 p.m. Prices are not posted.' },
+  { place: 'Smithville Brewing Company', city: 'Smithville', days: [3], text: '55 and older: 50% off an entree with the purchase of a beverage.' },
+  { place: 'Smithville Brewing Company', city: 'Smithville', days: [4], text: '$5 pints and $2 off pizzas.' },
+  { place: 'Smithville Brewing Company', city: 'Smithville', days: [0], text: 'Happy hour all day. $2 off appetizers and $1 off bottles and cans. Live music 4:00–6:00 p.m. Exclusions apply.' },
+];
+
+function weekdayOf(key: string) {
+  const [year, month, day] = key.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 18)).getUTCDay();
+}
+
+function dealsOn(key: string) {
+  const day = weekdayOf(key);
+  const rows = deals.filter((deal) => deal.days.includes(day) && (!deal.from || key >= deal.from) && (!deal.until || key <= deal.until));
+  const grouped: { place: string; city: string; text: string }[] = [];
+  for (const deal of rows) {
+    const last = grouped.at(-1);
+    if (last && last.place === deal.place) last.text = `${last.text} ${deal.text}`;
+    else grouped.push({ place: deal.place, city: deal.city, text: deal.text });
+  }
+  return grouped;
+}
+
+const todayKey = chicagoParts(new Date()).key;
+const tomorrowKey = addDays(todayKey, 1);
+const upcoming = [
+  { when: 'Today', key: todayKey, deals: dealsOn(todayKey) },
+  { when: 'Tomorrow', key: tomorrowKey, deals: dealsOn(tomorrowKey) },
+];
 
 const checked = [
   {
@@ -42,7 +112,26 @@ const checked = [
     lede="Happy hours and specials posted on a restaurant or bar’s own site. Compiled November 15, 2026. The weekly boards were read again November 16. Confirm before you go. A kids-eat-free or senior deal often has conditions that are not on the page."
   />
   <div class="wrap">
-    <p class="meta">Times are Central. Casa Chapala and Chapala Fiestas & Grill are two different restaurants.</p>
+    <section class="day-pair" aria-label="Today and tomorrow">
+      {upcoming.map((day) => (
+        <article class="detail-main">
+          <p class="kicker">{day.when}</p>
+          <h2>{labelFromKey(day.key)}</h2>
+          {day.deals.length ? (
+            <ul>
+              {day.deals.map((deal) => (
+                <li>
+                  <strong>{deal.place}</strong>, {deal.city}. {deal.text}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Nothing posted for this day.</p>
+          )}
+        </article>
+      ))}
+    </section>
+    <p class="meta">Times are Central. Casa Chapala and Chapala Fiestas & Grill are two different restaurants. Weekly boards are for November 16–22 and can change.</p>
 
     <h2>Bastrop</h2>
     <div class="card-list">

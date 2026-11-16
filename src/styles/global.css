@@ -437,6 +437,10 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; }
 .split { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2.2rem; align-items: start; }
 .weekend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 0.8rem; }
+.day-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0 0 1.4rem; }
+.day-pair h2 { font-size: 1.55rem; margin: 0.15rem 0 0.6rem; }
+.day-pair ul { margin: 0; padding-left: 1.1rem; }
+.day-pair li { margin: 0.4rem 0; }
 
 .event-card, .story-card, .update-card, .stream, .day-card { background: transparent; border: 0; box-shadow: none; }
 .event-card { border-bottom: 1px solid var(--line); }
@@ -762,7 +766,7 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
   .col-left { padding-right: 1.2rem; border-top: 0; }
   .col-right { padding-left: 1.2rem; }
   .ci-4 { grid-template-columns: repeat(2, 1fr); }
-  .split, .detail, .tier-grid, .weekend-grid, .service-grid, .band, .directory { grid-template-columns: 1fr; }
+  .split, .detail, .tier-grid, .weekend-grid, .day-pair, .service-grid, .band, .directory { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
   .forecast { grid-template-columns: repeat(2, 1fr); }
