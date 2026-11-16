@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeBanner from '../components/HomeBanner.astro';
 import PageHead from '../components/PageHead.astro';
 import {
   directoryByCategory,
@@ -95,6 +96,10 @@ function href(overrides: Record<string, string | null>) {
         </p>
       )}
     </form>
+
+    <div class="site-banner">
+      <HomeBanner />
+    </div>
 
     {visible.length === 0 ? (
       <article class="detail-main">

@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import HomeBanner from '../components/HomeBanner.astro';
 import { directoryShelves, directorySource } from '../data/facebookDirectory';
 import { getBastropiaGroupPosts } from '../lib/facebookGroup';
 import { offsiteAttrs } from '../lib/links';
@@ -60,6 +61,10 @@ const total = directoryShelves.reduce((count, shelf) => count + shelf.items.leng
         <p>The latest posts are on the <a class="text-link" href={facebookPage} {...offsiteAttrs(facebookPage)}>Bastropia Facebook page</a>.</p>
       )}
     </section>
+
+    <div class="site-banner">
+      <HomeBanner />
+    </div>
 
     <p class="meta" id="directory">{total} Facebook rooms and pages. Member counts are approximate.</p>
     <nav class="filters" aria-label="Jump to a category">

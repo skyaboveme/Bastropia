@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import EventCard from '../../components/EventCard.astro';
 import EventBanner from '../../components/EventBanner.astro';
+import HomeBanner from '../../components/HomeBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
 import { filterEvents, isClassListing, sortByDayThenTier } from '../../lib/events';
@@ -183,6 +184,9 @@ function href(overrides: Record<string, string | null>) {
     )}
     </>
     )}
+    <div class="site-banner">
+      <HomeBanner />
+    </div>
     <NewsletterSignup />
   </div>
 </BaseLayout>

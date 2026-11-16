@@ -834,7 +834,8 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
     padding: 0.35rem 0.5rem;
   }
   .home-stack { display: flex; flex-direction: column; }
-  .home-stack > .front { order: 1; }
+  .home-stack > .front,
+  .home-stack > .home-mid-banner { order: 1; }
   .home-stack > .home-around { order: 3; }
   .home-stack > .section,
   .home-stack > .band { order: 4; }

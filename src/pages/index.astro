@@ -7,6 +7,7 @@ import EventCard from '../components/EventCard.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
 import DailyFeature from '../components/DailyFeature.astro';
+import HomeBanner from '../components/HomeBanner.astro';
 import SponsorBanner from '../components/SponsorBanner.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
@@ -130,7 +131,6 @@ const deskStories = pageHeadlines
     ...deskStories.map((story) => newsNode(story)),
   ]}
 >
-  <div data-banner-slot></div>
   <div class="wrap home-stack">
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
@@ -292,6 +292,10 @@ const deskStories = pageHeadlines
         </div>
       </aside>
     </section>
+
+    <div class="home-mid-banner site-banner">
+      <HomeBanner />
+    </div>
 
     <div class="home-around">
       <ExternalNews items={around} allNews />

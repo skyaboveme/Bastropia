@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import HomeBanner from '../components/HomeBanner.astro';
 import SponsorBanner from '../components/SponsorBanner.astro';
 import { getCollegeScores } from '../lib/collegeScores';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
@@ -193,6 +194,9 @@ const boards = footballSchools.map((school) => {
       </section>
     )}
 
+    <div class="site-banner">
+      <HomeBanner />
+    </div>
     <p class="disclaimer">
       High school scores and logos come from each school’s MaxPreps page. Highlight teasers and recaps come from the NFHS Network school pages (often Texan Live).
       NFHS does not allow embedding the player here, so each clip opens on their site. College scores, records, and logos come from ESPN. Bastropia does not keep the official book.

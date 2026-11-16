@@ -4,6 +4,7 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
+import HomeBanner from '../components/HomeBanner.astro';
 import VideoSection from '../components/VideoSection.astro';
 ---
 
@@ -15,6 +16,9 @@ import VideoSection from '../components/VideoSection.astro';
   />
   <div class="wrap">
     <CountyFeeds />
+    <div class="site-banner">
+      <HomeBanner />
+    </div>
     <VideoSection heading="Now playing" />
   </div>
 </BaseLayout>

@@ -19,7 +19,6 @@ const defaultRate = siteBanner.rate;
 <BaseLayout
   title="Advertise"
   description="Reach Bastrop County neighbors where they already look for weekends, news, and local plans. Reserve a labeled placement on Bastropia."
-  banner={false}
 >
   <PageHead
     kicker="Advertise with Bastropia"
@@ -92,7 +91,7 @@ const defaultRate = siteBanner.rate;
           <h2>Two ways to show up</h2>
         </div>
       </div>
-      <p class="ad-book-lede">A page sponsor is the large banner on one page. The run-of-site banner is the short strip readers see across the site. Tell us which one you want and when to start. We confirm the dates are open and send the invoice.</p>
+      <p class="ad-book-lede">A page sponsor is the large banner on one page. The run-of-site banner is the short strip in the body of the section pages. Tell us which one you want and when to start. We confirm the dates are open and send the invoice.</p>
       <FormError />
       <form id="ad-form" class="form" action="/api/intake" method="post">
         <input type="hidden" name="type" value="ad" />
@@ -115,7 +114,7 @@ const defaultRate = siteBanner.rate;
         </fieldset>
         <fieldset class="ad-offer">
           <legend>Run of site</legend>
-          <p>The same 1200×500 image, shown shorter. On a desktop the strip is about 544 pixels wide and centered. On a phone it is full width. It also appears on the six sponsor pages.</p>
+          <p>The same 1200×500 image, shown shorter. On a desktop the strip is about 544 pixels wide and centered. On a phone it is full width. It sits in the body of the section pages, after the opening, not under the title.</p>
           <div class="place-grid ad-places">
             <label class="choice">
               <input type="radio" name="placement" value={siteBanner.id} required checked={selected ? selected === siteBanner.id : true} />

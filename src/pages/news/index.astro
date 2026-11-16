@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import DailyFeature from '../../components/DailyFeature.astro';
+import HomeBanner from '../../components/HomeBanner.astro';
 import SponsorBanner from '../../components/SponsorBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../../lib/externalNews';
@@ -37,6 +38,9 @@ const headlines = latestHeadlines(stories, await getExternalNews(24, 6));
           </a>
         </article>
       ))}
+    </div>
+    <div class="site-banner">
+      <HomeBanner />
     </div>
     <p class="disclaimer">
       Headlines open on the site that published them. Bastropia does not write or edit them.

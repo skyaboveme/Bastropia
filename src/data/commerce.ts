@@ -56,9 +56,9 @@ export const placements = [
   {
     id: 'home-banner',
     name: 'Run of Site banner',
-    page: 'Every page',
-    where: 'A short strip on public pages',
-    detail: 'On most pages it sits under the title. On the front page it sits above the daily video. On Government it sits below the emergency numbers and public notices. It rotates, and it stays off the burn ban, thanks, and the forms.',
+    page: 'Section pages',
+    where: 'In the body of the section pages',
+    detail: 'A short strip after the opening on the front page, weather, scores, news, events, this weekend, videos, government, social, the directory, and development. It is not under the title. It rotates, and it stays off search, the advertise page, the burn ban, thanks, and the forms.',
     rate: 250,
     unit: 'month',
   },
