@@ -100,7 +100,7 @@ const defaultRate = siteBanner.rate;
         <input class="hp" type="text" name="bastro_hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <fieldset class="ad-offer">
           <legend>Page sponsors</legend>
-          <p>The large banner. On a desktop it runs up to 840 pixels wide. On a phone it is full width. One advertiser owns the period. Most are billed by the month. This weekend is billed per weekend. If two reserve the same page, they share a short rotation.</p>
+          <p>The large banner. On a desktop it runs up to 1000 pixels wide. On a phone it is full width. One advertiser owns the period. Most are billed by the month. This weekend is billed per weekend. If two reserve the same page, they share a short rotation.</p>
           <div class="place-grid ad-places">
             {pageSponsors.map((placement) => (
               <label class="choice">
@@ -115,7 +115,7 @@ const defaultRate = siteBanner.rate;
         </fieldset>
         <fieldset class="ad-offer">
           <legend>Run of site</legend>
-          <p>The same 1200×500 image, shown shorter. On a desktop the strip is about 416 pixels wide and centered. On a phone it is full width. It also appears on the six sponsor pages.</p>
+          <p>The same 1200×500 image, shown shorter. On a desktop the strip is about 544 pixels wide and centered. On a phone it is full width. It also appears on the six sponsor pages.</p>
           <div class="place-grid ad-places">
             <label class="choice">
               <input type="radio" name="placement" value={siteBanner.id} required checked={selected ? selected === siteBanner.id : true} />

@@ -302,13 +302,13 @@ main { padding-bottom: 3rem; }
 .wrap > .site-banner { width: auto; margin-left: 0; margin-right: 0; }
 .home-banner { margin: 0; }
 .home-banner-frame { position: relative; aspect-ratio: 12 / 5; background: var(--paper-2); border-bottom: 4px solid var(--river); overflow: hidden; }
-.banner-poster { width: min(840px, calc(100% - 2.4rem)); margin: 1rem auto 1.15rem; }
+.banner-poster { width: min(1000px, calc(100% - 2.4rem)); margin: 1rem auto 1.15rem; }
 .wrap .banner-poster,
-.col-lead .banner-poster { width: min(100%, 840px); }
+.col-lead .banner-poster { width: min(100%, 1000px); }
 @media (min-width: 760px) {
   .banner-strip { display: flex; flex-direction: column; align-items: center; }
   .banner-strip .home-banner-frame,
-  .banner-strip .home-banner-controls { width: min(100%, 26rem); }
+  .banner-strip .home-banner-controls { width: min(100%, 34rem); }
 }
 .home-banner-slide { position: absolute; inset: 0; }
 .home-banner-slide[hidden] { display: none; }
