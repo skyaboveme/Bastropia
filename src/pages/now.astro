@@ -94,11 +94,11 @@ const cards = [
     alert: Boolean(county.power && !quiet(county.power.label)),
   },
   {
-    href: '/roads',
-    kicker: 'Roads',
-    value: county.closureLine.label,
-    detail: county.closureLine.label === 'None reported' ? 'No closure or crash in the county file.' : county.closureLine.detail,
-    alert: !quiet(county.closureLine.label),
+    href: county.beef?.href ?? 'https://www.ams.usda.gov/mnreports/ams_1955.pdf',
+    kicker: 'Beef',
+    value: county.beef?.label ?? '—',
+    detail: county.beef?.note || 'The Texas auction summary did not load.',
+    alert: false,
   },
   {
     href: '/weather',
@@ -112,7 +112,7 @@ const cards = [
 
 <BaseLayout
   title="Right now"
-  description="Weather, burn ban, river, air, highways, schools, power, road closures, and the last seven days of rain in Bastrop County."
+  description="Weather, burn ban, river, air, highways, schools, power, Texas beef prices, and the last seven days of rain in Bastrop County."
 >
   <PageHead
     kicker="County"
@@ -208,6 +208,7 @@ const cards = [
     <p class="disclaimer">
       Weather is the forecast for {town}. The river is the USGS gauge at Bastrop and can be provisional.
       Air is a model index, linked to the TCEQ monitor page. Rain is the last seven days at the Bastrop coordinates.
+      Beef is the USDA weekly average for medium and large 1 feeder steers sold at Texas auctions.
       Roads come from the DriveTexas file for this county. Each school line is that district’s homepage today.
       Power is Bluebonnet’s outage count. The county page is the burn-ban order.
     </p>

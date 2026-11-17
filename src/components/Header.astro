@@ -263,13 +263,13 @@ function current(href: string) {
       </span>
       <em data-now="power-detail">Bluebonnet</em>
     </a>
-    <a href="/roads">
+    <a href="https://www.ams.usda.gov/mnreports/ams_1955.pdf">
       <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 4.5 4.5 19.5h15L17 4.5H7Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 8v2.2M12 12.5v2.2M12 17v1"/></svg>
-        <span class="strip-name">Roads</span>
-        <strong data-now="closed">—</strong>
+        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4.8 15.2c.2-2.4 2-4.3 4.4-4.5.3-1.6 1.7-2.8 3.4-2.6 1.4.2 2.5 1.2 2.9 2.4 1.9.3 3.3 1.8 3.3 3.6 0 2-1.5 3.4-3.5 3.4H8.3c-2 0-3.5-1.4-3.5-3.3Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.2 11.2 7 8.4M15.2 10.8l1.3-2.6"/></svg>
+        <span class="strip-name">Beef</span>
+        <strong data-now="beef">—</strong>
       </span>
-      <em data-now="closed-detail">Closures</em>
+      <em data-now="beef-detail">Texas auctions</em>
     </a>
     <a href="/weather">
       <span class="strip-line">
@@ -324,7 +324,13 @@ function current(href: string) {
         };
         fill('schools', data.schools);
         fill('power', data.power);
-        fill('closed', data.closureLine);
+        if (data.beef) {
+          set('beef', data.beef.label);
+          set('beef-detail', data.beef.detail);
+          const beefNode = document.querySelector('[data-now="beef"]');
+          const beefLink = beefNode && beefNode.closest('a');
+          if (beefLink && data.beef.href) beefLink.href = data.beef.href;
+        }
         const also = document.querySelector('[data-now="also"]');
         if (also && data.others && data.others.length) {
           also.hidden = false;

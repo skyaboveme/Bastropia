@@ -23,6 +23,8 @@ export type RoadAlert = {
 
 export type StatusLine = { label: string; detail: string; href: string };
 
+export type BeefQuote = StatusLine & { note: string };
+
 export type CountyNow = {
   river: { label: string; detail: string; href: string } | null;
   air: { label: string; detail: string; href: string } | null;
@@ -33,6 +35,7 @@ export type CountyNow = {
   schools: StatusLine | null;
   power: StatusLine | null;
   rain: StatusLine | null;
+  beef: BeefQuote | null;
 };
 
 const cache: { at: number; value: CountyNow } | null = { at: 0, value: emptyNow() };
@@ -49,6 +52,7 @@ function emptyNow(): CountyNow {
     schools: null,
     power: null,
     rain: null,
+    beef: null,
   };
 }
 
@@ -173,6 +177,147 @@ async function recentRain(): Promise<CountyNow['rain']> {
   };
 }
 
+const beefReportUrl = 'https://www.ams.usda.gov/mnreports/ams_1955.pdf';
+
+function indexOfBytes(haystack: Uint8Array, needle: Uint8Array, from: number) {
+  outer: for (let i = from; i <= haystack.length - needle.length; i += 1) {
+    for (let j = 0; j < needle.length; j += 1) {
+      if (haystack[i + j] !== needle[j]) continue outer;
+    }
+    return i;
+  }
+  return -1;
+}
+
+function latin1(bytes: Uint8Array) {
+  let text = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    text += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return text;
+}
+
+async function inflateZlib(bytes: Uint8Array) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+/** Pull the text runs out of a USDA market PDF. */
+export async function pdfTextRuns(bytes: Uint8Array) {
+  const streamMark = new TextEncoder().encode('stream');
+  const endMark = new TextEncoder().encode('endstream');
+  const runs: string[] = [];
+  let cursor = 0;
+  while (cursor < bytes.length) {
+    const at = indexOfBytes(bytes, streamMark, cursor);
+    if (at < 0) break;
+    let start = at + streamMark.length;
+    if (bytes[start] === 13) start += 1;
+    if (bytes[start] === 10) start += 1;
+    const stop = indexOfBytes(bytes, endMark, start);
+    if (stop < 0) break;
+    let finish = stop;
+    if (finish > start && bytes[finish - 1] === 10) finish -= 1;
+    if (finish > start && bytes[finish - 1] === 13) finish -= 1;
+    cursor = stop + endMark.length;
+    try {
+      const inflated = await inflateZlib(bytes.slice(start, finish));
+      const text = latin1(inflated);
+      const pattern = /\(((?:\\.|[^\\)])*)\)\s*Tj/g;
+      for (const match of text.matchAll(pattern)) {
+        runs.push(
+          match[1]
+            .replace(/\\([()\\])/g, '$1')
+            .replace(/\\n/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim(),
+        );
+      }
+    } catch {
+      // Image streams and other filters are not the price table.
+    }
+  }
+  return runs;
+}
+
+function isCount(value: string) {
+  return /^\d+$/.test(value);
+}
+
+function isWeight(value: string) {
+  return /^\d+(?:-\d+)?$/.test(value);
+}
+
+function isMoney(value: string) {
+  return /^\d+\.\d{2}(?:-\d+\.\d{2})?$/.test(value);
+}
+
+function weekPhrase(tokens: string[]) {
+  const line = tokens.find((token) => token.includes('Weighted Average Report for'));
+  const match = line?.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*-\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!match) return '';
+  const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
+  const startMonth = Number(match[1]) - 1;
+  const endMonth = Number(match[4]) - 1;
+  const start = `${months[startMonth]} ${Number(match[2])}`;
+  const end = startMonth === endMonth ? String(Number(match[5])) : `${months[endMonth]} ${Number(match[5])}`;
+  return `Week of ${start}–${end}`;
+}
+
+type SteerRow = { head: number; range: string; price: string; note: string };
+
+function steerRows(tokens: string[]) {
+  const start = tokens.findIndex((token) => token.startsWith('STEERS - Medium and Large 1 (Per Cwt'));
+  if (start < 0) return [];
+  const rows: SteerRow[] = [];
+  for (let i = start + 1; i < tokens.length; i += 1) {
+    const token = tokens[i];
+    if (/^(HEIFERS|BULLS|SLAUGHTER|STEERS -|COWS|LIVESTOCK)/.test(token)) break;
+    const weight = tokens[i + 1];
+    const averageWeight = tokens[i + 2];
+    const priceRange = tokens[i + 3];
+    const average = tokens[i + 4];
+    if (!isCount(token) || !isWeight(weight) || !isCount(averageWeight) || !isMoney(priceRange) || !isMoney(average) || average.includes('-')) {
+      continue;
+    }
+    const following = tokens[i + 5] ?? '';
+    const note = following && !isCount(following) && !following.includes('(') && !following.endsWith(':') ? following : '';
+    rows.push({ head: Number(token), range: weight, price: average, note });
+    i += note ? 5 : 4;
+  }
+  return rows;
+}
+
+function weightPhrase(range: string) {
+  return `${range.replace('-', '–')} lb`;
+}
+
+/** The plain 500 lb steer class from the Texas weekly auction summary. */
+export function beefFromTokens(tokens: string[]): BeefQuote | null {
+  const rows = steerRows(tokens).filter((row) => !row.note);
+  if (!rows.length) return null;
+  const fiveHundreds = rows.filter((row) => {
+    const [low, high] = row.range.split('-').map(Number);
+    return low <= 599 && (high || low) >= 500;
+  });
+  const picked = (fiveHundreds.length ? fiveHundreds : rows).sort((a, b) => b.head - a.head)[0];
+  const week = weekPhrase(tokens);
+  return {
+    label: `$${picked.price}`,
+    detail: 'Feeder steers',
+    note: `${week ? `${week}. ` : ''}Medium and large 1 steers, ${weightPhrase(picked.range)}, ${picked.head.toLocaleString('en-US')} head. Average price per hundredweight from the USDA Texas auction summary.`,
+    href: beefReportUrl,
+  };
+}
+
+async function beef(): Promise<BeefQuote | null> {
+  const response = await fetch(beefReportUrl, { headers, signal: AbortSignal.timeout(8000) });
+  if (!response.ok) return null;
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes.length < 1000 || bytes[0] !== 0x25) return null;
+  return beefFromTokens(await pdfTextRuns(bytes));
+}
+
 async function roads(): Promise<{ watched: CountyNow['roads']; alerts: RoadAlert[] }> {
   const request = {
     action: 'table/query',
@@ -211,13 +356,14 @@ async function roads(): Promise<{ watched: CountyNow['roads']; alerts: RoadAlert
 
 export async function getCountyNow(): Promise<CountyNow> {
   if (cache && Date.now() - cache.at < tenMinutes) return cache.value;
-  const [riverResult, airResult, roadResult, schoolDays, powerResult, rainResult] = await Promise.all([
+  const [riverResult, airResult, roadResult, schoolDays, powerResult, rainResult, beefResult] = await Promise.all([
     river().catch(() => null),
     air().catch(() => null),
     roads().catch(() => null),
     getSchoolDays().catch(() => null),
     getPower().catch(() => null),
     recentRain().catch(() => null),
+    beef().catch(() => null),
   ]);
   const alerts = roadResult?.alerts ?? [];
   const closures = alerts.filter((alert) => alert.kind === 'crash' || alert.kind === 'closure');
@@ -231,6 +377,7 @@ export async function getCountyNow(): Promise<CountyNow> {
     schools: schoolDays ? schoolSummary(schoolDays) : null,
     power: powerResult,
     rain: rainResult,
+    beef: beefResult,
   };
   // A missed gauge should be tried again soon. A full reading can sit for ten minutes.
   cache.at = value.river ? Date.now() : Date.now() - tenMinutes + 30_000;
