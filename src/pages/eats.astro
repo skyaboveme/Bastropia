@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { directoryEntries, type DirectoryEntry } from '../data/directory';
 import { listLiveBusinesses, toDirectoryEntry } from '../lib/businessDb';
-import { addDays, chicagoParts } from '../lib/time';
+import { addDays, chicagoParts, labelFromKey } from '../lib/time';
 
 type Offer = {
   what: string;
@@ -348,6 +348,9 @@ for (const place of places) {
 
 const todayKey = chicagoParts(new Date()).key;
 const tomorrowKey = addDays(todayKey, 1);
+const todayGroups = places
+  .map((place) => ({ place, offers: place.offers.filter((offer) => onDay(offer, todayKey)) }))
+  .filter((group) => group.offers.length > 0);
 const town = Astro.url.searchParams.get('town');
 const q = (Astro.url.searchParams.get('q') || '').trim().toLowerCase();
 
@@ -395,6 +398,27 @@ function eatHref(nextTown: string | null) {
     lede="Restaurants, cafes, bakeries, and bars from the Bastrop County directory. A posted happy hour or special shows on the row. Confirm before you go."
   />
   <div class="wrap">
+    {todayGroups.length > 0 && (
+      <section class="today-board" aria-label="Today's happy hours and specials">
+        <p class="kicker">Today</p>
+        <h2>{labelFromKey(todayKey)}</h2>
+        <ul class="deal-list">
+          {todayGroups.map((group) => (
+            <li class="deal">
+              {group.offers.map((offer) => (
+                <div class="deal-block">
+                  <p class="deal-what">{offer.what}</p>
+                  {offer.time && <p class="deal-time">{offer.time}</p>}
+                  {offer.discount?.map((line) => <p class="deal-off">{line}</p>)}
+                  {offer.note && <p class="deal-note">{offer.note}</p>}
+                </div>
+              ))}
+              <p class="deal-place">{group.place.name}, {group.place.city}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
     <form class="filters" method="get" action="/eats">
       <div class="filter-row search-row">
         <label for="q">Search</label>
