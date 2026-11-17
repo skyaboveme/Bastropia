@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import ChurchCard from '../components/ChurchCard.astro';
+import { churchCount, churchGroupsList } from '../data/churches';
+import { facebookPage } from '../data/site';
+
+const groups = churchGroupsList;
+const officialCount = groups.reduce(
+  (sum, group) => sum + group.churches.filter((church) => !church.confirmWithChurch).length,
+  0,
+);
+const confirmCount = churchCount - officialCount;
+---
+
+<BaseLayout
+  title="Bastrop County Church Directory: Worship Times"
+  description="Worship times for churches in Bastrop County, Texas, that publish both a website and a weekly schedule. Grouped by town, with a link to each church’s own page."
+>
+  <PageHead
+    kicker="Churches"
+    title="Bastrop County Church Directory: Worship Times"
+    lede="A countywide list of churches that publish both a website and weekly worship times, grouped by town for Bastrop, Elgin, Smithville, McDade, Cedar Creek, and nearby communities."
+  />
+
+  <div class="wrap church-page">
+    <p class="church-intro">
+      Times were checked in mid-November 2026 and can change, especially around holidays. Please confirm on the church’s own website or by calling before you go.
+      {confirmCount > 0 && (
+        <>
+          {' '}
+          A few listings come from church directories rather than the congregation’s own page; those are marked so you can confirm them.
+        </>
+      )}
+      {' '}
+      If your church’s times are missing or out of date, send an update through the <a href={facebookPage} target="_blank" rel="noopener noreferrer">Bastropia Facebook page</a>.
+    </p>
+
+    <p class="church-count">
+      {churchCount} {churchCount === 1 ? 'church' : 'churches'} with a posted website and worship times.
+      {officialCount > 0 && <> {officialCount} from the church’s own site.</>}
+      {confirmCount > 0 && <> {confirmCount} {confirmCount === 1 ? 'listing' : 'listings'} to confirm with the church.</>}
+    </p>
+
+    <nav class="church-jump" aria-label="Jump to a town">
+      {groups.map((group) => (
+        <a href={`#${group.id}`}>{group.label}</a>
+      ))}
+    </nav>
+
+    {groups.map((group) => (
+      <section class:list={['church-town', `church-town-${group.id}`]} id={group.id}>
+        <h2>
+          {group.label}
+          <span class="church-town-count">
+            {group.churches.length} {group.churches.length === 1 ? 'church' : 'churches'}
+          </span>
+        </h2>
+        <div class="church-card-grid">
+          {group.churches.map((church) => (
+            <ChurchCard church={church} />
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .church-page {
+    padding-bottom: 3rem;
+  }
+  .church-intro {
+    max-width: 46rem;
+    margin: 0 0 1rem;
+    font-family: var(--text);
+    font-size: 1.05rem;
+    line-height: 1.55;
+  }
+  .church-intro a {
+    color: var(--river-deep);
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+  .church-count {
+    margin: 0 0 1.1rem;
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    font-weight: 650;
+    color: var(--ink-soft);
+  }
+  .church-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 0 0 1.6rem;
+  }
+  .church-jump a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.32rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--pine-deep);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+  .church-jump a:hover,
+  .church-jump a:focus-visible {
+    border-color: var(--pine);
+    background: var(--ok-bg);
+  }
+
+  .church-town {
+    margin: 0 0 2rem;
+  }
+  .church-town h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    margin: 0 0 0.75rem;
+    padding-top: 0.55rem;
+    border-top: 3px solid var(--pine);
+    font-size: 1.7rem;
+    scroll-margin-top: 5.5rem;
+  }
+  .church-town-elgin h2 { border-top-color: var(--river-deep); }
+  .church-town-smithville h2 { border-top-color: var(--sun-deep); }
+  .church-town-mcdade h2 { border-top-color: #4c3480; }
+  .church-town-cedar-creek h2 { border-top-color: #2d5a27; }
+  .church-town-elsewhere h2 { border-top-color: var(--ink-soft); }
+  .church-town-count {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .church-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  @media (min-width: 860px) {
+    .church-card-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
