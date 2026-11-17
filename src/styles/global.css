@@ -449,6 +449,16 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .deal-off { margin: 0.08rem 0 0; }
 .deal-note { margin: 0.15rem 0 0; color: var(--ink-soft); font-size: 0.88rem; }
 .deal-place { margin: 0.4rem 0 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--river-deep); }
+.eat-list { list-style: none; margin: 0.4rem 0 1.4rem; padding: 0; }
+.eat-row { display: grid; grid-template-columns: 4.4rem minmax(0, 1fr); gap: 0.35rem 0.9rem; align-items: start; padding: 1rem 0; border-top: 1px solid var(--line); }
+.eat-mark { width: 4.4rem; height: 4.4rem; border-radius: 0.4rem; background: var(--pine-deep); color: #f4efe6; display: grid; place-items: center; font-family: var(--serif); font-size: 1.15rem; letter-spacing: 0.04em; }
+.eat-name { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; line-height: 1.15; text-decoration: none; color: inherit; }
+.eat-name:hover { text-decoration: underline; text-underline-offset: 0.08em; }
+.eat-line { display: block; margin-top: 0.16rem; color: var(--ink-soft); font-size: 0.92rem; }
+.eat-special { grid-column: 2; margin-top: 0.35rem; padding: 0.5rem 0.7rem 0.6rem; background: var(--paper-2); border-left: 3px solid var(--river); }
+.eat-special .deal-what { font-size: 1.05rem; }
+.eat-special .deal-block + .deal-block { margin-top: 0.55rem; }
+.eat-actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; margin: 0.35rem 0 0; font-size: 0.92rem; }
 .card-list .deal-block + .deal-block { margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--line); }
 
 .event-card, .story-card, .update-card, .stream, .day-card { background: transparent; border: 0; box-shadow: none; }
