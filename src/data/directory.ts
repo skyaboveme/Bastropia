@@ -224,7 +224,10 @@ export function filterDirectory(
     if (query.town && !entryServesTown(entry, query.town)) return false;
     if (needle) {
       const hay = `${entry.name} ${entry.category} ${entry.place} ${entry.summary}`.toLowerCase();
-      if (!hay.includes(needle)) return false;
+      const stem = needle.replace(/(ers|er|ists|ist|ing|s)$/i, '');
+      const words = hay.split(/[^a-z0-9]+/);
+      const hit = hay.includes(needle) || (stem.length >= 4 && stem !== needle && words.some((word) => word.startsWith(stem)));
+      if (!hit) return false;
     }
     return true;
   });
