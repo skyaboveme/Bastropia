@@ -1,0 +1,684 @@
+---
+/**
+ * Infographic layout for the Eats Beat news column: a weekday scan table
+ * and one DealCard per restaurant, grouped by town.
+ */
+import DealCard from './DealCard.astro';
+
+type Town = 'Bastrop' | 'Elgin' | 'Smithville' | 'Paige';
+type Item = { day?: string; text: string };
+type Block = { when?: string; items?: Item[] | string[]; note?: string };
+type Mark = 'hh' | 'sp' | 'both' | 'confirm' | '';
+
+type Venue = {
+  name: string;
+  town: Town;
+  address: string;
+  website?: string;
+  sourceLabel?: string;
+  phone?: string;
+  hours?: string;
+  happyHour?: Block | null;
+  specials?: Block | null;
+  wide?: boolean;
+  /** Sunday through Saturday marks for the week-at-a-glance table. */
+  week?: [Mark, Mark, Mark, Mark, Mark, Mark, Mark];
+};
+
+const venues: Venue[] = [
+  {
+    name: 'Casa Chapala',
+    town: 'Bastrop',
+    address: '1800 Walnut St.',
+    website: 'https://bastrop.casachapala.com/food-menu',
+    sourceLabel: 'Official food menu',
+    wide: true,
+    week: ['both', 'both', 'both', 'both', 'both', 'sp', 'sp'],
+    happyHour: {
+      when: 'Monday–Thursday 11 a.m.–7 p.m.; Friday 11 a.m.–6 p.m.',
+      items: [
+        '$4 draft pints',
+        '$6.50 Mexican martinis',
+        '$6 Casa Rita',
+        '$7 Caguama draft beer',
+        '$10 top-shelf margarita',
+        '$3.99 mimosas',
+        '$6.50 patio margaritas, available anywhere in the restaurant',
+        '$3.50 cantina tacos',
+        '$6 Texas queso',
+        '$6 poblano quesadilla',
+        '$6 nachos Chapala',
+        'To-go margarita packs: 2-pack $16 with chips and salsa; 4-pack $35 with Texas queso, chips and salsa; gallon $64.95 with queso, chips and salsa',
+      ],
+    },
+    specials: {
+      items: [
+        { day: 'Monday', text: 'Kids eat free all day (conditions not posted — confirm).' },
+        { day: 'Tuesday', text: '$3.50 street tacos, with carne asada, carnitas or chicken.' },
+        { day: 'Wednesday', text: '15% off all food for seniors.' },
+        { day: 'Saturday', text: '$6 patio Rita, any flavor, anywhere, all day.' },
+        { day: 'Sunday', text: 'Brunch buffet 9 a.m.–3 p.m., and a $6 patio margarita.' },
+        { day: 'Monday–Friday', text: 'Lunch buffet $15.99, 11 a.m.–2 p.m., includes iced tea or a soft drink.' },
+      ],
+    },
+  },
+  {
+    name: 'Chapala Fiestas & Grill',
+    town: 'Bastrop',
+    address: '1067 W. State Highway 71',
+    website: 'https://chapalafiestas.com/bastrop-chapala-fiestas-and-grill-happy-hours-specials',
+    sourceLabel: 'Official specials page',
+    week: ['hh', 'confirm', 'hh', 'hh', 'hh', 'hh', 'hh'],
+    happyHour: {
+      when: 'All-day happy hour most days, week of Nov. 15–21, following restaurant hours.',
+      items: [
+        'Sunday 10 a.m.–9 p.m.',
+        'Monday and Thursday 11 a.m.–10 p.m.',
+        'Wednesday: margaritas, food, wine and beer, 11 a.m.–10 p.m.',
+        'Friday 11 a.m.–11 p.m.',
+        'Saturday 10 a.m.–11 p.m.',
+      ],
+      note: 'No happy-hour prices were posted. Tuesday hours on the current calendar should be confirmed.',
+    },
+  },
+  {
+    name: 'Old Town Restaurant & Bar',
+    town: 'Bastrop',
+    address: '931 Main St.',
+    website: 'https://oldtownbastroptx.com/bastrop-old-town-restaurant-and-bar-happy-hours-specials',
+    sourceLabel: 'Official specials page',
+    week: ['', 'both', 'both', 'both', 'sp', 'sp', ''],
+    happyHour: {
+      when: 'This week, Monday–Wednesday 3–7 p.m.',
+      items: [
+        { day: 'Monday', text: '$1 off all drinks.' },
+        { day: 'Tuesday', text: 'Tap that Tuesday: $3 Bud Light and Ziegenbock drafts and $1 off all drinks.' },
+        { day: 'Wednesday', text: 'Well Wednesday: $4.50 well drinks and $1 off all drinks.' },
+      ],
+      note: 'No happy hour was listed for Thursday or Friday on the current calendar.',
+    },
+    specials: {
+      when: 'Week of Nov. 16–20, 11 a.m.–10 p.m.',
+      items: [
+        { day: 'Monday', text: 'Catfish basket.' },
+        { day: 'Tuesday', text: 'Chicken Parmesan.' },
+        { day: 'Wednesday', text: 'Chicken-fried steak and $1 wings.' },
+        { day: 'Thursday', text: 'Meatloaf dinner.' },
+        { day: 'Friday', text: 'New York strip.' },
+      ],
+      note: 'Food specials look like a weekly rotation and were confirmed only for this posted week.',
+    },
+  },
+  {
+    name: 'Piney Creek Chop House',
+    town: 'Bastrop',
+    address: '703 Chestnut St.',
+    website: 'https://pineycreektx.com/bastrop-downtown-bastrop-piney-creek-chop-house-happy-hours-specials',
+    sourceLabel: 'Official specials page',
+    week: ['', 'hh', 'hh', 'hh', 'hh', '', ''],
+    happyHour: {
+      when: 'Monday–Thursday 5–7 p.m.',
+      items: ['$7 martinis', 'Discounted appetizers'],
+      note: 'Friday through Sunday were not listed as of this check, so do not assume a weekend happy hour. The listings cover Nov. 16–19.',
+    },
+  },
+  {
+    name: 'Store House Market & Eatery',
+    town: 'Bastrop',
+    address: '813 Main St.',
+    website: 'https://storehousebastrop.com/',
+    sourceLabel: 'Store House homepage',
+    week: ['', '', '', 'hh', 'hh', 'hh', ''],
+    happyHour: {
+      when: 'Wednesday–Friday 5–10 p.m., covering the dinner service.',
+      note: 'No drink or food prices were posted.',
+    },
+  },
+  {
+    name: 'Bastrop Beer Company',
+    town: 'Bastrop',
+    address: '1008 Main St.',
+    website: 'https://bastropbeerco.com/',
+    sourceLabel: 'Official homepage',
+    week: ['sp', 'sp', 'both', 'both', 'both', 'both', 'sp'],
+    happyHour: {
+      when: 'Tuesday–Friday 3–6 p.m.',
+      items: ['$1 off pints, domestic beer and wines', '10% off all to-go craft beer'],
+    },
+    specials: {
+      items: [
+        { day: 'Every day', text: 'Free popcorn all day. Focaccia pizza and pickles are served all day, and outside food is allowed.' },
+        { day: 'Wednesday', text: 'Bingo at 7 p.m.' },
+        { day: 'Thursday', text: 'Trivia at 7 p.m.' },
+      ],
+    },
+  },
+  {
+    name: 'Film Alley Bastrop',
+    town: 'Bastrop',
+    address: '1600 Chestnut St.',
+    website: 'https://filmalley.com/events/71116-happy-hour/',
+    sourceLabel: 'Official happy hour page',
+    week: ['', '', '', '', 'hh', '', ''],
+    happyHour: {
+      when: 'Thursdays noon–7 p.m.',
+      items: ['Half-price domestic draft pints, bowling games and arcade'],
+    },
+  },
+  {
+    name: "Chili's Grill & Bar",
+    town: 'Bastrop',
+    address: '734 Highway 71',
+    website: 'https://www.chilis.com/locations/us/texas/bastrop/bastrop',
+    sourceLabel: 'Bastrop location page',
+    week: ['', 'hh', 'hh', 'hh', 'hh', 'hh', ''],
+    happyHour: {
+      when: 'Monday–Friday 3–6 p.m.',
+      items: [
+        '$3: 16-oz. Bud Light, Miller Lite or Coors Light',
+        '$4: 22-oz. Bud Light, Miller Lite or Coors Light; 16-oz. Modelo; 16-oz. Michelob Ultra',
+        '$5: 22-oz. Modelo; 22-oz. Michelob Ultra; house red and white wine',
+        '$6 margarita of the month',
+        '$7 tequila classic margarita',
+      ],
+    },
+  },
+  {
+    name: "Maxine's Cafe & Bakery",
+    town: 'Bastrop',
+    address: '905 Main St.',
+    website: 'https://maxinescafe.com/specials',
+    sourceLabel: 'Official specials page',
+    week: ['sp', 'sp', 'sp', 'sp', 'sp', 'sp', 'sp'],
+    specials: {
+      when: 'Week of Nov. 15–21',
+      items: [
+        { day: 'Sunday', text: 'Breakfast all day, 7 a.m.–3 p.m.' },
+        { day: 'Monday', text: 'Remix Monday, 11 a.m.–3 p.m.; call 512-303-0919 for the chef special.' },
+        { day: 'Tuesday', text: 'Loaded potato soup, 11 a.m.–3 p.m.' },
+        { day: 'Wednesday', text: 'Homestyle chili and cornbread, 11 a.m.–3 p.m.' },
+        { day: 'Thursday', text: 'Personal chicken pot pie, 11 a.m.–3 p.m.' },
+        { day: 'Friday', text: 'Broccoli cheese soup served over rice, 11 a.m.–3 p.m., with breakfast served until 5 p.m.' },
+        { day: 'Saturday', text: 'Breakfast 7 a.m.–5 p.m.' },
+      ],
+      note: 'Lunch specials may change week to week.',
+    },
+  },
+  {
+    name: 'True Texas BBQ at the Bastrop H-E-B plus!',
+    town: 'Bastrop',
+    address: '104 N. Hasler Blvd.',
+    website: 'https://www.truetxbbq.com/',
+    sourceLabel: 'True Texas BBQ',
+    phone: '512-985-1042',
+    hours: 'Open 11 a.m.–9 p.m. daily',
+    wide: true,
+    week: ['sp', 'sp', 'sp', 'sp', 'sp', 'sp', 'sp'],
+    specials: {
+      when: 'From H-E-B’s official True Texas BBQ plus/tenders menu dated Oct. 5, 2026, a chain menu, not a Bastrop-only flyer. Confirm at the counter.',
+      items: [
+        { day: 'Family Meal for four', text: '$59.99, with 1 pound of prime brisket, 1 pound of turkey breast, two medium sides, a gallon of tea or lemonade, plus bread, pickles, onions and sauce.' },
+        { day: 'Limited time', text: 'Loaded Elotes $5.99 (add turkey, pulled pork, chopped brisket or prime brisket $3.75–$7); Brisket Chili $6.99 a cup or $14.99 a bowl; Loaded Chili Dipper $9.99.' },
+        { day: 'Fridays', text: 'Dino Beef Rib $38, or a plate with two sides $44, until it sells out.' },
+        { day: 'Nov. 1–Dec. 27', text: 'Pitmaster holiday meals, hot or cold, for pre-order in person or by phone. Store selection varies.' },
+      ],
+    },
+  },
+  {
+    name: 'Texas Roadhouse',
+    town: 'Bastrop',
+    address: '829 W. State Highway 71',
+    website: 'https://www.texasroadhouse.com/locations/bastrop',
+    sourceLabel: 'Bastrop location page',
+    hours: 'Sunday 11 a.m.–10 p.m.; Monday–Thursday 4–10 p.m.; Friday 4–11 p.m.; Saturday 11 a.m.–11 p.m.',
+    week: ['', '', '', '', '', '', ''],
+    specials: {
+      note: 'The official Bastrop location page advertises Early Dine, Kids Night and Wild West Wednesday, but the deal descriptions did not display correctly, so no times or prices could be verified. Confirm the promotions at the restaurant.',
+    },
+  },
+  {
+    name: "Lightnin' Bar",
+    town: 'Elgin',
+    address: '109 Central Ave., Unit B',
+    website: 'https://www.lightninbartexas.com/',
+    sourceLabel: 'Official homepage',
+    hours: 'Tuesday–Friday 2 p.m.–midnight; Saturday 2 p.m.–1 a.m.; Sunday 2–10 p.m.; closed Monday',
+    week: ['', '', 'hh', 'hh', 'hh', 'hh', ''],
+    happyHour: {
+      when: 'Tuesday–Friday 2–6 p.m.',
+      note: 'No drink or food prices were posted.',
+    },
+  },
+  {
+    name: 'Morelia Mexican Grill',
+    town: 'Elgin',
+    address: '608 W. Alamo St.',
+    website: 'https://moreliaelgin.com/',
+    sourceLabel: 'Official homepage',
+    week: ['', '', '', '', '', '', ''],
+    happyHour: {
+      note: 'The official website advertises lunch and happy hour, but no times or prices were posted, and the menu page did not include a happy-hour menu.',
+    },
+  },
+  {
+    name: 'The Owl Wine Bar & Home Goods',
+    town: 'Elgin',
+    address: '106 N. Main St.',
+    website: 'https://elginowl.com/',
+    sourceLabel: 'elginowl.com',
+    week: ['', '', '', '', '', '', ''],
+    happyHour: {
+      note: 'The official website mentions happy hour as a service but does not post times or prices.',
+    },
+  },
+  {
+    name: 'Smithville Brewing Company',
+    town: 'Smithville',
+    address: '661 NW Loop 230',
+    website: 'https://www.smithvillebrewing.com/',
+    sourceLabel: 'Official homepage',
+    hours: 'Wednesday–Thursday 4–9 p.m.; Friday 4–10 p.m.; Saturday 2–10 p.m.; Sunday 1–7 p.m.; closed Monday and Tuesday',
+    week: ['hh', '', '', 'sp', 'sp', '', ''],
+    happyHour: {
+      when: 'Sunday all day',
+      items: [
+        '$2 off appetizers and $1 off bottles and cans; exclusions apply',
+        'Live music Sundays 4–6 p.m.',
+      ],
+    },
+    specials: {
+      items: [
+        { day: 'Wednesday', text: '55-and-older senior special: 50% off an entree with the purchase of a beverage, dine-in. A chamber posting listed the offer as valid through Nov. 18, and it was still on the brewery homepage on Nov. 16.' },
+        { day: 'Thursday', text: 'Pints and pizza night, with $5 SBC pints and $2 off pizzas.' },
+      ],
+    },
+  },
+  {
+    name: "Pocket's Grille",
+    town: 'Smithville',
+    address: '205 Fawcett St.',
+    website: 'https://pocketsgrille.com/smithville-smithville-pockets-grille-happy-hours-specials',
+    sourceLabel: 'Official specials page',
+    hours: 'Monday–Wednesday 11 a.m.–8 p.m.; Thursday–Saturday 11 a.m.–9 p.m.',
+    week: ['', 'sp', 'sp', 'sp', 'sp', '', ''],
+    specials: {
+      when: 'Week of Nov. 16',
+      items: [
+        { day: 'Monday', text: 'Manic Monday: a large single-topping pizza for $10, 4–8 p.m., dine-in or carry-out. Also listed as a standing special on the homepage.' },
+        { day: 'Tuesday', text: 'Taco Tuesday: three crunchy tacos with chips and salsa for $6, 11 a.m.–8 p.m., dine-in or carry-out.' },
+        { day: 'Wednesday', text: 'Kids 12 and younger eat free with each adult entree, certain exclusions, dine-in only, 11 a.m.–8 p.m.' },
+        { day: 'Thursday', text: 'Bun-Believable Thursday: any 1/3-pound burger and regular fries for $10, dine-in only, 11 a.m.–9 p.m.' },
+      ],
+      note: 'The Tuesday through Thursday deals were confirmed only for this posted week and may change.',
+    },
+  },
+  {
+    name: "Swayze's Burger House",
+    town: 'Smithville',
+    address: '205 NE Loop 230',
+    website: 'https://www.swayzesburgerhouse.com/',
+    sourceLabel: 'swayzesburgerhouse.com',
+    week: ['', '', '', '', '', '', ''],
+    specials: {
+      note: 'The official online ordering site lists a Wing Night Special at $4.50 and a $3 beer special. The day of the week and the hours were not posted on a readable page, so confirm those before you go.',
+    },
+  },
+];
+
+const towns: Town[] = ['Bastrop', 'Elgin', 'Smithville'];
+const days = [
+  { key: 'sun', label: 'Sun' },
+  { key: 'mon', label: 'Mon' },
+  { key: 'tue', label: 'Tue' },
+  { key: 'wed', label: 'Wed' },
+  { key: 'thu', label: 'Thu' },
+  { key: 'fri', label: 'Fri' },
+  { key: 'sat', label: 'Sat' },
+] as const;
+
+const scanRows = venues.filter((venue) => venue.week?.some(Boolean));
+
+const mondayHappyHour = [
+  { name: 'Casa Chapala', detail: '11 a.m.–7 p.m.' },
+  { name: 'Chapala Fiestas & Grill', detail: '11 a.m.–10 p.m.' },
+  { name: 'Old Town Restaurant & Bar', detail: '3–7 p.m.' },
+  { name: 'Piney Creek Chop House', detail: '5–7 p.m.' },
+  { name: "Chili's Grill & Bar", detail: '3–6 p.m.' },
+];
+
+const mondaySpecials = [
+  { name: 'Casa Chapala', detail: 'Kids eat free all day; lunch buffet 11 a.m.–2 p.m.' },
+  { name: 'Old Town Restaurant & Bar', detail: 'Catfish basket' },
+  { name: 'Bastrop Beer Company', detail: 'Free popcorn all day' },
+  { name: "Maxine's Cafe & Bakery", detail: 'Remix Monday, 11 a.m.–3 p.m.' },
+  { name: 'True Texas BBQ', detail: 'Family meal and limited-time menu items' },
+  { name: "Pocket's Grille", detail: 'Large single-topping pizza $10, 4–8 p.m.' },
+];
+
+const markLabel: Record<Exclude<Mark, ''>, string> = {
+  hh: 'Happy hour',
+  sp: 'Specials',
+  both: 'Happy hour and specials',
+  confirm: 'Listed, confirm first',
+};
+
+function markText(mark: Mark): string {
+  if (mark === 'hh') return 'HH';
+  if (mark === 'sp') return 'SP';
+  if (mark === 'both') return 'HH+SP';
+  if (mark === 'confirm') return '?';
+  return '—';
+}
+
+const counts = {
+  total: venues.length,
+  Bastrop: venues.filter((venue) => venue.town === 'Bastrop').length,
+  Elgin: venues.filter((venue) => venue.town === 'Elgin').length,
+  Smithville: venues.filter((venue) => venue.town === 'Smithville').length,
+};
+---
+
+<div class="eats-beat">
+  <div class="eats-counts" role="list">
+    <div class="eats-count" role="listitem">
+      <p class="eats-count-value">{counts.total}</p>
+      <p class="eats-count-label">Official listings</p>
+    </div>
+    <div class="eats-count" role="listitem">
+      <p class="eats-count-value">{counts.Bastrop}</p>
+      <p class="eats-count-label">Bastrop</p>
+    </div>
+    <div class="eats-count" role="listitem">
+      <p class="eats-count-value">{counts.Elgin}</p>
+      <p class="eats-count-label">Elgin</p>
+    </div>
+    <div class="eats-count" role="listitem">
+      <p class="eats-count-value">{counts.Smithville}</p>
+      <p class="eats-count-label">Smithville</p>
+    </div>
+  </div>
+
+  <section class="eats-monday" aria-labelledby="eats-monday-heading">
+    <h2 id="eats-monday-heading">Monday, Nov. 16, at a glance</h2>
+    <div class="eats-monday-grid">
+      <div class="eats-monday-col">
+        <h3>Happy hour today</h3>
+        <ul>
+          {mondayHappyHour.map((row) => (
+            <li><strong>{row.name}</strong> <span>{row.detail}</span></li>
+          ))}
+        </ul>
+      </div>
+      <div class="eats-monday-col eats-monday-sp">
+        <h3>Specials today</h3>
+        <ul>
+          {mondaySpecials.map((row) => (
+            <li><strong>{row.name}</strong> <span>{row.detail}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="eats-scan" aria-labelledby="eats-scan-heading">
+    <h2 id="eats-scan-heading">This week by day</h2>
+    <p class="eats-scan-legend">
+      <span class="eats-mark is-hh">HH</span> happy hour
+      <span class="eats-mark is-sp">SP</span> specials
+      <span class="eats-mark is-both">HH+SP</span> both
+      <span class="eats-mark is-confirm">?</span> listed, confirm first
+    </p>
+    <div class="eats-scan-wrap" tabindex="0">
+      <table class="eats-scan-table">
+        <thead>
+          <tr>
+            <th scope="col">Restaurant</th>
+            {days.map((day) => <th scope="col">{day.label}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {scanRows.map((venue) => (
+            <tr>
+              <th scope="row">
+                {venue.name}
+                <span class={`eats-mini-town is-${venue.town.toLowerCase()}`}>{venue.town}</span>
+              </th>
+              {(venue.week ?? ['', '', '', '', '', '', '']).map((mark) => (
+                <td>
+                  <span class={`eats-mark is-${mark || 'none'}`} title={mark ? markLabel[mark] : 'No posted deal'}>
+                    {markText(mark)}
+                  </span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {towns.map((town) => (
+    <section class={`eats-town eats-town-${town.toLowerCase()}`} aria-labelledby={`eats-town-${town.toLowerCase()}`}>
+      <h2 id={`eats-town-${town.toLowerCase()}`}>{town}</h2>
+      <div class="eats-card-grid">
+        {venues
+          .filter((venue) => venue.town === town)
+          .map((venue) => (
+            <DealCard
+              name={venue.name}
+              town={venue.town}
+              address={venue.address}
+              website={venue.website}
+              sourceLabel={venue.sourceLabel}
+              phone={venue.phone}
+              hours={venue.hours}
+              happyHour={venue.happyHour}
+              specials={venue.specials}
+              wide={venue.wide}
+            />
+          ))}
+      </div>
+    </section>
+  ))}
+</div>
+
+<style>
+  :global(.prose:has(.eats-beat)) {
+    max-width: 72rem;
+  }
+  :global(.prose .eats-beat h2) {
+    margin: 0;
+  }
+  :global(.prose .eats-beat p),
+  :global(.prose .eats-beat ul),
+  :global(.prose .eats-beat li) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eats-beat {
+    display: grid;
+    gap: 1.4rem;
+    margin: 1.1rem 0 1.6rem;
+    font-family: var(--sans);
+  }
+
+  .eats-counts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.55rem;
+  }
+  .eats-count {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--pine);
+    border-radius: 0.35rem;
+    padding: 0.55rem 0.7rem 0.65rem;
+  }
+  .eats-count:nth-child(2) { border-top-color: var(--pine); }
+  .eats-count:nth-child(3) { border-top-color: var(--river-deep); }
+  .eats-count:nth-child(4) { border-top-color: var(--sun-deep); }
+  .eats-count-value {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: 620;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--pine-deep);
+  }
+  .eats-count-label {
+    margin: 0.25rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .eats-monday,
+  .eats-scan {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    padding: 0.85rem 0.95rem 1rem;
+  }
+  .eats-monday h2,
+  .eats-scan h2,
+  .eats-town h2 {
+    font-family: var(--serif);
+    font-size: 1.45rem;
+    font-weight: 620;
+    line-height: 1.15;
+  }
+  .eats-monday-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    margin-top: 0.7rem;
+  }
+  @media (min-width: 700px) {
+    .eats-monday-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .eats-monday-col {
+    padding: 0.55rem 0.65rem 0.7rem;
+    background: var(--paper);
+    border-radius: 0.35rem;
+    border-left: 3px solid var(--river-deep);
+  }
+  .eats-monday-sp { border-left-color: var(--sun-deep); }
+  .eats-monday-col h3 {
+    margin: 0 0 0.4rem;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--river-deep);
+  }
+  .eats-monday-sp h3 { color: var(--sun-deep); }
+  .eats-monday-col ul { display: grid; gap: 0.35rem; }
+  .eats-monday-col li {
+    display: grid;
+    gap: 0.05rem;
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+  .eats-monday-col li span { color: var(--ink-soft); font-size: 0.86rem; }
+
+  .eats-scan-legend {
+    margin: 0.4rem 0 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.8rem;
+    align-items: center;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+  }
+  .eats-scan-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .eats-scan-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    min-width: 36rem;
+  }
+  .eats-scan-table th,
+  .eats-scan-table td {
+    padding: 0.4rem 0.35rem;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .eats-scan-table thead th {
+    border-top: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .eats-scan-table tbody th {
+    text-align: left;
+    font-weight: 650;
+    white-space: nowrap;
+    padding-left: 0;
+    position: sticky;
+    left: 0;
+    background: var(--card);
+    z-index: 1;
+  }
+  .eats-mini-town {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .eats-mini-town.is-bastrop { color: var(--pine); }
+  .eats-mini-town.is-elgin { color: var(--river-deep); }
+  .eats-mini-town.is-smithville { color: var(--sun-deep); }
+
+  .eats-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    padding: 0.12rem 0.35rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    background: var(--paper-2);
+    color: var(--ink-soft);
+  }
+  .eats-mark.is-hh { background: #e4f6fa; color: var(--river-deep); }
+  .eats-mark.is-sp { background: #f8e7c0; color: var(--sun-deep); }
+  .eats-mark.is-both { background: var(--ok-bg); color: var(--pine-deep); }
+  .eats-mark.is-confirm { background: var(--stop-bg); color: var(--stop); }
+  .eats-mark.is-none { background: transparent; color: var(--line); min-width: 1.2rem; }
+
+  .eats-town h2 {
+    margin: 0 0 0.75rem;
+    padding-top: 0.45rem;
+    border-top: 3px solid var(--pine);
+  }
+  .eats-town-elgin h2 { border-top-color: var(--river-deep); }
+  .eats-town-smithville h2 { border-top-color: var(--sun-deep); }
+
+  .eats-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  @media (min-width: 860px) {
+    .eats-card-grid { grid-template-columns: 1fr 1fr; }
+    .eats-card-grid :global(.deal-card.is-wide) { grid-column: 1 / -1; }
+  }
+  @media (max-width: 640px) {
+    .eats-counts { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
