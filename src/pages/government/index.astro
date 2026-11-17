@@ -3,12 +3,16 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import HomeBanner from '../../components/HomeBanner.astro';
+import ServiceGroup from '../../components/ServiceGroup.astro';
 import { emergencyLine, serviceGroups } from '../../data/services';
 import { phoneHref } from '../../lib/format';
 import { linkList } from '../../lib/schema';
 import { formatMedium } from '../../lib/time';
 
 const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const leadIds = ['county', 'cities'];
+const leadGroups = leadIds.map((id) => serviceGroups.find((group) => group.id === id)!);
+const laterGroups = serviceGroups.filter((group) => !leadIds.includes(group.id));
 ---
 
 <BaseLayout
@@ -22,6 +26,10 @@ const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.g
     lede="The numbers and offices neighbors ask for, plus short summaries of public notices. Official pages are linked on every item that has one."
   />
   <div class="wrap">
+    {leadGroups.map((group) => (
+      <ServiceGroup group={group} />
+    ))}
+
     <section class="notice">
       <p class="kicker" style="color: var(--river);">Emergency</p>
       <h2>Call {emergencyLine.phone}</h2>
@@ -61,29 +69,8 @@ const updates = (await getCollection('updates')).sort((a, b) => b.data.pubDate.g
   </div>
 
   <div class="wrap">
-    {serviceGroups.map((group) => (
-      <section class="section" id={group.id}>
-        <div class="section-head">
-          <div>
-            <h2>{group.title}</h2>
-            <p class="meta">{group.intro}</p>
-          </div>
-        </div>
-        <div class="service-grid">
-          {group.items.map((item) => (
-            <article class="service" style="padding: 0.9rem 1rem;">
-              <h3>{item.name}</h3>
-              <p class="meta">{item.detail}</p>
-              {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
-              {item.address && <p style="margin-top:0.35rem;">{item.address}</p>}
-              <p class="cluster">
-                {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
-                {item.href && <a class="button button-ghost" href={item.href}>Website</a>}
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
+    {laterGroups.map((group) => (
+      <ServiceGroup group={group} />
     ))}
     <p class="disclaimer">These are published office numbers and links, gathered for convenience. Hours change. If an emergency is happening, call 911 instead of an office line.</p>
   </div>

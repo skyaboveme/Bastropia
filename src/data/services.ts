@@ -48,7 +48,7 @@ export const serviceGroups: ServiceGroup[] = [
         detail: 'Non-emergency sheriff’s office',
         phone: '(512) 549-5100',
         address: '200 Jackson Street, Bastrop, TX 78602',
-        href: 'https://www.bastropcounty.gov/',
+        href: 'https://www.bastropcounty.gov/page/lec.sheriff',
       },
       {
         name: 'Bastrop Police Department',
@@ -79,7 +79,7 @@ export const serviceGroups: ServiceGroup[] = [
   },
   {
     id: 'county',
-    title: 'County offices',
+    title: 'County',
     intro: 'Bastrop County government is centered at the courthouse on Pecan Street.',
     items: [
       {
@@ -94,18 +94,21 @@ export const serviceGroups: ServiceGroup[] = [
         detail: 'Records and filings',
         phone: '(512) 332-7234',
         address: '803 Pine Street, Bastrop, TX 78602',
+        href: 'https://www.bastropcounty.gov/page/co.county_clerk',
       },
       {
         name: 'District Clerk',
         detail: 'District court records',
         phone: '(512) 332-7244',
         address: '804 Pecan Street, Bastrop, TX 78602',
+        href: 'https://www.bastropcounty.gov/page/dc.clerk',
       },
       {
         name: 'District Attorney',
         detail: 'County attorney’s office for criminal cases',
         phone: '(512) 581-7125',
         address: '804 Pecan Street, Bastrop, TX 78602',
+        href: 'https://www.bastropcounty.gov/page/da.attorney',
       },
       {
         name: 'Tax Assessor-Collector',
@@ -148,24 +151,28 @@ export const serviceGroups: ServiceGroup[] = [
         detail: 'Bastrop',
         phone: '(512) 581-4258',
         address: '803 Pecan Street, Bastrop, TX 78602',
+        href: 'https://www.bastropcounty.gov/page/co.justice_peace',
       },
       {
         name: 'Justice of the Peace, Precinct 2',
         detail: 'Smithville',
         phone: '(512) 581-7112',
         address: '1624 NE Loop 230, Smithville, TX 78957',
+        href: 'https://www.bastropcounty.gov/page/co.justice_peace',
       },
       {
         name: 'Justice of the Peace, Precinct 3',
         detail: 'Cedar Creek',
         phone: '(512) 332-7288',
         address: '5785 FM 535, Cedar Creek, TX 78612',
+        href: 'https://www.bastropcounty.gov/page/co.justice_peace',
       },
       {
         name: 'Justice of the Peace, Precinct 4',
         detail: 'Elgin',
         phone: '(512) 581-7162',
         address: '1125 Dildy Drive, Elgin, TX 78621',
+        href: 'https://www.bastropcounty.gov/page/co.justice_peace',
       },
     ],
   },

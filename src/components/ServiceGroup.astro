@@ -1,0 +1,50 @@
+---
+import { phoneHref } from '../lib/format';
+import type { ServiceGroup } from '../data/services';
+
+interface Props {
+  group: ServiceGroup;
+}
+
+const { group } = Astro.props;
+---
+
+<section class="section" id={group.id}>
+  <div class="section-head">
+    <div>
+      <h2>{group.title}</h2>
+      <p class="meta">{group.intro}</p>
+    </div>
+  </div>
+  <div class="service-grid">
+    {group.items.map((item) => (
+      <article class="service" style="padding: 0.9rem 1rem;">
+        <h3>
+          {item.href ? (
+            <a href={item.href} target="_blank" rel="noopener noreferrer">{item.name}</a>
+          ) : (
+            item.name
+          )}
+        </h3>
+        <p class="meta">{item.detail}</p>
+        {item.hours && <p style="margin-top:0.35rem;">{item.hours}</p>}
+        {item.address && <p style="margin-top:0.35rem;">{item.address}</p>}
+        <p class="cluster">
+          {item.phone && <a class="button button-dark" href={phoneHref(item.phone)}>{item.phone}</a>}
+          {item.href && <a class="button button-ghost" href={item.href} target="_blank" rel="noopener noreferrer">Website</a>}
+        </p>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .service h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .service h3 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.08em;
+  }
+</style>
