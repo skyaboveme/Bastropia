@@ -584,6 +584,58 @@ export async function bumpStat(businessId: string, field: 'views' | 'site_clicks
     .run();
 }
 
+export type ListingDeskBanner = {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  banner_placement: string;
+  banner_views: number;
+  views: number;
+};
+
+export async function listingDeskStats(days = 30) {
+  const empty = { views: 0, site_clicks: 0, phone_clicks: 0, banner_views: 0, banners: [] as ListingDeskBanner[] };
+  const db = database();
+  if (!db) return empty;
+  const start = eventKey(new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000));
+  const totals = await db
+    .prepare(
+      `SELECT COALESCE(SUM(views), 0) AS views,
+              COALESCE(SUM(site_clicks), 0) AS site_clicks,
+              COALESCE(SUM(phone_clicks), 0) AS phone_clicks,
+              COALESCE(SUM(banner_views), 0) AS banner_views
+       FROM listing_stats WHERE day >= ?`,
+    )
+    .bind(start)
+    .first<{ views: number; site_clicks: number; phone_clicks: number; banner_views: number }>();
+  const banners = await db
+    .prepare(
+      `SELECT b.id, b.name, b.slug, b.status, b.banner_placement,
+              COALESCE(SUM(s.banner_views), 0) AS banner_views,
+              COALESCE(SUM(s.views), 0) AS views
+       FROM businesses b
+       LEFT JOIN listing_stats s ON s.business_id = b.id AND s.day >= ?
+       WHERE b.banner_url != ''
+       GROUP BY b.id, b.name, b.slug, b.status, b.banner_placement
+       ORDER BY banner_views DESC, b.name`,
+    )
+    .bind(start)
+    .all<ListingDeskBanner>();
+  const num = (value: unknown) => Number(value) || 0;
+  return {
+    views: num(totals?.views),
+    site_clicks: num(totals?.site_clicks),
+    phone_clicks: num(totals?.phone_clicks),
+    banner_views: num(totals?.banner_views),
+    banners: (banners.results ?? []).map((row) => ({
+      ...row,
+      banner_views: num(row.banner_views),
+      views: num(row.views),
+    })),
+  };
+}
+
 export async function statsFor(businessId: string, days = 30) {
   const db = database();
   if (!db) return [];

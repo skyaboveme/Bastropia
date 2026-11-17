@@ -4,8 +4,12 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
+import { businesses } from '../data/businesses';
+import { placements } from '../data/commerce';
+import { deskAds } from '../lib/ads';
 import { listAlertSubscriptions } from '../lib/alertStore';
 import { deskAuthorized, deskKeyConfigured } from '../lib/auth';
+import { listBusinesses, listingDeskStats } from '../lib/businessDb';
 import { eventMarkdown, listIntake, readSponsors, readUpgrades } from '../lib/intake';
 import { money } from '../lib/format';
 import { formatMedium } from '../lib/time';
@@ -16,13 +20,36 @@ const orders = allowed ? await listIntake() : [];
 const alertLists = allowed ? await listAlertSubscriptions().catch(() => []) : [];
 const sponsors = allowed ? await readSponsors() : [];
 const upgrades = allowed ? await readUpgrades() : [];
+const rows = allowed ? await listBusinesses().catch(() => []) : [];
+const listingStats = allowed
+  ? await listingDeskStats().catch(() => ({ views: 0, site_clicks: 0, phone_clicks: 0, banner_views: 0, banners: [] }))
+  : { views: 0, site_clicks: 0, phone_clicks: 0, banner_views: 0, banners: [] };
+const ads = allowed ? await deskAds().catch(() => []) : [];
+
+const q = (Astro.url.searchParams.get('q') || '').trim();
+const needle = q.toLowerCase();
+const matched = rows
+  .filter((row) => !needle || `${row.name} ${row.category} ${row.city} ${row.phone} ${row.slug}`.toLowerCase().includes(needle))
+  .sort((a, b) => a.name.localeCompare(b.name));
+const shown = needle ? matched.slice(0, 40) : [];
+const liveListings = rows.filter((row) => row.status === 'live').length;
+const waitingListings = rows.filter((row) => row.status === 'pending').length;
+const hiddenListings = rows.filter((row) => row.status === 'hidden').length;
+const pages = [...businesses].sort((a, b) => a.name.localeCompare(b.name));
+const advertiserRows = [...ads].sort((a, b) => b.impressions - a.impressions || a.name.localeCompare(b.name));
+const showingAds = ads.filter((ad) => ad.active).length;
+const adViews = ads.reduce((sum, ad) => sum + ad.impressions, 0);
+const adClicks = ads.reduce((sum, ad) => sum + ad.clicks, 0);
+const pendingOrders = orders.filter((order) => order.status === 'pending').length;
+const count = (value: number) => value.toLocaleString('en-US');
+const placementName = (id: string) => placements.find((item) => item.id === id)?.name || id;
 ---
 
-<BaseLayout title="Desk" description="Orders, listing submissions, and newsletter signups for Bastropia." noindex>
+<BaseLayout title="Desk" description="Listings, custom pages, advertisers, and orders for Bastropia." noindex>
   <PageHead
     kicker="Publisher"
     title="The desk"
-    lede="Reservations land here. Place an ad or apply an upgrade after you have been paid. Nothing on this page is public."
+    lede="Counts for the directory, the branded pages, and the banners. Edit a listing, then check who is showing and how the banners are doing."
   />
   <div class="wrap">
     {!allowed && locked && (
@@ -41,48 +68,263 @@ const upgrades = allowed ? await readUpgrades() : [];
     )}
     {allowed && (
       <>
-        <p class="cluster"><a class="button" href="/desk/ads">Advertisers</a> <a class="button" href="/desk/businesses">Businesses</a></p>
-        <p class="meta">{orders.length} saved. {sponsors.length} ad{sponsors.length === 1 ? '' : 's'} on the site. {upgrades.length} listing upgrade{upgrades.length === 1 ? '' : 's'} applied. {alertLists.length} status alert{alertLists.length === 1 ? '' : 's'}.</p>
-        {alertLists.length > 0 && (
-          <section class="section">
-            <h2>Status lists</h2>
-            {alertLists.map((item) => (
-              <p>{item.topic}{item.road ? ` · ${item.road}` : ''} · {item.email}{item.phone ? ` · ${item.phone}` : ''}</p>
-            ))}
-          </section>
-        )}
-        <div class="card-list" style="margin-top:1rem;">
-          {orders.map((order) => (
-            <article class="detail-main">
-              <p class="kicker">{order.status} · {order.type} · {formatMedium(new Date(order.createdAt))}</p>
-              <h2>{order.id}</h2>
-              <p>{order.summary}</p>
-              {order.total > 0 && <p class="price-line">{money(order.total)}</p>}
-              <dl class="facts">
-                {Object.entries(order.fields).map(([key, value]) => (
-                  <div>
-                    <dt>{key}</dt>
-                    <dd>{value}</dd>
-                  </div>
+        <p class="cluster">
+          <a class="button" href="#listings">Edit listings</a>
+          <a class="button" href="/desk/ads">Advertisers</a>
+          <a class="button button-ghost" href="#orders">Orders</a>
+        </p>
+
+        <section class="desk-board" aria-label="What you can update">
+          <h2>What you can update</h2>
+          <ul class="desk-figures">
+            <li>
+              <strong>{count(rows.length)}</strong>
+              <span>Directory listings</span>
+              <em>{count(liveListings)} live · {count(waitingListings)} waiting · {count(hiddenListings)} hidden</em>
+            </li>
+            <li>
+              <strong>{count(pages.length)}</strong>
+              <span>Custom pages</span>
+              <em>Branded pages such as /BarronHomes</em>
+            </li>
+            <li>
+              <strong>{count(showingAds)}</strong>
+              <span>Advertisers showing</span>
+              <em>{count(ads.length)} on file · {count(adViews)} views · {count(adClicks)} clicks</em>
+            </li>
+            <li>
+              <strong>{count(pendingOrders)}</strong>
+              <span>Orders waiting</span>
+              <em>{count(orders.length)} saved · {count(sponsors.length)} ads placed · {count(upgrades.length)} upgrades</em>
+            </li>
+          </ul>
+        </section>
+
+        <section class="section" id="listings">
+          <h2>Directory listings</h2>
+          <p class="meta">Last 30 days · {count(listingStats.views)} listing views · {count(listingStats.site_clicks)} website clicks · {count(listingStats.phone_clicks)} phone clicks · {count(listingStats.banner_views)} banner views.</p>
+          <form class="form" method="get" action="/desk">
+            <label class="field wide"><span>Find a listing to edit</span><input name="q" value={q} placeholder="Name, town, or phone" /></label>
+            <button class="button" type="submit">Search</button>
+          </form>
+          {needle && (
+            <p class="meta">{count(matched.length)} match{matched.length === 1 ? '' : 'es'}{shown.length < matched.length ? ` · showing ${count(shown.length)}` : ''}.</p>
+          )}
+          {shown.length > 0 && (
+            <div class="desk-table-wrap">
+              <table class="stat-table">
+                <thead>
+                  <tr>
+                    <th>Listing</th>
+                    <th>Status</th>
+                    <th>Category</th>
+                    <th>Town</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shown.map((row) => (
+                    <tr>
+                      <td>{row.name}</td>
+                      <td>{row.status}</td>
+                      <td>{row.category}</td>
+                      <td>{row.city}</td>
+                      <td>
+                        <a href={`/desk/businesses/${row.id}`}>Edit</a>
+                        {row.status === 'live' && <> · <a href={`/${row.slug}`}>Page</a></>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {needle && !matched.length && <p>No listings match that search.</p>}
+          {!needle && <p class="meta">Search by name, town, or phone. Matches open in the listing editor.</p>}
+          <p><a href="/desk/businesses">Add a listing or browse the full list</a></p>
+        </section>
+
+        <section class="section" id="pages">
+          <h2>Custom pages</h2>
+          <p class="meta">{count(pages.length)} branded pages. Each one has its own address, like bastropia.com/BarronHomes.</p>
+          <div class="desk-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>Page</th>
+                  <th>Category</th>
+                  <th>Place</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pages.map((page) => (
+                  <tr>
+                    <td>{page.name}</td>
+                    <td><a href={`/${page.slug}`}>/{page.slug}</a></td>
+                    <td>{page.category}</td>
+                    <td>{page.place}</td>
+                  </tr>
                 ))}
-              </dl>
-              {order.type === 'event' && <pre class="markdown">{eventMarkdown(order.fields)}</pre>}
-              {order.type === 'tip' && order.fields.photoKey && (
-                <p><a class="button button-ghost" href={`/api/tip-image/${order.id}`}>Open tip photo</a></p>
-              )}
-              {order.status === 'pending' && (
-                <form class="cluster" action="/api/desk" method="post">
-                  <input type="hidden" name="id" value={order.id} />
-                  {order.type === 'ad' && <button class="button" name="action" value="place">Place this ad</button>}
-                  {order.type === 'upgrade' && <button class="button" name="action" value="upgrade">Apply upgrade</button>}
-                  <button class="button button-ghost" name="action" value="decline">Decline</button>
-                </form>
-              )}
-            </article>
-          ))}
-          {!orders.length && <p>No reservations yet. An ad, an upgrade, a listing, or a newsletter signup will show up here.</p>}
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="banners">
+          <h2>Advertisers and banners</h2>
+          <p class="meta">Views and clicks are the totals recorded for each banner.</p>
+          <p><a class="button button-ghost" href="/desk/ads">Manage advertisers</a></p>
+          {advertiserRows.length > 0 && (
+            <div class="desk-table-wrap">
+              <table class="stat-table">
+                <thead>
+                  <tr>
+                    <th>Advertiser</th>
+                    <th>Status</th>
+                    <th>Pages</th>
+                    <th>Views</th>
+                    <th>Clicks</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {advertiserRows.map((ad) => (
+                    <tr>
+                      <td>{ad.name}</td>
+                      <td>{ad.active ? 'Showing' : 'Paused'}</td>
+                      <td>{ad.placements.map((id) => placementName(id)).join(', ')}</td>
+                      <td>{count(ad.impressions)}</td>
+                      <td>{count(ad.clicks)}</td>
+                      <td><a href={`/ad/${ad.token}`}>Report</a></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {!advertiserRows.length && <p>No advertisers are on file.</p>}
+          {listingStats.banners.length > 0 && (
+            <>
+              <h3>Directory listing banners</h3>
+              <p class="meta">Last 30 days. These banners are attached to a directory listing.</p>
+              <div class="desk-table-wrap">
+                <table class="stat-table">
+                  <thead>
+                    <tr>
+                      <th>Listing</th>
+                      <th>Placement</th>
+                      <th>Status</th>
+                      <th>Banner views</th>
+                      <th>Listing views</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {listingStats.banners.map((banner) => (
+                      <tr>
+                        <td>{banner.name}</td>
+                        <td>{placementName(banner.banner_placement)}</td>
+                        <td>{banner.status}</td>
+                        <td>{count(banner.banner_views)}</td>
+                        <td>{count(banner.views)}</td>
+                        <td><a href={`/desk/businesses/${banner.id}`}>Edit</a></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section class="section" id="orders">
+          <h2>Orders</h2>
+          <p class="meta">{count(orders.length)} saved. {count(sponsors.length)} ad{sponsors.length === 1 ? '' : 's'} on the site. {count(upgrades.length)} listing upgrade{upgrades.length === 1 ? '' : 's'} applied. {count(alertLists.length)} status alert{alertLists.length === 1 ? '' : 's'}.</p>
+          {alertLists.length > 0 && (
+            <section class="section">
+              <h2>Status lists</h2>
+              {alertLists.map((item) => (
+                <p>{item.topic}{item.road ? ` · ${item.road}` : ''} · {item.email}{item.phone ? ` · ${item.phone}` : ''}</p>
+              ))}
+            </section>
+          )}
+          <div class="card-list" style="margin-top:1rem;">
+            {orders.map((order) => (
+              <article class="detail-main">
+                <p class="kicker">{order.status} · {order.type} · {formatMedium(new Date(order.createdAt))}</p>
+                <h2>{order.id}</h2>
+                <p>{order.summary}</p>
+                {order.total > 0 && <p class="price-line">{money(order.total)}</p>}
+                <dl class="facts">
+                  {Object.entries(order.fields).map(([key, value]) => (
+                    <div>
+                      <dt>{key}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {order.type === 'event' && <pre class="markdown">{eventMarkdown(order.fields)}</pre>}
+                {order.type === 'tip' && order.fields.photoKey && (
+                  <p><a class="button button-ghost" href={`/api/tip-image/${order.id}`}>Open tip photo</a></p>
+                )}
+                {order.status === 'pending' && (
+                  <form class="cluster" action="/api/desk" method="post">
+                    <input type="hidden" name="id" value={order.id} />
+                    {order.type === 'ad' && <button class="button" name="action" value="place">Place this ad</button>}
+                    {order.type === 'upgrade' && <button class="button" name="action" value="upgrade">Apply upgrade</button>}
+                    <button class="button button-ghost" name="action" value="decline">Decline</button>
+                  </form>
+                )}
+              </article>
+            ))}
+            {!orders.length && <p>No reservations yet. An ad, an upgrade, a listing, or a newsletter signup will show up here.</p>}
+          </div>
+        </section>
       </>
     )}
   </div>
 </BaseLayout>
+
+<style>
+  .desk-board { margin: 0.4rem 0 1.4rem; }
+  .desk-board h2 { margin: 0 0 0.8rem; font-size: clamp(1.7rem, 3vw, 2.3rem); }
+  .desk-figures {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem 1.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .desk-figures strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 0.95;
+    color: var(--pine-deep);
+  }
+  .desk-figures span { display: block; margin-top: 0.25rem; }
+  .desk-figures em {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--ink-soft);
+    font-style: normal;
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+  .desk-table-wrap { overflow-x: auto; margin-top: 0.6rem; }
+  .section h3 {
+    margin: 1.4rem 0 0.4rem;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  @media (max-width: 800px) {
+    .desk-figures { grid-template-columns: 1fr 1fr; }
+  }
+</style>
