@@ -1,0 +1,252 @@
+---
+/**
+ * One restaurant card for Eats Beat: town badge, address, Happy Hour and
+ * Specials blocks, and a source link. Used from MDX news stories.
+ */
+interface Item {
+  day?: string;
+  text: string;
+}
+
+interface Block {
+  when?: string;
+  items?: Item[] | string[];
+  note?: string;
+}
+
+interface Props {
+  name: string;
+  town: 'Bastrop' | 'Elgin' | 'Smithville' | 'Paige';
+  address: string;
+  website?: string;
+  sourceLabel?: string;
+  phone?: string;
+  hours?: string;
+  happyHour?: Block | null;
+  specials?: Block | null;
+  wide?: boolean;
+}
+
+const {
+  name,
+  town,
+  address,
+  website,
+  sourceLabel = 'Venue website',
+  phone,
+  hours,
+  happyHour = null,
+  specials = null,
+  wide = false,
+} = Astro.props;
+
+const townSlug = town.toLowerCase();
+
+function lines(block: Block | null | undefined): { day?: string; text: string }[] {
+  if (!block?.items?.length) return [];
+  return block.items.map((item) => (typeof item === 'string' ? { text: item } : item));
+}
+
+const hhLines = lines(happyHour);
+const spLines = lines(specials);
+const hasHappyHour = Boolean(happyHour && (happyHour.when || hhLines.length || happyHour.note));
+const hasSpecials = Boolean(specials && (specials.when || spLines.length || specials.note));
+---
+
+<article class:list={['deal-card', `deal-card-${townSlug}`, wide && 'is-wide']}>
+  <header class="deal-card-head">
+    <div class="deal-card-title">
+      <h3>{name}</h3>
+      <p class="deal-card-address">{address}</p>
+      {hours && <p class="deal-card-hours">{hours}</p>}
+    </div>
+    <span class="deal-town-badge">{town}</span>
+  </header>
+
+  <div class="deal-card-blocks">
+    <section class="deal-panel deal-panel-hh">
+      <h4><span class="deal-icon" aria-hidden="true">🕔</span> Happy Hour</h4>
+      {hasHappyHour ? (
+        <>
+          {happyHour?.when && <p class="deal-when">{happyHour.when}</p>}
+          {hhLines.length > 0 && (
+            <ul>
+              {hhLines.map((item) => (
+                <li>
+                  {item.day && <strong>{item.day}:</strong>} {item.text}
+                </li>
+              ))}
+            </ul>
+          )}
+          {happyHour?.note && <p class="deal-card-note">{happyHour.note}</p>}
+        </>
+      ) : (
+        <p class="deal-empty">No posted happy hour</p>
+      )}
+    </section>
+
+    <section class="deal-panel deal-panel-sp">
+      <h4><span class="deal-icon" aria-hidden="true">🍽️</span> Specials</h4>
+      {hasSpecials ? (
+        <>
+          {specials?.when && <p class="deal-when">{specials.when}</p>}
+          {spLines.length > 0 && (
+            <ul>
+              {spLines.map((item) => (
+                <li>
+                  {item.day && <strong>{item.day}:</strong>} {item.text}
+                </li>
+              ))}
+            </ul>
+          )}
+          {specials?.note && <p class="deal-card-note">{specials.note}</p>}
+        </>
+      ) : (
+        <p class="deal-empty">No posted specials</p>
+      )}
+    </section>
+  </div>
+
+  {(website || phone) && (
+    <p class="deal-card-source">
+      {website && (
+        <a href={website} target="_blank" rel="noopener noreferrer">{sourceLabel}</a>
+      )}
+      {website && phone && <span aria-hidden="true"> · </span>}
+      {phone && <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>}
+    </p>
+  )}
+</article>
+
+<style>
+  .deal-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    padding: 0.85rem 0.95rem 0.9rem;
+    display: grid;
+    gap: 0.7rem;
+    min-width: 0;
+    break-inside: avoid;
+  }
+  .deal-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 0.7rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .deal-card-title h3 {
+    font-family: var(--serif);
+    font-size: 1.32rem;
+    font-weight: 620;
+    line-height: 1.15;
+    margin: 0;
+  }
+  .deal-card-address,
+  .deal-card-hours {
+    margin: 0.2rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+  .deal-town-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    background: var(--paper-2);
+    color: var(--pine-deep);
+  }
+  .deal-card-bastrop .deal-town-badge { background: var(--ok-bg); color: var(--pine-deep); }
+  .deal-card-elgin .deal-town-badge { background: #e4f6fa; color: var(--river-deep); }
+  .deal-card-smithville .deal-town-badge { background: #f8e7c0; color: var(--sun-deep); }
+  .deal-card-paige .deal-town-badge { background: var(--paper-2); color: var(--ink); }
+
+  .deal-card-blocks {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+  @media (min-width: 640px) {
+    .deal-card-blocks { grid-template-columns: 1fr 1fr; align-items: start; }
+    .deal-card.is-wide .deal-card-blocks { grid-template-columns: 1fr 1.15fr; }
+  }
+
+  .deal-panel {
+    min-width: 0;
+    padding: 0.55rem 0.65rem 0.65rem;
+    border-radius: 0.35rem;
+    background: var(--paper);
+  }
+  .deal-panel-hh { border-left: 3px solid var(--river-deep); }
+  .deal-panel-sp { border-left: 3px solid var(--sun-deep); }
+  .deal-panel h4 {
+    margin: 0 0 0.35rem;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .deal-panel-hh h4 { color: var(--river-deep); }
+  .deal-panel-sp h4 { color: var(--sun-deep); }
+  .deal-icon { font-size: 0.95rem; letter-spacing: 0; text-transform: none; }
+
+  .deal-when {
+    margin: 0 0 0.35rem;
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    font-weight: 650;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .deal-panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.28rem;
+  }
+  .deal-panel li {
+    margin: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .deal-panel li strong {
+    font-weight: 700;
+    color: var(--pine-deep);
+  }
+  .deal-card-note,
+  .deal-empty {
+    margin: 0.35rem 0 0;
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+  .deal-empty { margin: 0; font-style: italic; }
+
+  .deal-card-source {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+  .deal-card-source a { color: var(--river-deep); text-decoration: none; }
+  .deal-card-source a:hover { text-decoration: underline; text-underline-offset: 0.1em; }
+</style>
