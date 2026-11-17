@@ -1,0 +1,2 @@
+ALTER TABLE businesses ADD COLUMN hours TEXT NOT NULL DEFAULT '';
+ALTER TABLE businesses ADD COLUMN daily_special TEXT NOT NULL DEFAULT '';

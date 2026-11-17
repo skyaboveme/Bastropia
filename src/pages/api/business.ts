@@ -59,6 +59,8 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
         contact: String(form.get('contact') || ''),
         address: String(form.get('address') || ''),
         details: String(form.get('details') || ''),
+        hours: String(form.get('hours') || ''),
+        daily_special: String(form.get('daily_special') || ''),
       });
     }
     if (action === 'special') {

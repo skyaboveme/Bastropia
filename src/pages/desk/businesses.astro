@@ -6,20 +6,25 @@ import PageHead from '../../components/PageHead.astro';
 import FormError from '../../components/FormError.astro';
 import { cities } from '../../data/taxonomy';
 import { deskAuthorized, deskKeyConfigured } from '../../lib/auth';
-import { accountForBusiness, listBusinesses } from '../../lib/businessDb';
+import { listBusinesses } from '../../lib/businessDb';
 
 const allowed = deskAuthorized(Astro.url.hostname, Astro.cookies.get('bastropia_desk')?.value);
 const rows = allowed ? await listBusinesses() : [];
-const accounts = allowed
-  ? await Promise.all(rows.map(async (row) => ({ id: row.id, account: await accountForBusiness(row.id) })))
-  : [];
-const usernameOf = new Map(accounts.map((item) => [item.id, item.account?.username ?? '']));
-const towns = cities.filter((city) => city !== 'Countywide');
+const q = (Astro.url.searchParams.get('q') || '').trim().toLowerCase();
+const matched = rows
+  .filter((row) => !q || `${row.name} ${row.category} ${row.city} ${row.phone} ${row.slug}`.toLowerCase().includes(q))
+  .sort((a, b) => a.name.localeCompare(b.name));
+const shown = matched.slice(0, q ? 60 : 40);
+const towns = [...cities.filter((city) => city !== 'Countywide'), 'Bastrop County'];
 const saved = Astro.url.searchParams.get('saved');
 ---
 
-<BaseLayout title="Business desk" description="Approve free listings and set business logins." noindex>
-  <PageHead kicker="Publisher" title="Businesses" lede="Free listings stay pending until you publish them and give the owner a username and password." />
+<BaseLayout title="Business desk" description="Add and update directory listings." noindex>
+  <PageHead
+    kicker="Publisher"
+    title="Directory"
+    lede="Each live listing gets a page at bastropia.com/its-name. Hours and the daily special stay blank until you fill them in."
+  />
   <div class="wrap">
     {!allowed && (
       <form class="form" action="/api/desk" method="post">
@@ -34,60 +39,45 @@ const saved = Astro.url.searchParams.get('saved');
     {allowed && (
       <>
         <p><a class="button button-ghost" href="/desk">Back to the desk</a></p>
-        {saved && <p>Saved {saved}.</p>}
+        {saved && <p>Saved.</p>}
         <FormError />
         <section class="section">
-          <h2>Add a business</h2>
+          <h2>Add a listing</h2>
           <form class="form" action="/api/desk-business" method="post">
             <input type="hidden" name="action" value="create" />
             <div class="fields">
               <label class="field wide"><span>Name</span><input name="name" required /></label>
+              <label class="field"><span>Page address</span><input name="slug" placeholder="barronhomes" /></label>
               <label class="field"><span>Category</span><input name="category" required /></label>
               <label class="field"><span>Town</span><select name="city" required>{towns.map((city) => <option value={city}>{city}</option>)}</select></label>
-              <label class="field"><span>Phone</span><input name="phone" required /></label>
-              <label class="field"><span>Email</span><input name="email" type="email" required /></label>
+              <label class="field"><span>Phone</span><input name="phone" /></label>
               <label class="field"><span>Website</span><input name="website" /></label>
-              <label class="field wide"><span>Details</span><textarea name="details" required minlength="20" rows="4"></textarea></label>
-              <label class="field"><span>Username</span><input name="username" required minlength="3" /></label>
-              <label class="field"><span>Password</span><input name="password" type="text" required minlength="8" autocomplete="new-password" /></label>
+              <label class="field wide"><span>Address</span><input name="address" /></label>
+              <label class="field wide"><span>Hours</span><input name="hours" placeholder="Mon–Fri 8–5" /></label>
+              <label class="field wide"><span>Daily special</span><input name="daily_special" /></label>
+              <label class="field wide"><span>Details</span><textarea name="details" rows="4"></textarea></label>
+              <label class="field"><span>Owner username</span><input name="username" minlength="3" /></label>
+              <label class="field"><span>Owner password</span><input name="password" type="text" minlength="8" autocomplete="new-password" /></label>
             </div>
-            <button class="button" type="submit">Publish and create login</button>
+            <button class="button" type="submit">Publish listing</button>
           </form>
         </section>
         <section class="section">
           <h2>Listings</h2>
-          {rows.map((row) => (
-            <article class="detail-main">
-              <p class="kicker">{row.status}{usernameOf.get(row.id) ? ` · ${usernameOf.get(row.id)}` : ' · no login'}</p>
-              <h2>{row.name}</h2>
-              <p>{row.category} · {row.city} · {row.phone} · {row.email}</p>
-              <p>{row.details}</p>
-              <form class="cluster" action="/api/desk-business" method="post">
-                <input type="hidden" name="id" value={row.id} />
-                <input type="hidden" name="name" value={row.name} />
-                <input type="hidden" name="category" value={row.category} />
-                <input type="hidden" name="city" value={row.city} />
-                <input type="hidden" name="areas" value={row.areas} />
-                <input type="hidden" name="phone" value={row.phone} />
-                <input type="hidden" name="website" value={row.website} />
-                <input type="hidden" name="email" value={row.email} />
-                <input type="hidden" name="contact" value={row.contact} />
-                <input type="hidden" name="address" value={row.address} />
-                <input type="hidden" name="details" value={row.details} />
-                {row.status !== 'live' && <button class="button" name="action" value="approve">Publish</button>}
-                {row.status === 'live' && <button class="button button-ghost" name="action" value="hide">Hide</button>}
-                {row.status === 'hidden' && <button class="button" name="action" value="live">Show again</button>}
-              </form>
-              <form class="form" action="/api/desk-business" method="post">
-                <input type="hidden" name="action" value="password" />
-                <input type="hidden" name="id" value={row.id} />
-                <label class="field"><span>Username</span><input name="username" required value={usernameOf.get(row.id) || ''} /></label>
-                <label class="field"><span>New password</span><input name="password" type="text" required minlength="8" /></label>
-                <button class="button button-ghost" type="submit">Set login</button>
-              </form>
-            </article>
-          ))}
-          {!rows.length && <p>No business submissions yet.</p>}
+          <form class="form" method="get">
+            <label class="field wide"><span>Find a listing</span><input name="q" value={q} placeholder="Name, town, or phone" /></label>
+            <button class="button" type="submit">Search</button>
+          </form>
+          <p class="meta">{matched.length} listing{matched.length === 1 ? '' : 's'}{shown.length < matched.length ? ` · showing ${shown.length}` : ''}.</p>
+          <ul class="biz-list">
+            {shown.map((row) => (
+              <li>
+                <a href={`/desk/businesses/${row.id}`}>{row.name}</a>
+                <span class="meta"> {row.status} · {row.category} · {row.city}{row.phone ? ` · ${row.phone}` : ''}</span>
+              </li>
+            ))}
+          </ul>
+          {!matched.length && <p>No listings match that search.</p>}
         </section>
       </>
     )}

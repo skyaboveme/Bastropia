@@ -42,7 +42,7 @@ const towns = cities.filter((city) => city !== 'Countywide');
     {business && (
       <>
         <p class="cluster">
-          <a class="button button-ghost" href={`/directory/l/${business.slug}`}>View public listing</a>
+          <a class="button button-ghost" href={`/${business.slug}`}>View public listing</a>
           <form action="/api/business" method="post"><input type="hidden" name="action" value="logout" /><button class="button button-ghost" type="submit">Sign out</button></form>
         </p>
         <p class="meta">Last 30 days · {totals.views} listing views · {totals.site} website clicks · {totals.phone} phone clicks. Status: {business.status}.</p>
@@ -59,12 +59,14 @@ const towns = cities.filter((city) => city !== 'Countywide');
               </select>
             </label>
             <label class="field wide"><span>Towns you serve</span><input name="areas" value={business.areas} /></label>
-            <label class="field"><span>Phone</span><input name="phone" required value={business.phone} /></label>
+            <label class="field"><span>Phone</span><input name="phone" value={business.phone} /></label>
             <label class="field"><span>Website</span><input name="website" value={business.website} /></label>
             <label class="field"><span>Contact name</span><input name="contact" value={business.contact} /></label>
-            <label class="field"><span>Email</span><input name="email" type="email" required value={business.email} /></label>
+            <label class="field"><span>Email</span><input name="email" type="email" value={business.email} /></label>
             <label class="field wide"><span>Address</span><input name="address" value={business.address} /></label>
-            <label class="field wide"><span>What neighbors should know</span><textarea name="details" required rows="5">{business.details}</textarea></label>
+            <label class="field wide"><span>Hours</span><input name="hours" value={business.hours} placeholder="Mon–Fri 8–5" /></label>
+            <label class="field wide"><span>Daily special</span><input name="daily_special" value={business.daily_special} /></label>
+            <label class="field wide"><span>What neighbors should know</span><textarea name="details" rows="5">{business.details}</textarea></label>
           </div>
           <button class="button" type="submit">Save listing</button>
         </form>

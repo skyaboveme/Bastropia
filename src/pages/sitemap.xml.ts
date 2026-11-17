@@ -81,7 +81,7 @@ export const GET: APIRoute = async () => {
   const entries: Entry[] = [
     ...hubs,
     ...businesses.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
-    ...listed.map((business) => ({ path: `/directory/l/${business.slug}`, priority: '0.6' })),
+    ...listed.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
     ...events.map((event) => ({
       path: `/events/${event.id}`,
       lastmod: event.data.start,

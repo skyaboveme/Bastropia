@@ -22,6 +22,8 @@ export type DirectoryEntry = {
   source: DirectorySource;
   partnerSlug?: string;
   areas?: string;
+  hours?: string;
+  dailySpecial?: string;
 };
 
 type ChamberRecord = {

@@ -15,9 +15,16 @@ import { phoneHref } from '../lib/format';
 import { eventKey, formatMedium, labelFromKey } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
 import { activeUpgrades, resolveTier } from '../lib/intake';
+import ListingPage from '../components/ListingPage.astro';
+import { bumpStat, getBusiness, listBizEvents, listSpecials } from '../lib/businessDb';
 
 const town = townBySlug(Astro.params.town ?? '');
-if (!town) Astro.response.status = 404;
+const listing = town ? null : await getBusiness(Astro.params.town ?? '');
+const liveListing = listing?.status === 'live' ? listing : null;
+if (liveListing) await bumpStat(liveListing.id, 'views');
+const listingSpecials = liveListing ? await listSpecials(liveListing.id) : [];
+const listingEvents = liveListing ? await listBizEvents(liveListing.id) : [];
+if (!town && !liveListing) Astro.response.status = 404;
 
 const now = new Date();
 const today = eventKey(now);
@@ -48,7 +55,9 @@ const townScores = scores.filter((score) => town?.football.includes(score.id));
 const schools = footballSchools.filter((school) => town?.football?.includes(school.id));
 ---
 
-{!town ? (
+{liveListing ? (
+  <ListingPage business={liveListing} specials={listingSpecials} events={listingEvents} />
+) : !town ? (
   <BaseLayout title="Page not found" description="That page is not on the Bastropia desk." noindex>
     <PageHead kicker="404" title="Nothing is filed there" lede="The town pages are Bastrop, Elgin, Smithville, Cedar Creek, McDade, and Paige." />
   </BaseLayout>

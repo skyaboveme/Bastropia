@@ -29,6 +29,8 @@ export type Biz = {
   contact: string;
   address: string;
   details: string;
+  hours: string;
+  daily_special: string;
   status: BizStatus;
   created_at: string;
   updated_at: string;
@@ -105,11 +107,64 @@ function clean(value: unknown, max = 400) {
     .slice(0, max);
 }
 
+const reservedSlugs = new Set([
+  'bastrop',
+  'elgin',
+  'smithville',
+  'cedar-creek',
+  'mcdade',
+  'paige',
+  'rosanky',
+  'directory',
+  'eats',
+  'government',
+  'news',
+  'events',
+  'weather',
+  'scores',
+  'videos',
+  'groups',
+  'development',
+  'advertise',
+  'search',
+  'about',
+  'desk',
+  'business',
+  'businesses',
+  'tips',
+  'thanks',
+  'alerts',
+  'now',
+  'newsletter',
+  'submit',
+  'upgrade',
+  'phone-numbers',
+  'new-here',
+  'schools',
+  'roads',
+  'go-vote',
+  'election-night',
+  'results',
+  'calendar',
+  'this-weekend',
+  'burn-ban',
+  'sitemap',
+  'api',
+  'go',
+  'ics',
+  'social',
+  'barronhomes',
+  'stringprairieheatingandair',
+  'barefootflowerfarms',
+  'lostpinestoyota',
+  'rosatexlandscaping',
+]);
+
 async function uniqueSlug(name: string, exceptId = '') {
   const db = database();
   if (!db) throw new Error('database unavailable');
   const base = slugify(name);
-  let slug = base;
+  let slug = reservedSlugs.has(base) ? `${base}-listing` : base;
   for (let n = 2; n < 50; n += 1) {
     const row = await db.prepare('SELECT id FROM businesses WHERE slug = ?').bind(slug).first<{ id: string }>();
     if (!row || row.id === exceptId) return slug;
@@ -120,41 +175,50 @@ async function uniqueSlug(name: string, exceptId = '') {
 
 export async function insertBusiness(input: {
   name: string;
+  slug?: string;
   category: string;
   city: string;
   areas?: string;
-  phone: string;
+  phone?: string;
   website?: string;
-  email: string;
+  email?: string;
   contact?: string;
   address?: string;
-  details: string;
+  details?: string;
+  hours?: string;
+  daily_special?: string;
   status?: BizStatus;
 }) {
   const db = database();
   if (!db) throw new Error('database unavailable');
+  const name = clean(input.name, 100);
+  const category = clean(input.category, 60);
+  const city = clean(input.city, 40);
+  if (!name || !category || !city) throw new Error('Name, category, and town are required.');
   const now = new Date().toISOString();
   const row: Biz = {
     id: id('biz'),
-    slug: await uniqueSlug(input.name),
-    name: clean(input.name, 100),
-    category: clean(input.category, 60),
-    city: clean(input.city, 40),
+    slug: await uniqueSlug(input.slug || name),
+    name,
+    category,
+    city,
     areas: clean(input.areas, 200),
     phone: clean(input.phone, 30),
     website: clean(input.website, 300),
     email: clean(input.email, 160).toLowerCase(),
     contact: clean(input.contact, 80),
-    address: clean(input.address, 160),
+    address: clean(input.address, 200),
     details: clean(input.details, 1200),
+    hours: clean(input.hours, 400),
+    daily_special: clean(input.daily_special, 400),
     status: input.status ?? 'pending',
     created_at: now,
     updated_at: now,
   };
   await db
     .prepare(
-      `INSERT INTO businesses (id, slug, name, category, city, areas, phone, website, email, contact, address, details, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO businesses (id, slug, name, category, city, areas, phone, website, email, contact, address, details, hours, daily_special, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       row.id,
@@ -169,6 +233,8 @@ export async function insertBusiness(input: {
       row.contact,
       row.address,
       row.details,
+      row.hours,
+      row.daily_special,
       row.status,
       row.created_at,
       row.updated_at,
@@ -179,31 +245,35 @@ export async function insertBusiness(input: {
 
 export async function updateBusiness(
   businessId: string,
-  input: Partial<Pick<Biz, 'name' | 'category' | 'city' | 'areas' | 'phone' | 'website' | 'email' | 'contact' | 'address' | 'details' | 'status'>>,
+  input: Partial<Pick<Biz, 'slug' | 'name' | 'category' | 'city' | 'areas' | 'phone' | 'website' | 'email' | 'contact' | 'address' | 'details' | 'hours' | 'daily_special' | 'status'>>,
 ) {
   const current = await getBusiness(businessId);
   const db = database();
   if (!current || !db) return null;
-  const name = input.name ? clean(input.name, 100) : current.name;
+  const name = input.name !== undefined ? clean(input.name, 100) || current.name : current.name;
+  const requested = input.slug !== undefined ? slugify(input.slug) : '';
+  const slug = requested && requested !== current.slug ? await uniqueSlug(requested, current.id) : current.slug;
   const next: Biz = {
     ...current,
     name,
-    slug: name === current.name ? current.slug : await uniqueSlug(name, current.id),
-    category: input.category ? clean(input.category, 60) : current.category,
-    city: input.city ? clean(input.city, 40) : current.city,
+    slug,
+    category: input.category !== undefined ? clean(input.category, 60) || current.category : current.category,
+    city: input.city !== undefined ? clean(input.city, 40) || current.city : current.city,
     areas: input.areas !== undefined ? clean(input.areas, 200) : current.areas,
-    phone: input.phone ? clean(input.phone, 30) : current.phone,
+    phone: input.phone !== undefined ? clean(input.phone, 30) : current.phone,
     website: input.website !== undefined ? clean(input.website, 300) : current.website,
-    email: input.email ? clean(input.email, 160).toLowerCase() : current.email,
+    email: input.email !== undefined ? clean(input.email, 160).toLowerCase() : current.email,
     contact: input.contact !== undefined ? clean(input.contact, 80) : current.contact,
-    address: input.address !== undefined ? clean(input.address, 160) : current.address,
-    details: input.details ? clean(input.details, 1200) : current.details,
+    address: input.address !== undefined ? clean(input.address, 200) : current.address,
+    details: input.details !== undefined ? clean(input.details, 1200) : current.details,
+    hours: input.hours !== undefined ? clean(input.hours, 400) : current.hours || '',
+    daily_special: input.daily_special !== undefined ? clean(input.daily_special, 400) : current.daily_special || '',
     status: input.status ?? current.status,
     updated_at: new Date().toISOString(),
   };
   await db
     .prepare(
-      `UPDATE businesses SET slug = ?, name = ?, category = ?, city = ?, areas = ?, phone = ?, website = ?, email = ?, contact = ?, address = ?, details = ?, status = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE businesses SET slug = ?, name = ?, category = ?, city = ?, areas = ?, phone = ?, website = ?, email = ?, contact = ?, address = ?, details = ?, hours = ?, daily_special = ?, status = ?, updated_at = ? WHERE id = ?`,
     )
     .bind(
       next.slug,
@@ -217,6 +287,8 @@ export async function updateBusiness(
       next.contact,
       next.address,
       next.details,
+      next.hours,
+      next.daily_special,
       next.status,
       next.updated_at,
       next.id,
@@ -245,22 +317,26 @@ export async function listLiveBusinesses() {
   return rows.results ?? [];
 }
 
+const directoryTowns = new Set(['Bastrop', 'Elgin', 'Smithville', 'Cedar Creek', 'McDade', 'Paige', 'Rosanky']);
+
 export function toDirectoryEntry(biz: Biz): DirectoryEntry {
   const digits = biz.phone.replace(/\D/g, '');
-  const phoneHref = digits.length === 10 ? `tel:+1${digits}` : digits.length === 11 ? `tel:+${digits}` : undefined;
+  const phoneHref = digits.length === 10 ? `tel:+1${digits}` : digits.length === 11 && digits.startsWith('1') ? `tel:+${digits}` : undefined;
   return {
     id: biz.id,
     name: biz.name,
     category: biz.category,
-    place: biz.city,
-    town: biz.city,
-    phone: biz.phone,
+    place: biz.address || biz.city,
+    town: directoryTowns.has(biz.city) ? biz.city : null,
+    phone: biz.phone || undefined,
     phoneHref,
     website: biz.website || null,
-    href: `/directory/l/${biz.slug}`,
+    href: `/${biz.slug}`,
     summary: biz.details,
     source: 'listed',
     areas: `${biz.city} ${biz.areas}`,
+    hours: biz.hours || undefined,
+    dailySpecial: biz.daily_special || undefined,
   };
 }
 

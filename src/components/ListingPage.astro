@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { directoryBusiness } from '../lib/schema';
+import type { Biz, BizEvent, BizSpecial } from '../lib/businessDb';
+
+interface Props {
+  business: Biz;
+  specials?: BizSpecial[];
+  events?: BizEvent[];
+}
+
+const { business, specials = [], events = [] } = Astro.props;
+const phoneDigits = business.phone.replace(/\D/g, '');
+const upcoming = events.filter((item) => item.starts >= new Date().toISOString().slice(0, 10));
+const description = (business.details || `${business.category} in ${business.city}.`).slice(0, 160);
+---
+
+<BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]}>
+  <article class="wrap">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+      <p class="kicker">{business.category} · {business.city}</p>
+      <h1>{business.name}</h1>
+      {business.details && <p class="lede">{business.details}</p>}
+    </header>
+    {business.daily_special && (
+      <section class="notice" style="margin-top:1rem;">
+        <p class="kicker" style="color: var(--river);">Daily special</p>
+        <h2>{business.daily_special}</h2>
+      </section>
+    )}
+    <p class="cluster">
+      {phoneDigits && <a class="button" href={`/go/biz/${business.id}?to=phone`}>Call {business.phone}</a>}
+      {business.website && <a class="button button-ghost" href={`/go/biz/${business.id}?to=site`}>Website</a>}
+      <a class="button button-ghost" href={`/directory?category=${encodeURIComponent(business.category)}`}>More {business.category}</a>
+    </p>
+    <dl class="facts">
+      {business.address && <div><dt>Address</dt><dd>{business.address}</dd></div>}
+      {business.hours && <div><dt>Hours</dt><dd>{business.hours}</dd></div>}
+      {business.phone && <div><dt>Phone</dt><dd><a href={`/go/biz/${business.id}?to=phone`}>{business.phone}</a></dd></div>}
+      {business.website && <div><dt>Website</dt><dd><a href={`/go/biz/${business.id}?to=site`}>{business.website.replace(/^https?:\/\//, '')}</a></dd></div>}
+      {business.areas && <div><dt>Also serves</dt><dd>{business.areas}</dd></div>}
+    </dl>
+    {specials.length > 0 && (
+      <section class="section">
+        <h2>Specials</h2>
+        {specials.map((item) => (
+          <article>
+            <h3>{item.title}</h3>
+            <p>{item.details}</p>
+            {(item.starts || item.ends) && <p class="meta">{[item.starts, item.ends].filter(Boolean).join(' – ')}</p>}
+          </article>
+        ))}
+      </section>
+    )}
+    {upcoming.length > 0 && (
+      <section class="section">
+        <h2>Events</h2>
+        {upcoming.map((item) => (
+          <article>
+            <h3>{item.title}</h3>
+            <p class="meta">{item.starts}{item.ends ? ` – ${item.ends}` : ''}{item.venue ? ` · ${item.venue}` : ''}</p>
+            {item.details && <p>{item.details}</p>}
+          </article>
+        ))}
+      </section>
+    )}
+  </article>
+</BaseLayout>

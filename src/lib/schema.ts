@@ -229,7 +229,7 @@ export function directoryBusiness(business: {
   city: string;
   areas: string;
 }) {
-  const path = `/directory/l/${business.slug}`;
+  const path = `/${business.slug}`;
   const digits = business.phone.replace(/\D/g, '');
   const telephone = digits.length === 10 ? `+1${digits}` : digits.length === 11 ? `+${digits}` : '';
   const areas = business.areas.split(',').map((name) => name.trim()).filter(Boolean);
