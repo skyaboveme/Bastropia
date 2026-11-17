@@ -48,6 +48,7 @@ const governmentHero = path === '/government';
 const newsHero = path === '/news';
 const videosHero = path === '/videos';
 const eatsHero = path === '/eats';
+const churchesHero = path === '/churches';
 const chicagoHour = chicagoParts(now).hour;
 const nightHero = chicagoHour >= 18 || chicagoHour < 6;
 const sectionHero =
@@ -61,7 +62,8 @@ const sectionHero =
   governmentHero ||
   newsHero ||
   videosHero ||
-  eatsHero;
+  eatsHero ||
+  churchesHero;
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/weather', label: 'Weather' },
@@ -74,6 +76,7 @@ const links = [
   { href: '/groups', label: 'Social' },
   { href: '/directory', label: 'Directory' },
   { href: '/eats', label: 'Eats' },
+  { href: '/churches', label: 'Churches' },
   { href: '/advertise', label: 'Advertise' },
 ];
 const voteLink = { href: '/go-vote', label: 'Go Vote' };
@@ -177,6 +180,11 @@ function current(href: string) {
     {eatsHero && (
       <div class="header-hero is-eats" aria-hidden="true">
         <img class="is-on" src="/images/header/eats.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {churchesHero && (
+      <div class="header-hero is-directory" aria-hidden="true">
+        <img class="is-on" src="/images/header/directory.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
       </div>
     )}
     {!sectionHero && (

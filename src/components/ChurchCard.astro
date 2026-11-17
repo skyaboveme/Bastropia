@@ -1,0 +1,165 @@
+---
+/**
+ * One church card for the worship-times directory: town badge, denomination,
+ * address, listed times, website, and the date those times were checked.
+ */
+import { townSlug, websiteLabel, type Church } from '../data/churches';
+
+interface Props {
+  church: Church;
+}
+
+const { church } = Astro.props;
+const slug = townSlug(church.city);
+const timeLines = church.times
+  .split(';')
+  .map((line) => line.trim())
+  .filter(Boolean);
+const linkLabel = websiteLabel(church.website);
+---
+
+<article class:list={['church-card', `church-card-${slug}`, church.confirmWithChurch && 'is-confirm']}>
+  <header class="church-card-head">
+    <div class="church-card-title">
+      <h3>{church.name}</h3>
+      {church.denomination && <p class="church-card-denom">{church.denomination}</p>}
+      {church.address && <p class="church-card-address">{church.address}</p>}
+    </div>
+    <span class="church-town-badge">{church.city}</span>
+  </header>
+
+  <section class="church-times" aria-label="Worship times">
+    <h4>Worship times</h4>
+    {timeLines.length > 1 ? (
+      <ul>
+        {timeLines.map((line) => (
+          <li>{line}</li>
+        ))}
+      </ul>
+    ) : (
+      <p>{church.times}</p>
+    )}
+    {church.confirmWithChurch && (
+      <p class="church-confirm">Confirm these times with the church. They were taken from a directory listing, not the congregation’s own page.</p>
+    )}
+  </section>
+
+  <p class="church-card-meta">
+    <a href={church.website} target="_blank" rel="noopener noreferrer">{linkLabel}</a>
+    {church.verified && (
+      <>
+        <span aria-hidden="true"> · </span>
+        <span>Verified {church.verified}</span>
+      </>
+    )}
+  </p>
+</article>
+
+<style>
+  .church-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    padding: 0.85rem 0.95rem 0.9rem;
+    display: grid;
+    gap: 0.7rem;
+    min-width: 0;
+    break-inside: avoid;
+  }
+  .church-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 0.7rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .church-card-title h3 {
+    font-family: var(--serif);
+    font-size: 1.32rem;
+    font-weight: 620;
+    line-height: 1.15;
+    margin: 0;
+  }
+  .church-card-denom,
+  .church-card-address {
+    margin: 0.2rem 0 0;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+  .church-card-denom {
+    font-weight: 650;
+    color: var(--pine-deep);
+  }
+  .church-town-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .church-card-bastrop .church-town-badge { background: var(--ok-bg); color: var(--pine-deep); }
+  .church-card-elgin .church-town-badge { background: #e4f6fa; color: var(--river-deep); }
+  .church-card-smithville .church-town-badge { background: #f8e7c0; color: var(--sun-deep); }
+  .church-card-mcdade .church-town-badge { background: #ece6f6; color: #4c3480; }
+  .church-card-cedar-creek .church-town-badge { background: #e8f3e4; color: #2d5a27; }
+  .church-card.is-confirm { border-color: #e6c8b8; }
+
+  .church-times {
+    min-width: 0;
+    padding: 0.55rem 0.65rem 0.65rem;
+    border-radius: 0.35rem;
+    background: var(--paper);
+    border-left: 3px solid var(--pine);
+  }
+  .church-times h4 {
+    margin: 0 0 0.35rem;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--pine-deep);
+  }
+  .church-times ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.28rem;
+  }
+  .church-times li,
+  .church-times p {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+  .church-confirm {
+    margin: 0.5rem 0 0 !important;
+    font-size: 0.86rem !important;
+    line-height: 1.4;
+    color: var(--sun-deep);
+    font-weight: 650;
+  }
+
+  .church-card-meta {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 650;
+    color: var(--ink-soft);
+  }
+  .church-card-meta a { color: var(--river-deep); text-decoration: none; }
+  .church-card-meta a:hover { text-decoration: underline; text-underline-offset: 0.1em; }
+</style>
