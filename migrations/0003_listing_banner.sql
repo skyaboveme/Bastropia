@@ -1,0 +1,3 @@
+ALTER TABLE businesses ADD COLUMN banner_url TEXT NOT NULL DEFAULT '';
+ALTER TABLE businesses ADD COLUMN banner_placement TEXT NOT NULL DEFAULT '';
+ALTER TABLE listing_stats ADD COLUMN banner_views INTEGER NOT NULL DEFAULT 0;

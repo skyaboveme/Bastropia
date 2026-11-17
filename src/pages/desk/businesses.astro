@@ -4,6 +4,7 @@ export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import FormError from '../../components/FormError.astro';
+import { placements } from '../../data/commerce';
 import { cities } from '../../data/taxonomy';
 import { deskAuthorized, deskKeyConfigured } from '../../lib/auth';
 import { listBusinesses } from '../../lib/businessDb';
@@ -55,6 +56,14 @@ const saved = Astro.url.searchParams.get('saved');
               <label class="field wide"><span>Address</span><input name="address" /></label>
               <label class="field wide"><span>Hours</span><input name="hours" placeholder="Mon–Fri 8–5" /></label>
               <label class="field wide"><span>Daily special</span><input name="daily_special" /></label>
+              <label class="field wide"><span>Banner image</span><input name="banner_url" type="url" placeholder="https://…" /></label>
+              <label class="field">
+                <span>Banner placement</span>
+                <select name="banner_placement">
+                  <option value="">None</option>
+                  {placements.map((item) => <option value={item.id}>{item.name}</option>)}
+                </select>
+              </label>
               <label class="field wide"><span>Details</span><textarea name="details" rows="4"></textarea></label>
               <label class="field"><span>Owner username</span><input name="username" minlength="3" /></label>
               <label class="field"><span>Owner password</span><input name="password" type="text" minlength="8" autocomplete="new-password" /></label>

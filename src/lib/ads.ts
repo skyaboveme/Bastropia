@@ -4,6 +4,7 @@ import { placements, type PlacementId } from '../data/commerce';
 import { eventBanners } from '../data/eventBanners';
 import { homeBanners } from '../data/homeBanners';
 import { weekendBanners } from '../data/weekendBanners';
+import { bannersForPlacement } from './businessDb';
 import { httpUrl } from './intake';
 import { eventKey } from './time';
 
@@ -195,7 +196,17 @@ async function imageAds(
         line: item.line,
         placement,
       }));
-    return [...fromFiles, ...uploaded];
+    const listed: LiveAd[] = (await bannersForPlacement(placement)).map((item) => ({
+      id: item.id,
+      name: item.name,
+      href: item.website || `/${item.slug}`,
+      go: `/go/biz/${item.id}?to=banner`,
+      src: item.banner_url,
+      alt: item.name,
+      line: '',
+      placement,
+    }));
+    return [...fromFiles, ...uploaded, ...listed];
   } catch {
     return files.filter((banner) => banner.id && banner.src && banner.href).map((banner) => ({
       id: banner.id,

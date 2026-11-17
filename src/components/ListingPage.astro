@@ -22,6 +22,24 @@ const description = (business.details || `${business.category} in ${business.cit
       <h1>{business.name}</h1>
       {business.details && <p class="lede">{business.details}</p>}
     </header>
+    {business.banner_url && (
+      <section class="home-banner banner-poster" data-listing-banner={business.id} aria-label="Sponsored" style="margin-top:1rem;">
+        <div class="home-banner-frame">
+          <a class="home-banner-slide is-on" href={`/go/biz/${business.id}?to=banner`}>
+            <img src={business.banner_url} alt={business.name} width="1200" height="500" decoding="async" />
+          </a>
+        </div>
+      </section>
+      <script is:inline>
+        const root = document.currentScript && document.currentScript.previousElementSibling;
+        const id = root && root.getAttribute('data-listing-banner');
+        if (id) {
+          const body = new URLSearchParams({ id, placement: 'listing' });
+          if (navigator.sendBeacon) navigator.sendBeacon('/api/ad-stat', body);
+          else fetch('/api/ad-stat', { method: 'POST', body, keepalive: true });
+        }
+      </script>
+    )}
     {business.daily_special && (
       <section class="notice" style="margin-top:1rem;">
         <p class="kicker" style="color: var(--river);">Daily special</p>

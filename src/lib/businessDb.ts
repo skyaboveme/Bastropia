@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers';
+import { placements, type PlacementId } from '../data/commerce';
 import type { DirectoryEntry } from '../data/directory';
 import { eventKey } from './time';
 import { hashPassword, passwordMatches } from './passwords';
@@ -31,6 +32,8 @@ export type Biz = {
   details: string;
   hours: string;
   daily_special: string;
+  banner_url: string;
+  banner_placement: string;
   status: BizStatus;
   created_at: string;
   updated_at: string;
@@ -68,6 +71,7 @@ export type DayStat = {
   views: number;
   site_clicks: number;
   phone_clicks: number;
+  banner_views: number;
 };
 
 const cookieName = 'bastropia_biz';
@@ -105,6 +109,23 @@ function clean(value: unknown, max = 400) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, max);
+}
+
+function bannerUrl(value: unknown) {
+  const raw = clean(value, 500);
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function bannerPlacement(value: unknown) {
+  const id = clean(value, 40);
+  return placements.some((item) => item.id === id) ? id : '';
 }
 
 const reservedSlugs = new Set([
@@ -187,6 +208,8 @@ export async function insertBusiness(input: {
   details?: string;
   hours?: string;
   daily_special?: string;
+  banner_url?: string;
+  banner_placement?: string;
   status?: BizStatus;
 }) {
   const db = database();
@@ -211,14 +234,16 @@ export async function insertBusiness(input: {
     details: clean(input.details, 1200),
     hours: clean(input.hours, 400),
     daily_special: clean(input.daily_special, 400),
+    banner_url: bannerUrl(input.banner_url),
+    banner_placement: bannerPlacement(input.banner_placement),
     status: input.status ?? 'pending',
     created_at: now,
     updated_at: now,
   };
   await db
     .prepare(
-      `INSERT INTO businesses (id, slug, name, category, city, areas, phone, website, email, contact, address, details, hours, daily_special, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO businesses (id, slug, name, category, city, areas, phone, website, email, contact, address, details, hours, daily_special, banner_url, banner_placement, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       row.id,
@@ -235,6 +260,8 @@ export async function insertBusiness(input: {
       row.details,
       row.hours,
       row.daily_special,
+      row.banner_url,
+      row.banner_placement,
       row.status,
       row.created_at,
       row.updated_at,
@@ -245,7 +272,7 @@ export async function insertBusiness(input: {
 
 export async function updateBusiness(
   businessId: string,
-  input: Partial<Pick<Biz, 'slug' | 'name' | 'category' | 'city' | 'areas' | 'phone' | 'website' | 'email' | 'contact' | 'address' | 'details' | 'hours' | 'daily_special' | 'status'>>,
+  input: Partial<Pick<Biz, 'slug' | 'name' | 'category' | 'city' | 'areas' | 'phone' | 'website' | 'email' | 'contact' | 'address' | 'details' | 'hours' | 'daily_special' | 'banner_url' | 'banner_placement' | 'status'>>,
 ) {
   const current = await getBusiness(businessId);
   const db = database();
@@ -268,12 +295,14 @@ export async function updateBusiness(
     details: input.details !== undefined ? clean(input.details, 1200) : current.details,
     hours: input.hours !== undefined ? clean(input.hours, 400) : current.hours || '',
     daily_special: input.daily_special !== undefined ? clean(input.daily_special, 400) : current.daily_special || '',
+    banner_url: input.banner_url !== undefined ? bannerUrl(input.banner_url) : current.banner_url || '',
+    banner_placement: input.banner_placement !== undefined ? bannerPlacement(input.banner_placement) : current.banner_placement || '',
     status: input.status ?? current.status,
     updated_at: new Date().toISOString(),
   };
   await db
     .prepare(
-      `UPDATE businesses SET slug = ?, name = ?, category = ?, city = ?, areas = ?, phone = ?, website = ?, email = ?, contact = ?, address = ?, details = ?, hours = ?, daily_special = ?, status = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE businesses SET slug = ?, name = ?, category = ?, city = ?, areas = ?, phone = ?, website = ?, email = ?, contact = ?, address = ?, details = ?, hours = ?, daily_special = ?, banner_url = ?, banner_placement = ?, status = ?, updated_at = ? WHERE id = ?`,
     )
     .bind(
       next.slug,
@@ -289,6 +318,8 @@ export async function updateBusiness(
       next.details,
       next.hours,
       next.daily_special,
+      next.banner_url,
+      next.banner_placement,
       next.status,
       next.updated_at,
       next.id,
@@ -469,23 +500,25 @@ export async function deleteBizEvent(businessId: string, eventId: string) {
   await db.prepare('DELETE FROM biz_events WHERE id = ? AND business_id = ?').bind(eventId, businessId).run();
 }
 
-export async function bumpStat(businessId: string, field: 'views' | 'site_clicks' | 'phone_clicks') {
+export async function bumpStat(businessId: string, field: 'views' | 'site_clicks' | 'phone_clicks' | 'banner_views') {
   const db = database();
   if (!db) return;
   const day = eventKey(new Date());
   const views = field === 'views' ? 1 : 0;
   const site = field === 'site_clicks' ? 1 : 0;
   const phone = field === 'phone_clicks' ? 1 : 0;
+  const banner = field === 'banner_views' ? 1 : 0;
   await db
     .prepare(
-      `INSERT INTO listing_stats (business_id, day, views, site_clicks, phone_clicks)
-       VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO listing_stats (business_id, day, views, site_clicks, phone_clicks, banner_views)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(business_id, day) DO UPDATE SET
          views = views + excluded.views,
          site_clicks = site_clicks + excluded.site_clicks,
-         phone_clicks = phone_clicks + excluded.phone_clicks`,
+         phone_clicks = phone_clicks + excluded.phone_clicks,
+         banner_views = banner_views + excluded.banner_views`,
     )
-    .bind(businessId, day, views, site, phone)
+    .bind(businessId, day, views, site, phone, banner)
     .run();
 }
 
@@ -494,8 +527,44 @@ export async function statsFor(businessId: string, days = 30) {
   if (!db) return [];
   const start = eventKey(new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000));
   const rows = await db
-    .prepare('SELECT day, views, site_clicks, phone_clicks FROM listing_stats WHERE business_id = ? AND day >= ? ORDER BY day')
+    .prepare('SELECT day, views, site_clicks, phone_clicks, banner_views FROM listing_stats WHERE business_id = ? AND day >= ? ORDER BY day')
     .bind(businessId, start)
     .all<DayStat>();
   return rows.results ?? [];
+}
+
+export type ListingBanner = {
+  id: string;
+  name: string;
+  slug: string;
+  website: string;
+  banner_url: string;
+  banner_placement: PlacementId;
+};
+
+export async function bannersForPlacement(placement: string): Promise<ListingBanner[]> {
+  const db = database();
+  if (!db || !bannerPlacement(placement)) return [];
+  const rows = await db
+    .prepare(
+      `SELECT id, name, slug, website, banner_url, banner_placement FROM businesses
+       WHERE status = 'live' AND banner_placement = ? AND banner_url != ''
+       ORDER BY name`,
+    )
+    .bind(placement)
+    .all<ListingBanner>();
+  return rows.results ?? [];
+}
+
+export async function recordBannerView(businessId: string, placement: string) {
+  const db = database();
+  if (!db) return false;
+  const row = await db
+    .prepare(`SELECT id, banner_url, banner_placement FROM businesses WHERE id = ? AND status = 'live'`)
+    .bind(businessId)
+    .first<{ id: string; banner_url: string; banner_placement: string }>();
+  if (!row?.banner_url) return false;
+  if (placement !== 'listing' && placement !== row.banner_placement) return false;
+  await bumpStat(row.id, 'banner_views');
+  return true;
 }

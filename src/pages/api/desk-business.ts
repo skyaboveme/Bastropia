@@ -22,6 +22,8 @@ function fields(form: FormData) {
     address: String(form.get('address') || ''),
     hours: String(form.get('hours') || ''),
     daily_special: String(form.get('daily_special') || ''),
+    banner_url: String(form.get('banner_url') || ''),
+    banner_placement: String(form.get('banner_placement') || ''),
     details: String(form.get('details') || ''),
   };
 }

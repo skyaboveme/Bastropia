@@ -110,21 +110,22 @@ async function getJson(url: string, timeout = 5000) {
 
 async function river(): Promise<CountyNow['river']> {
   const url =
-    'https://waterservices.usgs.gov/nwis/iv/?format=json&sites=08159200&parameterCd=00065,00060&siteStatus=all';
+    'https://api.waterdata.usgs.gov/ogcapi/v1/collections/latest-continuous/items?f=json&limit=10&monitoring_location_id=USGS-08159200';
   const data = await getJson(url);
-  const series = data?.value?.timeSeries ?? [];
+  const features = data?.features ?? [];
   let feet: string | null = null;
   let flow: string | null = null;
   let when: string | null = null;
   let provisional = false;
-  for (const row of series) {
-    const name = String(row?.variable?.variableName ?? '');
-    const latest = row?.values?.[0]?.value?.at(-1);
-    if (!latest) continue;
-    if (name.startsWith('Gage height')) feet = latest.value;
-    if (name.startsWith('Streamflow')) flow = latest.value;
-    when = latest.dateTime ?? when;
-    if ((latest.qualifiers ?? []).includes('P')) provisional = true;
+  for (const feature of features) {
+    const reading = feature?.properties ?? {};
+    const code = String(reading.parameter_code ?? '');
+    if (reading.value == null || reading.value === '') continue;
+    if (code === '00065') feet = String(reading.value);
+    if (code === '00060') flow = String(reading.value);
+    if (code !== '00065' && code !== '00060') continue;
+    when = reading.time ?? when;
+    if (String(reading.approval_status ?? '').toLowerCase() === 'provisional') provisional = true;
   }
   if (!feet) return null;
   const clock = when
@@ -231,7 +232,8 @@ export async function getCountyNow(): Promise<CountyNow> {
     power: powerResult,
     rain: rainResult,
   };
-  cache.at = Date.now();
+  // A missed gauge should be tried again soon. A full reading can sit for ten minutes.
+  cache.at = value.river ? Date.now() : Date.now() - tenMinutes + 30_000;
   cache.value = value;
   return value;
 }

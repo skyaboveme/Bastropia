@@ -7,6 +7,10 @@ export const GET: APIRoute = async ({ params, url }) => {
   const business = await getBusiness(params.id ?? '');
   if (!business || business.status !== 'live') return new Response(null, { status: 404 });
   const to = url.searchParams.get('to');
+  if (to === 'banner') {
+    const href = business.website || `/${business.slug}`;
+    return Response.redirect(href, 302);
+  }
   if (to === 'site' && business.website) {
     await bumpStat(business.id, 'site_clicks');
     return Response.redirect(business.website, 302);
