@@ -8,6 +8,8 @@ import {
   deleteSpecial,
   loginAccount,
   logoutToken,
+  readLogoFile,
+  storeLogo,
   updateBusiness,
 } from '../../lib/businessDb';
 
@@ -48,6 +50,8 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
 
   try {
     if (action === 'save') {
+      const logo = await readLogoFile(form.get('logo'));
+      const removeLogo = form.get('remove_logo') === 'yes';
       await updateBusiness(businessId, {
         name: String(form.get('name') || ''),
         category: String(form.get('category') || ''),
@@ -64,6 +68,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
         banner_url: String(form.get('banner_url') || ''),
         banner_placement: String(form.get('banner_placement') || ''),
       });
+      if (logo || removeLogo) await storeLogo(businessId, logo, removeLogo && !logo);
     }
     if (action === 'special') {
       const title = String(form.get('title') || '');
@@ -85,8 +90,9 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       }
     }
     if (action === 'delete-event') await deleteBizEvent(businessId, String(form.get('id') || ''));
-  } catch {
-    return bounce('/business?error=save');
+  } catch (error) {
+    const reason = error instanceof Error && error.message === 'image' ? 'image' : 'save';
+    return bounce(`/business?error=${reason}`);
   }
   return bounce('/business');
 };

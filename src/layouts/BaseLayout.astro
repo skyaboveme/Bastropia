@@ -75,7 +75,6 @@ const jsonLd = stringify(graph(nodes));
 const robots = noindex
   ? `noindex, ${nofollow ? 'nofollow' : 'follow'}`
   : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
-const trail = crumbs.length ? [{ name: 'Front page', path: '/' }, ...crumbs] : [];
 ---
 
 <!doctype html>
@@ -154,17 +153,6 @@ const trail = crumbs.length ? [{ name: 'Front page', path: '/' }, ...crumbs] : [
     <a class="skip" href="#main">Skip to content</a>
     <Header />
     <main id="main">
-      {trail.length > 0 && (
-        <nav class="crumbs" aria-label="Breadcrumb">
-          <ol>
-            {trail.map((crumb, index) => (
-              <li>
-                {index < trail.length - 1 ? <a href={crumb.path}>{crumb.name}</a> : <span>{crumb.name}</span>}
-              </li>
-            ))}
-          </ol>
-        </nav>
-      )}
       <slot />
     </main>
     <Footer />

@@ -44,7 +44,7 @@ const saved = Astro.url.searchParams.get('saved');
         <FormError />
         <section class="section">
           <h2>Add a listing</h2>
-          <form class="form" action="/api/desk-business" method="post">
+          <form class="form" action="/api/desk-business" method="post" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create" />
             <div class="fields">
               <label class="field wide"><span>Name</span><input name="name" required /></label>
@@ -56,6 +56,7 @@ const saved = Astro.url.searchParams.get('saved');
               <label class="field wide"><span>Address</span><input name="address" /></label>
               <label class="field wide"><span>Hours</span><input name="hours" placeholder="Mon–Fri 8–5" /></label>
               <label class="field wide"><span>Daily special</span><input name="daily_special" /></label>
+              <label class="field wide"><span>Logo</span><input name="logo" type="file" accept="image/jpeg,image/png,image/webp" /></label>
               <label class="field wide"><span>Banner image</span><input name="banner_url" type="url" placeholder="https://…" /></label>
               <label class="field">
                 <span>Banner placement</span>

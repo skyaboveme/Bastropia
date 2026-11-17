@@ -3,6 +3,7 @@ import { placements, type PlacementId } from '../data/commerce';
 import type { DirectoryEntry } from '../data/directory';
 import { eventKey } from './time';
 import { hashPassword, passwordMatches } from './passwords';
+import { sessionKv } from './sessionKv';
 
 type Statement = {
   bind(...values: unknown[]): Statement;
@@ -34,6 +35,7 @@ export type Biz = {
   daily_special: string;
   banner_url: string;
   banner_placement: string;
+  logo_type: string;
   status: BizStatus;
   created_at: string;
   updated_at: string;
@@ -236,14 +238,15 @@ export async function insertBusiness(input: {
     daily_special: clean(input.daily_special, 400),
     banner_url: bannerUrl(input.banner_url),
     banner_placement: bannerPlacement(input.banner_placement),
+    logo_type: '',
     status: input.status ?? 'pending',
     created_at: now,
     updated_at: now,
   };
   await db
     .prepare(
-      `INSERT INTO businesses (id, slug, name, category, city, areas, phone, website, email, contact, address, details, hours, daily_special, banner_url, banner_placement, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO businesses (id, slug, name, category, city, areas, phone, website, email, contact, address, details, hours, daily_special, banner_url, banner_placement, logo_type, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       row.id,
@@ -262,6 +265,7 @@ export async function insertBusiness(input: {
       row.daily_special,
       row.banner_url,
       row.banner_placement,
+      row.logo_type,
       row.status,
       row.created_at,
       row.updated_at,
@@ -272,7 +276,7 @@ export async function insertBusiness(input: {
 
 export async function updateBusiness(
   businessId: string,
-  input: Partial<Pick<Biz, 'slug' | 'name' | 'category' | 'city' | 'areas' | 'phone' | 'website' | 'email' | 'contact' | 'address' | 'details' | 'hours' | 'daily_special' | 'banner_url' | 'banner_placement' | 'status'>>,
+  input: Partial<Pick<Biz, 'slug' | 'name' | 'category' | 'city' | 'areas' | 'phone' | 'website' | 'email' | 'contact' | 'address' | 'details' | 'hours' | 'daily_special' | 'banner_url' | 'banner_placement' | 'logo_type' | 'status'>>,
 ) {
   const current = await getBusiness(businessId);
   const db = database();
@@ -297,12 +301,13 @@ export async function updateBusiness(
     daily_special: input.daily_special !== undefined ? clean(input.daily_special, 400) : current.daily_special || '',
     banner_url: input.banner_url !== undefined ? bannerUrl(input.banner_url) : current.banner_url || '',
     banner_placement: input.banner_placement !== undefined ? bannerPlacement(input.banner_placement) : current.banner_placement || '',
+    logo_type: input.logo_type !== undefined ? logoType(input.logo_type) : current.logo_type || '',
     status: input.status ?? current.status,
     updated_at: new Date().toISOString(),
   };
   await db
     .prepare(
-      `UPDATE businesses SET slug = ?, name = ?, category = ?, city = ?, areas = ?, phone = ?, website = ?, email = ?, contact = ?, address = ?, details = ?, hours = ?, daily_special = ?, banner_url = ?, banner_placement = ?, status = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE businesses SET slug = ?, name = ?, category = ?, city = ?, areas = ?, phone = ?, website = ?, email = ?, contact = ?, address = ?, details = ?, hours = ?, daily_special = ?, banner_url = ?, banner_placement = ?, logo_type = ?, status = ?, updated_at = ? WHERE id = ?`,
     )
     .bind(
       next.slug,
@@ -320,6 +325,7 @@ export async function updateBusiness(
       next.daily_special,
       next.banner_url,
       next.banner_placement,
+      next.logo_type,
       next.status,
       next.updated_at,
       next.id,
@@ -368,7 +374,62 @@ export function toDirectoryEntry(biz: Biz): DirectoryEntry {
     areas: `${biz.city} ${biz.areas}`,
     hours: biz.hours || undefined,
     dailySpecial: biz.daily_special || undefined,
+    logo: logoSrc(biz),
   };
+}
+
+function logoType(value: unknown) {
+  const type = String(value ?? '');
+  return type === 'image/jpeg' || type === 'image/png' || type === 'image/webp' ? type : '';
+}
+
+function logoKind(bytes: Uint8Array) {
+  if (bytes.length < 16 || bytes.length > 1_500_000) return '';
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'image/png';
+  if (
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
+    return 'image/webp';
+  }
+  return '';
+}
+
+export function logoSrc(biz: Pick<Biz, 'id' | 'logo_type' | 'updated_at'>) {
+  if (!biz.logo_type) return '';
+  return `/directory/logo/${biz.id}?v=${encodeURIComponent(biz.updated_at)}`;
+}
+
+export async function readLogoFile(value: FormDataEntryValue | null) {
+  if (!value || typeof value === 'string' || !('arrayBuffer' in value) || value.size === 0) return null;
+  const bytes = await value.arrayBuffer();
+  const type = logoKind(new Uint8Array(bytes));
+  if (!type) throw new Error('image');
+  return { bytes, type };
+}
+
+export async function storeLogo(businessId: string, logo: { bytes: ArrayBuffer; type: string } | null, remove = false) {
+  const current = await getBusiness(businessId);
+  if (!current) return null;
+  const kv = sessionKv();
+  const key = `biz:logo:${businessId}`;
+  if (logo) {
+    if (!kv) throw new Error('save');
+    await kv.put(key, logo.bytes);
+    return updateBusiness(businessId, { logo_type: logo.type });
+  }
+  if (remove) {
+    if (kv) await kv.delete(key);
+    return updateBusiness(businessId, { logo_type: '' });
+  }
+  return current;
 }
 
 export async function setAccount(businessId: string, username: string, password: string) {

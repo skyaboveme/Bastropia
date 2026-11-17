@@ -24,6 +24,7 @@ export type DirectoryEntry = {
   areas?: string;
   hours?: string;
   dailySpecial?: string;
+  logo?: string;
 };
 
 type ChamberRecord = {

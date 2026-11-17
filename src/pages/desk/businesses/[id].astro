@@ -7,7 +7,7 @@ import FormError from '../../../components/FormError.astro';
 import { placements } from '../../../data/commerce';
 import { cities } from '../../../data/taxonomy';
 import { deskAuthorized, deskKeyConfigured } from '../../../lib/auth';
-import { accountForBusiness, getBusiness, statsFor } from '../../../lib/businessDb';
+import { accountForBusiness, getBusiness, logoSrc, statsFor } from '../../../lib/businessDb';
 
 const allowed = deskAuthorized(Astro.url.hostname, Astro.cookies.get('bastropia_desk')?.value);
 const business = allowed ? await getBusiness(Astro.params.id ?? '') : null;
@@ -43,7 +43,7 @@ const saved = Astro.url.searchParams.get('saved');
         {saved && <p>Saved. The public page is <a href={`/${business.slug}`}>bastropia.com/{business.slug}</a>.</p>}
         <p class="meta">Last 30 days · {listingViews} listing {listingViews === 1 ? 'view' : 'views'} · {bannerViews} banner {bannerViews === 1 ? 'view' : 'views'}.</p>
         <FormError />
-        <form class="form" action="/api/desk-business" method="post">
+        <form class="form" action="/api/desk-business" method="post" enctype="multipart/form-data">
           <input type="hidden" name="action" value="save" />
           <input type="hidden" name="id" value={business.id} />
           <div class="fields">
@@ -61,6 +61,14 @@ const saved = Astro.url.searchParams.get('saved');
             <label class="field wide"><span>Address</span><input name="address" value={business.address} /></label>
             <label class="field wide"><span>Hours</span><input name="hours" value={business.hours} placeholder="Mon–Fri 8–5" /></label>
             <label class="field wide"><span>Daily special</span><input name="daily_special" value={business.daily_special} /></label>
+            <label class="field wide"><span>Logo</span><input name="logo" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+            {business.logo_type && (
+              <p class="field wide">
+                <span>Current logo</span>
+                <img src={logoSrc(business)} alt="" width="72" height="72" style="display:block;width:4.4rem;height:4.4rem;object-fit:cover;border-radius:0.4rem;margin-top:0.4rem;background:#fff;" />
+                <label style="display:flex;gap:0.4rem;align-items:center;margin-top:0.45rem;"><input type="checkbox" name="remove_logo" value="yes" /> Remove logo</label>
+              </p>
+            )}
             <label class="field wide"><span>Banner image</span><input name="banner_url" type="url" value={business.banner_url} placeholder="https://…" /></label>
             <label class="field">
               <span>Banner placement</span>

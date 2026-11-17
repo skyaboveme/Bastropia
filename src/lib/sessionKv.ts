@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 
 export type SessionKv = {
   get(key: string, type: 'json'): Promise<unknown>;
+  get(key: string, type: 'arrayBuffer'): Promise<ArrayBuffer | null>;
   get(key: string): Promise<string | null>;
   put(key: string, value: string | ArrayBuffer, options?: { expirationTtl?: number }): Promise<unknown>;
   delete(key: string): Promise<unknown>;

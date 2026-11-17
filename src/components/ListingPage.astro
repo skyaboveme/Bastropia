@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { directoryBusiness } from '../lib/schema';
-import type { Biz, BizEvent, BizSpecial } from '../lib/businessDb';
+import { logoSrc, type Biz, type BizEvent, type BizSpecial } from '../lib/businessDb';
 
 interface Props {
   business: Biz;
@@ -18,8 +18,15 @@ const description = (business.details || `${business.category} in ${business.cit
 <BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]}>
   <article class="wrap">
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
-      <p class="kicker">{business.category} · {business.city}</p>
-      <h1>{business.name}</h1>
+      <div style="display:flex;gap:0.9rem;align-items:center;">
+        {business.logo_type && (
+          <img src={logoSrc(business)} alt="" width="72" height="72" style="width:4.4rem;height:4.4rem;object-fit:cover;border-radius:0.4rem;background:#fff;flex:none;" />
+        )}
+        <div>
+          <p class="kicker">{business.category} · {business.city}</p>
+          <h1>{business.name}</h1>
+        </div>
+      </div>
       {business.details && <p class="lede">{business.details}</p>}
     </header>
     {business.banner_url && (

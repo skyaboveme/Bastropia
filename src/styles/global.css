@@ -119,6 +119,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .header-hero.is-news img { object-position: center 58%; }
 .header-hero.is-videos img { object-position: center 48%; }
 .header-hero.is-eats img { object-position: center 46%; }
+.header-hero.is-default img { object-position: center 34%; }
 .header-hero::after {
   content: "";
   position: absolute;
@@ -420,14 +421,6 @@ main { padding-bottom: 3rem; }
 .section-head h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
 .section-head a { font-size: 0.82rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; }
 
-.crumbs {
-  width: min(var(--wrap), calc(100% - 2.4rem));
-  margin: 0.85rem auto 0;
-}
-.crumbs ol { display: flex; flex-wrap: wrap; gap: 0.35rem 0.5rem; }
-.crumbs li { display: flex; gap: 0.5rem; color: var(--ink-soft); font-size: 0.88rem; }
-.crumbs li:not(:last-child)::after { content: "/"; }
-.crumbs a { color: var(--river-deep); }
 .page-head { padding: 0.45rem 0 0.4rem; border-bottom: 1px solid var(--ink); margin-bottom: 0.65rem; }
 .page-head h1 { font-size: clamp(1.45rem, 2.2vw, 1.85rem); max-width: none; margin-top: 0.05rem; line-height: 1.15; }
 .page-head .lede { font-size: 0.98rem; margin-top: 0.2rem; line-height: 1.35; }

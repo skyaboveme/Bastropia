@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { deskAuthorized } from '../../lib/auth';
-import { insertBusiness, setAccount, updateBusiness } from '../../lib/businessDb';
+import { insertBusiness, readLogoFile, setAccount, storeLogo, updateBusiness } from '../../lib/businessDb';
 
 export const prerender = false;
 
@@ -35,8 +35,11 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   const existingId = String(form.get('id') || '');
   const back = existingId ? `/desk/businesses/${existingId}` : '/desk/businesses';
   try {
+    const logo = await readLogoFile(form.get('logo'));
+    const removeLogo = form.get('remove_logo') === 'yes';
     if (action === 'create') {
       const row = await insertBusiness({ ...fields(form), status: 'live' });
+      if (logo) await storeLogo(row.id, logo);
       const username = String(form.get('username') || '');
       const password = String(form.get('password') || '');
       if (username || password) await setAccount(row.id, username, password);
@@ -45,6 +48,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
     if (action === 'save' || action === 'approve') {
       const row = await updateBusiness(existingId, { ...fields(form), status: 'live' });
       if (!row) return bounce(`${back}?error=save`);
+      if (logo || removeLogo) await storeLogo(existingId, logo, removeLogo && !logo);
       const username = String(form.get('username') || '');
       const password = String(form.get('password') || '');
       if (username || password) await setAccount(row.id, username, password);
@@ -59,7 +63,8 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       return bounce(`${back}?saved=1`);
     }
   } catch (error) {
-    const reason = error instanceof Error && (error.message === 'username' || error.message === 'password') ? error.message : 'save';
+    const message = error instanceof Error ? error.message : '';
+    const reason = message === 'username' || message === 'password' || message === 'image' ? message : 'save';
     return bounce(`${back}?error=${reason}`);
   }
   return bounce('/desk/businesses');

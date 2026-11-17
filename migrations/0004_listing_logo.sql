@@ -1,0 +1,1 @@
+ALTER TABLE businesses ADD COLUMN logo_type TEXT NOT NULL DEFAULT '';
