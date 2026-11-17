@@ -181,6 +181,7 @@ const reservedSlugs = new Set([
   'barefootflowerfarms',
   'lostpinestoyota',
   'rosatexlandscaping',
+  '602brewing',
 ]);
 
 async function uniqueSlug(name: string, exceptId = '') {

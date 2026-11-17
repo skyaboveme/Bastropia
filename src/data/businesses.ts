@@ -43,9 +43,12 @@ export type Business = {
   hero: BusinessImage;
   portrait?: BusinessImage;
   points: string[];
+  servicesTitle?: string;
   services: { title: string; items: string[] }[];
+  areasTitle?: string;
   areas: string[];
   areaNote: string;
+  galleryTitle?: string;
   gallery: BusinessImage[];
   quotes: { quote: string; name: string }[];
   reviewsUrl: string;
@@ -702,6 +705,149 @@ export const businesses: Business[] = [
       'https://www.facebook.com/RosaTexLandscaping',
     ],
     address: { locality: 'Rosanky', region: 'TX', postalCode: '78953' },
+  },
+  {
+    slug: '602Brewing',
+    name: '602 Brewing Company',
+    category: 'Brewery and restaurant',
+    tagline: 'American, Mediterranean, and Lebanese food on Main Street.',
+    summary:
+      'Restaurant and beer garden at 919 Main Street in Bastrop, in a building from 1890. Call (512) 321-3577. Closed Monday.',
+    about:
+      '602 Brewing Company serves American, Mediterranean, and Lebanese food at 919 Main Street. The restaurant is in a building from 1890. The menu includes burgers, shrimp and grits, and chicken fried chicken, and the site names a signature 602 Burger. Guests can dine in, order takeout or delivery, book a table, or ask about catering. The page also lists live music and cocktails. Online orders earn points in The 602 on Main Rewards.',
+    phone: '(512) 321-3577',
+    phoneHref: 'tel:+15123213577',
+    email: 'raymond.keyrouz@gmail.com',
+    place: '919 Main St, Bastrop, TX 78602',
+    hours: 'Tuesday–Wednesday 11:00 am–9:00 pm. Thursday 11:00 am–11:00 pm. Friday–Saturday 11:00 am–12:00 am. Sunday 3:00 pm–9:00 pm. Closed Monday.',
+    website: 'https://602brewing.com/',
+    websiteLabel: '602brewing.com',
+    bookUrl: 'https://602brewing.com/page/reservation',
+    bookLabel: 'Book a table',
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=919%20Main%20St%2C%20Bastrop%2C%20TX%2078602%2C%20USA&query_place_id=ChIJkXGesUSaRIYRYuTWrq7szQ0',
+    accent: '#db594b',
+    accent2: '#ffe7c2',
+    radius: '8px',
+    displayFont: '"Fraunces", Georgia, serif',
+    textFont: '"Outfit", "Avenir Next", sans-serif',
+    logo: {
+      src: '/images/businesses/602/logo-mark.png',
+      alt: '602 Brewing Company, restaurant and beer garden, Bastrop, Texas',
+      width: 252,
+      height: 240,
+    },
+    shareImage: '/images/businesses/602/history.jpg',
+    shareAlt: 'Pink stone building on Main Street signed 602 Brewing Company and Beer Garden',
+    hero: {
+      src: '/images/businesses/602/history.jpg',
+      alt: 'Pink stone building on Main Street with signs for 602 Brewing Company and the beer garden',
+      width: 768,
+      height: 768,
+    },
+    points: ['Dine in', 'Takeout', 'Delivery', 'Live music'],
+    servicesTitle: 'What they offer',
+    services: [
+      {
+        title: 'The menu',
+        items: [
+          'American, Mediterranean, and Lebanese plates',
+          'Burgers, including the 602 Burger',
+          'Shrimp and grits, and chicken fried chicken',
+        ],
+      },
+      {
+        title: 'Beer garden',
+        items: ['Beer on site', 'Cocktails', 'Live music'],
+      },
+      {
+        title: 'Order ahead',
+        items: ['Takeout and delivery from the online menu', 'Table reservations', 'Catering for gatherings'],
+      },
+    ],
+    areas: [
+      'Bastrop',
+      'Bastrop County',
+      'Rosanky',
+      'Rockne',
+      'Wyldwood',
+      'Camp Swift',
+      'Circle D-KC Estates',
+      'Alum Creek',
+      'Utley',
+      'Upton',
+      'Hills Prairie',
+      'Clearview',
+      'Phelan',
+    ],
+    areasTitle: 'Nearby',
+    areaNote: 'The restaurant lists Bastrop and nearby communities, including Rosanky, Rockne, and Wyldwood.',
+    galleryTitle: 'From the kitchen',
+    gallery: [
+      {
+        src: '/images/businesses/602/hero.jpg',
+        alt: 'Bacon and blue cheese burger with fries and a side salad',
+        width: 1920,
+        height: 1200,
+      },
+      {
+        src: '/images/businesses/602/shrimp.jpg',
+        alt: 'Crispy fried shrimp with parsley and a dark dipping sauce',
+        width: 960,
+        height: 960,
+      },
+      {
+        src: '/images/businesses/602/chicken.jpg',
+        alt: 'Fried chicken steak in gravy with mashed potatoes',
+        width: 960,
+        height: 960,
+      },
+      {
+        src: '/images/businesses/602/burger.jpg',
+        alt: 'Bacon mushroom burger with fries, ketchup, mayonnaise, and gravy',
+        width: 960,
+        height: 960,
+      },
+    ],
+    quotes: [
+      {
+        quote: 'All the food we ordered was full of flavor and hot. Their beers are great too. I could not stop drinking their peach Hefeweizen.',
+        name: 'Tyan C.',
+      },
+      {
+        quote: '602 Brewing has a friendly staff, good food, interesting beer options and live music. Definitely seems like a fun local spot to hang out.',
+        name: 'Sandy M.',
+      },
+      {
+        quote: 'Absolutely loved this place. Felt like home. Affordable beers, great music, fabulous company.',
+        name: 'Guest on 602brewing.com',
+      },
+    ],
+    reviewsUrl: 'https://602brewing.com/',
+    facts: [
+      { label: 'Phone', value: '(512) 321-3577' },
+      { label: 'Email', value: 'raymond.keyrouz@gmail.com' },
+      { label: 'Address', value: '919 Main St, Bastrop, TX 78602' },
+      { label: 'Tuesday–Wednesday', value: '11:00 am–9:00 pm' },
+      { label: 'Thursday', value: '11:00 am–11:00 pm' },
+      { label: 'Friday–Saturday', value: '11:00 am–12:00 am' },
+      { label: 'Sunday', value: '3:00 pm–9:00 pm' },
+      { label: 'Monday', value: 'Closed' },
+    ],
+    stepsTitle: 'Plan a visit',
+    steps: [
+      { title: 'Order online', text: 'The menu is at 602brewing.com. Takeout and delivery are both offered.' },
+      { title: 'Book a table', text: 'Reservations are on the site for a group or a night out.' },
+      { title: 'Ask about catering', text: 'Catering is listed for gatherings, with an inquiry form on the site.' },
+    ],
+    schemaType: 'Brewery',
+    sameAs: [
+      'https://602brewing.com/',
+      'https://www.google.com/maps/search/?api=1&query=919%20Main%20St%2C%20Bastrop%2C%20TX%2078602%2C%20USA&query_place_id=ChIJkXGesUSaRIYRYuTWrq7szQ0',
+      'https://apps.apple.com/app/id6807154101',
+      'https://play.google.com/store/apps/details?id=com.owner.brewingcompany',
+    ],
+    address: { locality: 'Bastrop', region: 'TX', postalCode: '78602' },
+    geo: { latitude: 30.1099746, longitude: -97.3196492 },
   },
 ];
 

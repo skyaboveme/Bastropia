@@ -52,7 +52,7 @@ const style = [
   </ul>
 
   <section class="wrap biz-block">
-    <h2>Services</h2>
+    <h2>{business.servicesTitle ?? 'Services'}</h2>
     <div class="biz-services">
       {business.services.map((group) => (
         <section>
@@ -105,7 +105,7 @@ const style = [
 
   {business.gallery.length > 0 && (
     <section class="wrap biz-block">
-      <h2>Work</h2>
+      <h2>{business.galleryTitle ?? 'Work'}</h2>
       <ul class="biz-gallery">
         {business.gallery.map((image) => (
           <li>
@@ -117,7 +117,7 @@ const style = [
   )}
 
   <section class="wrap biz-block">
-    <h2>Where they work</h2>
+    <h2>{business.areasTitle ?? 'Where they work'}</h2>
     <p class="biz-area-note">{business.areaNote}</p>
     <ul class="biz-areas">
       {business.areas.map((area) => <li>{area}</li>)}

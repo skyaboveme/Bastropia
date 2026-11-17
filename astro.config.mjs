@@ -25,5 +25,7 @@ export default defineConfig({
     '/barefootflowerfarms': '/BarefootFlowerFarms',
     '/lostpinestoyota': '/LostPinesToyota',
     '/rosatexlandscaping': '/RosaTexLandscaping',
+    '/602brewing': '/602Brewing',
+    '/602-brewing-company': '/602Brewing',
   },
 });
