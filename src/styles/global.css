@@ -120,6 +120,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .header-hero.is-videos img { object-position: center 48%; }
 .header-hero.is-eats img { object-position: center 46%; }
 .header-hero.is-default img { object-position: center 34%; }
+.header-hero.is-night img { object-position: center 58%; }
 .header-hero::after {
   content: "";
   position: absolute;

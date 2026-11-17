@@ -6,7 +6,6 @@ import CategoryIcon from '../components/CategoryIcon.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import { categoryIcon, categoryIconSvg } from '../data/categoryIcons';
 import {
-  directoryByCategory,
   directoryEntries,
   filterDirectory,
   type DirectoryEntry,
@@ -19,7 +18,6 @@ const town = params.get('town');
 const q = params.get('q');
 const filtered = Boolean(category || town || q);
 const showResults = Boolean(category || town || (q && q.trim()));
-const listedTowns = ['Bastrop', 'Elgin', 'Smithville', 'Cedar Creek', 'McDade', 'Paige', 'Rosanky'];
 function inSelectedTown(entry: DirectoryEntry) {
   if (!town) return true;
   if (town === 'Countywide') return !entry.town;
@@ -35,12 +33,6 @@ const visible = filterDirectory({ category, q }, all).filter(inSelectedTown).sor
   const rank = (entry: DirectoryEntry) => (entry.source === 'partner' ? 0 : 1);
   return rank(a) - rank(b) || a.name.localeCompare(b.name);
 });
-const townGroups = [
-  ...listedTowns.map((name) => ({ town: name, count: all.filter((entry) => entry.town === name).length })),
-  { town: 'Countywide', count: all.filter((entry) => !entry.town).length },
-].filter((group) => group.count > 0);
-const widest = Math.max(...townGroups.map((group) => group.count), 1);
-const tradeCount = directoryByCategory(all).length;
 const shown = visible.slice(0, 40);
 const countText = shown.length < visible.length
   ? `Showing ${shown.length} of ${visible.length} businesses${town ? ` in ${town}` : ''}.`
@@ -118,28 +110,6 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
           {town ? <input type="hidden" name="town" value={town} /> : null}
         </div>
       </form>
-      <div class="figures">
-        <p><strong>{all.length}</strong><span>businesses</span></p>
-        <p><strong>{townGroups.filter((group) => group.town !== 'Countywide').length}</strong><span>towns</span></p>
-        <p><strong>{tradeCount}</strong><span>trades</span></p>
-      </div>
-      <div class="chart">
-        <div class="chart-head">
-          <p>Listings by town</p>
-          {town && <a class="text-link" href={href({ town: null })}>Whole county</a>}
-        </div>
-        <ol class="town-bars">
-          {townGroups.map((group) => (
-            <li>
-              <a href={href({ town: group.town })} aria-current={town === group.town ? 'true' : undefined}>
-                <span class="bar-name">{group.town}</span>
-                <span class="bar-track" style={`--share:${group.count / widest}`}><span class="bar-fill"></span></span>
-                <span class="bar-count">{group.count}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </div>
       <p class="looking-note">
         <a class="text-link" href="/directory/submit">List your business free</a>
         <span aria-hidden="true"> · </span>
@@ -315,12 +285,6 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
           if (value) url.searchParams.set('q', value);
           else url.searchParams.delete('q');
           history.replaceState(null, '', url);
-          document.querySelectorAll('.town-bars a').forEach((link) => {
-            const next = new URL(link.href);
-            if (value) next.searchParams.set('q', value);
-            else next.searchParams.delete('q');
-            link.href = next.pathname + next.search;
-          });
           if (!value && !category && !townLabel) {
             results.hidden = true;
             return;
@@ -446,81 +410,8 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
     margin: 0.85rem 0 0;
     color: var(--ink-soft);
   }
-  .figures {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.7rem;
-    margin: 0 0 1.1rem;
-  }
-  .figures p {
-    display: grid;
-    gap: 0.1rem;
-    margin: 0;
-    padding: 0.7rem 0.2rem 0.55rem;
-    border-top: 4px solid var(--river);
-  }
-  .figures strong {
-    font-family: var(--serif);
-    font-size: clamp(2.4rem, 5vw, 3.6rem);
-    font-weight: 620;
-    letter-spacing: -0.04em;
-    line-height: 0.9;
-  }
-  .figures span {
-    color: var(--ink-soft);
-    font-size: 0.82rem;
-    font-weight: 650;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .chart-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    align-items: baseline;
-    margin-bottom: 0.45rem;
-  }
-  .chart-head p {
-    margin: 0;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  .town-bars {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.38rem;
-  }
-  .town-bars a {
-    display: grid;
-    grid-template-columns: 8rem minmax(0, 1fr) 2.8rem;
-    gap: 0.65rem;
-    align-items: center;
-    color: inherit;
-    text-decoration: none;
-  }
-  .bar-name { font-weight: 650; }
-  .bar-count { text-align: right; font-variant-numeric: tabular-nums; font-weight: 650; }
-  .bar-track {
-    display: block;
-    height: 0.85rem;
-    background: var(--paper-2);
-  }
-  .bar-fill {
-    display: block;
-    height: 100%;
-    width: max(0.4rem, calc(var(--share) * 100%));
-    background: var(--pine);
-  }
-  .town-bars a[aria-current='true'] .bar-fill { background: var(--sun-deep); }
-  .town-bars a:hover .bar-fill { background: var(--river-deep); }
   @media (max-width: 640px) {
     .board { padding: 0.85rem 0.75rem 0.75rem; }
-    .town-bars a { grid-template-columns: 6.6rem minmax(0, 1fr) 2.4rem; gap: 0.4rem; }
-    .figures strong { font-size: 2.1rem; }
   }
   .cat-current {
     display: flex;

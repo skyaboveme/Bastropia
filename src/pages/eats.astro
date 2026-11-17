@@ -364,12 +364,7 @@ const rows = directoryFood
       tomorrow: special?.offers.filter((offer) => onDay(offer, tomorrowKey)) ?? [],
     };
   })
-  .filter((row) => {
-    if (town && row.town !== town) return false;
-    if (!q) return true;
-    const hay = `${row.entry.name} ${row.entry.category} ${row.town} ${row.entry.place}`.toLowerCase();
-    return hay.includes(q);
-  })
+  .filter((row) => !town || row.town === town)
   .sort((a, b) => {
     const rank = (row: { today: Offer[] }) => (row.today.length ? 0 : 1);
     const byDeal = rank(a) - rank(b);
@@ -378,6 +373,20 @@ const rows = directoryFood
   });
 
 const townOptions = [...new Set(directoryFood.map((entry) => townLabel(entry)))].sort((a, b) => a.localeCompare(b));
+
+function offerText(offer: Offer) {
+  return [offer.what, offer.span, offer.time, offer.note, ...(offer.discount || [])].filter(Boolean).join(' ');
+}
+
+function eatHay(name: string, category: string, townName: string, place: string, offers: Offer[]) {
+  return `${name} ${category} ${townName} ${place} ${offers.map(offerText).join(' ')}`.toLowerCase();
+}
+
+const shownCount = rows.filter((row) => {
+  const hay = eatHay(row.entry.name, row.entry.category, row.town, row.entry.place, [...row.today, ...row.tomorrow]);
+  return !q || hay.includes(q);
+}).length;
+const todayShown = todayGroups.filter((group) => !q || eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)).length;
 
 function eatHref(nextTown: string | null) {
   const params = new URLSearchParams();
@@ -398,13 +407,27 @@ function eatHref(nextTown: string | null) {
     lede="Restaurants, cafes, bakeries, and bars from the Bastrop County directory. A posted happy hour or special shows on the row. Confirm before you go."
   />
   <div class="wrap">
+    <section class="board" aria-label="Find a place">
+      <form class="looking" method="get" action="/eats" role="search">
+        <label class="looking-label" for="q">Looking for</label>
+        <div class="looking-bar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+            <path d="M16 16.5 20.5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          <input id="q" type="search" name="q" value={q} placeholder="tacos, coffee, Elgin" autocomplete="off" enterkeyhint="search" />
+          <button class="looking-clear" type="button" aria-label="Clear search" hidden={!q}>×</button>
+          {town ? <input type="hidden" name="town" value={town} /> : null}
+        </div>
+      </form>
+    </section>
     {todayGroups.length > 0 && (
-      <section class="today-board" aria-label="Today's happy hours and specials">
+      <section class="today-board" aria-label="Today's happy hours and specials" hidden={todayShown === 0}>
         <p class="kicker">Today</p>
         <h2>{labelFromKey(todayKey)}</h2>
         <ul class="deal-list">
           {todayGroups.map((group) => (
-            <li class="deal">
+            <li class="deal" data-q={eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers)} hidden={Boolean(q) && !eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)}>
               {group.offers.map((offer) => (
                 <div class="deal-block">
                   <p class="deal-what">{offer.what}</p>
@@ -419,13 +442,7 @@ function eatHref(nextTown: string | null) {
         </ul>
       </section>
     )}
-    <form class="filters" method="get" action="/eats">
-      <div class="filter-row search-row">
-        <label for="q">Search</label>
-        <input id="q" type="search" name="q" value={q} placeholder="Name or town" />
-        {town ? <input type="hidden" name="town" value={town} /> : null}
-        <button class="button" type="submit">Search</button>
-      </div>
+    <div class="filters">
       <div class="filter-row">
         <span>Town</span>
         <a class="chip" href={eatHref(null)} aria-current={town ? undefined : 'true'}>All</a>
@@ -433,16 +450,16 @@ function eatHref(nextTown: string | null) {
           <a class="chip" href={eatHref(item)} aria-current={town === item ? 'true' : undefined}>{item}</a>
         ))}
       </div>
-    </form>
-    <p class="meta">{rows.length} {rows.length === 1 ? 'place' : 'places'}. Places with a special today are first. Times are Central.</p>
-    {rows.length === 0 ? (
-      <p>Nothing matches that search.</p>
-    ) : (
-      <ul class="eat-list">
+    </div>
+    <p class="meta" id="eats-count">{shownCount} {shownCount === 1 ? 'place' : 'places'}. Places with a special today are first. Times are Central.</p>
+    <p id="eats-empty" hidden={shownCount > 0}>Nothing matches that search.</p>
+    <ul class="eat-list">
         {rows.map((row) => {
           const external = row.entry.href.startsWith('http');
+          const hay = eatHay(row.entry.name, row.entry.category, row.town, row.entry.place, [...row.today, ...row.tomorrow]);
+          const matched = !q || hay.includes(q);
           return (
-            <li class="eat-row">
+            <li class="eat-row" data-q={hay} hidden={!matched}>
               <span class="eat-mark" aria-hidden="true">{mark(row.entry.name)}</span>
               <div>
                 <a class="eat-name" href={row.entry.href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>{row.entry.name}</a>
@@ -487,9 +504,135 @@ function eatHref(nextTown: string | null) {
           );
         })}
       </ul>
-    )}
     <p class="disclaimer">
       Specials were read from each restaurant’s own site on November 15 and 16, 2026. A row with no deal had none posted. Weekly boards can change. Casa Chapala and Chapala Fiestas & Grill are two different restaurants. Back 9 Bar closed January 20, 2026. Stem & Stone closed in late 2025 and is now Espadas de Brazil. Leo’s Italian Grill in Cedar Creek closed July 8, 2026, and is now Lupita’s Kitchen. Send a correction — <a class="text-link" href="/tips">reader tips</a>.
     </p>
+    <script is:inline>
+      (function () {
+        var input = document.getElementById('q');
+        var clearButton = document.querySelector('.looking-clear');
+        var count = document.getElementById('eats-count');
+        var empty = document.getElementById('eats-empty');
+        var board = document.querySelector('.today-board');
+        if (!input || !count || !empty) return;
+        var rows = Array.prototype.slice.call(document.querySelectorAll('.eat-row'));
+        var deals = Array.prototype.slice.call(document.querySelectorAll('.today-board .deal'));
+        var chips = Array.prototype.slice.call(document.querySelectorAll('.filters a.chip'));
+        var hit = function (needle, text) {
+          if (!needle) return true;
+          return (text || '').indexOf(needle) !== -1;
+        };
+        var apply = function () {
+          var value = input.value.trim().toLowerCase();
+          if (clearButton) clearButton.hidden = !value;
+          var url = new URL(location.href);
+          if (value) url.searchParams.set('q', value);
+          else url.searchParams.delete('q');
+          history.replaceState(null, '', url);
+          chips.forEach(function (link) {
+            var next = new URL(link.href);
+            if (value) next.searchParams.set('q', value);
+            else next.searchParams.delete('q');
+            link.href = next.pathname + next.search;
+          });
+          var shown = 0;
+          rows.forEach(function (row) {
+            var on = hit(value, row.getAttribute('data-q'));
+            row.hidden = !on;
+            if (on) shown += 1;
+          });
+          var dealsOn = 0;
+          deals.forEach(function (deal) {
+            var on = hit(value, deal.getAttribute('data-q'));
+            deal.hidden = !on;
+            if (on) dealsOn += 1;
+          });
+          if (board) board.hidden = dealsOn === 0;
+          count.textContent = shown + ' ' + (shown === 1 ? 'place' : 'places') + '. Places with a special today are first. Times are Central.';
+          empty.hidden = shown !== 0;
+        };
+        input.addEventListener('input', apply);
+        if (clearButton) {
+          clearButton.addEventListener('click', function () {
+            input.value = '';
+            input.focus();
+            apply();
+          });
+        }
+      })();
+    </script>
   </div>
 </BaseLayout>
+
+<style>
+  .board {
+    margin: 0.2rem 0 1.2rem;
+    padding: 1.1rem 1.1rem 0.95rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-top: 8px solid var(--pine-deep);
+  }
+  .looking { margin: 0; }
+  .looking-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .looking-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 4.8rem;
+    padding: 0.25rem 0.55rem 0.25rem 1.2rem;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+  }
+  .looking-bar:focus-within {
+    outline: 3px solid color-mix(in srgb, var(--river) 55%, white);
+    outline-offset: 2px;
+  }
+  .looking-bar svg {
+    width: 1.7rem;
+    height: 1.7rem;
+    flex: none;
+    color: var(--ink);
+  }
+  .looking-bar input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+    padding: 0.85rem 0;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .looking-bar input:focus { outline: none; }
+  .looking-bar input::-webkit-search-cancel-button { display: none; }
+  .looking-clear {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    font-size: 1.45rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .looking-clear:hover { background: var(--paper-2); }
+  .looking-clear[hidden] { display: none; }
+  .eat-row[hidden],
+  .today-board[hidden],
+  .deal[hidden] { display: none !important; }
+  @media (max-width: 640px) {
+    .board { padding: 0.85rem 0.75rem 0.75rem; }
+  }
+</style>

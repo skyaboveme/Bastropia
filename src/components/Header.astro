@@ -3,7 +3,7 @@ import BurnMark from './BurnMark.astro';
 import SocialIcons from './SocialIcons.astro';
 import { burnBan, burnStatus } from '../data/burnBan';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
-import { eventKey, formatLong, labelFromKey } from '../lib/time';
+import { chicagoParts, eventKey, formatLong, labelFromKey } from '../lib/time';
 import { getForecast, isTown, weatherHeroSrc, weatherLabel } from '../lib/weather';
 import { readTown, townCookie } from '../lib/townChoice';
 
@@ -48,6 +48,8 @@ const governmentHero = path === '/government';
 const newsHero = path === '/news';
 const videosHero = path === '/videos';
 const eatsHero = path === '/eats';
+const chicagoHour = chicagoParts(now).hour;
+const nightHero = chicagoHour >= 18 || chicagoHour < 6;
 const sectionHero =
   path === '/' ||
   path === '/scores' ||
@@ -107,7 +109,12 @@ function current(href: string) {
   </div>
 
   <div class="header-stage has-hero">
-    {path === '/' && (
+    {path === '/' && nightHero && (
+      <div class="header-hero is-night" aria-hidden="true">
+        <img class="is-on" src="/images/header/main-night.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
+      </div>
+    )}
+    {path === '/' && !nightHero && (
       <div class="header-hero" data-header-hero aria-hidden="true">
         <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
         <img src="/images/header/lost-pines.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
