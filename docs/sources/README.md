@@ -34,3 +34,7 @@ These can later power a searchable church directory page (filter by town and den
 - `county-gov-sources.md` — official monitoring URLs (County Clerk agendas and the CivicWeb document archive) and the daily/weekly agenda workflow.
 
 These can later power a county government reference page and automatic agenda-preview stories.
+
+## Article images
+
+- `image-guide.md` — how to add a photo to a news story: file path, frontmatter fields, size targets, licensing rules, and credit format. Use this on every new article when a properly licensed image is available.

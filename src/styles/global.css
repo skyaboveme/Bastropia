@@ -460,7 +460,10 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 
 .event-card, .story-card, .update-card, .stream, .day-card { background: transparent; border: 0; box-shadow: none; }
 .event-card { border-bottom: 1px solid var(--line); }
-.event-photo { display: block; width: auto; max-width: 100%; max-height: 640px; margin: 0 0 1rem; }
+.event-photo { display: block; width: auto; max-width: 100%; max-height: 640px; height: auto; margin: 0 0 1rem; }
+.story-photo { margin: 0 0 1.15rem; }
+.story-photo .event-photo { margin-bottom: 0; }
+.photo-credit { margin: 0.4rem 0 0; font-size: 0.82rem; color: var(--ink-soft); line-height: 1.4; max-width: 42rem; }
 .event-card a.has-photo { grid-template-columns: 4.2rem 5.6rem 1fr; }
 .event-thumb { width: 100%; height: 4.4rem; object-fit: cover; object-position: center top; display: block; }
 .event-card.compact .event-thumb {

@@ -18,6 +18,7 @@ const { Content } = await render(story);
   title={story.data.title}
   description={story.data.description}
   image={story.data.image}
+  imageAlt={story.data.imageAlt}
   pageType="NewsArticle"
   published={story.data.pubDate}
   section={story.data.place}
@@ -31,7 +32,10 @@ const { Content } = await render(story);
       <p class="lede">{story.data.description}</p>
     </header>
     {story.data.image && (
-      <img class="event-photo" src={story.data.image} alt={story.data.title} />
+      <figure class="story-photo">
+        <img class="event-photo" src={story.data.image} alt={story.data.imageAlt ?? story.data.title} />
+        {story.data.imageCredit && <figcaption class="photo-credit">{story.data.imageCredit}</figcaption>}
+      </figure>
     )}
     <div class="prose">
       <Content />
