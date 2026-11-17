@@ -1,25 +1,638 @@
 ---
-import { getEntry, render } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import NewsletterSignup from '../components/NewsletterSignup.astro';
-import { formatLong } from '../lib/time';
+export const prerender = false;
 
-const story = await getEntry('news', 'eats-beat-specials-happy-hours-bastrop-county-2026-11-16');
-if (!story) throw new Error('Missing Eats Beat story');
-const { Content } = await render(story);
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { directoryEntries, type DirectoryEntry } from '../data/directory';
+import { listLiveBusinesses, toDirectoryEntry } from '../lib/businessDb';
+import { addDays, chicagoParts, labelFromKey } from '../lib/time';
+
+type Offer = {
+  what: string;
+  time?: string;
+  span?: string;
+  discount?: string[];
+  note?: string;
+  days: number[];
+  from?: string;
+  until?: string;
+};
+
+type Place = {
+  name: string;
+  city: string;
+  where?: string;
+  phone?: string;
+  href: string;
+  hrefLabel: string;
+  offers: Offer[];
+};
+
+const week = { from: '2026-11-16', until: '2026-11-22' };
+
+const places: Place[] = [
+  {
+    name: 'Bastrop Beer Company',
+    city: 'Bastrop',
+    where: '1008 Main Street, Bastrop, TX 78602',
+    phone: '512-549-3722',
+    href: 'https://bastropbeerco.com/',
+    hrefLabel: 'bastropbeerco.com',
+    offers: [
+      {
+        what: 'Happy hour',
+        span: 'Tuesday–Friday',
+        time: '3:00–6:00 p.m.',
+        discount: ['$1 off pints, domestic beer, and wines', '10% off all to-go craft beer'],
+        days: [2, 3, 4, 5],
+      },
+    ],
+  },
+  {
+    name: 'Casa Chapala',
+    city: 'Bastrop',
+    where: '1800 Walnut Street, Bastrop',
+    href: 'https://bastrop.casachapala.com/food-menu',
+    hrefLabel: 'Casa Chapala Bastrop menu',
+    offers: [
+      {
+        what: 'Happy hour',
+        span: 'Monday–Thursday',
+        time: '11:00 a.m.–7:00 p.m.',
+        discount: ['$4 draft pints', '$6 Casa Rita', '$3.50 cantina tacos', '$6 shareable plates'],
+        days: [1, 2, 3, 4],
+      },
+      {
+        what: 'Kids eat free',
+        span: 'Monday',
+        time: 'All day',
+        note: 'Conditions were not posted.',
+        days: [1],
+      },
+      {
+        what: 'Lunch buffet',
+        span: 'Monday',
+        time: '11:00 a.m.–2:00 p.m.',
+        discount: ['$15.99, includes a drink'],
+        days: [1],
+      },
+      {
+        what: 'Patio Rita, any flavor',
+        time: 'All day',
+        days: [0, 1, 2, 3, 4, 5, 6],
+      },
+      {
+        what: 'Sunday brunch buffet',
+        span: 'Sunday',
+        time: '9:00 a.m.–3:00 p.m.',
+        days: [0],
+      },
+    ],
+  },
+  {
+    name: 'Chapala Fiestas & Grill',
+    city: 'Bastrop',
+    href: 'https://chapalafiestas.com/bastrop-chapala-fiestas-and-grill-happy-hours-specials',
+    hrefLabel: 'Chapala Fiestas specials',
+    offers: [
+      { what: 'Happy hour', span: 'Monday, Nov. 16', time: '11:00 a.m.–10:00 p.m.', days: [1], ...week },
+      { what: 'Happy hour', span: 'Tuesday, Nov. 17', time: '11:00 p.m.–10:00 p.m.', note: 'The site lists the start as 11:00 p.m. Call before you plan on it.', days: [2], ...week },
+      { what: 'Happy hour', span: 'Wednesday, Nov. 18', time: '11:00 a.m.–10:00 p.m.', discount: ['Margaritas, food, wine, and beer'], days: [3], ...week },
+      { what: 'Happy hour', span: 'Thursday, Nov. 19', time: '11:00 a.m.–10:00 p.m.', days: [4], ...week },
+      { what: 'Happy hour', span: 'Friday, Nov. 20', time: '11:00 a.m.–11:00 p.m.', days: [5], ...week },
+      { what: 'Happy hour', span: 'Saturday, Nov. 21', time: '10:00 a.m.–11:00 p.m.', days: [6], ...week },
+      { what: 'Happy hour', span: 'Sunday, Nov. 22', time: '10:00 a.m.–9:00 p.m.', days: [0], ...week },
+    ],
+  },
+  {
+    name: "Chili's Grill & Bar",
+    city: 'Bastrop',
+    where: '734 Highway 71, Bastrop, TX 78602',
+    phone: '(512) 332-2644',
+    href: 'https://www.chilis.com/locations/us/texas/bastrop/bastrop',
+    hrefLabel: "Chili's Bastrop",
+    offers: [
+      {
+        what: 'Happy hour',
+        span: 'Monday–Friday',
+        time: '3:00–6:00 p.m.',
+        discount: [
+          '$3 Bud Light, Miller Lite, or Coors Light, 16 oz',
+          '$4 Bud Light 22 oz, Modelo 16 oz, Miller Lite 22 oz, Coors Light 22 oz, or Michelob Ultra 16 oz',
+          '$5 Modelo 22 oz, house red or white wine, or Michelob Ultra 22 oz',
+          '$6 margarita of the month',
+          '$7 tequila classic margarita',
+        ],
+        days: [1, 2, 3, 4, 5],
+      },
+    ],
+  },
+  {
+    name: 'Film Alley Bastrop',
+    city: 'Bastrop',
+    where: '1600 Chestnut Street, Bastrop, TX 78602',
+    href: 'https://filmalley.com/events/71116-happy-hour/',
+    hrefLabel: 'Film Alley happy hour',
+    offers: [
+      {
+        what: 'Happy hour',
+        span: 'Thursday',
+        time: '12:00–7:00 p.m.',
+        discount: ['Half-price arcade', 'Half-price bowling', 'Half-price domestic pints'],
+        days: [4],
+      },
+    ],
+  },
+  {
+    name: "Maxine's Cafe & Bakery",
+    city: 'Bastrop',
+    phone: '512-303-0919',
+    href: 'https://maxinescafe.com/specials',
+    hrefLabel: "Maxine's specials",
+    offers: [
+      { what: 'Loaded potato soup', span: 'Tuesday, Nov. 17', time: '11:00 a.m.–3:00 p.m.', days: [2], ...week },
+      { what: 'Homestyle chili and cornbread', span: 'Wednesday, Nov. 18', time: '11:00 a.m.–3:00 p.m.', days: [3], ...week },
+      { what: 'Personal chicken pot pie', span: 'Thursday, Nov. 19', time: '11:00 a.m.–3:00 p.m.', days: [4], ...week },
+      { what: 'Broccoli cheese soup', span: 'Friday, Nov. 20', time: '11:00 a.m.–3:00 p.m.', discount: ['Served over rice'], days: [5], ...week },
+      { what: 'Breakfast', span: 'Friday, Nov. 20', time: 'Until 5:00 p.m.', days: [5], ...week },
+      { what: 'Breakfast', span: 'Saturday, Nov. 21', time: '7:00 a.m.–5:00 p.m.', days: [6], ...week },
+      { what: 'Breakfast all day', span: 'Sunday, Nov. 22', time: '7:00 a.m.–3:00 p.m.', days: [0], ...week },
+    ],
+  },
+  {
+    name: 'Old Town Restaurant & Bar',
+    city: 'Bastrop',
+    where: '931 Main Street, Bastrop',
+    phone: '(512) 321-1171',
+    href: 'https://oldtownbastroptx.com/bastrop-old-town-restaurant-and-bar-happy-hours-specials',
+    hrefLabel: 'Old Town specials',
+    offers: [
+      { what: 'Catfish basket', span: 'Monday, Nov. 16', time: '11:00 a.m.–10:00 p.m.', days: [1], ...week },
+      { what: 'Happy hour', span: 'Monday, Nov. 16', time: '3:00–7:00 p.m.', discount: ['$1 off all drinks'], days: [1], ...week },
+      { what: 'Chicken parmesan', span: 'Tuesday, Nov. 17', time: '11:00 a.m.–10:00 p.m.', days: [2], ...week },
+      { what: 'Happy hour', span: 'Tuesday, Nov. 17', time: '3:00–7:00 p.m.', discount: ['$3 Bud Light and Ziegenbock drafts', '$1 off all drinks'], days: [2], ...week },
+      { what: 'Chicken fried steak and $1 wings', span: 'Wednesday, Nov. 18', time: '11:00 a.m.–10:00 p.m.', days: [3], ...week },
+      { what: 'Happy hour', span: 'Wednesday, Nov. 18', time: '3:00–7:00 p.m.', discount: ['$4.50 well drinks', '$1 off all'], days: [3], ...week },
+      { what: 'Meatloaf dinner', span: 'Thursday, Nov. 19', time: '11:00 a.m.–10:00 p.m.', days: [4], ...week },
+      { what: 'New York strip', span: 'Friday, Nov. 20', time: '11:00 a.m.–10:00 p.m.', days: [5], ...week },
+    ],
+  },
+  {
+    name: 'Piney Creek Chop House',
+    city: 'Bastrop',
+    where: '703 Chestnut Street, Bastrop',
+    phone: '(512) 321-2135',
+    href: 'https://pineycreektx.com/bastrop-downtown-bastrop-piney-creek-chop-house-happy-hours-specials',
+    hrefLabel: 'Piney Creek specials',
+    offers: [
+      {
+        what: 'Happy hour',
+        span: 'Monday–Thursday',
+        time: '5:00–7:00 p.m.',
+        discount: ['$7 martinis', 'Discounted appetizers'],
+        days: [1, 2, 3, 4],
+      },
+    ],
+  },
+  {
+    name: "Lightnin' Bar",
+    city: 'Elgin',
+    where: '109 Central Ave. Unit B, Elgin, TX 78621',
+    href: 'https://www.lightninbartexas.com/',
+    hrefLabel: 'lightninbartexas.com',
+    offers: [
+      {
+        what: 'Happy hour',
+        span: 'Tuesday–Friday',
+        time: '2:00–6:00 p.m.',
+        days: [2, 3, 4, 5],
+      },
+    ],
+  },
+  {
+    name: 'Smithville Brewing Company',
+    city: 'Smithville',
+    href: 'https://www.smithvillebrewing.com/',
+    hrefLabel: 'smithvillebrewing.com',
+    offers: [
+      {
+        what: '55 and older',
+        span: 'Wednesday',
+        discount: ['50% off an entree with a beverage'],
+        days: [3],
+      },
+      {
+        what: 'Pints and pizza',
+        span: 'Thursday',
+        discount: ['$5 pints', '$2 off pizzas'],
+        days: [4],
+      },
+      {
+        what: 'Happy hour',
+        span: 'Sunday',
+        time: 'All day',
+        discount: ['$2 off appetizers', '$1 off bottles and cans'],
+        note: 'Exclusions apply.',
+        days: [0],
+      },
+      {
+        what: 'Live music',
+        span: 'Sunday',
+        time: '4:00–6:00 p.m.',
+        days: [0],
+      },
+    ],
+  },
+];
+
+const foodCategories = new Set([
+  'Restaurants',
+  'Food Trucks',
+  'Bakeries / Baked Goods',
+  'Coffee / Beverage Shops',
+  'Wineries / Wine Shops / Breweries',
+]);
+
+const countyTowns = ['Bastrop', 'Elgin', 'Smithville', 'Cedar Creek', 'McDade', 'Paige', 'Rosanky'];
+
+function norm(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function samePlace(a: string, b: string) {
+  const left = norm(a);
+  const right = norm(b);
+  return left === right || left.startsWith(`${right} `) || right.startsWith(`${left} `);
+}
+
+function weekdayOf(key: string) {
+  const [year, month, day] = key.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 18)).getUTCDay();
+}
+
+function onDay(offer: Offer, key: string) {
+  return offer.days.includes(weekdayOf(key)) && (!offer.from || key >= offer.from) && (!offer.until || key <= offer.until);
+}
+
+function isFood(entry: DirectoryEntry) {
+  if (foodCategories.has(entry.category)) return true;
+  if (entry.category === 'Catering' && /chick-fil-a|southside/i.test(entry.name)) return true;
+  if (entry.source === 'listed' && /restaurant|food|cafe|coffee|bakery|brew|winery|grill|bbq|bar|pizza|kitchen|diner|eatery/i.test(`${entry.category} ${entry.name}`)) return true;
+  return false;
+}
+
+function inCounty(entry: DirectoryEntry) {
+  return !`${entry.place} ${entry.town || ''}`.toLowerCase().includes('cedar park');
+}
+
+function townLabel(entry: DirectoryEntry) {
+  if (entry.town && countyTowns.includes(entry.town)) return entry.town;
+  const blob = entry.place.toLowerCase();
+  for (const town of countyTowns) {
+    if (blob.includes(town.toLowerCase())) return town;
+  }
+  if (blob.includes('lost pines')) return 'Lost Pines';
+  return entry.town || 'Bastrop County';
+}
+
+function mark(name: string) {
+  const words = name
+    .replace(/[^A-Za-z0-9' ]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word && !/^(the|and|of|a)$/i.test(word));
+  return ((words[0]?.[0] || '') + (words[1]?.[0] || '')).toUpperCase();
+}
+
+function specialEntry(place: Place): DirectoryEntry {
+  const digits = (place.phone || '').replace(/\D/g, '');
+  return {
+    id: `special:${norm(place.name)}`,
+    name: place.name,
+    category: 'Restaurant',
+    place: place.where || place.city,
+    town: place.city,
+    phone: place.phone,
+    phoneHref: digits.length === 10 ? `tel:+1${digits}` : undefined,
+    website: place.href,
+    href: place.href,
+    summary: '',
+    source: 'chamber',
+  };
+}
+
+let listed: DirectoryEntry[] = [];
+try {
+  listed = (await listLiveBusinesses()).map(toDirectoryEntry);
+} catch {
+  listed = [];
+}
+
+const seen = new Set<string>();
+const directoryFood = [...listed, ...directoryEntries].filter((entry) => {
+  if (!isFood(entry) || !inCounty(entry)) return false;
+  const key = norm(entry.name);
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
+
+for (const place of places) {
+  if (directoryFood.some((entry) => samePlace(entry.name, place.name))) continue;
+  directoryFood.push(specialEntry(place));
+}
+
+const todayKey = chicagoParts(new Date()).key;
+const tomorrowKey = addDays(todayKey, 1);
+const todayGroups = places
+  .map((place) => ({ place, offers: place.offers.filter((offer) => onDay(offer, todayKey)) }))
+  .filter((group) => group.offers.length > 0);
+const town = Astro.url.searchParams.get('town');
+const q = (Astro.url.searchParams.get('q') || '').trim().toLowerCase();
+
+const rows = directoryFood
+  .map((entry) => {
+    const special = places.find((place) => samePlace(place.name, entry.name));
+    return {
+      entry,
+      town: townLabel(entry),
+      today: special?.offers.filter((offer) => onDay(offer, todayKey)) ?? [],
+      tomorrow: special?.offers.filter((offer) => onDay(offer, tomorrowKey)) ?? [],
+    };
+  })
+  .filter((row) => !town || row.town === town)
+  .sort((a, b) => {
+    const rank = (row: { today: Offer[] }) => (row.today.length ? 0 : 1);
+    const byDeal = rank(a) - rank(b);
+    if (byDeal !== 0) return byDeal;
+    return a.entry.name.localeCompare(b.entry.name);
+  });
+
+const townOptions = [...new Set(directoryFood.map((entry) => townLabel(entry)))].sort((a, b) => a.localeCompare(b));
+
+function offerText(offer: Offer) {
+  return [offer.what, offer.span, offer.time, offer.note, ...(offer.discount || [])].filter(Boolean).join(' ');
+}
+
+function eatHay(name: string, category: string, townName: string, place: string, offers: Offer[]) {
+  return `${name} ${category} ${townName} ${place} ${offers.map(offerText).join(' ')}`.toLowerCase();
+}
+
+const shownCount = rows.filter((row) => {
+  const hay = eatHay(row.entry.name, row.entry.category, row.town, row.entry.place, [...row.today, ...row.tomorrow]);
+  return !q || hay.includes(q);
+}).length;
+const todayShown = todayGroups.filter((group) => !q || eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)).length;
+
+function eatHref(nextTown: string | null) {
+  const params = new URLSearchParams();
+  if (nextTown) params.set('town', nextTown);
+  if (q) params.set('q', q);
+  const search = params.toString();
+  return search ? `/eats?${search}` : '/eats';
+}
 ---
 
-<BaseLayout title={story.data.title} description={story.data.description}>
-  <article class="wrap">
-    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
-      <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
-      <h1>{story.data.title}</h1>
-      <p class="meta">By the <a href="/about">Bastropia desk</a></p>
-      <p class="lede">{story.data.description}</p>
-    </header>
-    <div class="prose">
-      <Content />
-      <NewsletterSignup />
+<BaseLayout
+  title="Eats"
+  description="Happy hours and specials posted by restaurants and bars in Bastrop County, from each place’s own site."
+>
+  <PageHead
+    kicker="Specials"
+    title="Eats"
+    lede="Restaurants, cafes, bakeries, and bars from the Bastrop County directory. A posted happy hour or special shows on the row. Confirm before you go."
+  />
+  <div class="wrap">
+    <section class="board" aria-label="Find a place">
+      <form class="looking" method="get" action="/eats" role="search">
+        <label class="looking-label" for="q">Looking for</label>
+        <div class="looking-bar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+            <path d="M16 16.5 20.5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          <input id="q" type="search" name="q" value={q} placeholder="tacos, coffee, Elgin" autocomplete="off" enterkeyhint="search" />
+          <button class="looking-clear" type="button" aria-label="Clear search" hidden={!q}>×</button>
+          {town ? <input type="hidden" name="town" value={town} /> : null}
+        </div>
+      </form>
+    </section>
+    {todayGroups.length > 0 && (
+      <section class="today-board" aria-label="Today's happy hours and specials" hidden={todayShown === 0}>
+        <p class="kicker">Today</p>
+        <h2>{labelFromKey(todayKey)}</h2>
+        <ul class="deal-list">
+          {todayGroups.map((group) => (
+            <li class="deal" data-q={eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers)} hidden={Boolean(q) && !eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)}>
+              {group.offers.map((offer) => (
+                <div class="deal-block">
+                  <p class="deal-what">{offer.what}</p>
+                  {offer.time && <p class="deal-time">{offer.time}</p>}
+                  {offer.discount?.map((line) => <p class="deal-off">{line}</p>)}
+                  {offer.note && <p class="deal-note">{offer.note}</p>}
+                </div>
+              ))}
+              <p class="deal-place">{group.place.name}, {group.place.city}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+    <div class="filters">
+      <div class="filter-row">
+        <span>Town</span>
+        <a class="chip" href={eatHref(null)} aria-current={town ? undefined : 'true'}>All</a>
+        {townOptions.map((item) => (
+          <a class="chip" href={eatHref(item)} aria-current={town === item ? 'true' : undefined}>{item}</a>
+        ))}
+      </div>
     </div>
-  </article>
+    <p class="meta" id="eats-count">{shownCount} {shownCount === 1 ? 'place' : 'places'}. Places with a special today are first. Times are Central.</p>
+    <p id="eats-empty" hidden={shownCount > 0}>Nothing matches that search.</p>
+    <ul class="eat-list">
+        {rows.map((row) => {
+          const external = row.entry.href.startsWith('http');
+          const hay = eatHay(row.entry.name, row.entry.category, row.town, row.entry.place, [...row.today, ...row.tomorrow]);
+          const matched = !q || hay.includes(q);
+          return (
+            <li class="eat-row" data-q={hay} hidden={!matched}>
+              <span class="eat-mark" aria-hidden="true">{mark(row.entry.name)}</span>
+              <div>
+                <a class="eat-name" href={row.entry.href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>{row.entry.name}</a>
+                <span class="eat-line">{row.entry.category} · {row.town}</span>
+                {row.entry.place && row.entry.place !== row.town && <span class="eat-line">{row.entry.place}</span>}
+              </div>
+              {row.today.length > 0 && (
+                <div class="eat-special">
+                  <p class="kicker">Today</p>
+                  {row.today.map((offer) => (
+                    <div class="deal-block">
+                      <p class="deal-what">{offer.what}</p>
+                      {offer.time && <p class="deal-time">{offer.time}</p>}
+                      {offer.discount?.map((line) => <p class="deal-off">{line}</p>)}
+                      {offer.note && <p class="deal-note">{offer.note}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {row.tomorrow.length > 0 && (
+                <div class="eat-special">
+                  <p class="kicker">Tomorrow</p>
+                  {row.tomorrow.map((offer) => (
+                    <div class="deal-block">
+                      <p class="deal-what">{offer.what}</p>
+                      {offer.time && <p class="deal-time">{offer.time}</p>}
+                      {offer.discount?.map((line) => <p class="deal-off">{line}</p>)}
+                      {offer.note && <p class="deal-note">{offer.note}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {(row.entry.phone || row.entry.website) && (
+                <p class="eat-actions">
+                  {row.entry.phoneHref ? <a href={row.entry.phoneHref}>{row.entry.phone}</a> : row.entry.phone}
+                  {row.entry.website && (
+                    <a href={row.entry.website} target="_blank" rel="noopener noreferrer">Website</a>
+                  )}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    <p class="disclaimer">
+      Specials were read from each restaurant’s own site on November 15 and 16, 2026. A row with no deal had none posted. Weekly boards can change. Casa Chapala and Chapala Fiestas & Grill are two different restaurants. Back 9 Bar closed January 20, 2026. Stem & Stone closed in late 2025 and is now Espadas de Brazil. Leo’s Italian Grill in Cedar Creek closed July 8, 2026, and is now Lupita’s Kitchen. Send a correction — <a class="text-link" href="/tips">reader tips</a>.
+    </p>
+    <script is:inline>
+      (function () {
+        var input = document.getElementById('q');
+        var clearButton = document.querySelector('.looking-clear');
+        var count = document.getElementById('eats-count');
+        var empty = document.getElementById('eats-empty');
+        var board = document.querySelector('.today-board');
+        if (!input || !count || !empty) return;
+        var rows = Array.prototype.slice.call(document.querySelectorAll('.eat-row'));
+        var deals = Array.prototype.slice.call(document.querySelectorAll('.today-board .deal'));
+        var chips = Array.prototype.slice.call(document.querySelectorAll('.filters a.chip'));
+        var hit = function (needle, text) {
+          if (!needle) return true;
+          return (text || '').indexOf(needle) !== -1;
+        };
+        var apply = function () {
+          var value = input.value.trim().toLowerCase();
+          if (clearButton) clearButton.hidden = !value;
+          var url = new URL(location.href);
+          if (value) url.searchParams.set('q', value);
+          else url.searchParams.delete('q');
+          history.replaceState(null, '', url);
+          chips.forEach(function (link) {
+            var next = new URL(link.href);
+            if (value) next.searchParams.set('q', value);
+            else next.searchParams.delete('q');
+            link.href = next.pathname + next.search;
+          });
+          var shown = 0;
+          rows.forEach(function (row) {
+            var on = hit(value, row.getAttribute('data-q'));
+            row.hidden = !on;
+            if (on) shown += 1;
+          });
+          var dealsOn = 0;
+          deals.forEach(function (deal) {
+            var on = hit(value, deal.getAttribute('data-q'));
+            deal.hidden = !on;
+            if (on) dealsOn += 1;
+          });
+          if (board) board.hidden = dealsOn === 0;
+          count.textContent = shown + ' ' + (shown === 1 ? 'place' : 'places') + '. Places with a special today are first. Times are Central.';
+          empty.hidden = shown !== 0;
+        };
+        input.addEventListener('input', apply);
+        if (clearButton) {
+          clearButton.addEventListener('click', function () {
+            input.value = '';
+            input.focus();
+            apply();
+          });
+        }
+      })();
+    </script>
+  </div>
 </BaseLayout>
+
+<style>
+  .board {
+    margin: 0.2rem 0 1.2rem;
+    padding: 1.1rem 1.1rem 0.95rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-top: 8px solid var(--pine-deep);
+  }
+  .looking { margin: 0; }
+  .looking-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .looking-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 4.8rem;
+    padding: 0.25rem 0.55rem 0.25rem 1.2rem;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+  }
+  .looking-bar:focus-within {
+    outline: 3px solid color-mix(in srgb, var(--river) 55%, white);
+    outline-offset: 2px;
+  }
+  .looking-bar svg {
+    width: 1.7rem;
+    height: 1.7rem;
+    flex: none;
+    color: var(--ink);
+  }
+  .looking-bar input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+    padding: 0.85rem 0;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .looking-bar input:focus { outline: none; }
+  .looking-bar input::-webkit-search-cancel-button { display: none; }
+  .looking-clear {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    font-size: 1.45rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .looking-clear:hover { background: var(--paper-2); }
+  .looking-clear[hidden] { display: none; }
+  .eat-row[hidden],
+  .today-board[hidden],
+  .deal[hidden] { display: none !important; }
+  @media (max-width: 640px) {
+    .board { padding: 0.85rem 0.75rem 0.75rem; }
+  }
+</style>
