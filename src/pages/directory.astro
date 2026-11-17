@@ -7,6 +7,7 @@ import HomeBanner from '../components/HomeBanner.astro';
 import { categoryIcon, categoryIconSvg } from '../data/categoryIcons';
 import {
   directoryEntries,
+  directoryTownOptions,
   filterDirectory,
   type DirectoryEntry,
 } from '../data/directory';
@@ -96,6 +97,28 @@ const searchIcons = Object.fromEntries(
   [...new Set(searchRows.map((row) => row.i))].map((key) => [key, categoryIconSvg[key] || categoryIconSvg.store]),
 );
 const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).replace(/</g, '\\u003c');
+const townCards = directoryTownOptions(all).map((town) => ({
+  town,
+  count: all.filter((entry) => entry.town === town).length,
+}));
+const skipTrades = new Set([
+  'friends of the chamber',
+  'non-profits',
+  'nonprofits',
+  'civic organizations',
+  'government',
+  'chamber of commerce',
+  'thoughtleader investor',
+  'investors',
+  'investor',
+]);
+const tradeCounts = new Map<string, number>();
+for (const entry of all) tradeCounts.set(entry.category, (tradeCounts.get(entry.category) ?? 0) + 1);
+const trades = [...tradeCounts.entries()]
+  .map(([name, count]) => ({ name, count, icon: categoryIcon(name) }))
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+const featuredTrades = trades.filter((trade) => !skipTrades.has(trade.name.toLowerCase())).slice(0, 12);
+const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
 ---
 
 <BaseLayout title={title} description={description} noindex={filtered} nofollow={false}>
@@ -115,24 +138,26 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
           {town ? <input type="hidden" name="town" value={town} /> : null}
         </div>
       </form>
-      <p class="looking-note">
-        <a class="text-link" href="/directory/submit">List your business free</a>
-        <span aria-hidden="true"> · </span>
-        <a class="text-link" href="/advertise">Paid partner pages</a>
-      </p>
-    </section>
 
-    <section class="section" id="directory-results" hidden={!showResults} data-category={category || ''} aria-label="Matching businesses">
-      {category && (
-        <div class="cat-current">
-          <h2>{category}{town ? ` in ${town}` : ''}</h2>
-          <a class="text-link" href={href({ category: null, q: null })}>All listings</a>
+      <section class="results-well" id="directory-results" data-category={category || ''} aria-label="Matching businesses">
+        <div id="directory-ready" hidden={showResults}>
+          <p class="results-ready">Matches show up here as you type.</p>
+          <div class="suggest">
+            {suggestions.map((word) => (
+              <button type="button" data-fill={word}>{word}</button>
+            ))}
+          </div>
         </div>
-      )}
-      <p class="meta" id="directory-count" aria-live="polite">
-        {showResults ? countText : ''}
-      </p>
-      <div id="directory-list">
+        {category && (
+          <div class="cat-current">
+            <h2>{category}{town ? ` in ${town}` : ''}</h2>
+            <a class="text-link" href={href({ category: null, q: null })}>All listings</a>
+          </div>
+        )}
+        <p class="meta" id="directory-count" aria-live="polite" hidden={!showResults}>
+          {showResults ? countText : ''}
+        </p>
+        <div id="directory-list">
         {showResults && visible.length === 0 ? (
           <p>Nothing matches that search. Try another word, or <a class="text-link" href="/directory/submit">submit a business</a>.</p>
         ) : showResults ? (
@@ -163,8 +188,48 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
             ))}
           </ul>
         ) : null}
-      </div>
+        </div>
+      </section>
+      <p class="looking-note">
+        <a class="text-link" href="/directory/submit">List your business free</a>
+        <span aria-hidden="true"> · </span>
+        <a class="text-link" href="/advertise">Paid partner pages</a>
+      </p>
     </section>
+
+    <section class="atlas" aria-label="Browse the county">
+      <h2>Browse the county</h2>
+      <ul class="atlas-figures">
+        <li><strong>{all.length}</strong><span>businesses</span></li>
+        <li><strong>{townCards.length}</strong><span>towns</span></li>
+        <li><strong>{trades.length}</strong><span>trades</span></li>
+      </ul>
+      <h3>By town</h3>
+      <ul class="town-cards">
+        {townCards.map((card) => (
+          <li>
+            <a href={href({ town: card.town, category: null, q: null })} aria-current={town === card.town ? 'page' : undefined}>
+              <strong>{card.count}</strong>
+              <em>{card.town}</em>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <h3>Popular trades</h3>
+      <ul class="trade-grid">
+        {featuredTrades.map((trade) => (
+          <li>
+            <a href={href({ category: trade.name, town: null, q: null })} aria-current={category === trade.name ? 'page' : undefined}>
+              <span class="trade-mark" aria-hidden="true"><CategoryIcon icon={trade.icon} /></span>
+              <strong>{trade.name}</strong>
+              <span>{trade.count} {trade.count === 1 ? 'listing' : 'listings'}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="atlas-note">Search for a name or another trade. Matches stay in the box above.</p>
+    </section>
+
     <div class="site-banner">
       <HomeBanner />
     </div>
@@ -215,8 +280,10 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
           }
           node.textContent = text;
         };
+        const ready = document.getElementById('directory-ready');
         const paint = (matches) => {
-          results.hidden = false;
+          if (ready) ready.hidden = true;
+          count.hidden = false;
           const shown = matches.slice(0, cap);
           const place = townLabel ? ' in ' + townLabel : '';
           count.textContent = shown.length < matches.length
@@ -291,13 +358,22 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
           else url.searchParams.delete('q');
           history.replaceState(null, '', url);
           if (!value && !category && !townLabel) {
-            results.hidden = true;
+            if (ready) ready.hidden = false;
+            count.hidden = true;
+            listHost.replaceChildren();
             return;
           }
           const needle = value.toLowerCase();
           paint(rows.filter((row) => (!category || row.c === category) && hit(row, needle)));
         };
         input.addEventListener('input', apply);
+        document.querySelectorAll('[data-fill]').forEach((button) => {
+          button.addEventListener('click', () => {
+            input.value = button.getAttribute('data-fill') || '';
+            input.focus();
+            apply();
+          });
+        });
         clearButton?.addEventListener('click', () => {
           input.value = '';
           input.focus();
@@ -323,14 +399,171 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
 
 <style>
   .board {
-    margin: 0.2rem 0 1.2rem;
-    padding: 1.1rem 1.1rem 0.9rem;
+    margin: 0.2rem 0 1.4rem;
+    padding: 0.2rem 0 0.2rem;
+    background: transparent;
+    border: 0;
+  }
+  .results-well {
+    min-height: 8.5rem;
+    margin-top: 0.85rem;
+    padding: 0.95rem 1rem 0.7rem;
     background: #fff;
     border: 1px solid var(--line);
-    border-top: 8px solid var(--pine-deep);
+    border-radius: 1.1rem;
+  }
+  .results-ready {
+    margin: 0.15rem 0 0;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+  }
+  .suggest {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+  }
+  .suggest button {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.95rem;
+    text-transform: capitalize;
+    cursor: pointer;
+  }
+  #directory-ready[hidden],
+  #directory-count[hidden] {
+    display: none !important;
+  }
+  .suggest button:hover {
+    border-color: var(--pine);
+    color: var(--pine-deep);
+  }
+  .atlas {
+    margin: 0.4rem 0 1.6rem;
+  }
+  .atlas h2 {
+    margin: 0 0 0.8rem;
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+  }
+  .atlas h3 {
+    margin: 1.15rem 0 0.55rem;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .atlas-figures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .atlas-figures li {
+    padding: 0.15rem 0 0.2rem;
+  }
+  .atlas-figures strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: clamp(2.1rem, 4.4vw, 3.2rem);
+    font-weight: 600;
+    line-height: 0.95;
+    color: var(--pine-deep);
+  }
+  .atlas-figures span,
+  .town-cards em {
+    color: var(--ink-soft);
+    font-style: normal;
+    font-size: 0.92rem;
+  }
+  .town-cards {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.55rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .town-cards a,
+  .trade-grid a {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .town-cards a {
+    padding: 0.75rem 0.6rem 0.7rem;
+  }
+  .town-cards a:hover,
+  .trade-grid a:hover,
+  .town-cards a[aria-current='page'],
+  .trade-grid a[aria-current='page'] {
+    border-color: var(--pine);
+  }
+  .town-cards strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 1.65rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .trade-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.65rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .trade-grid a {
+    display: grid;
+    justify-items: start;
+    gap: 0.28rem;
+    min-height: 7.4rem;
+    padding: 0.85rem 0.8rem 0.75rem;
+  }
+  .trade-mark {
+    width: 2.45rem;
+    height: 2.45rem;
+    border-radius: 0.6rem;
+    background: var(--pine);
+    color: #f4efe6;
+    display: grid;
+    place-items: center;
+  }
+  .trade-mark :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .trade-grid strong {
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .trade-grid a > span:last-child {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+  .atlas-note {
+    margin: 0.9rem 0 0;
+    color: var(--ink-soft);
+  }
+  @media (max-width: 900px) {
+    .town-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .trade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   .looking {
-    margin: 0 0 1rem;
+    margin: 0;
   }
   .looking-label {
     position: absolute;
@@ -441,6 +674,10 @@ const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).rep
     align-items: start;
     padding: 1rem 0;
     border-top: 1px solid var(--line);
+  }
+  .results-well .biz-row:first-child {
+    border-top: 0;
+    padding-top: 0.15rem;
   }
   .biz-mark {
     width: 4.4rem;
