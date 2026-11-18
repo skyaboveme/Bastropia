@@ -69,8 +69,11 @@ const coveredOnTheDesk = [
   'bastrop-isd-launches-tuition-free-program-to-certify-educators',
   'from-service-to-support-free-roof-repairs-for-bastrop-veterans',
   '10-bastrop-business-updates-to-know',
+  'esd-3-responds-to-over-1-000-calls-in-first-month',
+  'what-s-next-for-the-290-toll-extension-into-bastrop-county',
+  'spacex-strikes-solar-manufacturing-deal-as-bastrop-operations-expand',
 ];
-const leadStory = '/news/whataburger-bastrop-reopens-dec-8-sh-71';
+const leadStory = '/news/bastrop-county-commissioners-court-nov-23-2026-agenda-preview';
 const coveredElsewhere = (href: string) => coveredOnTheDesk.some((slug) => href.includes(slug));
 let pageHeadlines = headlines.filter((story) => !hiddenStories.has(story.href) && !coveredElsewhere(story.href));
 if (today <= electionDay) {
