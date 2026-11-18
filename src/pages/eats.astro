@@ -348,11 +348,17 @@ for (const place of places) {
 
 const todayKey = chicagoParts(new Date()).key;
 const tomorrowKey = addDays(todayKey, 1);
-const todayGroups = places
-  .map((place) => ({ place, offers: place.offers.filter((offer) => onDay(offer, todayKey)) }))
-  .filter((group) => group.offers.length > 0);
 const town = Astro.url.searchParams.get('town');
 const q = (Astro.url.searchParams.get('q') || '').trim().toLowerCase();
+const dayGroups = (key: string) =>
+  places
+    .filter((place) => !town || place.city === town)
+    .map((place) => ({ place, offers: place.offers.filter((offer) => onDay(offer, key)) }))
+    .filter((group) => group.offers.length > 0);
+const dayBoards = [
+  { key: todayKey, kicker: 'Today', groups: dayGroups(todayKey) },
+  { key: tomorrowKey, kicker: 'Tomorrow', groups: dayGroups(tomorrowKey) },
+].filter((board) => board.groups.length > 0);
 
 const rows = directoryFood
   .map((entry) => {
@@ -386,7 +392,8 @@ const shownCount = rows.filter((row) => {
   const hay = eatHay(row.entry.name, row.entry.category, row.town, row.entry.place, [...row.today, ...row.tomorrow]);
   return !q || hay.includes(q);
 }).length;
-const todayShown = todayGroups.filter((group) => !q || eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)).length;
+const boardShown = (groups: { place: Place; offers: Offer[] }[]) =>
+  groups.filter((group) => !q || eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)).length;
 
 function eatHref(nextTown: string | null) {
   const params = new URLSearchParams();
@@ -404,9 +411,34 @@ function eatHref(nextTown: string | null) {
   <PageHead
     kicker="Specials"
     title="Eats"
-    lede="Restaurants, cafes, bakeries, and bars from the Bastrop County directory. A posted happy hour or special shows on the row. Confirm before you go."
+    lede="Happy hours and specials for today and tomorrow are up top. The list below is restaurants, cafes, bakeries, and bars from the directory. Confirm before you go."
   />
   <div class="wrap">
+    {dayBoards.length > 0 && (
+      <div class="day-pair">
+        {dayBoards.map((board) => (
+          <section class="today-board day-board" aria-label={`${board.kicker}'s happy hours and specials`} hidden={boardShown(board.groups) === 0}>
+            <p class="kicker">{board.kicker}</p>
+            <h2>{labelFromKey(board.key)}</h2>
+            <ul class="deal-list">
+              {board.groups.map((group) => (
+                <li class="deal" data-q={eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers)} hidden={Boolean(q) && !eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)}>
+                  {group.offers.map((offer) => (
+                    <div class="deal-block">
+                      <p class="deal-what">{offer.what}</p>
+                      {offer.time && <p class="deal-time">{offer.time}</p>}
+                      {offer.discount?.map((line) => <p class="deal-off">{line}</p>)}
+                      {offer.note && <p class="deal-note">{offer.note}</p>}
+                    </div>
+                  ))}
+                  <p class="deal-place">{group.place.name}, {group.place.city}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    )}
     <section class="board" aria-label="Find a place">
       <form class="looking" method="get" action="/eats" role="search">
         <label class="looking-label" for="q">Looking for</label>
@@ -421,27 +453,6 @@ function eatHref(nextTown: string | null) {
         </div>
       </form>
     </section>
-    {todayGroups.length > 0 && (
-      <section class="today-board" aria-label="Today's happy hours and specials" hidden={todayShown === 0}>
-        <p class="kicker">Today</p>
-        <h2>{labelFromKey(todayKey)}</h2>
-        <ul class="deal-list">
-          {todayGroups.map((group) => (
-            <li class="deal" data-q={eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers)} hidden={Boolean(q) && !eatHay(group.place.name, '', group.place.city, group.place.where || '', group.offers).includes(q)}>
-              {group.offers.map((offer) => (
-                <div class="deal-block">
-                  <p class="deal-what">{offer.what}</p>
-                  {offer.time && <p class="deal-time">{offer.time}</p>}
-                  {offer.discount?.map((line) => <p class="deal-off">{line}</p>)}
-                  {offer.note && <p class="deal-note">{offer.note}</p>}
-                </div>
-              ))}
-              <p class="deal-place">{group.place.name}, {group.place.city}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
     <div class="filters">
       <div class="filter-row">
         <span>Town</span>
@@ -513,10 +524,9 @@ function eatHref(nextTown: string | null) {
         var clearButton = document.querySelector('.looking-clear');
         var count = document.getElementById('eats-count');
         var empty = document.getElementById('eats-empty');
-        var board = document.querySelector('.today-board');
+        var boards = Array.prototype.slice.call(document.querySelectorAll('.day-board'));
         if (!input || !count || !empty) return;
         var rows = Array.prototype.slice.call(document.querySelectorAll('.eat-row'));
-        var deals = Array.prototype.slice.call(document.querySelectorAll('.today-board .deal'));
         var chips = Array.prototype.slice.call(document.querySelectorAll('.filters a.chip'));
         var hit = function (needle, text) {
           if (!needle) return true;
@@ -541,13 +551,15 @@ function eatHref(nextTown: string | null) {
             row.hidden = !on;
             if (on) shown += 1;
           });
-          var dealsOn = 0;
-          deals.forEach(function (deal) {
-            var on = hit(value, deal.getAttribute('data-q'));
-            deal.hidden = !on;
-            if (on) dealsOn += 1;
+          boards.forEach(function (board) {
+            var dealsOn = 0;
+            Array.prototype.forEach.call(board.querySelectorAll('.deal'), function (deal) {
+              var on = hit(value, deal.getAttribute('data-q'));
+              deal.hidden = !on;
+              if (on) dealsOn += 1;
+            });
+            board.hidden = dealsOn === 0;
           });
-          if (board) board.hidden = dealsOn === 0;
           count.textContent = shown + ' ' + (shown === 1 ? 'place' : 'places') + '. Places with a special today are first. Times are Central.';
           empty.hidden = shown !== 0;
         };
