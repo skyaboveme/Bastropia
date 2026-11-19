@@ -72,8 +72,10 @@ const coveredOnTheDesk = [
   'esd-3-responds-to-over-1-000-calls-in-first-month',
   'what-s-next-for-the-290-toll-extension-into-bastrop-county',
   'spacex-strikes-solar-manufacturing-deal-as-bastrop-operations-expand',
+  'bee-infestation-stalls-repairs-at-historic-bastrop-courthouse',
+  'boots-bling-and-bingo-bastrop-fundraiser-to-benefit-cats',
 ];
-const leadStory = '/news/bastrop-county-commissioners-court-nov-23-2026-agenda-preview';
+const leadStory = '/news/elgin-voters-approve-citywide-mixed-drink-sales';
 const coveredElsewhere = (href: string) => coveredOnTheDesk.some((slug) => href.includes(slug));
 let pageHeadlines = headlines.filter((story) => !hiddenStories.has(story.href) && !coveredElsewhere(story.href));
 if (today <= electionDay) {
@@ -146,7 +148,7 @@ const deskStories = pageHeadlines
         <SponsorBanner placement="front-banner" size="poster" />
         {lead && (
           <article class="story-lead story-follow">
-            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Bastrop' : lead.label} · {formatMedium(lead.date)}</p>
+            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Elgin' : lead.label} · {formatMedium(lead.date)}</p>
             <h2><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h2>
             {lead.summary && <p class="dek">{lead.summary}</p>}
             <p class="more"><a href={lead.href} {...offsiteAttrs(lead.href)}>Read the story</a></p>
