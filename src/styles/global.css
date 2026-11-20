@@ -192,17 +192,17 @@ ul { margin: 0; padding: 0; list-style: none; }
   min-width: 0;
 }
 .county-strip .strip-name {
-  font-size: 1.05rem;
+  font-size: 1.3rem;
   font-weight: 750;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.015em;
   text-transform: uppercase;
   color: var(--river-deep);
-  line-height: 1.1;
+  line-height: 1;
   white-space: nowrap;
 }
 .county-strip .strip-icon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.22rem;
+  height: 1.22rem;
   flex: none;
   align-self: center;
   color: var(--river-deep);
@@ -222,8 +222,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 .county-strip a.is-alert .strip-icon { color: #c5161d; }
 .county-strip strong {
   font-family: var(--serif);
-  font-size: 1.22rem;
-  font-weight: 650;
+  font-size: 0.96rem;
+  font-weight: 560;
   line-height: 1;
   flex: none;
   white-space: nowrap;
@@ -819,9 +819,9 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
     border-radius: 0.35rem;
   }
   .county-strip .strip-line { flex-wrap: wrap; gap: 0.08rem 0.35rem; }
-  .county-strip .strip-name { font-size: 0.72rem; letter-spacing: 0.02em; }
-  .county-strip .strip-icon { width: 0.9rem; height: 0.9rem; }
-  .county-strip strong { font-size: 1.02rem; }
+  .county-strip .strip-name { font-size: 1.02rem; letter-spacing: 0.02em; }
+  .county-strip .strip-icon { width: 1.05rem; height: 1.05rem; }
+  .county-strip strong { font-size: 0.86rem; }
   .county-strip em {
     font-size: 0.72rem;
     white-space: nowrap;
