@@ -6,9 +6,12 @@
     "node": ">=22.23.4"
   },
   "scripts": {
+    "prepare-images": "node scripts/decode-news-images.mjs",
+    "predev": "npm run prepare-images",
+    "prebuild": "npm run prepare-images",
     "dev": "astro dev",
     "build": "astro build",
-    "deploy": "astro build && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy",
     "preview": "astro preview",
     "astro": "astro",
     "scout": "node scripts/event-scout.mjs"
