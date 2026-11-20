@@ -74,8 +74,11 @@ const coveredOnTheDesk = [
   'spacex-strikes-solar-manufacturing-deal-as-bastrop-operations-expand',
   'bee-infestation-stalls-repairs-at-historic-bastrop-courthouse',
   'boots-bling-and-bingo-bastrop-fundraiser-to-benefit-cats',
+  '11m-upgrade-wraps-up-on-historic-bastrop-bridge',
+  'explore-3-christmas-tree-farms-in-the-bastrop-area',
+  'operation-turkey-aims-to-serve-over-3-000-thanksgiving-meals',
 ];
-const leadStory = '/news/elgin-voters-approve-citywide-mixed-drink-sales';
+const leadStory = '/news/cedar-creek-data-center-gas-plant-neighbors-letter';
 const coveredElsewhere = (href: string) => coveredOnTheDesk.some((slug) => href.includes(slug));
 let pageHeadlines = headlines.filter((story) => !hiddenStories.has(story.href) && !coveredElsewhere(story.href));
 if (today <= electionDay) {
@@ -161,7 +164,7 @@ const weekendDays = weekend
       <div class="col col-lead">
         {lead ? (
           <article class="story-lead">
-            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Elgin' : lead.label} · {formatMedium(lead.date)}</p>
+            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Cedar Creek' : lead.label} · {formatMedium(lead.date)}</p>
             <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
             {leadItem?.data.image && (
               <img class="lead-photo" src={leadItem.data.image} alt={leadItem.data.imageAlt ?? lead.title} width="1200" height="675" />
