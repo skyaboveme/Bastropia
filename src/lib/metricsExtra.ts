@@ -21,6 +21,8 @@ export type MetricsExtra = {
   sunset: MetricLine | null;
   lake: MetricLine | null;
   gas: MetricLine | null;
+  diesel: MetricLine | null;
+  redDye: MetricLine | null;
   aquaOutage: MetricLine | null;
   aquaDrought: MetricLine | null;
   parks: ParkStatus[];
@@ -112,15 +114,8 @@ function eiaDate(value: string) {
   );
 }
 
-async function gas(): Promise<MetricLine | null> {
-  const html = await getText('https://www.eia.gov/petroleum/gasdiesel/');
-  const start = html.indexOf('U.S. Regular Gasoline Prices');
-  if (start < 0) return null;
-  const end = html.indexOf('>Cities<', start);
-  const slice = plain(html.slice(start, end > start ? end : start + 12000));
-  const dates = [...slice.matchAll(/\d{2}\/\d{2}\/\d{2}/g)].map((match) => match[0]);
-  const row = slice.match(/Texas\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
-  if (!row || dates.length < 3) return null;
+function fuelLine(row: RegExpMatchArray, dates: string[], detail: string): MetricLine | null {
+  if (dates.length < 3) return null;
   const latest = Number(row[3]);
   const weekChange = Number(row[6]);
   if (!Number.isFinite(latest) || !Number.isFinite(weekChange)) return null;
@@ -129,8 +124,38 @@ async function gas(): Promise<MetricLine | null> {
   const change = weekChange === 0 ? 'Unchanged from the prior week.' : `${cents} cents ${direction} the ${eiaDate(dates[1])} price.`;
   return {
     label: `$${latest.toFixed(3)}`,
-    detail: `Texas regular, week of ${eiaDate(dates[2])}. ${change} Not a town price.`,
+    detail: `${detail} Week of ${eiaDate(dates[2])}. ${change}`,
     href: 'https://www.eia.gov/petroleum/gasdiesel/',
+  };
+}
+
+async function fuel(): Promise<{ regular: MetricLine | null; diesel: MetricLine | null }> {
+  const html = await getText('https://www.eia.gov/petroleum/gasdiesel/');
+  const text = plain(html);
+  const gasStart = text.indexOf('U.S. Regular Gasoline Prices');
+  const dieselStart = text.indexOf('U.S. On-Highway Diesel');
+  if (gasStart < 0 || dieselStart < gasStart) return { regular: null, diesel: null };
+  const gasSlice = text.slice(gasStart, dieselStart);
+  const dieselSlice = text.slice(dieselStart, dieselStart + 2500);
+  const dates = [...gasSlice.matchAll(/\d{2}\/\d{2}\/\d{2}/g)].map((match) => match[0]);
+  const texas = gasSlice.match(/Texas\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
+  const gulf = dieselSlice.match(/Gulf Coast \(PADD3\)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
+  return {
+    regular: texas ? fuelLine(texas, dates, 'Texas regular. Not a town price.') : null,
+    diesel: gulf
+      ? fuelLine(gulf, dates, 'On-highway diesel for the Gulf Coast, the EIA region that includes Texas. Not a town price, and not red dye.')
+      : null,
+  };
+}
+
+async function redDye(): Promise<MetricLine | null> {
+  const href = 'https://www.eia.gov/tools/faqs/faq.php?id=14&t=9';
+  const text = plain(await getText(href));
+  if (!/do not publish prices specifically for off-road diesel/i.test(text)) return null;
+  return {
+    label: 'Not posted',
+    detail: 'EIA does not publish a red-dye, off-road diesel price.',
+    href,
   };
 }
 
@@ -209,10 +234,11 @@ async function forestNotes(): Promise<{ season: string | null; signup: string | 
 
 export async function getMetricsExtra(): Promise<MetricsExtra> {
   if (cache && Date.now() - cache.at < tenMinutes) return cache.value;
-  const [sunResult, lakeResult, gasResult, outageResult, droughtResult, bastrop, buescher, forest] = await Promise.all([
+  const [sunResult, lakeResult, fuelResult, dyeResult, outageResult, droughtResult, bastrop, buescher, forest] = await Promise.all([
     sun().catch(() => ({ sunrise: null, sunset: null })),
     lake().catch(() => null),
-    gas().catch(() => null),
+    fuel().catch(() => ({ regular: null, diesel: null })),
+    redDye().catch(() => null),
     aquaOutage().catch(() => null),
     aquaDrought().catch(() => null),
     park('Bastrop State Park', 'bastrop'),
@@ -223,7 +249,9 @@ export async function getMetricsExtra(): Promise<MetricsExtra> {
     sunrise: sunResult.sunrise,
     sunset: sunResult.sunset,
     lake: lakeResult,
-    gas: gasResult,
+    gas: fuelResult.regular,
+    diesel: fuelResult.diesel,
+    redDye: dyeResult,
     aquaOutage: outageResult,
     aquaDrought: droughtResult,
     parks: [bastrop, buescher],

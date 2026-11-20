@@ -20,18 +20,6 @@ const [county, alerts, schools, extra] = await Promise.all([
 
 const flow = county.river ? flowLabel(county.river.detail) : null;
 
-const gasTowns = [
-  ['Bastrop', 'bastrop'],
-  ['Elgin', 'elgin'],
-  ['Smithville', 'smithville'],
-  ['Cedar Creek', 'cedar-creek'],
-  ['McDade', 'mcdade'],
-  ['Paige', 'paige'],
-].map(([name, slug]) => ({
-  name,
-  href: `https://www.gasbuddy.com/gasprices/texas/${slug}`,
-}));
-
 const trash = serviceGroups.find((group) => group.id === 'trash');
 const cities = serviceGroups.find((group) => group.id === 'cities');
 const aqua = serviceGroups.find((group) => group.id === 'roads')?.items.find((item) => item.name === 'Aqua Water Supply');
@@ -104,25 +92,22 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
           <h2>Gas</h2>
         </div>
       </div>
-      <div class="metric-split">
-        <a class="metric-tile metric-hero" href={extra.gas?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/'} {...offsiteAttrs(extra.gas?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/')}>
+      <div class="metric-board metric-board-wide">
+        <a class="metric-tile" href={extra.gas?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/'} {...offsiteAttrs(extra.gas?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/')}>
           <p class="metric-name"><MetricIcon name="gas" /><span class="kicker">Texas regular</span></p>
           <strong>{extra.gas?.label ?? '—'}</strong>
-          <span>{extra.gas?.detail ?? 'The EIA weekly table did not load.'}</span>
+          <span>{extra.gas?.detail ?? 'The EIA weekly gasoline table did not load.'}</span>
         </a>
-        <div>
-          <p class="meta">No public feed posts a Bastrop County station price. These links open a lookup. They are not a price.</p>
-          <ul class="metric-links">
-            {gasTowns.map((place) => (
-              <li>
-                <a href={place.href} {...offsiteAttrs(place.href)}>
-                  <strong>{place.name}</strong>
-                  <span>Look up stations</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <a class="metric-tile" href={extra.diesel?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/'} {...offsiteAttrs(extra.diesel?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/')}>
+          <p class="metric-name"><MetricIcon name="gas" /><span class="kicker">Gulf Coast diesel</span></p>
+          <strong>{extra.diesel?.label ?? '—'}</strong>
+          <span>{extra.diesel?.detail ?? 'The EIA weekly diesel table did not load.'}</span>
+        </a>
+        <a class="metric-tile" href={extra.redDye?.href ?? 'https://www.eia.gov/tools/faqs/faq.php?id=14&t=9'} {...offsiteAttrs(extra.redDye?.href ?? 'https://www.eia.gov/tools/faqs/faq.php?id=14&t=9')}>
+          <p class="metric-name"><MetricIcon name="dye" /><span class="kicker">Red dye diesel</span></p>
+          <strong>{extra.redDye?.label ?? '—'}</strong>
+          <span>{extra.redDye?.detail ?? 'The EIA off-road diesel note did not load.'}</span>
+        </a>
       </div>
     </section>
 
@@ -262,7 +247,7 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
     <p class="disclaimer">
       The river and the paddling flow are the USGS gauge at Bastrop and can be provisional.
       Lake Bastrop is the LCRA elevation. Sunrise and sunset are Open-Meteo at the Bastrop coordinates.
-      Gas is the EIA weekly Texas regular average, not a station in town.
+      Regular gasoline is the EIA weekly Texas average. Diesel is the EIA weekly on-highway price for the Gulf Coast, the region that includes Texas. EIA does not publish a red-dye price. None of these is a station price.
       Aqua lines are copied from Aqua’s own pages. Trash days are the city route, linked from the phone book checked in early November 2026.
       School lines are each district homepage today. Park lines are the dated notices on the TPWD alert page.
     </p>
@@ -326,27 +311,8 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
   .metric-tile > a, .metric-inline a { color: var(--river-deep); font-weight: 650; }
   .metric-inline { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; }
   .metric-span { grid-column: 1 / -1; }
-  .metric-split {
-    display: grid;
-    grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);
-    gap: 1rem;
-    align-items: start;
-  }
-  .metric-links { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0; }
-  .metric-links a {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.45rem 0;
-    border-top: 1px solid var(--line);
-    color: inherit;
-    text-decoration: none;
-  }
-  .metric-links strong { font-family: var(--serif); font-size: 1.25rem; font-weight: 560; }
-  .metric-links span { color: var(--river-deep); font-size: 0.88rem; font-weight: 650; }
   @media (max-width: 800px) {
     .section-head { flex-direction: column; align-items: start; }
-    .metric-split { grid-template-columns: 1fr; }
     .metric-tile .kicker { font-size: 1.2rem; }
     .metric-tile strong { font-size: 0.98rem; }
   }
