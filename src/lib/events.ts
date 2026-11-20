@@ -34,6 +34,68 @@ export function hasEnded(event: ListedEvent, now = new Date()) {
   return (event.data.end ?? event.data.start).getTime() <= now.getTime();
 }
 
+function plainTitle(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\b(the|a|an|and)\b/g, ' ')
+    .replace(/\b20\d{2}\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const venueSkip = new Set(['bastrop', 'texas', 'county', 'the', 'and', 'center', 'park', 'library', 'hall', 'church', 'school', 'street']);
+
+function venueWords(venue: string) {
+  return venue
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 3 && !venueSkip.has(word));
+}
+
+function samePlace(a: string, b: string) {
+  const left = venueWords(a);
+  const right = new Set(venueWords(b));
+  if (left.some((word) => right.has(word))) return true;
+  const compact = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const leftCompact = compact(a);
+  const rightCompact = compact(b);
+  return Boolean(leftCompact && rightCompact && (leftCompact.includes(rightCompact) || rightCompact.includes(leftCompact)));
+}
+
+function sameListing(a: ListedEvent, b: ListedEvent) {
+  if (a.data.city !== b.data.city) return false;
+  if (eventKey(a.data.start) !== eventKey(b.data.start)) return false;
+  const left = chicagoParts(a.data.start);
+  const right = chicagoParts(b.data.start);
+  if (left.hour !== right.hour || left.minute !== right.minute) return false;
+  if (plainTitle(a.data.title) !== plainTitle(b.data.title)) return false;
+  return samePlace(a.data.venue, b.data.venue);
+}
+
+function listingScore(event: ListedEvent) {
+  const summary = event.data.summary;
+  const boilerplate = /is on the .+ calendar/i.test(summary) ? 0 : 4;
+  return boilerplate + Math.min(summary.length, 500) / 100 + (event.data.image ? 0.5 : 0);
+}
+
+/** Drop a second listing of the same gathering when two calendars posted it. */
+export function dedupeListings(events: ListedEvent[]) {
+  const kept: ListedEvent[] = [];
+  for (const event of events) {
+    const match = kept.findIndex((item) => sameListing(item, event));
+    if (match === -1) {
+      kept.push(event);
+      continue;
+    }
+    if (listingScore(event) > listingScore(kept[match])) kept[match] = event;
+  }
+  return kept;
+}
+
 /** Keep the first listings from each organizer so one calendar cannot fill the page. */
 export function capOrganizer(events: ListedEvent[], max = 2) {
   const counts = new Map<string, number>();
@@ -53,8 +115,7 @@ export function filterEvents(events: ListedEvent[], query: EventQuery, now = new
   const classesOnly = query.classes === '1' || query.classes === 'classes';
   const includeClasses = query.classes === 'include';
 
-  return events
-    .filter((event) => {
+  const matched = events.filter((event) => {
       const key = eventKey(event.data.start);
       const hour = chicagoParts(event.data.start).hour;
       const classListing = isClassListing(event);
@@ -83,8 +144,9 @@ export function filterEvents(events: ListedEvent[], query: EventQuery, now = new
       if (query.when === 'weekend') return weekend.has(key);
       if (query.when === 'all') return true;
       return key >= today;
-    })
-    .sort((a, b) => a.data.start.getTime() - b.data.start.getTime());
+    });
+
+  return dedupeListings(matched).sort((a, b) => a.data.start.getTime() - b.data.start.getTime());
 }
 
 export function sortByTier(events: ListedEvent[], tierOf: (event: ListedEvent) => Tier) {

@@ -16,6 +16,10 @@ export default defineConfig({
   integrations: [mdx()],
   // Keep a real space between inline elements. Astro 7's default is JSX-style.
   compressHTML: true,
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
   redirects: {
     '/events/submit': '/submit',
     '/live': '/videos',

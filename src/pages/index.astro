@@ -130,6 +130,21 @@ const deskStories = pageHeadlines
   .filter((story) => !story.external)
   .map((story) => news.find((item) => `/news/${item.id}` === story.href))
   .filter((story) => story !== undefined);
+const leadItem = lead && !lead.external ? news.find((item) => `/news/${item.id}` === lead.href) : undefined;
+const inTown = (event: (typeof events)[number]) => !homeTown || event.data.city === homeTown;
+const todayShown = todayEvents.filter(inTown);
+const nextUp = capOrganizer(upcoming.filter((event) => inTown(event) && eventKey(event.data.start) > today)).slice(0, 4);
+const weekendDays = weekend
+  .map((day) => ({
+    day,
+    items: capOrganizer(
+      sortByDayThenTier(
+        weekendEvents.filter((event) => eventKey(event.data.start) === day && inTown(event)),
+        tierOf,
+      ),
+    ),
+  }))
+  .filter((column) => column.items.length > 0);
 ---
 
 <BaseLayout
@@ -144,16 +159,20 @@ const deskStories = pageHeadlines
   <div class="wrap home-stack">
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
-        <DailyFeature level="h1" />
-        <SponsorBanner placement="front-banner" size="poster" />
-        {lead && (
-          <article class="story-lead story-follow">
+        {lead ? (
+          <article class="story-lead">
             <p class="kicker">{lead.href === leadStory ? 'Bastropia · Elgin' : lead.label} · {formatMedium(lead.date)}</p>
-            <h2><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h2>
+            <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
+            {leadItem?.data.image && (
+              <img class="lead-photo" src={leadItem.data.image} alt={leadItem.data.imageAlt ?? lead.title} width="1200" height="675" />
+            )}
             {lead.summary && <p class="dek">{lead.summary}</p>}
             <p class="more"><a href={lead.href} {...offsiteAttrs(lead.href)}>Read the story</a></p>
           </article>
+        ) : (
+          <h1 class="sr">Bastropia</h1>
         )}
+        <NewsletterSignup id="newsletter-lead" compact />
         <div class="story-pair">
           {secondary.map((story) => (
             <article class="story-sub">
@@ -163,6 +182,8 @@ const deskStories = pageHeadlines
             </article>
           ))}
         </div>
+        <DailyFeature level="h2" />
+        <SponsorBanner placement="front-banner" size="poster" />
       </div>
 
       <aside class="col col-left" aria-label="More headlines">
@@ -190,13 +211,13 @@ const deskStories = pageHeadlines
             {townCounts.map((item) => <option value={item.city} selected={item.city === homeTown}>{item.city}</option>)}
           </select>
         </label>
-        <h2 class="col-title">{homeTown ? `Today in ${homeTown}` : 'Today in Bastrop County'}</h2>
-        {(homeTown ? todayEvents.filter((event) => event.data.city === homeTown) : todayEvents).length ? (
+        <h2 class="col-title">{todayShown.length ? (homeTown ? `Today in ${homeTown}` : 'Today in Bastrop County') : 'Next up'}</h2>
+        {(todayShown.length ? todayShown : nextUp).length ? (
           <ul class="agenda">
-            {(homeTown ? todayEvents.filter((event) => event.data.city === homeTown) : todayEvents).map((event) => (
+            {(todayShown.length ? todayShown : nextUp).map((event) => (
               <li class={`tier-${tierOf(event)}`}>
                 <a href={`/events/${event.id}`}>
-                  <span class="when">{whenLabel(event.data.schedule, event.data.start, event.data.end)}</span>
+                  <span class="when">{todayShown.length ? whenLabel(event.data.schedule, event.data.start, event.data.end) : labelFromKey(eventKey(event.data.start))}</span>
                   <strong>{event.data.title}</strong>
                   <span class="where">{event.data.city}</span>
                 </a>
@@ -204,7 +225,7 @@ const deskStories = pageHeadlines
             ))}
           </ul>
         ) : (
-          <p class="meta">{homeTown ? `Nothing is listed in ${homeTown} today.` : 'Nothing is listed for today.'} <a class="text-link" href="/submit">Add something</a>.</p>
+          <p class="meta">Nothing is on the calendar yet. <a class="text-link" href="/submit">Add something</a>.</p>
         )}
         <p class="more"><a href={homeTown ? townPath(homeTown) : '/events?when=today'}>{homeTown ? `This week in ${homeTown}` : 'Full agenda'}</a></p>
         {homeTown && homePage?.football.length ? (
@@ -237,66 +258,36 @@ const deskStories = pageHeadlines
         ) : null}
 
         <div class="wx" id="featured-news">
-          <h2 class="col-title">Featured news by city</h2>
-          <label class="city-pick">
-            <span class="sr">City</span>
-            <select id="featured-city">
-              <option value="">All county</option>
-              {featuredCities.map((city) => <option value={city}>{city}</option>)}
-            </select>
-          </label>
-          {featuredNews.map((panel) => (
-            <div data-city-panel={panel.city} hidden={panel.city !== homeTown}>
-              {panel.items.length ? (
-                <ul class="featured-news">
-                  {panel.items.map((story) => (
-                    <li>
-                      <a href={story.href} {...offsiteAttrs(story.href)}>
-                        <em>{story.label}</em>
-                        <strong>{story.title}</strong>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p class="meta">No recent headline names {panel.city}.</p>
-              )}
-            </div>
+          <h2 class="col-title">{homeTown ? `${homeTown} headlines` : 'Featured news'}</h2>
+          {featuredNews.filter((panel) => panel.city === (homeTown || '')).map((panel) => (
+            panel.items.length ? (
+              <ul class="featured-news">
+                {panel.items.map((story) => (
+                  <li>
+                    <a href={story.href} {...offsiteAttrs(story.href)}>
+                      <em>{story.label}</em>
+                      <strong>{story.title}</strong>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="meta">No recent headline names {panel.city}.</p>
+            )
           ))}
           <script is:inline>
             (function () {
               const key = 'bastropia-city';
-              const select = document.querySelector('#featured-city');
-              const panels = document.querySelectorAll('[data-city-panel]');
-              if (!select || !panels.length) return;
-              const known = new Set([...select.options].map((option) => option.value));
-              let saved = '';
-              try {
-                saved = localStorage.getItem(key) || '';
-              } catch (error) {
-                saved = '';
-              }
-              if (!known.has(saved)) saved = '';
-              const show = (city) => {
-                select.value = city;
-                panels.forEach((panel) => {
-                  panel.hidden = panel.getAttribute('data-city-panel') !== city;
-                });
-              };
-              show(saved);
-              const remember = (city) => {
+              const homeTown = document.querySelector('#home-town');
+              if (!homeTown) return;
+              homeTown.addEventListener('change', () => {
+                const city = homeTown.value;
                 try { localStorage.setItem(key, city); } catch (error) { /* private browsing */ }
                 document.cookie = city
                   ? key + '=' + encodeURIComponent(city) + '; path=/; max-age=31536000; SameSite=Lax'
                   : key + '=; path=/; max-age=0; SameSite=Lax';
                 location.reload();
-              };
-              const homeTown = document.querySelector('#home-town');
-              if (homeTown) {
-                homeTown.value = saved;
-                homeTown.addEventListener('change', () => remember(homeTown.value));
-              }
-              select.addEventListener('change', () => remember(select.value));
+              });
             })();
           </script>
         </div>
@@ -316,22 +307,21 @@ const deskStories = pageHeadlines
         <h2>This weekend</h2>
         <a href="/this-weekend">Friday to Sunday</a>
       </div>
-      <div class="weekend-grid">
-        {weekend.map((day) => {
-          const items = sortByDayThenTier(
-            weekendEvents.filter((event) => eventKey(event.data.start) === day && (!homeTown || event.data.city === homeTown)),
-            tierOf,
-          );
-          return (
+      {weekendDays.length ? (
+        <div class="weekend-grid">
+          {weekendDays.map((column) => (
             <section class="day-card">
-              <p class="kicker">{labelFromKey(day)}</p>
-              {capOrganizer(items).map((event) => <EventCard event={event} tier={tierOf(event)} compact />)}
-              {!items.length && <p class="meta">Nothing listed.</p>}
+              <p class="kicker">{labelFromKey(column.day)}</p>
+              {column.items.map((event) => <EventCard event={event} tier={tierOf(event)} compact />)}
             </section>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p class="meta">Nothing is listed for this weekend. <a class="text-link" href="/submit">Add something</a>.</p>
+      )}
     </section>
+
+    <NewsletterSignup id="newsletter-weekend" compact heading="The weekend, in your inbox" />
 
     <section class="section split">
       <div>
