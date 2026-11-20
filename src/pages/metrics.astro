@@ -29,12 +29,12 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
 
 <BaseLayout
   title="County metrics"
-  description="Bastrop County readings: sunrise and sunset, lake level, river flow, gas, water notices, trash day, schools, state parks, and cedar season."
+  description="Bastrop County readings: sunrise and sunset, lake level, the Colorado River, schools, gas, water notices, trash day, state parks, and cedar season."
 >
   <PageHead
     kicker="Bastrop County"
     title="County metrics"
-    lede="Sunrise, the lake, the river gauge, then fuel, water, trash, schools, parks, and cedar. A dash means that source did not load."
+    lede="Sunrise, the lake, the Colorado River, then schools, fuel, water, trash, parks, and cedar. A dash means that source did not load."
   />
 
   <div class="wrap metrics">
@@ -54,7 +54,7 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
       <div class="section-head">
         <div>
           <p class="kicker">Sun and water</p>
-          <h2>Daylight, the lake, the gauge</h2>
+          <h2>Daylight, the lake, the river</h2>
         </div>
       </div>
       <div class="metric-board metric-board-wide">
@@ -73,15 +73,47 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
           <strong>{extra.lake?.label ?? '—'}</strong>
           <span>{extra.lake?.detail || 'The LCRA lake table did not load.'}</span>
         </a>
+        <a class="metric-tile" href={county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/'} {...offsiteAttrs(county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/')}>
+          <p class="metric-name"><MetricIcon name="river" /><span class="kicker">Colorado River</span></p>
+          <strong>{county.river?.label ?? '—'}</strong>
+          <span>
+            {county.river
+              ? `Gauge height at Bastrop. ${county.river.detail}.`
+              : 'The Bastrop gauge did not load.'}
+          </span>
+        </a>
         <a class="metric-tile metric-span" href={county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/'} {...offsiteAttrs(county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/')}>
           <p class="metric-name"><MetricIcon name="flow" /><span class="kicker">Paddling flow</span></p>
           <strong>{flow ?? '—'}</strong>
           <span>
             {county.river
-              ? `${county.river.label} at the Bastrop gauge. ${county.river.detail}. The flow is the paddling number. This page does not add a separate runnable rating.`
+              ? 'Same Bastrop gauge. The flow is the paddling number. This page does not add a separate runnable rating.'
               : 'The Bastrop gauge did not load.'}
           </span>
         </a>
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Four districts</p>
+          <h2>Schools</h2>
+        </div>
+        <a href="/schools">School status</a>
+      </div>
+      <div class="metric-board">
+        {schools.map((day) => (
+          <article class:list={['metric-tile', { 'is-alert': day.status === 'closed' || day.status === 'delayed' }]}>
+            <p class="metric-name"><MetricIcon name="school" /><span class="kicker">{day.name}</span></p>
+            <strong>{day.label}</strong>
+            <span>{day.note}</span>
+            {!/early release|early dismissal/i.test(day.note) && <span>No early release is posted on the homepage.</span>}
+            {!/\bbus\b/i.test(day.note) && <span>No bus delay is posted on the homepage.</span>}
+            <span>Lunch is on the district site, not copied here.</span>
+            <a href={day.href} {...offsiteAttrs(day.href)}>Calendar and menu</a>
+          </article>
+        ))}
       </div>
     </section>
 
@@ -102,11 +134,6 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
           <p class="metric-name"><MetricIcon name="gas" /><span class="kicker">Gulf Coast diesel</span></p>
           <strong>{extra.diesel?.label ?? '—'}</strong>
           <span>{extra.diesel?.detail ?? 'The EIA weekly diesel table did not load.'}</span>
-        </a>
-        <a class="metric-tile" href={extra.redDye?.href ?? 'https://www.eia.gov/tools/faqs/faq.php?id=14&t=9'} {...offsiteAttrs(extra.redDye?.href ?? 'https://www.eia.gov/tools/faqs/faq.php?id=14&t=9')}>
-          <p class="metric-name"><MetricIcon name="dye" /><span class="kicker">Red dye diesel</span></p>
-          <strong>{extra.redDye?.label ?? '—'}</strong>
-          <span>{extra.redDye?.detail ?? 'The EIA off-road diesel note did not load.'}</span>
         </a>
       </div>
     </section>
@@ -173,29 +200,6 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
     <section class="metric-section">
       <div class="section-head">
         <div>
-          <p class="kicker">Four districts</p>
-          <h2>Schools</h2>
-        </div>
-        <a href="/schools">School status</a>
-      </div>
-      <div class="metric-board">
-        {schools.map((day) => (
-          <article class:list={['metric-tile', { 'is-alert': day.status === 'closed' || day.status === 'delayed' }]}>
-            <p class="metric-name"><MetricIcon name="school" /><span class="kicker">{day.name}</span></p>
-            <strong>{day.label}</strong>
-            <span>{day.note}</span>
-            {!/early release|early dismissal/i.test(day.note) && <span>No early release is posted on the homepage.</span>}
-            {!/\bbus\b/i.test(day.note) && <span>No bus delay is posted on the homepage.</span>}
-            <span>Lunch is on the district site, not copied here.</span>
-            <a href={day.href} {...offsiteAttrs(day.href)}>Calendar and menu</a>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="metric-section">
-      <div class="section-head">
-        <div>
           <p class="kicker">Lost Pines</p>
           <h2>State parks</h2>
         </div>
@@ -245,9 +249,9 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
     </section>
 
     <p class="disclaimer">
-      The river and the paddling flow are the USGS gauge at Bastrop and can be provisional.
+      The Colorado River height and the paddling flow are the USGS gauge at Bastrop and can be provisional.
       Lake Bastrop is the LCRA elevation. Sunrise and sunset are Open-Meteo at the Bastrop coordinates.
-      Regular gasoline is the EIA weekly Texas average. Diesel is the EIA weekly on-highway price for the Gulf Coast, the region that includes Texas. EIA does not publish a red-dye price. None of these is a station price.
+      Regular gasoline is the EIA weekly Texas average. Diesel is the EIA weekly on-highway price for the Gulf Coast, the region that includes Texas. Neither is a station price.
       Aqua lines are copied from Aqua’s own pages. Trash days are the city route, linked from the phone book checked in early November 2026.
       School lines are each district homepage today. Park lines are the dated notices on the TPWD alert page.
     </p>
@@ -300,12 +304,12 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
   }
   .metric-tile strong {
     font-family: var(--serif);
-    font-size: 1.05rem;
+    font-size: 2.05rem;
     font-weight: 560;
-    line-height: 1.2;
+    line-height: 1.1;
     letter-spacing: 0;
   }
-  .metric-tile strong.is-phrase { font-size: 1rem; line-height: 1.25; }
+  .metric-tile strong.is-phrase { font-size: 1.45rem; line-height: 1.2; }
   .metric-tile span { color: var(--ink-soft); font-size: 0.95rem; line-height: 1.4; }
   .metric-tile > a, .metric-inline { margin-top: auto; }
   .metric-tile > a, .metric-inline a { color: var(--river-deep); font-weight: 650; }
@@ -314,6 +318,7 @@ const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
   @media (max-width: 800px) {
     .section-head { flex-direction: column; align-items: start; }
     .metric-tile .kicker { font-size: 1.2rem; }
-    .metric-tile strong { font-size: 0.98rem; }
+    .metric-tile strong { font-size: 1.65rem; }
+    .metric-tile strong.is-phrase { font-size: 1.25rem; }
   }
 </style>

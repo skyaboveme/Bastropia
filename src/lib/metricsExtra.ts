@@ -22,7 +22,6 @@ export type MetricsExtra = {
   lake: MetricLine | null;
   gas: MetricLine | null;
   diesel: MetricLine | null;
-  redDye: MetricLine | null;
   aquaOutage: MetricLine | null;
   aquaDrought: MetricLine | null;
   parks: ParkStatus[];
@@ -143,19 +142,8 @@ async function fuel(): Promise<{ regular: MetricLine | null; diesel: MetricLine 
   return {
     regular: texas ? fuelLine(texas, dates, 'Texas regular. Not a town price.') : null,
     diesel: gulf
-      ? fuelLine(gulf, dates, 'On-highway diesel for the Gulf Coast, the EIA region that includes Texas. Not a town price, and not red dye.')
+      ? fuelLine(gulf, dates, 'On-highway diesel for the Gulf Coast, the EIA region that includes Texas. Not a town price.')
       : null,
-  };
-}
-
-async function redDye(): Promise<MetricLine | null> {
-  const href = 'https://www.eia.gov/tools/faqs/faq.php?id=14&t=9';
-  const text = plain(await getText(href));
-  if (!/do not publish prices specifically for off-road diesel/i.test(text)) return null;
-  return {
-    label: 'Not posted',
-    detail: 'EIA does not publish a red-dye, off-road diesel price.',
-    href,
   };
 }
 
@@ -234,11 +222,10 @@ async function forestNotes(): Promise<{ season: string | null; signup: string | 
 
 export async function getMetricsExtra(): Promise<MetricsExtra> {
   if (cache && Date.now() - cache.at < tenMinutes) return cache.value;
-  const [sunResult, lakeResult, fuelResult, dyeResult, outageResult, droughtResult, bastrop, buescher, forest] = await Promise.all([
+  const [sunResult, lakeResult, fuelResult, outageResult, droughtResult, bastrop, buescher, forest] = await Promise.all([
     sun().catch(() => ({ sunrise: null, sunset: null })),
     lake().catch(() => null),
     fuel().catch(() => ({ regular: null, diesel: null })),
-    redDye().catch(() => null),
     aquaOutage().catch(() => null),
     aquaDrought().catch(() => null),
     park('Bastrop State Park', 'bastrop'),
@@ -251,7 +238,6 @@ export async function getMetricsExtra(): Promise<MetricsExtra> {
     lake: lakeResult,
     gas: fuelResult.regular,
     diesel: fuelResult.diesel,
-    redDye: dyeResult,
     aquaOutage: outageResult,
     aquaDrought: droughtResult,
     parks: [bastrop, buescher],
