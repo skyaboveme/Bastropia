@@ -1,9 +1,11 @@
 import { getCollection } from 'astro:content';
 import { burnBan } from '../data/burnBan';
 import { businesses } from '../data/businesses';
+import { churches } from '../data/churches';
+import { eatDayGroups, offerText } from '../data/eatsSpecials';
 import { facebookPage, siteDescription, siteUrl, youtubeChannel } from '../data/site';
 import { electionDay, voteIsLive, voteSource } from '../data/vote';
-import { eventKey, formatLong, labelFromKey, whenLabel } from './time';
+import { addDays, chicagoParts, eventKey, formatLong, labelFromKey, whenLabel } from './time';
 
 const pages: { path: string; label: string; note: string }[] = [
   { path: '/', label: 'Front page', note: 'Today’s news, Around the county, and upcoming events. The front-page sponsor sits after the daily video. A short run-of-site banner sits after the front columns.' },
@@ -11,7 +13,8 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans in the same list as the events calendar. The weekend sponsor sits after the first five listings. A short run-of-site banner sits after the list.' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source. The news sponsor sits after the daily video. A short run-of-site banner sits after the headlines.' },
   { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, restaurants, industry, expansions, and new retail under watch in Bastrop County' },
-  { path: '/eats', label: 'Eats', note: 'Happy hours and specials posted on a restaurant or bar’s own site in Bastrop County. Compiled November 15, 2026. Confirm before you go.' },
+  { path: '/eats', label: 'Eats', note: 'Happy hours and specials for today and tomorrow, posted on each restaurant or bar’s own site. Confirm before you go.' },
+  { path: '/churches', label: 'Churches', note: 'Worship times for churches in Bastrop County that publish a website and a weekly schedule. Times were checked in mid-November 2026. Confirm before you go.' },
   { path: '/new-here', label: 'New resident guide', note: 'Utilities, trash day, tax dates, and which commissioner covers your road' },
   { path: '/tips', label: 'Send a tip or photo', note: 'Neighbor tips and photos for the site and the Facebook group' },
   { path: '/newsletter', label: 'Newsletter', note: 'Free weekend email every Thursday at 7 AM, with reasons to subscribe' },
@@ -20,7 +23,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/events.xml', label: 'Events RSS', note: 'Feed of upcoming listings' },
   { path: '/burn-ban', label: 'Burn ban', note: 'Whether the county lists an outdoor burn ban' },
   { path: '/weather', label: 'Weather', note: 'Forecast, a live radar map of Bastrop County, and National Weather Service alerts. The weather sponsor sits after the current conditions. A short run-of-site banner sits after the seven-day forecast.' },
-  { path: '/now', label: 'Right now', note: 'The county numbers from the top of every page: weather, burn ban, river gauge, air, SH 71, US 290, schools, power, road closures, and the last seven days of rain' },
+  { path: '/now', label: 'Right now', note: 'The county numbers from the top of every page: weather, burn ban, river gauge, air, SH 71, US 290, schools, power, the USDA Texas feeder-steer price, and the last seven days of rain. Highway closures are on /roads.' },
   { path: '/government', label: 'Government', note: 'Emergency numbers, services, and public notices' },
   { path: '/phone-numbers', label: 'Phone numbers', note: 'Sheriff, tax office, city hall, water, libraries, trash and recycling day, and school districts, with hours and the date each page was checked' },
   { path: '/schools', label: 'School status', note: 'Closed, delayed, or a normal day for Bastrop ISD, Elgin ISD, Smithville ISD, and McDade ISD' },
@@ -104,6 +107,52 @@ export async function llmsFull() {
       `Election Day is ${labelFromKey(electionDay)}. Polls are open 7 am to 7 pm. Hours and polling places: ${link('/go-vote')}. Source: ${voteSource.url}`,
       '',
     );
+  }
+
+  lines.push(
+    '## Churches',
+    '',
+    `${churches.length} churches with a posted website and worship times. Times were checked in mid-November 2026 and can change. Confirm on the church’s own site before you go.`,
+    link('/churches'),
+    '',
+  );
+  for (const church of churches) {
+    lines.push(`### ${church.name}`);
+    lines.push(`${[church.denomination, church.city, church.address].filter(Boolean).join('. ')}.`);
+    lines.push(church.times);
+    lines.push(church.website);
+    if (church.confirmWithChurch) {
+      lines.push('Confirm these times with the church. They were taken from a directory listing, not the congregation’s own page.');
+    }
+    lines.push('');
+  }
+
+  const todayKey = chicagoParts(new Date()).key;
+  const tomorrowKey = addDays(todayKey, 1);
+  lines.push(
+    '## Happy hours and specials',
+    '',
+    'Posted on each restaurant or bar’s own site. Today and tomorrow are listed here. Some dated specials run November 16 through November 22, 2026. Confirm before you go.',
+    link('/eats'),
+    '',
+  );
+  for (const day of [
+    { key: todayKey, label: 'Today' },
+    { key: tomorrowKey, label: 'Tomorrow' },
+  ]) {
+    lines.push(`### ${day.label}, ${labelFromKey(day.key)}`, '');
+    const groups = eatDayGroups(day.key);
+    if (groups.length === 0) {
+      lines.push('None posted.', '');
+      continue;
+    }
+    for (const group of groups) {
+      lines.push(`#### ${group.place.name}, ${group.place.city}`);
+      for (const offer of group.offers) lines.push(`- ${offerText(offer)}`);
+      if (group.place.where) lines.push(group.place.where);
+      lines.push(group.place.href);
+      lines.push('');
+    }
   }
 
   lines.push('## Upcoming events', '');

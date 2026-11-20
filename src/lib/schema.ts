@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
-import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, youtubeChannel } from '../data/site';
+import { offerText } from '../data/eatsSpecials';
+import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site';
 import { eventKey, TZ } from './time';
 
 export const orgId = `${siteUrl}/#organization`;
@@ -38,7 +39,7 @@ export function organization() {
       '@type': 'AdministrativeArea',
       name: 'Bastrop County, Texas',
     },
-    sameAs: [facebookPage, facebookGroup, youtubeChannel],
+    sameAs: [facebookPage, facebookGroup, youtubeChannel, tiktokProfile],
     knowsAbout: [
       'Bastrop County events',
       'Bastrop Texas',
@@ -219,28 +220,77 @@ export function newsNode(story: CollectionEntry<'news'>) {
   };
 }
 
+function tidy(value: string) {
+  return (value || '').replace(/\s+/g, ' ').trim();
+}
+
+/** Meta description built only from fields already stored on the listing. */
+export function listingSummary(business: {
+  category: string;
+  city: string;
+  details: string;
+  phone: string;
+  address: string;
+  hours: string;
+  daily_special: string;
+}) {
+  const details = tidy(business.details);
+  const base = details || `${tidy(business.category)} in ${tidy(business.city)}.`;
+  const extras = [business.address, business.phone, business.hours, business.daily_special]
+    .map(tidy)
+    .filter((value) => value && !base.toLowerCase().includes(value.toLowerCase()));
+  let text = base;
+  for (const extra of extras) {
+    const next = `${text} ${extra}`;
+    if (next.length <= 160) text = next;
+  }
+  if (text.length <= 160) return text;
+  const cut = text.slice(0, 157);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > 100 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
+function listingSchemaDescription(business: {
+  category: string;
+  city: string;
+  details: string;
+  phone: string;
+  address: string;
+  hours: string;
+  daily_special: string;
+}) {
+  const details = tidy(business.details);
+  if (details.length >= 80) return details;
+  return listingSummary(business);
+}
+
 export function directoryBusiness(business: {
   slug: string;
   name: string;
+  category: string;
   details: string;
   phone: string;
   website: string;
   address: string;
   city: string;
   areas: string;
+  hours: string;
+  daily_special: string;
 }) {
   const path = `/${business.slug}`;
   const digits = business.phone.replace(/\D/g, '');
   const telephone = digits.length === 10 ? `+1${digits}` : digits.length === 11 ? `+${digits}` : '';
   const areas = business.areas.split(',').map((name) => name.trim()).filter(Boolean);
+  const hours = tidy(business.hours);
   return {
     '@type': 'LocalBusiness',
     '@id': `${absolute(path)}#business`,
     name: business.name,
-    description: business.details,
+    description: listingSchemaDescription(business),
     url: absolute(path),
     ...(telephone ? { telephone } : {}),
     ...(business.website ? { sameAs: [business.website] } : {}),
+    ...(hours ? { openingHours: hours } : {}),
     address: {
       '@type': 'PostalAddress',
       ...(business.address ? { streetAddress: business.address } : {}),
@@ -249,6 +299,59 @@ export function directoryBusiness(business: {
       addressCountry: 'US',
     },
     areaServed: (areas.length ? areas : [business.city]).map((name) => ({ '@type': 'AdministrativeArea', name })),
+  };
+}
+
+const churchConfirm = 'Confirm these times with the church. They were taken from a directory listing, not the congregation’s own page.';
+
+export function churchDirectory(list: {
+  name: string;
+  denomination: string;
+  city: string;
+  address: string;
+  times: string;
+  website: string;
+  confirmWithChurch: boolean;
+}[]) {
+  return {
+    '@type': 'ItemList',
+    name: 'Bastrop County churches with posted worship times',
+    numberOfItems: list.length,
+    itemListElement: list.map((church, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Church',
+        name: church.name,
+        url: church.website,
+        description: [church.denomination, church.times, church.confirmWithChurch ? churchConfirm : ''].filter(Boolean).join(' '),
+        address: {
+          '@type': 'PostalAddress',
+          ...(church.address ? { streetAddress: church.address } : {}),
+          addressLocality: church.city,
+          addressRegion: 'TX',
+          addressCountry: 'US',
+        },
+      },
+    })),
+  };
+}
+
+export function eatDealList(
+  name: string,
+  groups: { place: { name: string; city: string; href: string }; offers: Parameters<typeof offerText>[0][] }[],
+) {
+  return {
+    '@type': 'ItemList',
+    name,
+    numberOfItems: groups.length,
+    itemListElement: groups.map((group, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: `${group.place.name}, ${group.place.city}`,
+      description: group.offers.map((offer) => offerText(offer)).join(' '),
+      url: group.place.href,
+    })),
   };
 }
 

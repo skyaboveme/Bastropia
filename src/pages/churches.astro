@@ -4,6 +4,7 @@ import PageHead from '../components/PageHead.astro';
 import ChurchCard from '../components/ChurchCard.astro';
 import { churchCount, churchGroupsList } from '../data/churches';
 import { facebookPage } from '../data/site';
+import { churchDirectory } from '../lib/schema';
 
 const groups = churchGroupsList;
 const officialCount = groups.reduce(
@@ -16,6 +17,7 @@ const confirmCount = churchCount - officialCount;
 <BaseLayout
   title="Bastrop County Church Directory: Worship Times"
   description="Worship times for churches in Bastrop County, Texas, that publish both a website and a weekly schedule. Grouped by town, with a link to each church’s own page."
+  extra={[churchDirectory(groups.flatMap((group) => group.churches))]}
 >
   <PageHead
     kicker="Churches"

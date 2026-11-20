@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { directoryBusiness } from '../lib/schema';
+import { directoryBusiness, listingSummary } from '../lib/schema';
 import { logoSrc, type Biz, type BizEvent, type BizSpecial } from '../lib/businessDb';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 const { business, specials = [], events = [] } = Astro.props;
 const phoneDigits = business.phone.replace(/\D/g, '');
 const upcoming = events.filter((item) => item.starts >= new Date().toISOString().slice(0, 10));
-const description = (business.details || `${business.category} in ${business.city}.`).slice(0, 160);
+const description = listingSummary(business);
 ---
 
 <BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]}>

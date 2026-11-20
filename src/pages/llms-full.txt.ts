@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { llmsFull } from '../lib/llmsGuide';
 
+export const prerender = false;
+
 export const GET: APIRoute = async () => {
   return new Response(await llmsFull(), {
     headers: {
