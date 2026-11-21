@@ -11,6 +11,9 @@ if [[ ! -x "$NODE" ]]; then
   NODE="$(nvm which 22.23.4)"
 fi
 
+# launchd starts with a minimal PATH. Homebrew's gh lives outside it.
+export PATH="/opt/homebrew/bin:/usr/local/bin:${PATH:-/usr/bin:/bin}"
+
 mkdir -p data/scout
 echo "---- $(date '+%Y-%m-%d %H:%M:%S %Z') ----" >> data/scout/launchd.log
 "$NODE" scripts/event-scout.mjs "$@" 2>&1 | tee -a data/scout/launchd.log

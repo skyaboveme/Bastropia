@@ -42,4 +42,6 @@ When the city page for that event includes a poster, the scout saves the image a
 
 ## Publishing
 
-Branch from the current `origin/main`. Add event files and their posters only. Open a pull request. Do not deploy from the bot branch, and do not edit the header, homepage, or other shared code. A merge to `main` is what publishes the new listings.
+`npm run scout` keeps a single branch, `bot/events-inbox`, and one pull request. Each run fetches `origin/main`, resets that branch onto main, and adds event files and posters that are not already on main or in the inbox. It treats a listing as a duplicate when the slug matches, or when the normalized title, date, and venue all match. It skips events that have already passed. If nothing new remains, it does not open a pull request.
+
+Do not open a `bot/events-YYYY-MM-DD` branch. Do not deploy from the inbox branch, and do not edit the header, homepage, or other shared code. A merge to `main` is what publishes the listings.

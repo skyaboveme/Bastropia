@@ -30,7 +30,7 @@ Submissions are saved in Cloudflare KV (`SESSION`) and reviewed on `/desk`. Desk
 
 ## Event scout
 
-`npm run scout` reads the City of Elgin calendar, the City of Smithville calendar, and the Bastrop County calendar. It writes new listings into `src/content/events/` and leaves anything already on the site alone. It skips county holidays and staff paydays. When a city listing has its own poster, the scout saves that photo and the event page shows it. Listings with no poster stay text only. `npm run scout -- --dry-run` prints the list without writing files.
+`npm run scout` reads the City of Elgin calendar, the City of Smithville calendar, the Bastrop County calendar, Bastrop EDC, Explore Bastrop County, and AllEvents Paige. It skips county holidays, staff paydays, events that have already passed, and anything already on the site (matched by slug and by title, date, and venue). When a city listing has its own poster, the scout saves that photo and the event page shows it. Listings with no poster stay text only. A real run resets one branch, `bot/events-inbox`, onto `main` and updates that pull request. It opens nothing when there is nothing new. `npm run scout -- --dry-run` prints the list without writing files or opening a pull request.
 
 On this Mac it also runs by itself every day at 7:15 AM, through `scripts/com.bastropia.event-scout.plist`. The Mac can be asleep. It runs when the Mac wakes. A log is written to `data/scout/launchd.log`.
 
