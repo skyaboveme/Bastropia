@@ -10,7 +10,7 @@ import {
   parseDailyVideo,
   selectFullEdition,
   videoEmbed,
-} from './dailyVideoFeed';
+} from './dailyVideoFeed.ts';
 
 const feed = `<?xml version="1.0" encoding="UTF-8"?>
 <feed>

@@ -42,6 +42,8 @@ const news = defineCollection({
     image: z.string().optional(),
     imageAlt: z.string().optional(),
     imageCredit: z.string().optional(),
+    /** Optional desk tags used to suggest related stories. */
+    tags: z.array(z.string().min(1)).optional(),
   }),
 });
 

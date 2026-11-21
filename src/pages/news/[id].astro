@@ -1,7 +1,10 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import MoreFromBastrop from '../../components/MoreFromBastrop.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
+import { filterEvents } from '../../lib/events';
+import { relatedStories } from '../../lib/relatedStories';
 import { newsNode } from '../../lib/schema';
 import { formatLong } from '../../lib/time';
 
@@ -12,6 +15,19 @@ export async function getStaticPaths() {
 
 const { story } = Astro.props;
 const { Content } = await render(story);
+const [stories, events] = await Promise.all([getCollection('news'), getCollection('events')]);
+const related = relatedStories(
+  story.id,
+  stories.map((item) => ({
+    id: item.id,
+    title: item.data.title,
+    description: item.data.description,
+    place: item.data.place,
+    pubDate: item.data.pubDate,
+    tags: item.data.tags,
+  })),
+);
+const upcoming = filterEvents(events, { when: 'upcoming' }).slice(0, 3);
 ---
 
 <BaseLayout
@@ -41,6 +57,7 @@ const { Content } = await render(story);
       <Content />
       {story.data.sourceUrl && <p>Source: <a href={story.data.sourceUrl}>{story.data.sourceLabel ?? 'Public source'}</a></p>}
     </div>
+    <MoreFromBastrop stories={related} events={upcoming} />
     <NewsletterSignup />
   </article>
 </BaseLayout>

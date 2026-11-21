@@ -374,6 +374,11 @@ function current(href: string) {
   <div class="sections-bar">
     <div class="sections-inner">
       <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav">Sections</button>
+      <nav class="quick-links" aria-label="Shortcuts">
+        <a href="/news" aria-current={current('/news') ? 'page' : undefined}>News</a>
+        <a href="/events" aria-current={current('/events') ? 'page' : undefined}>Events</a>
+        <a class="quick-join" href="/newsletter#newsletter" aria-current={current('/newsletter') ? 'page' : undefined}>Newsletter</a>
+      </nav>
       <nav id="site-nav" class="nav" aria-label="Sections">
         {voteLive && (
           <a class="nav-vote" href={voteLink.href} data-expires={voteLiveUntil} aria-current={current(voteLink.href) ? 'page' : undefined}>{voteLink.label}</a>
@@ -389,6 +394,19 @@ function current(href: string) {
     </div>
   </div>
 </header>
+<div class="slim-bar" data-slim-bar inert aria-hidden="true">
+  <div class="slim-inner">
+    <a class="slim-brand" href="/">
+        <img src="/brand/logo-masthead.png" alt="" width="36" height="38" decoding="async" />
+      <span>Bastropia</span>
+    </a>
+    <nav class="slim-nav" aria-label="Shortcuts">
+      <a href="/news" aria-current={current('/news') ? 'page' : undefined}>News</a>
+      <a href="/events" aria-current={current('/events') ? 'page' : undefined}>Events</a>
+      <a class="slim-join" href="/newsletter#newsletter" aria-current={current('/newsletter') ? 'page' : undefined}>Newsletter</a>
+    </nav>
+  </div>
+</div>
 <script is:inline>
   (function () {
     var key = 'bastropia-city';
@@ -417,4 +435,23 @@ function current(href: string) {
     const open = nav?.classList.toggle('is-open');
     button.setAttribute('aria-expanded', String(Boolean(open)));
   });
+</script>
+<script is:inline>
+  (function () {
+    var bar = document.querySelector('[data-slim-bar]');
+    var head = document.querySelector('.site-head');
+    if (!bar || !head || !('IntersectionObserver' in window)) return;
+    var observer = new IntersectionObserver(function (entries) {
+      var on = !entries[0].isIntersecting;
+      bar.classList.toggle('is-on', on);
+      if (on) {
+        bar.removeAttribute('inert');
+        bar.removeAttribute('aria-hidden');
+      } else {
+        bar.setAttribute('inert', '');
+        bar.setAttribute('aria-hidden', 'true');
+      }
+    });
+    observer.observe(head);
+  })();
 </script>
