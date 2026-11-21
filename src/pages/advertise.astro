@@ -10,10 +10,17 @@ import { addDays, eventKey } from '../lib/time';
 
 const selected = Astro.url.searchParams.get('placement');
 const start = addDays(eventKey(new Date()), 7);
-const offers = Object.fromEntries(placements.map((item) => [item.id, { rate: item.rate, unit: item.unit }]));
+const offers = Object.fromEntries(
+  placements.map((item) => [item.id, { rate: item.rate, unit: item.unit, name: item.name, page: item.page }]),
+);
 const pageSponsors = placements.filter((item) => item.id !== 'home-banner');
 const siteBanner = placements.find((item) => item.id === 'home-banner') ?? placements[0];
-const defaultRate = siteBanner.rate;
+const initial = placements.find((item) => item.id === selected) ?? siteBanner;
+const defaultRate = initial.rate;
+const today = eventKey(new Date());
+const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(
+  new Date(`${start}T12:00:00Z`),
+);
 ---
 
 <BaseLayout
@@ -125,49 +132,86 @@ const defaultRate = siteBanner.rate;
             </label>
           </div>
         </fieldset>
-        <div class="fields">
-          <label class="field">
-            <span id="ad-span">Months</span>
-            <input name="count" type="number" min="1" max="12" value="1" required />
-          </label>
-          <label class="field">
-            <span>Start date</span>
-            <input name="start" type="date" value={start} required />
-          </label>
-          <label class="field">
-            <span>Business name</span>
-            <input name="business" required maxlength="80" />
-          </label>
-          <label class="field">
-            <span>Contact name</span>
-            <input name="contact" required maxlength="80" autocomplete="name" />
-          </label>
-          <label class="field">
-            <span>Email</span>
-            <input name="email" type="email" required autocomplete="email" />
-          </label>
-          <label class="field">
-            <span>Phone</span>
-            <input name="phone" type="tel" autocomplete="tel" />
-          </label>
-          <label class="field wide">
-            <span>Website the ad should open</span>
-            <input name="website" type="url" required placeholder="https://" />
-          </label>
-          <label class="field wide">
-            <span>Line for the invoice, up to 90 characters</span>
-            <input name="line" required maxlength="90" placeholder="Main Street Produce, November" />
-          </label>
-          <label class="field wide">
-            <span>Notes</span>
-            <textarea name="notes" rows="4" maxlength="1200" placeholder="Anything the desk should know. Political ads need the paid-for line in this box."></textarea>
-          </label>
+        <div class="ad-checkout">
+          <div class="ad-details">
+            <p class="ad-form-note">Required unless a field says optional.</p>
+            <fieldset class="ad-group">
+              <legend>When it runs</legend>
+              <div class="fields">
+                <div class="field">
+                  <span id="ad-span">{initial.unit === 'weekend' ? 'Weekend' : 'Month'}</span>
+                  <span class="stepper">
+                    <button type="button" data-step="-1" aria-label="Fewer">−</button>
+                    <input id="ad-count" name="count" type="number" inputmode="numeric" min="1" max="12" value="1" required aria-labelledby="ad-span" aria-describedby="ad-count-hint" />
+                    <button type="button" data-step="1" aria-label="More">+</button>
+                  </span>
+                  <small id="ad-count-hint">{initial.unit === 'weekend' ? 'Billed once for each weekend. 1 to 12.' : 'Billed once for each month. 1 to 12.'}</small>
+                </div>
+                <label class="field">
+                  <span>Start date</span>
+                  <input name="start" type="date" value={start} min={today} required />
+                  <small>Usually a week out. We confirm the dates are open.</small>
+                </label>
+              </div>
+            </fieldset>
+            <fieldset class="ad-group">
+              <legend>Who to bill</legend>
+              <div class="fields">
+                <label class="field">
+                  <span>Business name</span>
+                  <input name="business" required maxlength="80" autocomplete="organization" />
+                </label>
+                <label class="field">
+                  <span>Contact name</span>
+                  <input name="contact" required maxlength="80" autocomplete="name" />
+                </label>
+                <label class="field">
+                  <span>Email</span>
+                  <input name="email" type="email" required autocomplete="email" />
+                </label>
+                <label class="field">
+                  <span>Phone <em class="optional">optional</em></span>
+                  <input name="phone" type="tel" autocomplete="tel" placeholder="(512) 555-0100" />
+                </label>
+              </div>
+            </fieldset>
+            <fieldset class="ad-group">
+              <legend>Where the ad goes</legend>
+              <div class="fields">
+                <label class="field wide">
+                  <span>Website the ad should open</span>
+                  <input name="website" type="url" inputmode="url" required autocomplete="url" placeholder="https://" />
+                  <small>The page the banner opens.</small>
+                </label>
+                <label class="field wide">
+                  <span class="field-top">
+                    <span>Line for the invoice</span>
+                    <span id="ad-line-count" class="field-count">0 of 90</span>
+                  </span>
+                  <input name="line" required maxlength="90" placeholder="Main Street Produce, November" aria-describedby="ad-line-hint" />
+                  <small id="ad-line-hint">Shown on the invoice, not printed on the banner.</small>
+                </label>
+                <label class="field wide">
+                  <span>Notes <em class="optional">optional</em></span>
+                  <textarea name="notes" rows="3" maxlength="1200" placeholder="Anything the desk should know. Political ads need the paid-for line in this box."></textarea>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+          <aside class="ad-summary">
+            <p class="kicker" id="ad-summary-page">{initial.page}</p>
+            <h3 id="ad-summary-name">{initial.name}</h3>
+            <p class="ad-summary-math" id="ad-summary-math">{money(defaultRate)} × 1 {initial.unit}</p>
+            <p class="ad-summary-when" id="ad-summary-when">Starts {startLabel}</p>
+            <p class="price-line">Estimated total <strong id="ad-total">{money(defaultRate)}</strong></p>
+            <p class="ad-summary-note">We send an invoice after the dates are confirmed. Nothing is charged on this form.</p>
+            <label class="ad-terms">
+              <input type="checkbox" name="terms" value="yes" required />
+              <span>The ad will say Sponsored. It will not imitate the county, a city, or an emergency notice. I understand this reservation is invoiced by the desk and is not charged on this form.</span>
+            </label>
+            <button class="button" type="submit">Reserve this placement</button>
+          </aside>
         </div>
-        <p class="price-line">Estimated total <strong id="ad-total">{money(defaultRate)}</strong></p>
-        <label>
-          <input type="checkbox" name="terms" value="yes" required /> The ad will say Sponsored. It will not imitate the county, a city, or an emergency notice. I understand this reservation is invoiced by the desk and is not charged on this form.
-        </label>
-        <button class="button" type="submit">Reserve this placement</button>
       </form>
     </section>
 
@@ -262,11 +306,152 @@ const defaultRate = siteBanner.rate;
     margin: 0.2rem 0 0.35rem;
   }
   .ad-place-detail { margin: 0.45rem 0 0; font-size: 0.98rem; line-height: 1.4; }
+  .ad-checkout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 19.5rem;
+    gap: 1.25rem;
+    align-items: start;
+    margin-top: 0.3rem;
+  }
+  .ad-details { display: grid; gap: 1.15rem; min-width: 0; }
+  .ad-form-note { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+  .ad-group {
+    margin: 0;
+    padding: 0 0 1.15rem;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .ad-group:last-child { border-bottom: 0; padding-bottom: 0; }
+  .ad-group legend {
+    font-family: var(--serif);
+    font-size: 1.45rem;
+    font-weight: 600;
+    padding: 0;
+  }
+  .advertise .field span { font-size: 0.92rem; }
+  .advertise .field small {
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+  .advertise .optional {
+    font-style: normal;
+    font-weight: 650;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .advertise .field-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+  .advertise .field .field-count {
+    font-size: 0.78rem;
+    font-weight: 650;
+    color: var(--ink-soft);
+  }
+  .advertise .field .field-count.is-full { color: var(--stop); }
+  .advertise .field input,
+  .advertise .field textarea {
+    border: 1px solid #cfc8b6;
+    border-radius: 0.6rem;
+    padding: 0.78rem 0.85rem;
+    background: white;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .advertise .field input:focus,
+  .advertise .field textarea:focus {
+    outline: none;
+    border-color: var(--river-deep);
+    box-shadow: 0 0 0 3px rgba(10, 117, 144, 0.16);
+  }
+  .advertise .field input:user-invalid,
+  .advertise .field textarea:user-invalid { border-color: var(--stop); }
+  .stepper {
+    display: grid;
+    grid-template-columns: 2.7rem minmax(0, 1fr) 2.7rem;
+    border: 1px solid #cfc8b6;
+    border-radius: 0.6rem;
+    background: white;
+    overflow: hidden;
+  }
+  .stepper:focus-within {
+    border-color: var(--river-deep);
+    box-shadow: 0 0 0 3px rgba(10, 117, 144, 0.16);
+  }
+  .stepper input {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: inset 1px 0 0 #cfc8b6, inset -1px 0 0 #cfc8b6 !important;
+    text-align: center;
+    padding-inline: 0.2rem;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper button {
+    border: 0;
+    background: var(--paper-2);
+    color: var(--ink);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .stepper button:hover { background: #e4dece; }
+  .stepper button:disabled { color: #b7b1a4; cursor: not-allowed; }
+  .ad-summary {
+    position: sticky;
+    top: 4.4rem;
+    display: grid;
+    gap: 0.55rem;
+    padding: 1rem 1.05rem 1.05rem;
+    background: white;
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--ink);
+    border-radius: 0.7rem;
+  }
+  .ad-summary h3 { font-size: 1.55rem; }
+  .ad-summary .kicker { margin: 0; }
+  .ad-summary-math,
+  .ad-summary-when,
+  .ad-summary-note { margin: 0; color: var(--ink-soft); }
+  .ad-summary-note { font-size: 0.9rem; line-height: 1.4; }
+  .ad-summary .price-line { margin: 0.15rem 0 0; font-size: 1.85rem; line-height: 1.05; }
+  .ad-terms {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    margin: 0.2rem 0 0;
+    padding: 0.75rem 0.8rem;
+    background: var(--paper);
+    border-radius: 0.55rem;
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+  .ad-terms input {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0.15rem 0 0;
+    flex: none;
+    accent-color: var(--pine);
+  }
+  .ad-terms:has(input:focus-visible) { outline: 3px solid var(--sun); outline-offset: 2px; }
+  .ad-terms:has(input:user-invalid) { box-shadow: inset 0 0 0 1.5px var(--stop); }
+  .ad-summary .button { width: 100%; margin-top: 0.2rem; padding: 0.9rem 1rem; }
   .advertise .disclaimer { margin-top: 1.6rem; }
   @media (max-width: 900px) {
     .ad-stats,
     .ad-benefit-grid,
-    .ad-places { grid-template-columns: 1fr; }
+    .ad-places,
+    .ad-checkout { grid-template-columns: 1fr; }
+    .ad-summary { position: static; }
   }
 </style>
 
@@ -274,15 +459,60 @@ const defaultRate = siteBanner.rate;
   const form = document.querySelector('#ad-form');
   const total = document.querySelector('#ad-total');
   const span = document.querySelector('#ad-span');
+  const hint = document.querySelector('#ad-count-hint');
+  const nameEl = document.querySelector('#ad-summary-name');
+  const pageEl = document.querySelector('#ad-summary-page');
+  const mathEl = document.querySelector('#ad-summary-math');
+  const whenEl = document.querySelector('#ad-summary-when');
+  const lineCount = document.querySelector('#ad-line-count');
   const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const prettyDate = (value) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
+    const [year, month, day] = value.split('-').map(Number);
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)));
+  };
   const update = () => {
     if (!(form instanceof HTMLFormElement) || !total) return;
     const data = new FormData(form);
-    const offer = offers[String(data.get('placement'))] || { rate: 0, unit: 'month' };
+    const offer = offers[String(data.get('placement'))] || { rate: 0, unit: 'month', name: 'Placement', page: '' };
     const count = Math.min(12, Math.max(1, Number(data.get('count')) || 1));
-    if (span) span.textContent = offer.unit === 'weekend' ? 'Weekends' : 'Months';
+    const unitName = offer.unit === 'weekend' ? 'weekend' : 'month';
+    const unitLabel = count === 1 ? unitName : `${unitName}s`;
+    if (span) span.textContent = count === 1 ? unitName[0].toUpperCase() + unitName.slice(1) : unitLabel[0].toUpperCase() + unitLabel.slice(1);
+    if (hint) hint.textContent = offer.unit === 'weekend' ? 'Billed once for each weekend. 1 to 12.' : 'Billed once for each month. 1 to 12.';
+    if (nameEl) nameEl.textContent = offer.name;
+    if (pageEl) pageEl.textContent = offer.page;
+    if (mathEl) mathEl.textContent = `${money.format(offer.rate)} × ${count} ${unitLabel}`;
+    if (whenEl) {
+      const label = prettyDate(String(data.get('start') || ''));
+      whenEl.textContent = label ? `Starts ${label}` : '';
+    }
     total.textContent = money.format(offer.rate * count);
+    const line = form.querySelector('input[name="line"]');
+    if (line instanceof HTMLInputElement && lineCount) {
+      lineCount.textContent = `${line.value.length} of 90`;
+      lineCount.classList.toggle('is-full', line.value.length >= 90);
+    }
+    const down = form.querySelector('[data-step="-1"]');
+    const up = form.querySelector('[data-step="1"]');
+    if (down instanceof HTMLButtonElement) down.disabled = count <= 1;
+    if (up instanceof HTMLButtonElement) up.disabled = count >= 12;
   };
   form?.addEventListener('input', update);
+  form?.addEventListener('change', update);
+  form?.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-step]') : null;
+    if (!(button instanceof HTMLButtonElement) || !(form instanceof HTMLFormElement)) return;
+    const input = form.querySelector('input[name="count"]');
+    if (!(input instanceof HTMLInputElement)) return;
+    input.value = String(Math.min(12, Math.max(1, (Number(input.value) || 1) + Number(button.dataset.step))));
+    update();
+  });
+  const countInput = form?.querySelector('input[name="count"]');
+  countInput?.addEventListener('blur', () => {
+    if (!(countInput instanceof HTMLInputElement)) return;
+    countInput.value = String(Math.min(12, Math.max(1, Number(countInput.value) || 1)));
+    update();
+  });
   update();
 </script>
