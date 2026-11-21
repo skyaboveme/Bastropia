@@ -1,7 +1,9 @@
 import type { CollectionEntry } from 'astro:content';
-import { offerText } from '../data/eatsSpecials';
-import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site';
-import { eventKey, TZ } from './time';
+import { authorBySlug } from '../data/authors.ts';
+import { offerText } from '../data/eatsSpecials.ts';
+import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site.ts';
+import { videoEmbed } from './dailyVideoFeed.ts';
+import { eventKey, TZ } from './time.ts';
 
 export const orgId = `${siteUrl}/#organization`;
 export const siteId = `${siteUrl}/#website`;
@@ -25,10 +27,11 @@ export function organization() {
     name: siteName,
     url: `${siteUrl}/`,
     description: siteDescription,
-    publishingPrinciples: absolute('/about'),
-    correctionsPolicy: absolute('/tips'),
-    actionableFeedbackPolicy: absolute('/tips'),
-    masthead: absolute('/about'),
+    publishingPrinciples: absolute('/corrections'),
+    ethicsPolicy: absolute('/corrections'),
+    correctionsPolicy: absolute('/corrections'),
+    actionableFeedbackPolicy: absolute('/contact'),
+    masthead: absolute('/staff'),
     logo: {
       '@type': 'ImageObject',
       url: absolute('/brand/logo.png'),
@@ -148,8 +151,66 @@ export function schemaDate(date: Date, allDay = false) {
   return `${bag.year}-${bag.month}-${bag.day}T${hour}:${bag.minute}:${bag.second}${offsetFor(date)}`;
 }
 
+const eventStatusUrl: Record<string, string> = {
+  scheduled: 'https://schema.org/EventScheduled',
+  cancelled: 'https://schema.org/EventCancelled',
+  postponed: 'https://schema.org/EventPostponed',
+  rescheduled: 'https://schema.org/EventRescheduled',
+  'moved-online': 'https://schema.org/EventMovedOnline',
+};
+
+const attendanceUrl: Record<string, string> = {
+  offline: 'https://schema.org/OfflineEventAttendanceMode',
+  online: 'https://schema.org/OnlineEventAttendanceMode',
+  mixed: 'https://schema.org/MixedEventAttendanceMode',
+};
+
+/** Price from the cost line. Vague costs such as "See the listing" stay off the schema. */
+export function eventOffers(cost: string, url: string) {
+  const text = cost.trim();
+  if (!text || /^see the listing$/i.test(text) || /^included with\b/i.test(text)) return undefined;
+  if (/^free\b/i.test(text)) {
+    return {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url,
+      description: text,
+    };
+  }
+  const amounts = [...text.matchAll(/\$(\d+(?:\.\d{1,2})?)/g)].map((match) => match[1]);
+  if (!amounts.length) return undefined;
+  if (amounts.length === 1) {
+    return {
+      '@type': 'Offer',
+      price: amounts[0],
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url,
+      description: text,
+    };
+  }
+  const numbers = amounts.map(Number);
+  return {
+    '@type': 'AggregateOffer',
+    lowPrice: String(Math.min(...numbers)),
+    highPrice: String(Math.max(...numbers)),
+    priceCurrency: 'USD',
+    offerCount: amounts.length,
+    url,
+    description: text,
+  };
+}
+
+function performerNames(value: string | string[] | undefined) {
+  if (!value) return [];
+  return (Array.isArray(value) ? value : [value]).map((name) => name.trim()).filter(Boolean);
+}
+
 export function eventNode(event: CollectionEntry<'events'>) {
   const path = `/events/${event.id}`;
+  const page = absolute(path);
   const city = event.data.city === 'Countywide' ? 'Bastrop County' : event.data.city;
   const allDay = event.data.schedule === 'all-day';
   const address: Record<string, string> = {
@@ -159,15 +220,15 @@ export function eventNode(event: CollectionEntry<'events'>) {
     addressCountry: 'US',
   };
   if (event.data.address) address.streetAddress = event.data.address;
+  const status = event.data.eventStatus ?? 'scheduled';
+  const attendance = event.data.attendanceMode ?? (event.data.streamUrl ? 'mixed' : 'offline');
   const node: Record<string, unknown> = {
     '@type': 'Event',
-    '@id': `${absolute(path)}#event`,
+    '@id': `${page}#event`,
     name: event.data.title,
     description: event.data.summary,
     startDate: schemaDate(event.data.start, allDay),
-    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    eventStatus: 'https://schema.org/EventScheduled',
-    url: absolute(path),
+    url: page,
     location: {
       '@type': 'Place',
       name: event.data.venue,
@@ -177,36 +238,56 @@ export function eventNode(event: CollectionEntry<'events'>) {
       ? { '@type': 'Organization', name: event.data.organizer }
       : { '@id': orgId },
   };
+  if (eventStatusUrl[status]) node.eventStatus = eventStatusUrl[status];
+  if (attendanceUrl[attendance]) node.eventAttendanceMode = attendanceUrl[attendance];
   if (event.data.end) node.endDate = schemaDate(event.data.end, allDay);
   if (event.data.image) node.image = [absolute(event.data.image)];
-  if (/^free\b/i.test(event.data.cost.trim())) {
-    node.offers = {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-      url: absolute(path),
-    };
-  }
+  const offers = eventOffers(event.data.cost, event.data.sourceUrl || page);
+  if (offers) node.offers = offers;
+  const performers = performerNames(event.data.performer);
+  if (performers.length === 1) node.performer = { '@type': 'Person', name: performers[0] };
+  else if (performers.length > 1) node.performer = performers.map((name) => ({ '@type': 'Person', name }));
   return node;
 }
 
-export function newsNode(story: CollectionEntry<'news'>) {
+export function articleAuthor(slug: string | undefined) {
+  const person = authorBySlug(slug);
+  if (!person) return { '@type': 'Organization', name: 'Bastropia desk', url: absolute('/staff') };
+  return {
+    '@type': 'Person',
+    name: person.name,
+    url: absolute(`/authors/${person.slug}`),
+    ...(person.jobTitle ? { jobTitle: person.jobTitle } : {}),
+  };
+}
+
+export function newsImage(path: string, size?: { width: number; height: number }) {
+  return {
+    '@type': 'ImageObject',
+    url: absolute(path),
+    ...(size?.width && size?.height ? { width: size.width, height: size.height } : {}),
+  };
+}
+
+export function newsNode(story: CollectionEntry<'news'>, size?: { width: number; height: number }) {
   const path = `/news/${story.id}`;
+  const modified = story.data.updated ?? story.data.pubDate;
+  const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
   return {
     '@type': 'NewsArticle',
     '@id': `${absolute(path)}#article`,
     headline: story.data.title,
     description: story.data.description,
+    ...(facts.length ? { abstract: facts.join(' ') } : {}),
     datePublished: schemaDate(story.data.pubDate),
-    dateModified: schemaDate(story.data.pubDate),
+    dateModified: schemaDate(modified),
     articleSection: story.data.place,
     inLanguage: 'en-US',
     isAccessibleForFree: true,
     mainEntityOfPage: absolute(path),
-    ...(story.data.image ? { image: [absolute(story.data.image)] } : {}),
+    ...(story.data.image ? { image: [newsImage(story.data.image, size)] } : {}),
     dateline: story.data.place,
-    author: { '@type': 'Organization', name: 'Bastropia desk', url: absolute('/about') },
+    author: articleAuthor(story.data.author),
     publisher: {
       '@type': 'NewsMediaOrganization',
       name: siteName,
@@ -217,6 +298,22 @@ export function newsNode(story: CollectionEntry<'news'>) {
       cssSelector: ['.page-head h1', '.page-head .lede'],
     },
     ...(story.data.sourceUrl ? { isBasedOn: story.data.sourceUrl } : {}),
+  };
+}
+
+export function dailyVideoNode(video: { videoId: string; title: string; published?: string }) {
+  const title = video.title.trim();
+  if (!title || !/^[\w-]{11}$/.test(video.videoId)) return undefined;
+  const published = video.published && !Number.isNaN(Date.parse(video.published)) ? video.published : '';
+  return {
+    '@type': 'VideoObject',
+    name: title,
+    description: `${title}. The newest full episode from the Bastropia YouTube channel.`,
+    thumbnailUrl: [`https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`],
+    ...(published ? { uploadDate: published } : {}),
+    embedUrl: videoEmbed(video.videoId),
+    contentUrl: `https://www.youtube.com/watch?v=${video.videoId}`,
+    publisher: { '@id': orgId },
   };
 }
 

@@ -4,17 +4,28 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
+import DailyFeature from '../components/DailyFeature.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import VideoSection from '../components/VideoSection.astro';
+import { currentDailyVideo } from '../lib/dailyVideo';
+import { dailyVideoNode } from '../lib/schema';
+
+const dailyVideo = await currentDailyVideo();
+const dailyNode = dailyVideo ? dailyVideoNode(dailyVideo) : undefined;
 ---
 
-<BaseLayout title="Videos" description="The newest video from each local YouTube channel, plus tours of Bastrop.">
+<BaseLayout
+  title="Videos"
+  description="The newest video from each local YouTube channel, plus tours of Bastrop."
+  extra={dailyNode ? [dailyNode] : []}
+>
   <PageHead
     kicker="Watch"
     title="Bastrop on video"
     lede="Local channels are first, with the newest video from each one. Tours of town are below."
   />
   <div class="wrap">
+    <DailyFeature level="h2" video={dailyVideo} />
     <CountyFeeds />
     <div class="site-banner">
       <HomeBanner />

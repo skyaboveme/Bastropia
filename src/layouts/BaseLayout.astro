@@ -4,7 +4,9 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import InstallPrompt from '../components/InstallPrompt.astro';
 import { siteDescription, siteName } from '../data/site';
+import { headerHero, headerNight } from '../lib/headerHero';
 import { breadcrumb, graph, organization, stringify, webPage, website } from '../lib/schema';
+import { getForecast, isTown } from '../lib/weather';
 
 interface Props {
   title: string;
@@ -17,11 +19,27 @@ interface Props {
   /** When a page is noindex, follow still lets crawlers use its links. Desk pages leave this on. */
   nofollow?: boolean;
   published?: Date;
+  modified?: Date;
+  authorPath?: string;
   section?: string;
   extra?: Record<string, unknown>[];
 }
 
-const { title, description = siteDescription, image, imageAlt, noindex = false, nofollow = true, pageType = 'WebPage', canonicalPath, published, section, extra = [] } = Astro.props;
+const {
+  title,
+  description = siteDescription,
+  image,
+  imageAlt,
+  noindex = false,
+  nofollow = true,
+  pageType = 'WebPage',
+  canonicalPath,
+  published,
+  modified,
+  authorPath = '/about',
+  section,
+  extra = [],
+} = Astro.props;
 const fullTitle = title === siteName ? `${siteName} — Everything happening in Bastrop County` : `${title} · ${siteName}`;
 const requestPath = Astro.url.pathname.length > 1 && Astro.url.pathname.endsWith('/') ? Astro.url.pathname.slice(0, -1) : Astro.url.pathname;
 const path = canonicalPath ?? requestPath;
@@ -30,6 +48,12 @@ const sharePath = image || '/brand/og.png';
 const shareAlt = image ? (imageAlt ?? title) : 'Bastropia — everything happening in Bastrop County';
 const shareImage = new URL(sharePath, Astro.site);
 const themeColor = '#10281f';
+const modifiedTime = modified ?? published;
+const requestedTown = Astro.url.searchParams.get('town');
+const weatherScene = requestPath === '/weather'
+  ? (await getForecast(isTown(requestedTown) ? requestedTown : 'Bastrop'))?.scene
+  : undefined;
+const hero = headerHero(requestPath, { night: headerNight(), scene: weatherScene });
 
 const sections: Record<string, string> = {
   events: 'Events',
@@ -59,10 +83,14 @@ const sections: Record<string, string> = {
   directory: 'Directory',
   eats: 'Eats',
   churches: 'Churches',
+  contact: 'Contact',
+  corrections: 'Corrections',
+  staff: 'Staff',
 };
 const parts = requestPath.split('/').filter(Boolean);
 const crumbs: { name: string; path: string }[] = [];
-if (sections[parts[0]]) crumbs.push({ name: sections[parts[0]], path: `/${parts[0]}` });
+if (parts[0] === 'authors') crumbs.push({ name: 'Staff', path: '/staff' });
+else if (sections[parts[0]]) crumbs.push({ name: sections[parts[0]], path: `/${parts[0]}` });
 if (parts.length > 1) crumbs.push({ name: title, path: requestPath });
 const schemaType = pageType === 'NewsArticle' || pageType === 'Article' ? 'WebPage' : pageType;
 const nodes = [
@@ -92,6 +120,7 @@ const robots = noindex
     <meta name="geo.placename" content="Bastrop County" />
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content={themeColor} />
+    <link rel="preload" as="image" href={hero.visible.src} fetchpriority="high" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -118,9 +147,9 @@ const robots = noindex
     <meta name="twitter:image" content={shareImage} />
     <meta name="twitter:image:alt" content={shareAlt} />
     {published && <meta property="article:published_time" content={published.toISOString()} />}
-    {published && <meta property="article:modified_time" content={published.toISOString()} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
     {section && <meta property="article:section" content={section} />}
-    {published && <meta property="article:author" content={new URL('/about', Astro.site).toString()} />}
+    {published && <meta property="article:author" content={new URL(authorPath, Astro.site).toString()} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

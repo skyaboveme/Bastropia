@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { authors } from '../data/authors';
+---
+
+<BaseLayout
+  title="Staff"
+  description="The Bastropia masthead. Stories run under the Bastropia desk until a reporter is listed here by name."
+>
+  <PageHead
+    kicker="Masthead"
+    title="Who writes Bastropia"
+    lede="Stories without a named reporter run under the Bastropia desk, a shared byline. A person appears here only when their name is already public."
+  />
+  <div class="wrap prose">
+    <p>
+      Bastropia is a community desk for Bastrop County, Texas. It collects the weekend, the burn ban, the weather, public meetings, and short news notes. It is not a government newsroom.
+    </p>
+    {authors.length > 0 ? (
+      <>
+        <h2>Reporters</h2>
+        <ul>
+          {authors.map((author) => (
+            <li>
+              <a href={`/authors/${author.slug}`}>{author.name}</a>
+              {author.jobTitle ? `, ${author.jobTitle}` : ''}. {author.description}
+            </li>
+          ))}
+        </ul>
+      </>
+    ) : (
+      <p>No reporter is listed by name yet. Until one is, every story is the Bastropia desk.</p>
+    )}
+    <p>
+      The <a href="/corrections">corrections policy</a> says how a wrong fact gets fixed. <a href="/contact">Contact</a> is the tip form, the event form, and the Facebook group. There is no newsroom phone number on this page.
+    </p>
+    <p><a href="/about">About Bastropia</a> says what the site covers and what it does not.</p>
+  </div>
+</BaseLayout>

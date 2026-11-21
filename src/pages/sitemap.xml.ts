@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { authors } from '../data/authors';
 import { businesses } from '../data/businesses';
 import { siteUrl } from '../data/site';
 import { listLiveBusinesses } from '../lib/businessDb';
@@ -49,6 +50,9 @@ const hubs: Entry[] = [
   { path: '/phone-numbers', priority: '0.8' },
   { path: '/burn-ban', priority: '0.8' },
   { path: '/about', priority: '0.6' },
+  { path: '/staff', priority: '0.5' },
+  { path: '/corrections', priority: '0.5' },
+  { path: '/contact', priority: '0.5' },
   { path: '/advertise', priority: '0.6' },
   { path: '/newsletter', priority: '0.7' },
   { path: '/directory', priority: '0.7' },
@@ -83,6 +87,7 @@ export const GET: APIRoute = async () => {
   const entries: Entry[] = [
     ...hubs,
     ...businesses.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
+    ...authors.map((author) => ({ path: `/authors/${author.slug}`, priority: '0.4' })),
     ...listed.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
     ...events.map((event) => ({
       path: `/events/${event.id}`,
@@ -92,7 +97,7 @@ export const GET: APIRoute = async () => {
     })),
     ...news.map((story) => ({
       path: `/news/${story.id}`,
-      lastmod: story.data.pubDate,
+      lastmod: story.data.updated ?? story.data.pubDate,
       priority: '0.7',
       image: story.data.image,
     })),

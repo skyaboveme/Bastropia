@@ -19,6 +19,10 @@ const events = defineCollection({
     cost: z.string(),
     tier: z.enum(tiers),
     organizer: z.string().optional(),
+    /** Named act. Omit when the listing does not name one. */
+    performer: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
+    eventStatus: z.enum(['scheduled', 'cancelled', 'postponed', 'rescheduled', 'moved-online']).optional(),
+    attendanceMode: z.enum(['offline', 'online', 'mixed']).optional(),
     sourceUrl: z.string().url().optional(),
     sourceLabel: z.string().optional(),
     streamUrl: z.string().url().optional(),
@@ -32,7 +36,13 @@ const news = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
+    /** Set when the story is corrected. dateModified uses this, then pubDate. */
+    updated: z.coerce.date().optional(),
     place: z.string(),
+    /** Slug from src/data/authors.ts. Omit it to keep the Bastropia desk byline. */
+    author: z.string().min(1).optional(),
+    /** Short bullets shown on the story and copied into the article abstract. */
+    keyFacts: z.array(z.string().min(1)).max(8).optional(),
     sourceUrl: z.string().url().optional(),
     sourceLabel: z.string().optional(),
     /** Newest story with lead: true is the homepage lead. Omit it to leave the previous lead in place. */

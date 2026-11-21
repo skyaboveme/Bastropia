@@ -19,7 +19,10 @@ import { electionDay } from '../data/vote';
 import { townByName, townPath } from '../data/towns';
 import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { readTown, townCookie } from '../lib/townChoice';
-import { eventNode, linkList, newsNode } from '../lib/schema';
+import { currentDailyVideo } from '../lib/dailyVideo';
+import PlaceName from '../components/PlaceName.astro';
+import { imageSize } from '../lib/imageSize';
+import { dailyVideoNode, eventNode, linkList, newsNode } from '../lib/schema';
 import { categoryMeta, cities } from '../data/taxonomy';
 import { streams } from '../data/streams';
 import { capOrganizer, filterEvents, sortByDayThenTier, sortByTier } from '../lib/events';
@@ -114,6 +117,8 @@ const deskStories = pageHeadlines
   .map((story) => news.find((item) => `/news/${item.id}` === story.href))
   .filter((story) => story !== undefined);
 const leadItem = lead && !lead.external ? news.find((item) => `/news/${item.id}` === lead.href) : undefined;
+const dailyVideo = await currentDailyVideo();
+const dailyNode = dailyVideo ? dailyVideoNode(dailyVideo) : undefined;
 const inTown = (event: (typeof events)[number]) => !homeTown || event.data.city === homeTown;
 const todayShown = todayEvents.filter(inTown);
 const nextUp = capOrganizer(upcoming.filter((event) => inTown(event) && eventKey(event.data.start) > today)).slice(0, 4);
@@ -136,7 +141,8 @@ const weekendDays = weekend
   extra={[
     linkList('Events on the front page', listed.map((event) => ({ name: event.data.title, path: `/events/${event.id}` }))),
     ...listed.map((event) => eventNode(event)),
-    ...deskStories.map((story) => newsNode(story)),
+    ...deskStories.map((story) => newsNode(story, story.data.image ? imageSize(story.data.image) : undefined)),
+    ...(dailyNode ? [dailyNode] : []),
   ]}
 >
   <div class="wrap home-stack">
@@ -145,7 +151,10 @@ const weekendDays = weekend
       <div class="col col-lead">
         {lead ? (
           <article class="story-lead">
-            <p class="kicker">{leadItem ? `Bastropia · ${leadItem.data.place}` : lead.label} · {formatMedium(lead.date)}</p>
+            <p class="kicker">
+              {leadItem ? <>Bastropia · <PlaceName name={leadItem.data.place} /></> : lead.label}
+              {' '}· {formatMedium(lead.date)}
+            </p>
             <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
             {leadItem?.data.image && (
               <img class="lead-photo" src={leadItem.data.image} alt={leadItem.data.imageAlt ?? lead.title} width="1200" height="675" />
@@ -156,11 +165,14 @@ const weekendDays = weekend
         ) : (
           <h1 class="sr">Bastropia</h1>
         )}
-        <DailyFeature level="h2" />
+        <DailyFeature level="h2" video={dailyVideo} />
         <div class="story-pair">
           {secondary.map((story) => (
             <article class="story-sub">
-              <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
+              <p class="kicker">
+                {story.external ? story.label : <PlaceName name={story.place} />}
+                {' '}· {formatMedium(story.date)}
+              </p>
               <h2><a href={story.href} {...offsiteAttrs(story.href)}>{story.title}</a></h2>
               {story.summary && <p class="dek">{story.summary}</p>}
             </article>
@@ -173,7 +185,10 @@ const weekendDays = weekend
         <h2 class="col-title">More headlines</h2>
         {briefs.map((story) => (
           <article class="brief">
-            <p class="kicker">{story.label} · {formatMedium(story.date)}</p>
+            <p class="kicker">
+              {story.external ? story.label : <PlaceName name={story.place} />}
+              {' '}· {formatMedium(story.date)}
+            </p>
             <h3><a href={story.href} {...offsiteAttrs(story.href)}>{story.title}</a></h3>
           </article>
         ))}
@@ -247,8 +262,8 @@ const weekendDays = weekend
               <ul class="featured-news">
                 {panel.items.map((story) => (
                   <li>
+                    <em>{story.external ? story.label : <PlaceName name={story.place} />}</em>
                     <a href={story.href} {...offsiteAttrs(story.href)}>
-                      <em>{story.label}</em>
                       <strong>{story.title}</strong>
                     </a>
                   </li>

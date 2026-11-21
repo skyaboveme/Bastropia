@@ -3,6 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { authors } from '../data/authors';
 import { businesses } from '../data/businesses';
 
 const [events, news, social, updates] = await Promise.all([
@@ -36,6 +37,9 @@ const hubs = [
   '/burn-ban',
   '/calendar',
   '/about',
+  '/staff',
+  '/corrections',
+  '/contact',
   '/advertise',
   '/newsletter',
   '/directory',
@@ -55,6 +59,7 @@ const hubs = [
 const links = [
   ...hubs.map((path) => ({ href: path, label: path === '/' ? 'Front page' : path })),
   ...businesses.map((business) => ({ href: `/${business.slug}`, label: business.name })),
+  ...authors.map((author) => ({ href: `/authors/${author.slug}`, label: author.name })),
   ...news
     .slice()
     .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
