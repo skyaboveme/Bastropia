@@ -1,0 +1,324 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MetricIcon from '../components/MetricIcon.astro';
+import PageHead from '../components/PageHead.astro';
+import { serviceGroups } from '../data/services';
+import { getCountyNow } from '../lib/countyNow';
+import { getSchoolDays } from '../lib/interruptions';
+import { offsiteAttrs } from '../lib/links';
+import { flowLabel, getMetricsExtra } from '../lib/metricsExtra';
+import { getAlerts } from '../lib/weather';
+
+const [county, alerts, schools, extra] = await Promise.all([
+  getCountyNow(),
+  getAlerts(),
+  getSchoolDays(),
+  getMetricsExtra(),
+]);
+
+const flow = county.river ? flowLabel(county.river.detail) : null;
+
+const trash = serviceGroups.find((group) => group.id === 'trash');
+const cities = serviceGroups.find((group) => group.id === 'cities');
+const aqua = serviceGroups.find((group) => group.id === 'roads')?.items.find((item) => item.name === 'Aqua Water Supply');
+
+const boilOnAqua = /boil/i.test(extra.aquaOutage?.detail ?? '');
+---
+
+<BaseLayout
+  title="County metrics"
+  description="Bastrop County readings: sunrise and sunset, lake level, the Colorado River, schools, gas, water notices, trash day, state parks, and cedar season."
+>
+  <PageHead
+    kicker="Bastrop County"
+    title="County metrics"
+    lede="Sunrise, the lake, the Colorado River, then schools, fuel, water, trash, parks, and cedar. A dash means that source did not load."
+  />
+
+  <div class="wrap metrics">
+    {alerts && alerts.length > 0 && (
+      <div class="metric-alerts">
+        {alerts.map((alert) => (
+          <article>
+            <p class="kicker">{alert.severity}</p>
+            <h2>{alert.event}</h2>
+            <p>{alert.headline}</p>
+          </article>
+        ))}
+      </div>
+    )}
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Sun and water</p>
+          <h2>Daylight, the lake, the river</h2>
+        </div>
+      </div>
+      <div class="metric-board metric-board-wide">
+        <a class="metric-tile" href={extra.sunrise?.href ?? 'https://open-meteo.com/'} {...offsiteAttrs(extra.sunrise?.href ?? 'https://open-meteo.com/')}>
+          <p class="metric-name"><MetricIcon name="sunrise" /><span class="kicker">Sunrise</span></p>
+          <strong>{extra.sunrise?.label ?? '—'}</strong>
+          <span>{extra.sunrise?.detail ?? 'Open-Meteo did not load.'}</span>
+        </a>
+        <a class="metric-tile" href={extra.sunset?.href ?? 'https://open-meteo.com/'} {...offsiteAttrs(extra.sunset?.href ?? 'https://open-meteo.com/')}>
+          <p class="metric-name"><MetricIcon name="sunset" /><span class="kicker">Sunset</span></p>
+          <strong>{extra.sunset?.label ?? '—'}</strong>
+          <span>{extra.sunset?.detail ?? 'Open-Meteo did not load.'}</span>
+        </a>
+        <a class="metric-tile" href={extra.lake?.href ?? 'https://hydromet.lcra.org/riverreport/'} {...offsiteAttrs(extra.lake?.href ?? 'https://hydromet.lcra.org/riverreport/')}>
+          <p class="metric-name"><MetricIcon name="lake" /><span class="kicker">Lake Bastrop</span></p>
+          <strong>{extra.lake?.label ?? '—'}</strong>
+          <span>{extra.lake?.detail || 'The LCRA lake table did not load.'}</span>
+        </a>
+        <a class="metric-tile" href={county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/'} {...offsiteAttrs(county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/')}>
+          <p class="metric-name"><MetricIcon name="river" /><span class="kicker">Colorado River</span></p>
+          <strong>{county.river?.label ?? '—'}</strong>
+          <span>
+            {county.river
+              ? `Gauge height at Bastrop. ${county.river.detail}.`
+              : 'The Bastrop gauge did not load.'}
+          </span>
+        </a>
+        <a class="metric-tile metric-span" href={county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/'} {...offsiteAttrs(county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/')}>
+          <p class="metric-name"><MetricIcon name="flow" /><span class="kicker">Paddling flow</span></p>
+          <strong>{flow ?? '—'}</strong>
+          <span>
+            {county.river
+              ? 'Same Bastrop gauge. The flow is the paddling number. This page does not add a separate runnable rating.'
+              : 'The Bastrop gauge did not load.'}
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Four districts</p>
+          <h2>Schools</h2>
+        </div>
+        <a href="/schools">School status</a>
+      </div>
+      <div class="metric-board">
+        {schools.map((day) => (
+          <article class:list={['metric-tile', { 'is-alert': day.status === 'closed' || day.status === 'delayed' }]}>
+            <p class="metric-name"><MetricIcon name="school" /><span class="kicker">{day.name}</span></p>
+            <strong>{day.label}</strong>
+            <span>{day.note}</span>
+            {!/early release|early dismissal/i.test(day.note) && <span>No early release is posted on the homepage.</span>}
+            {!/\bbus\b/i.test(day.note) && <span>No bus delay is posted on the homepage.</span>}
+            <span>Lunch is on the district site, not copied here.</span>
+            <a href={day.href} {...offsiteAttrs(day.href)}>Calendar and menu</a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Fuel</p>
+          <h2>Gas</h2>
+        </div>
+      </div>
+      <div class="metric-board metric-board-wide">
+        <a class="metric-tile" href={extra.gas?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/'} {...offsiteAttrs(extra.gas?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/')}>
+          <p class="metric-name"><MetricIcon name="gas" /><span class="kicker">Texas regular</span></p>
+          <strong>{extra.gas?.label ?? '—'}</strong>
+          <span>{extra.gas?.detail ?? 'The EIA weekly gasoline table did not load.'}</span>
+        </a>
+        <a class="metric-tile" href={extra.diesel?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/'} {...offsiteAttrs(extra.diesel?.href ?? 'https://www.eia.gov/petroleum/gasdiesel/')}>
+          <p class="metric-name"><MetricIcon name="gas" /><span class="kicker">Gulf Coast diesel</span></p>
+          <strong>{extra.diesel?.label ?? '—'}</strong>
+          <span>{extra.diesel?.detail ?? 'The EIA weekly diesel table did not load.'}</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Drinking water</p>
+          <h2>Notices and outages</h2>
+        </div>
+      </div>
+      <div class="metric-board metric-board-wide">
+        <a class:list={['metric-tile', { 'is-alert': extra.aquaOutage?.label === 'Listed' }]} href={extra.aquaOutage?.href ?? 'https://www.aquawsc.com/service-interruptions/'} {...offsiteAttrs('https://www.aquawsc.com/service-interruptions/')}>
+          <p class="metric-name"><MetricIcon name="outage" /><span class="kicker">Aqua outage</span></p>
+          <strong>{extra.aquaOutage?.label ?? '—'}</strong>
+          <span>{extra.aquaOutage?.detail ?? 'The Aqua interruptions page did not load.'}</span>
+        </a>
+        <a class="metric-tile" href={extra.aquaDrought?.href ?? 'https://www.aquawsc.com/conservation-environment/water-conservation/water-restrictions/'} {...offsiteAttrs(extra.aquaDrought?.href ?? 'https://www.aquawsc.com/')}>
+          <p class="metric-name"><MetricIcon name="drought" /><span class="kicker">Aqua drought</span></p>
+          <strong>{extra.aquaDrought?.label ?? '—'}</strong>
+          <span>{extra.aquaDrought?.detail ?? 'The drought page did not load.'}</span>
+        </a>
+        <article class:list={['metric-tile', { 'is-alert': boilOnAqua }]}>
+          <p class="metric-name"><MetricIcon name="boil" /><span class="kicker">Boil notice</span></p>
+          <strong class:list={{ 'is-phrase': Boolean(extra.aquaOutage) && !boilOnAqua }}>{!extra.aquaOutage ? '—' : boilOnAqua ? 'Listed' : 'Not on Aqua’s list'}</strong>
+          <span>
+            {!extra.aquaOutage
+              ? 'The Aqua page did not load, so a boil notice was not checked.'
+              : boilOnAqua
+                ? extra.aquaOutage.detail
+                : 'A boil sentence is shown here only when Aqua’s interruptions page writes one. City water notices stay on the city site.'}
+          </span>
+          <p class="metric-inline">
+            {aqua?.href && <a href={aqua.href} {...offsiteAttrs(aqua.href)}>Aqua Water Supply</a>}
+            {cities?.items.map((city) => (
+              city.href && <a href={city.href} {...offsiteAttrs(city.href)}>{city.name}</a>
+            ))}
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Hauling</p>
+          <h2>Trash, recycling, bulk</h2>
+        </div>
+        <a href="/new-here#trash">New resident guide</a>
+      </div>
+      <p class="meta">{trash?.intro} The day is on the city map, not a single county calendar.</p>
+      <div class="metric-board">
+        {trash?.items.map((item) => (
+          <article class="metric-tile">
+            <p class="metric-name"><MetricIcon name="trash" /><span class="kicker">{item.name.replace(' trash and recycling', '')}</span></p>
+            <strong>By route</strong>
+            <span>{item.detail}{item.hours ? ` ${item.hours}` : ''}{item.phone ? ` ${item.phone}.` : ''}</span>
+            {item.href && <a href={item.href} {...offsiteAttrs(item.href)}>Schedule</a>}
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Lost Pines</p>
+          <h2>State parks</h2>
+        </div>
+      </div>
+      <div class="metric-board metric-board-wide">
+        {extra.parks.map((park) => (
+          <article class:list={['metric-tile', { 'is-alert': park.label === 'Alert' }]}>
+            <p class="metric-name"><MetricIcon name="park" /><span class="kicker">{park.name}</span></p>
+            <strong>{park.label}</strong>
+            <span>
+              {park.detail}
+              {park.label === 'Notice' ? ' No closure is written in this notice.' : ''}
+              {' '}Capacity is not a number on the alert page.
+            </span>
+            <p class="metric-inline">
+              <a href={park.alertHref} {...offsiteAttrs(park.alertHref)}>Alerts</a>
+              <a href={park.href} {...offsiteAttrs(park.href)}>Park page</a>
+            </p>
+          </article>
+        ))}
+        <article class="metric-tile">
+          <p class="metric-name"><MetricIcon name="fire" /><span class="kicker">Prescribed fire</span></p>
+          <strong>{extra.burnSeason ? 'Season posted' : 'See the park page'}</strong>
+          <span>
+            {extra.burnSeason
+              ? `TPWD plans to ${extra.burnSeason} A burn is listed above only when the alert page names one.`
+              : 'The forest page did not load. Check the park alerts for a burn.'}
+            {extra.burnSignup ? ` ${extra.burnSignup}` : ''}
+          </span>
+          <a href="https://tpwd.texas.gov/state-parks/bastrop/protecting-forest" {...offsiteAttrs('https://tpwd.texas.gov/state-parks/bastrop/protecting-forest')}>Forest page</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="metric-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Seasonal</p>
+          <h2>Cedar</h2>
+        </div>
+      </div>
+      <a class="metric-tile metric-hero" href="https://www.aaaai.org/tools-for-the-public/allergy-and-asthma-resources" {...offsiteAttrs('https://www.aaaai.org/tools-for-the-public/allergy-and-asthma-resources')}>
+        <p class="metric-name"><MetricIcon name="cedar" /><span class="kicker">Cedar count</span></p>
+        <strong>Not posted</strong>
+        <span>Cedar fever season starts in December. This page does not invent a grain count. The link is the National Allergy Bureau directory, where a station posts its own number.</span>
+      </a>
+    </section>
+
+    <p class="disclaimer">
+      The Colorado River height and the paddling flow are the USGS gauge at Bastrop and can be provisional.
+      Lake Bastrop is the LCRA elevation. Sunrise and sunset are Open-Meteo at the Bastrop coordinates.
+      Regular gasoline is the EIA weekly Texas average. Diesel is the EIA weekly on-highway price for the Gulf Coast, the region that includes Texas. Neither is a station price.
+      Aqua lines are copied from Aqua’s own pages. Trash days are the city route, linked from the phone book checked in early November 2026.
+      School lines are each district homepage today. Park lines are the dated notices on the TPWD alert page.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .metrics { display: grid; gap: 2.2rem; padding-bottom: 2rem; }
+  .metric-section { min-width: 0; }
+  .section-head { display: flex; justify-content: space-between; gap: 1rem; align-items: end; margin-bottom: 0.8rem; }
+  .section-head h2 { margin: 0.15rem 0 0; }
+  .section-head a { color: var(--river-deep); font-weight: 650; }
+  .metric-alerts { display: grid; gap: 0.7rem; }
+  .metric-alerts h2 { font-size: 1.45rem; margin: 0.15rem 0; }
+  .metric-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+    gap: 0.75rem;
+  }
+  .metric-board-wide { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+  .metric-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.9rem 0.95rem 1rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--pine);
+    color: inherit;
+    text-decoration: none;
+  }
+  .metric-tile.is-alert { border-top-color: var(--stop); }
+  .metric-name {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    min-width: 0;
+    color: var(--river-deep);
+  }
+  .metric-tile.is-alert .metric-name { color: var(--stop); }
+  .metric-tile .kicker {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .metric-tile strong {
+    font-family: var(--serif);
+    font-size: 2.05rem;
+    font-weight: 560;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .metric-tile strong.is-phrase { font-size: 1.45rem; line-height: 1.2; }
+  .metric-tile span { color: var(--ink-soft); font-size: 0.95rem; line-height: 1.4; }
+  .metric-tile > a, .metric-inline { margin-top: auto; }
+  .metric-tile > a, .metric-inline a { color: var(--river-deep); font-weight: 650; }
+  .metric-inline { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; }
+  .metric-span { grid-column: 1 / -1; }
+  @media (max-width: 800px) {
+    .section-head { flex-direction: column; align-items: start; }
+    .metric-tile .kicker { font-size: 1.2rem; }
+    .metric-tile strong { font-size: 1.65rem; }
+    .metric-tile strong.is-phrase { font-size: 1.25rem; }
+  }
+</style>

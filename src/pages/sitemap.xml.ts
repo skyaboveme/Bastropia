@@ -38,6 +38,7 @@ const hubs: Entry[] = [
   { path: '/videos', priority: '0.8' },
   { path: '/weather', priority: '0.8' },
   { path: '/now', priority: '0.8' },
+  { path: '/metrics', priority: '0.8' },
   { path: '/government', priority: '0.8' },
   { path: '/government/court-decisions', priority: '0.7' },
   { path: '/new-here', priority: '0.8' },
