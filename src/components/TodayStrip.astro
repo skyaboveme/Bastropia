@@ -1,14 +1,11 @@
 ---
-import BurnMark from './BurnMark.astro';
-import { burnBan } from '../data/burnBan';
-import { burnView } from '../lib/burnBanView';
 import { youtubeChannel } from '../data/site';
 import { thumbnail, watchUrl } from '../data/videos';
 import { getCollection } from 'astro:content';
 import { currentDailyVideo } from '../lib/dailyVideo';
 import { capOrganizer, filterEvents } from '../lib/events';
 import { offsiteAttrs } from '../lib/links';
-import { eventKey, labelFromKey, whenLabel } from '../lib/time';
+import { eventKey, labelFromKey, stampParts, thisWeekendKeys, whenLabel } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
 
 const now = new Date();
@@ -19,8 +16,6 @@ const todayLabel = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
 }).format(now);
-const burn = burnView(now);
-
 const [events, forecast, video] = await Promise.all([
   getCollection('events'),
   getForecast('Bastrop'),
@@ -33,6 +28,14 @@ const nextEvents = filterEvents(events, { when: 'upcoming' }, now)
   .slice(0, 3);
 const shownEvents = todayEvents.length ? todayEvents : nextEvents;
 const eventsAreToday = todayEvents.length > 0;
+const weekendKeys = thisWeekendKeys(now);
+const weekendEvents = filterEvents(events, { when: 'weekend' }, now);
+const weekendPool = weekendKeys.flatMap((day) =>
+  capOrganizer(weekendEvents.filter((event) => eventKey(event.data.start) === day)),
+);
+const shownIds = new Set(shownEvents.map((event) => event.id));
+const weekendFresh = weekendPool.filter((event) => !shownIds.has(event.id));
+const weekendHighlights = (weekendFresh.length >= 2 ? weekendFresh : weekendPool).slice(0, 3);
 const day = forecast?.daily.find((item) => item.date === today) ?? forecast?.daily[0];
 const conditions = forecast ? weatherLabel(forecast.code) : '';
 const clipHref = video ? watchUrl(video.videoId) : `${youtubeChannel}/videos`;
@@ -54,21 +57,6 @@ const weatherLabelText = forecast
 <section class="today-strip" aria-labelledby="today-heading">
   <p class="col-title" id="today-heading">Today in Bastrop <span class="today-date">{todayLabel}</span></p>
   <div class="today-row">
-    <a
-      class:list={['today-card', 'today-burn', `is-${burn.tone}`]}
-      href="/burn-ban"
-      aria-label={burn.aria}
-    >
-      <p class="kicker">Burn ban</p>
-      <strong class:list={['burn-word', `is-${burn.tone}`]}>
-        <BurnMark banned={burnBan.inEffect && !burn.stale} />
-        <span>{burn.status}</span>
-      </strong>
-      <span class:list={['meta', { 'is-stale': burn.stale }]}>
-        {burn.stale ? `Status not confirmed since ${burn.checkedLong} — check the county page.` : burn.sub}
-      </span>
-    </a>
-
     <a class="today-card today-wx" href="/weather?town=Bastrop" aria-label={weatherLabelText}>
       <p class="kicker">Weather · Bastrop</p>
       {forecast ? (
@@ -83,6 +71,24 @@ const weatherLabelText = forecast
           <span class="meta">Unavailable right now</span>
         </>
       )}
+    </a>
+
+    <a class="today-card today-video" href={clipHref} {...offsiteAttrs(clipHref)}>
+      {video && (
+        <img
+          src={thumbnail(video.videoId, 'hqdefault')}
+          alt=""
+          width="320"
+          height="180"
+          loading="lazy"
+          decoding="async"
+        />
+      )}
+      <span class="today-copy">
+        <p class="kicker">Bastropia Daily</p>
+        <strong>{clipTitle}</strong>
+        {clipWhen && <span class="meta">{clipWhen}</span>}
+      </span>
     </a>
 
     <article class="today-card today-events-card" aria-label={eventsAreToday ? "Today's events" : 'Upcoming events'}>
@@ -108,22 +114,23 @@ const weatherLabelText = forecast
       <a class="today-more" href="/events">{eventsAreToday ? 'All events' : 'Events calendar'}</a>
     </article>
 
-    <a class="today-card today-video" href={clipHref} {...offsiteAttrs(clipHref)}>
-      {video && (
-        <img
-          src={thumbnail(video.videoId, 'hqdefault')}
-          alt=""
-          width="320"
-          height="180"
-          loading="lazy"
-          decoding="async"
-        />
+    <article class="today-card today-events-card" aria-label="This weekend">
+      <p class="kicker">This weekend</p>
+      {weekendHighlights.length ? (
+        <ul class="today-events">
+          {weekendHighlights.map((event) => (
+            <li>
+              <a href={`/events/${event.id}`}>
+                <span class="when">{stampParts(event.data.start).weekday} · {whenLabel(event.data.schedule, event.data.start, event.data.end)}</span>
+                <strong>{event.data.title}</strong>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="meta">Nothing is listed for this weekend.</p>
       )}
-      <span class="today-copy">
-        <p class="kicker">Bastropia Daily</p>
-        <strong>{clipTitle}</strong>
-        {clipWhen && <span class="meta">{clipWhen}</span>}
-      </span>
-    </a>
+      <a class="today-more" href="/this-weekend">Friday to Sunday</a>
+    </article>
   </div>
 </section>

@@ -1020,13 +1020,6 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
 a.today-card:hover strong { text-decoration: underline; text-underline-offset: 0.08em; }
 .today-card .kicker { margin: 0; }
 .today-card strong { font-family: var(--serif); font-weight: 580; line-height: 1.05; }
-.today-burn strong { font-size: 1.35rem; }
-.today-burn.is-stop { border-top-color: var(--stop); }
-.today-burn.is-ok { border-top-color: var(--ok); }
-.today-burn.is-stale { border-top-color: var(--sun-deep); }
-.today-burn.is-stale strong,
-.today-burn .meta.is-stale { color: var(--sun-deep); }
-.today-burn .meta.is-stale { font-weight: 650; }
 .today-wx strong { font-size: 2rem; }
 .today-events { display: grid; }
 .today-events a { display: grid; gap: 0.05rem; padding: 0.32rem 0; border-top: 1px solid var(--line); text-decoration: none; }
