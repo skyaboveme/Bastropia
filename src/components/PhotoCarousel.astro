@@ -1,28 +1,21 @@
 ---
 /**
- * Accessible, swipeable photo carousel for news stories (history features and similar).
+ * PhotoCarousel — one swipeable photo strip for a news story.
  *
- * In an MDX story:
+ * Props (keep this shape; the Friday history story passes it):
+ * - label?: string — accessible name of the carousel. Default: "Photograph carousel".
+ * - slides: Slide[] — required. Each slide:
+ *   - src: string — site path, such as /images/news/story/photo.jpg
+ *   - alt: string — what the photograph shows. Not a substitute for the caption.
+ *   - caption: string — one line under the photo. Empty string hides it.
+ *   - credit: string — source and license under the caption. Empty string hides it.
+ *   - width?: number — intrinsic pixel width of the file
+ *   - height?: number — intrinsic pixel height of the file
  *
- *   import PhotoCarousel from '../../components/PhotoCarousel.astro';
- *
- *   <PhotoCarousel
- *     label="Historic photographs of Bastrop County"
- *     slides={[
- *       {
- *         src: '/images/news/example/photo.jpg',
- *         alt: 'What the photograph shows.',
- *         caption: 'Short caption.',
- *         credit: 'Photo by Name via Wikimedia Commons (CC BY 4.0). Image resized.',
- *         width: 1600,
- *         height: 944,
- *       },
- *     ]}
- *   />
- *
- * No extra libraries. Horizontal CSS scroll-snap handles swipes. Arrow buttons,
- * dots, and left/right keys move between slides. Captions and credits sit under
- * each photo. The first image loads eagerly; the rest are lazy-loaded.
+ * Arrow keys, Home, and End move between slides when focus is inside the carousel.
+ * Touch and trackpad swipes use native horizontal scrolling with scroll-snap.
+ * Previous, next, and the dots call the same movement. The first image loads
+ * immediately; the rest wait until they are near the screen.
  */
 export interface Slide {
   src: string;
@@ -38,7 +31,7 @@ interface Props {
   label?: string;
 }
 
-const { slides, label = 'Photograph carousel' } = Astro.props;
+const { slides = [], label = 'Photograph carousel' } = Astro.props;
 const count = slides.length;
 const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
 ---
@@ -53,7 +46,7 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
     id={carouselId}
   >
     <div class="photo-carousel-toolbar">
-      <p class="photo-carousel-status" data-carousel-status aria-live="polite">
+      <p class="photo-carousel-status" data-carousel-status aria-live="polite" aria-atomic="true">
         Photo 1 of {count}
       </p>
       {count > 1 && (
@@ -72,9 +65,21 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
       )}
     </div>
 
-    <div class="photo-carousel-viewport" data-carousel-track tabindex={count > 1 ? 0 : undefined} aria-label={count > 1 ? 'Photo list. Use the arrow keys to move between photos.' : undefined}>
+    <div
+      class="photo-carousel-viewport"
+      data-carousel-track
+      tabindex={count > 1 ? 0 : undefined}
+      aria-label={count > 1 ? 'Photo list. Use the arrow keys to move between photos.' : undefined}
+    >
       {slides.map((slide, index) => (
-        <figure class="photo-carousel-slide" data-carousel-slide aria-hidden={index === 0 ? 'false' : 'true'}>
+        <figure
+          class="photo-carousel-slide"
+          data-carousel-slide
+          id={`${carouselId}-slide-${index}`}
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`Photo ${index + 1} of ${count}`}
+        >
           <div class="photo-carousel-frame">
             <img
               src={slide.src}
@@ -83,12 +88,20 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
               height={slide.height}
               loading={index === 0 ? 'eager' : 'lazy'}
               decoding="async"
+              fetchpriority={index === 0 ? undefined : 'low'}
             />
           </div>
-          <figcaption>
-            {slide.caption && <span class="photo-carousel-caption">{slide.caption}</span>}
-            {slide.credit && <span class="photo-carousel-credit">{slide.credit}</span>}
-          </figcaption>
+          {(slide.caption || slide.credit) && (
+            <figcaption>
+              {slide.caption && <span class="photo-carousel-caption">{slide.caption}</span>}
+              {slide.credit && (
+                <span class="photo-carousel-credit">
+                  <span class="photo-carousel-sr">Credit: </span>
+                  {slide.credit}
+                </span>
+              )}
+            </figcaption>
+          )}
         </figure>
       ))}
     </div>
@@ -111,6 +124,9 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
 
 <script>
   function setupCarousel(root: HTMLElement) {
+    if (root.dataset.carouselReady === 'true') return;
+    root.dataset.carouselReady = 'true';
+
     const track = root.querySelector<HTMLElement>('[data-carousel-track]');
     const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-carousel-slide]'));
     const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-carousel-dot]'));
@@ -120,27 +136,21 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
     if (!track || slides.length === 0) return;
 
     let index = 0;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const goTo = (nextIndex: number, { focusTrack = false } = {}) => {
-      index = (nextIndex + slides.length) % slides.length;
-      const slide = slides[index];
-      track.scrollTo({
-        left: slide.offsetLeft - track.offsetLeft,
-        behavior: reduceMotion ? 'auto' : 'smooth',
-      });
-      update(index);
-      if (focusTrack) track.focus();
-    };
+    let animating = false;
+    let moveId = 0;
+    let settleTimer = 0;
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const update = (active: number) => {
       index = active;
       slides.forEach((slide, i) => {
-        slide.setAttribute('aria-hidden', i === active ? 'false' : 'true');
+        if (i === active) slide.removeAttribute('aria-hidden');
+        else slide.setAttribute('aria-hidden', 'true');
       });
       dots.forEach((dot, i) => {
-        dot.classList.toggle('is-active', i === active);
-        if (i === active) dot.setAttribute('aria-current', 'true');
+        const on = i === active;
+        dot.classList.toggle('is-active', on);
+        if (on) dot.setAttribute('aria-current', 'true');
         else dot.removeAttribute('aria-current');
       });
       if (status) status.textContent = `Photo ${active + 1} of ${slides.length}`;
@@ -151,13 +161,51 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
       let closest = 0;
       let dist = Infinity;
       slides.forEach((slide, i) => {
-        const d = Math.abs(slide.offsetLeft - track.offsetLeft - left);
+        const d = Math.abs(slide.offsetLeft - left);
         if (d < dist) {
           dist = d;
           closest = i;
         }
       });
       return closest;
+    };
+
+    const syncFromScroll = () => {
+      const nextIndex = currentFromScroll();
+      if (nextIndex !== index) update(nextIndex);
+    };
+
+    // behavior: 'auto' follows the CSS scroll-behavior, which is smooth.
+    // An inline auto value is the reliable way to jump.
+    const scrollTrackTo = (left: number, smooth: boolean) => {
+      if (!smooth) {
+        const previous = track.style.scrollBehavior;
+        track.style.scrollBehavior = 'auto';
+        track.scrollTo({ left, behavior: 'auto' });
+        track.style.scrollBehavior = previous;
+        return;
+      }
+      track.scrollTo({ left, behavior: 'smooth' });
+    };
+
+    const goTo = (nextIndex: number) => {
+      if (slides.length < 2) return;
+      const wrapped = (nextIndex + slides.length) % slides.length;
+      const move = ++moveId;
+      const adjacent = Math.abs(wrapped - index) === 1;
+      const smooth = adjacent && !motionQuery.matches;
+      animating = true;
+      update(wrapped);
+      scrollTrackTo(slides[wrapped].offsetLeft, smooth);
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        if (move !== moveId) return;
+        if (Math.abs(track.scrollLeft - slides[wrapped].offsetLeft) > 2) {
+          scrollTrackTo(slides[wrapped].offsetLeft, false);
+        }
+        animating = false;
+        syncFromScroll();
+      }, smooth ? 1000 : 50);
     };
 
     prev?.addEventListener('click', () => goTo(index - 1));
@@ -167,6 +215,8 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
     });
 
     root.addEventListener('keydown', (event) => {
+      if (slides.length < 2) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         goTo(index - 1);
@@ -182,19 +232,48 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
       }
     });
 
+    track.addEventListener('pointerdown', () => {
+      moveId += 1;
+      animating = false;
+      window.clearTimeout(settleTimer);
+    });
+
     let ticking = false;
     track.addEventListener(
       'scroll',
       () => {
-        if (ticking) return;
+        if (animating || ticking) return;
         ticking = true;
         requestAnimationFrame(() => {
-          update(currentFromScroll());
           ticking = false;
+          if (animating) return;
+          const nextIndex = currentFromScroll();
+          if (nextIndex !== index) update(nextIndex);
         });
       },
       { passive: true },
     );
+
+    track.addEventListener('scrollend', () => {
+      if (animating && Math.abs(track.scrollLeft - slides[index].offsetLeft) > 2) return;
+      animating = false;
+      window.clearTimeout(settleTimer);
+      syncFromScroll();
+    });
+
+    let lastWidth = track.clientWidth;
+    const observer = new ResizeObserver(() => {
+      const width = track.clientWidth;
+      if (width === lastWidth) return;
+      lastWidth = width;
+      const previous = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollTo({ left: slides[index].offsetLeft, behavior: 'auto' });
+      track.style.scrollBehavior = previous;
+    });
+    observer.observe(track);
+
+    update(0);
   }
 
   document.querySelectorAll<HTMLElement>('[data-photo-carousel]').forEach(setupCarousel);
@@ -202,6 +281,7 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
 
 <style>
   .photo-carousel {
+    width: 100%;
     margin: 1.4rem 0 1.85rem;
     max-width: 42rem;
   }
@@ -233,8 +313,8 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -262,6 +342,7 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
   }
 
   .photo-carousel-viewport {
+    position: relative;
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
@@ -283,6 +364,7 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
   .photo-carousel-slide {
     flex: 0 0 100%;
     width: 100%;
+    min-width: 100%;
     margin: 0;
     scroll-snap-align: start;
     scroll-snap-stop: always;
@@ -303,6 +385,7 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
     max-width: none;
     max-height: none;
     object-fit: contain;
+    object-position: center;
     background: var(--pine-deep);
   }
 
@@ -331,31 +414,66 @@ const carouselId = `photo-carousel-${Math.random().toString(36).slice(2, 9)}`;
     color: var(--ink-soft);
   }
 
+  .photo-carousel-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .photo-carousel-dots {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.4rem;
-    margin: 0.7rem 0 0;
+    gap: 0.2rem;
+    margin: 0.55rem 0 0;
   }
 
   .photo-carousel-dot {
-    width: 0.62rem;
-    height: 0.62rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
     padding: 0;
     border: 0;
     border-radius: 999px;
-    background: var(--line);
+    background: transparent;
     cursor: pointer;
   }
 
-  .photo-carousel-dot.is-active {
+  .photo-carousel-dot::before {
+    content: "";
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 999px;
+    background: #8a8478;
+  }
+
+  .photo-carousel-dot.is-active::before {
     background: var(--pine);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .photo-carousel-viewport {
       scroll-behavior: auto;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .photo-carousel-btn,
+    .photo-carousel-dot {
+      border: 1px solid ButtonText;
+    }
+
+    .photo-carousel-dot::before,
+    .photo-carousel-dot.is-active::before {
+      background: ButtonText;
     }
   }
 </style>
