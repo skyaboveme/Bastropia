@@ -870,7 +870,8 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
   .home-stack > .home-around { order: 3; }
   .home-stack > .section,
   .home-stack > .band { order: 4; }
-  .home-stack > .home-weekend { order: 2; }
+  .home-stack > .home-weekend,
+  .home-stack > #newsletter-weekend { order: 2; }
   .sections-inner { flex-wrap: wrap; }
   .menu { display: inline-flex; }
   .nav { display: none; width: 100%; flex-direction: column; padding-bottom: 0.6rem; }
@@ -1022,6 +1023,10 @@ a.today-card:hover strong { text-decoration: underline; text-underline-offset: 0
 .today-burn strong { font-size: 1.35rem; }
 .today-burn.is-stop { border-top-color: var(--stop); }
 .today-burn.is-ok { border-top-color: var(--ok); }
+.today-burn.is-stale { border-top-color: var(--sun-deep); }
+.today-burn.is-stale strong,
+.today-burn .meta.is-stale { color: var(--sun-deep); }
+.today-burn .meta.is-stale { font-weight: 650; }
 .today-wx strong { font-size: 2rem; }
 .today-events { display: grid; }
 .today-events a { display: grid; gap: 0.05rem; padding: 0.32rem 0; border-top: 1px solid var(--line); text-decoration: none; }

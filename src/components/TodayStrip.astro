@@ -1,6 +1,7 @@
 ---
 import BurnMark from './BurnMark.astro';
-import { burnBan, burnStatus } from '../data/burnBan';
+import { burnBan } from '../data/burnBan';
+import { burnView } from '../lib/burnBanView';
 import { youtubeChannel } from '../data/site';
 import { thumbnail, watchUrl } from '../data/videos';
 import { getCollection } from 'astro:content';
@@ -18,11 +19,7 @@ const todayLabel = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
 }).format(now);
-const checkedLabel = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'America/Chicago',
-  month: 'long',
-  day: 'numeric',
-}).format(new Date(`${burnBan.checked}T18:00:00Z`));
+const burn = burnView(now);
 
 const [events, forecast, video] = await Promise.all([
   getCollection('events'),
@@ -58,16 +55,18 @@ const weatherLabelText = forecast
   <p class="col-title" id="today-heading">Today in Bastrop <span class="today-date">{todayLabel}</span></p>
   <div class="today-row">
     <a
-      class:list={['today-card', 'today-burn', burnBan.inEffect ? 'is-stop' : 'is-ok']}
+      class:list={['today-card', 'today-burn', `is-${burn.tone}`]}
       href="/burn-ban"
-      aria-label={`${burnStatus} in Bastrop County. Checked ${checkedLabel}.`}
+      aria-label={burn.aria}
     >
       <p class="kicker">Burn ban</p>
-      <strong class:list={['burn-word', burnBan.inEffect ? 'is-stop' : 'is-ok']}>
-        <BurnMark banned={burnBan.inEffect} />
-        <span>{burnStatus}</span>
+      <strong class:list={['burn-word', `is-${burn.tone}`]}>
+        <BurnMark banned={burnBan.inEffect && !burn.stale} />
+        <span>{burn.status}</span>
       </strong>
-      <span class="meta">Checked {checkedLabel}</span>
+      <span class:list={['meta', { 'is-stale': burn.stale }]}>
+        {burn.stale ? `Status not confirmed since ${burn.checkedLong} — check the county page.` : burn.sub}
+      </span>
     </a>
 
     <a class="today-card today-wx" href="/weather?town=Bastrop" aria-label={weatherLabelText}>
