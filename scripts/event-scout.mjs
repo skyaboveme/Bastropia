@@ -4,24 +4,33 @@
  * Reads public calendars for Bastrop County, skips anything already on the site,
  * and writes new listings to src/content/events. It never invents a time, price, or address.
  *
- *   node scripts/event-scout.mjs            post new listings
+ *   node scripts/event-scout.mjs            post new listings and update the bot/events-inbox pull request
  *   node scripts/event-scout.mjs --dry-run  print what it would post
+ *   node scripts/event-scout.mjs --no-publish  write listings here and do not open a pull request
  *   node scripts/event-scout.mjs --source=bastrop-edc  only that calendar
  *   node scripts/event-scout.mjs --images-only  save posters for listings already on the site
  *
  * A poster is saved only when that event's own page has one. The generic
  * calendar icon is skipped, and so is a photo whose page title is a different event.
+ *
+ * A real run resets one branch, bot/events-inbox, onto origin/main. It adds
+ * event files and posters that are not already on main or in that pull request,
+ * and it opens nothing when there is nothing new.
  */
 import { spawn } from 'node:child_process';
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { publishInbox, remoteListings } from './event-inbox.mjs';
+import { alreadyListed, filenameFor, hasPassed, looseTitle, mergeListings, parseListing } from './event-match.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const eventsDir = path.join(root, 'src', 'content', 'events');
 const photoDir = path.join(root, 'public', 'images', 'events');
 const logDir = path.join(root, 'data', 'scout');
 const dryRun = process.argv.includes('--dry-run');
+const noPublish = process.argv.includes('--no-publish');
+const noFetch = process.argv.includes('--no-fetch');
 const sourceFilter = (process.argv.find((arg) => arg.startsWith('--source=')) || '').slice('--source='.length);
 const horizonDays = 75;
 const maxNew = 40;
@@ -156,17 +165,6 @@ function stripTags(value) {
   return decode(value.replace(/<[^>]*>/g, ' '));
 }
 
-function slug(title, date) {
-  const base = title
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 54)
-    .replace(/-+$/g, '');
-  return `${base || 'event'}-${date}`;
-}
-
 function categoryFor(title, section) {
   const text = `${title} ${section}`.toLowerCase();
   const rules = [
@@ -239,8 +237,19 @@ function collapseRepeats(events) {
   return { kept, later };
 }
 
-function inWindow(date, today) {
-  return date >= today && date <= addDays(today, horizonDays);
+function inWindow(event, today) {
+  if (!event?.date || hasPassed(event, today)) return false;
+  return event.date <= addDays(today, horizonDays);
+}
+
+/** ICS all-day DTEND is exclusive. Timed end dates are the last day. */
+function inclusiveEnd(start, endStamp) {
+  if (!endStamp) return start.date;
+  if (endStamp.allDay) {
+    const last = addDays(endStamp.date, -1);
+    return last < start.date ? start.date : last;
+  }
+  return endStamp.date || start.date;
 }
 
 async function fetchText(url) {
@@ -267,6 +276,7 @@ function parseCivicEngage(html, source) {
       found.push({
         title,
         ...when,
+        endDate: when.date,
         section,
         city: source.city,
         venue: venueFor(title, section, source.organizer),
@@ -361,6 +371,7 @@ function parseRss(xml, source) {
     found.push({
       title,
       date: when.date,
+      endDate: when.date,
       startTime: when.startTime === '00:00' ? '' : when.startTime,
       endTime: '',
       allDay: when.startTime === '00:00',
@@ -392,6 +403,7 @@ function parseJsonLdEvents(html, source) {
       if (!event || event['@type'] !== 'Event') continue;
       const title = decode(String(event.name || '')).trim();
       const startRaw = String(event.startDate || '').slice(0, 10);
+      const endRaw = String(event.endDate || '').slice(0, 10);
       if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(startRaw)) continue;
       let sourceUrl = String(event.url || '').trim();
       try {
@@ -414,6 +426,7 @@ function parseJsonLdEvents(html, source) {
       found.push({
         title,
         date: startRaw,
+        endDate: /^\d{4}-\d{2}-\d{2}$/.test(endRaw) ? endRaw : startRaw,
         startTime: '',
         endTime: '',
         allDay: true,
@@ -447,6 +460,7 @@ function parseIcs(text, source) {
     found.push({
       title,
       date: start.date,
+      endDate: inclusiveEnd(start, end),
       startTime: start.startTime,
       endTime: end && !end.allDay && end.date === start.date ? end.startTime : '',
       allDay: start.allDay,
@@ -465,62 +479,13 @@ function parseIcs(text, source) {
   return found;
 }
 
-function unquote(value) {
-  const trimmed = value.trim();
-  if (trimmed.startsWith('"')) {
-    try {
-      return JSON.parse(trimmed);
-    } catch {
-      return trimmed.replace(/^"|"$/g, '');
-    }
-  }
-  return trimmed;
-}
-
 async function existingListings() {
   const files = (await readdir(eventsDir)).filter((file) => file.endsWith('.md'));
   const listings = [];
   for (const file of files) {
-    const raw = await readFile(path.join(eventsDir, file), 'utf8');
-    const title = raw.match(/^title:\s*(.*)$/m);
-    const start = raw.match(/^start:\s*(.*)$/m);
-    const source = raw.match(/^sourceUrl:\s*(.*)$/m);
-    listings.push({
-      file,
-      title: title ? unquote(title[1]).toLowerCase() : '',
-      date: start ? unquote(start[1]).slice(0, 10) : '',
-      sourceUrl: source ? unquote(source[1]) : '',
-      image: /^image:\s*/m.test(raw),
-    });
+    listings.push(parseListing(file, await readFile(path.join(eventsDir, file), 'utf8')));
   }
   return listings;
-}
-
-function dayDistance(left, right) {
-  const [ay, am, ad] = left.split('-').map(Number);
-  const [by, bm, bd] = right.split('-').map(Number);
-  return Math.abs(Date.UTC(ay, am - 1, ad) - Date.UTC(by, bm - 1, bd)) / 86400000;
-}
-
-function looseTitle(title) {
-  return title
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/\s*[-|]\s*explore bastrop county\s*$/i, '')
-    .replace(/\s*\|\s*bastrop(?:\s*,?\s*tx)?\s*$/i, '')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function alreadyListed(event, listings) {
-  const title = looseTitle(event.title);
-  return listings.some((listing) => {
-    if (event.sourceUrl && listing.sourceUrl === event.sourceUrl && !event.sourceUrl.endsWith('/page/calendar')) return true;
-    if (!listing.title || !listing.date) return false;
-    return looseTitle(listing.title) === title && dayDistance(listing.date, event.date) <= 1;
-  });
 }
 
 function prettyDate(key) {
@@ -544,7 +509,9 @@ function prettyTime(value) {
 function markdown(event) {
   const zone = offset(event.date);
   const start = event.allDay ? `${event.date}T00:00:00${zone}` : `${event.date}T${event.startTime}:00${zone}`;
-  const end = !event.allDay && event.endTime ? `${event.date}T${event.endTime}:00${zone}` : '';
+  const end = event.endDate && event.endDate > event.date
+    ? `${event.endDate}T23:59:59${offset(event.endDate)}`
+    : (!event.allDay && event.endTime ? `${event.date}T${event.endTime}:00${zone}` : '');
   const when = event.allDay
     ? 'all day'
     : [prettyTime(event.startTime), prettyTime(event.endTime)].filter(Boolean).join('–');
@@ -840,17 +807,25 @@ async function alignSourceUrls(listings, catalog) {
 }
 
 const today = todayKey();
-const listings = await existingListings();
-const report = { ranAt: new Date().toISOString(), dryRun, today, added: [], skipped: [], outsideWindow: 0, errors: [] };
-const seen = new Set();
-const fresh = [];
-const catalog = [];
-
 const activeSources = sourceFilter ? sources.filter((source) => source.id === sourceFilter) : sources;
 if (sourceFilter && !activeSources.length) {
   console.error(`No source matches --source=${sourceFilter}`);
   process.exit(1);
 }
+
+const localListings = await existingListings();
+let listings = localListings;
+if (!noFetch) {
+  try {
+    listings = mergeListings(await remoteListings(root), localListings);
+  } catch (error) {
+    console.error(`Could not read origin/main for duplicate checks (${error instanceof Error ? error.message : error}). Comparing with this checkout only.`);
+  }
+}
+const report = { ranAt: new Date().toISOString(), dryRun, today, added: [], skipped: [], outsideWindow: 0, errors: [] };
+const seen = new Set();
+const fresh = [];
+const catalog = [];
 
 if (!imagesOnly) for (const source of activeSources) {
   try {
@@ -861,7 +836,11 @@ if (!imagesOnly) for (const source of activeSources) {
       const key = canFetchPhoto(event.sourceUrl) ? event.sourceUrl : `${looseTitle(event.title)}|${event.date}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      if (!inWindow(event.date, today)) {
+      if (hasPassed(event, today)) {
+        report.skipped.push({ title: event.title, date: event.date, reason: 'already passed' });
+        continue;
+      }
+      if (!inWindow(event, today)) {
         report.outsideWindow += 1;
         continue;
       }
@@ -869,7 +848,7 @@ if (!imagesOnly) for (const source of activeSources) {
         report.skipped.push({ title: event.title, date: event.date, reason: 'not a public event' });
         continue;
       }
-      if (alreadyListed(event, listings) || listings.some((item) => item.file === `${slug(event.title, event.date)}.md`)) {
+      if (alreadyListed(event, listings)) {
         report.skipped.push({ title: event.title, date: event.date, reason: 'already on the calendar' });
         continue;
       }
@@ -894,8 +873,11 @@ for (const event of ready.slice(maxNew)) {
 }
 
 if (!imagesOnly) for (const event of posting) {
-  let file = `${slug(event.title, event.date)}.md`;
-  if (listings.some((item) => item.file === file)) file = file.replace(/\.md$/, '-2.md');
+  const file = filenameFor(event, listings);
+  if (listings.some((item) => item.file === file)) {
+    report.skipped.push({ title: event.title, date: event.date, reason: 'already on the calendar' });
+    continue;
+  }
   const full = path.join(eventsDir, file);
   if (!dryRun && (event.remoteImage || canFetchPhoto(event.sourceUrl))) {
     try {
@@ -905,7 +887,17 @@ if (!imagesOnly) for (const event of posting) {
     }
   }
   if (!dryRun) await writeFile(full, markdown(event));
-  listings.push({ file, title: event.title.toLowerCase(), date: event.date, sourceUrl: event.sourceUrl, image: Boolean(event.image) });
+  const saved = {
+    file,
+    title: event.title,
+    date: event.date,
+    endDate: event.endDate || event.date,
+    venue: event.venue || '',
+    sourceUrl: event.sourceUrl,
+    image: Boolean(event.image),
+  };
+  listings.push(saved);
+  if (localListings !== listings) localListings.push(saved);
   report.added.push({ file, title: event.title, date: event.date, city: event.city, source: event.sourceLabel, image: event.image || '' });
   console.log(`${dryRun ? 'would post' : 'posted'}  ${event.date}  ${event.city}  ${event.title}${event.image ? '  (photo)' : ''}`);
 }
@@ -924,12 +916,25 @@ if (imagesOnly) {
   }
 }
 
-const relinked = await alignSourceUrls(listings, catalog);
-const photos = imagesOnly || !dryRun ? await attachMissingPhotos(listings) : 0;
+const relinked = await alignSourceUrls(localListings, catalog);
+const photos = imagesOnly || !dryRun ? await attachMissingPhotos(localListings) : 0;
 
 if (!dryRun) {
   await mkdir(logDir, { recursive: true });
   await writeFile(path.join(logDir, 'last-run.json'), JSON.stringify(report, null, 2));
+}
+
+if (!imagesOnly && !dryRun && !noPublish) {
+  try {
+    const inbox = await publishInbox({ root, today, added: report.added });
+    console.log(inbox.summary);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    console.error('Listings from this run are still in src/content/events/. No pull request was opened.');
+    process.exitCode = 1;
+  }
+} else if (!imagesOnly && dryRun) {
+  console.log('Dry run: no pull request opened.');
 }
 
 console.log(`\n${report.added.length} posted, ${relinked} links corrected, ${photos} photos saved, ${report.skipped.length} skipped, ${report.outsideWindow} outside the next ${horizonDays} days, ${report.errors.length} source errors${dryRun ? ' (dry run)' : ''}.`);
