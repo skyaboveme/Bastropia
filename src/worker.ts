@@ -1,5 +1,6 @@
 import { handle } from '@astrojs/cloudflare/handler';
 import { runAlertWatch } from './lib/alertWatch';
+import { refreshDailyVideo } from './lib/dailyVideo';
 
 const APEX_HOST = 'bastropia.com';
 const WWW_HOST = `www.${APEX_HOST}`;
@@ -45,6 +46,11 @@ export default {
     ctx.waitUntil(
       runAlertWatch().catch((error) => {
         console.error('alert watch failed', error);
+      }),
+    );
+    ctx.waitUntil(
+      refreshDailyVideo().catch((error) => {
+        console.error('daily video refresh failed', error);
       }),
     );
   },

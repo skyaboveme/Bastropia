@@ -11,10 +11,10 @@ export type DailyEdition = {
 
 /**
  * Public mp4 editions, newest first.
- * The homepage and the news page embed the latest upload from the Bastropia
- * YouTube channel. They do not play these files. The mp4s and posters stay in
- * public/media/ as source URLs for TikTok posting. Add a day by putting the
- * files in public/media/ and listing them here.
+ * The homepage and the news page embed the newest full edition from the
+ * Bastropia YouTube channel, skipping Shorts. They do not play these files.
+ * The mp4s and posters stay in public/media/ as source URLs for TikTok
+ * posting. Add a day by putting the files in public/media/ and listing them here.
  */
 export const dailyEditions: DailyEdition[] = [
   {

@@ -1,5 +1,6 @@
 ---
 import { tiktokProfile, youtubeChannel } from '../data/site';
+import { currentDailyVideo, playlistEmbed, videoEmbed } from '../lib/dailyVideo';
 import { offsiteAttrs } from '../lib/links';
 
 interface Props {
@@ -10,8 +11,14 @@ interface Props {
 const { level = 'h2' } = Astro.props;
 const Title = level;
 
-/** Uploads playlist for channel UCdxOffp6asSKV6aPNT1vkdA (UU + id without UC). */
-const embedSrc = 'https://www.youtube-nocookie.com/embed/videoseries?list=UUdxOffp6asSKV6aPNT1vkdA';
+/**
+ * KV holds the newest full edition, refreshed by the 15-minute cron and
+ * /api/daily-video. Empty KV refreshes once here. The playlist is only the
+ * last fallback, and the script replaces it when the API has an id.
+ */
+const video = await currentDailyVideo();
+const embedSrc = video ? videoEmbed(video.videoId) : playlistEmbed;
+const frameTitle = video?.title || 'Latest Bastropia Daily episode';
 const subscribeHref = `${youtubeChannel}?sub_confirmation=1`;
 const episodesHref = `${youtubeChannel}/videos`;
 ---
@@ -19,17 +26,33 @@ const episodesHref = `${youtubeChannel}/videos`;
 <section class="daily-feature" aria-labelledby="daily-heading">
   <p class="kicker">Latest episode</p>
   <Title id="daily-heading" class="daily-title">Bastropia Daily</Title>
-  <p class="dek">The newest upload from the Bastropia YouTube channel.</p>
+  <p class="dek">The newest full episode from the Bastropia YouTube channel.</p>
   <div class="daily-player">
     <iframe
+      data-daily-player
+      data-video={video?.videoId ?? ''}
       src={embedSrc}
-      title="Latest Bastropia Daily episode"
+      title={frameTitle}
       loading="lazy"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
       allowfullscreen
       referrerpolicy="strict-origin-when-cross-origin"
     ></iframe>
   </div>
+  <script is:inline>
+    document.querySelectorAll('[data-daily-player]').forEach((frame) => {
+      fetch('/api/daily-video', { headers: { accept: 'application/json' } })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data) => {
+          const id = data && data.videoId;
+          if (!/^[\w-]{11}$/.test(id) || id === frame.dataset.video) return;
+          frame.dataset.video = id;
+          if (data.title) frame.title = data.title;
+          frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?rel=0';
+        })
+        .catch(() => {});
+    });
+  </script>
   <div class="daily-actions">
     <a class="button" href={subscribeHref} {...offsiteAttrs(subscribeHref)}>Subscribe on YouTube</a>
     <a class="button" href={tiktokProfile} {...offsiteAttrs(tiktokProfile)}>Follow on TikTok</a>
