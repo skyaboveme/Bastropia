@@ -64,6 +64,7 @@ const hiddenStories = new Set(['/news/burn-ban-clear']);
 if (shownEvents.has('boo-bash')) hiddenStories.add('/news/boo-bash-halloween');
 /** Desk notes cover these wire items, so the outside link does not also run on the front page. */
 const coveredOnTheDesk = [
+  'acutronic-lands-100m-investment-eyes-larger-bastrop-factory-in-2027',
   'ev-chargers-and-e-bikes-1-47m-bastrop-carts-expansion-planned',
   'whataburger-to-make-its-bastrop-comeback-dec-8',
   'bastrop-isd-launches-tuition-free-program-to-certify-educators',
@@ -75,7 +76,7 @@ const coveredOnTheDesk = [
   'bee-infestation-stalls-repairs-at-historic-bastrop-courthouse',
   'boots-bling-and-bingo-bastrop-fundraiser-to-benefit-cats',
 ];
-const leadStory = '/news/elgin-voters-approve-citywide-mixed-drink-sales';
+const leadStory = '/news/acutronic-100m-investment-bastrop-jet-engine-factory';
 const coveredElsewhere = (href: string) => coveredOnTheDesk.some((slug) => href.includes(slug));
 let pageHeadlines = headlines.filter((story) => !hiddenStories.has(story.href) && !coveredElsewhere(story.href));
 if (today <= electionDay) {
@@ -161,7 +162,7 @@ const weekendDays = weekend
       <div class="col col-lead">
         {lead ? (
           <article class="story-lead">
-            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Elgin' : lead.label} · {formatMedium(lead.date)}</p>
+            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Bastrop' : lead.label} · {formatMedium(lead.date)}</p>
             <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
             {leadItem?.data.image && (
               <img class="lead-photo" src={leadItem.data.image} alt={leadItem.data.imageAlt ?? lead.title} width="1200" height="675" />
