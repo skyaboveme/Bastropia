@@ -1,0 +1,1770 @@
+{
+  "/brand/logo-footer.png": {
+    "width": 281,
+    "height": 300
+  },
+  "/brand/logo-footer.webp": {
+    "width": 281,
+    "height": 300
+  },
+  "/brand/logo-masthead.png": {
+    "width": 440,
+    "height": 470
+  },
+  "/brand/logo-masthead.webp": {
+    "width": 440,
+    "height": 470
+  },
+  "/brand/logo-trim.png": {
+    "width": 865,
+    "height": 923
+  },
+  "/brand/logo.png": {
+    "width": 1024,
+    "height": 1024
+  },
+  "/brand/og.png": {
+    "width": 1200,
+    "height": 630
+  },
+  "/images/banners/barefoot-flower-farms.png": {
+    "height": 419,
+    "width": 1024
+  },
+  "/images/banners/barron-homes.jpg": {
+    "height": 426,
+    "width": 1024
+  },
+  "/images/banners/community-unity-2026.png": {
+    "height": 469,
+    "width": 1024
+  },
+  "/images/banners/highline.jpg": {
+    "height": 438,
+    "width": 1024
+  },
+  "/images/banners/rosanky-baptist-church.jpg": {
+    "height": 438,
+    "width": 1024
+  },
+  "/images/banners/rosatex-landscaping.jpg": {
+    "height": 438,
+    "width": 1024
+  },
+  "/images/banners/string-prairie-heating.jpg": {
+    "height": 426,
+    "width": 1024
+  },
+  "/images/bastrop-aerial-640.webp": {
+    "width": 640,
+    "height": 426
+  },
+  "/images/bastrop-aerial.jpg": {
+    "height": 682,
+    "width": 1024
+  },
+  "/images/bastrop-aerial.webp": {
+    "width": 1024,
+    "height": 682
+  },
+  "/images/businesses/602/burger.jpg": {
+    "height": 960,
+    "width": 960
+  },
+  "/images/businesses/602/chicken.jpg": {
+    "height": 960,
+    "width": 960
+  },
+  "/images/businesses/602/hero.jpg": {
+    "height": 1200,
+    "width": 1920
+  },
+  "/images/businesses/602/history.jpg": {
+    "height": 768,
+    "width": 768
+  },
+  "/images/businesses/602/logo-mark.png": {
+    "width": 252,
+    "height": 240
+  },
+  "/images/businesses/602/shrimp.jpg": {
+    "height": 960,
+    "width": 960
+  },
+  "/images/businesses/barefoot/bouquet.jpg": {
+    "height": 1600,
+    "width": 1200
+  },
+  "/images/businesses/barefoot/logo.png": {
+    "width": 800,
+    "height": 360
+  },
+  "/images/businesses/barefoot/nursery.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
+  "/images/businesses/barefoot/og.jpg": {
+    "height": 630,
+    "width": 1200
+  },
+  "/images/businesses/barefoot/rows.jpg": {
+    "height": 1249,
+    "width": 1000
+  },
+  "/images/businesses/barefoot/shop.jpg": {
+    "height": 1600,
+    "width": 1200
+  },
+  "/images/businesses/barefoot/wedding.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/businesses/barron/build.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/businesses/barron/hero.jpg": {
+    "height": 1573,
+    "width": 1200
+  },
+  "/images/businesses/barron/house.jpg": {
+    "height": 1066,
+    "width": 1600
+  },
+  "/images/businesses/barron/kitchen.jpg": {
+    "height": 1044,
+    "width": 1600
+  },
+  "/images/businesses/barron/logo.png": {
+    "width": 622,
+    "height": 148
+  },
+  "/images/businesses/barron/pool.jpg": {
+    "height": 1069,
+    "width": 1600
+  },
+  "/images/businesses/lost-pines/logo.png": {
+    "width": 588,
+    "height": 200
+  },
+  "/images/businesses/lost-pines/og.jpg": {
+    "height": 630,
+    "width": 1200
+  },
+  "/images/businesses/lost-pines/showroom.jpg": {
+    "height": 512,
+    "width": 1600
+  },
+  "/images/businesses/rosa-tex/lawn.jpg": {
+    "height": 640,
+    "width": 640
+  },
+  "/images/businesses/rosa-tex/logo.png": {
+    "width": 459,
+    "height": 285
+  },
+  "/images/businesses/rosa-tex/mower.jpg": {
+    "height": 1024,
+    "width": 1536
+  },
+  "/images/businesses/rosa-tex/og.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/businesses/string-prairie/attic.jpg": {
+    "height": 1600,
+    "width": 1200
+  },
+  "/images/businesses/string-prairie/og.jpg": {
+    "height": 630,
+    "width": 1200
+  },
+  "/images/businesses/string-prairie/repair.jpg": {
+    "height": 1600,
+    "width": 1200
+  },
+  "/images/businesses/string-prairie/team.jpg": {
+    "height": 1600,
+    "width": 1200
+  },
+  "/images/businesses/string-prairie/van.jpg": {
+    "height": 1600,
+    "width": 1200
+  },
+  "/images/events/20th-annual-heroes-and-hot-rod-s-veterans-day-car-show-2026-11-14.jpg": {
+    "height": 722,
+    "width": 1200
+  },
+  "/images/events/2nd-annual-rhythm-and-vines-benefit-concert-2026-2026-11-14.jpg": {
+    "height": 700,
+    "width": 1200
+  },
+  "/images/events/6th-annual-dia-de-los-muertos-festival-2026-2026-11-07.jpg": {
+    "height": 676,
+    "width": 1200
+  },
+  "/images/events/adult-co-ed-kickball-league-with-elgin-parks-and-rec-2026-10-29.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/adult-co-ed-kickball-league-with-elgin-parks-and-rec-2026-11-05.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/adult-co-ed-kickball-league-with-elgin-parks-and-rec-2026-11-12.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/adult-co-ed-kickball-league-with-elgin-parks-and-rec-2026-11-19.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/adult-craft-2026-11-06.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/adult-craft-2026-12-04.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/adult-craft-2027-01-01.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/afternoon-book-club-abc-2026-11-10.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/afternoon-book-club-abc-2026-12-08.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/all-day-games-2026-12-25.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/all-day-games-2027-01-22.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/autumn-market-festival-2026-2026-11-21.jpg": {
+    "height": 746,
+    "width": 1200
+  },
+  "/images/events/baron-s-birthday-bash-2026-2026-11-21.jpg": {
+    "height": 674,
+    "width": 1200
+  },
+  "/images/events/bastrop-art-fest-2026-2026-11-07.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/bastrop-art-fest-at-the-museum-2026-11-07.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/bastrop-comedy-club-2026-2026-11-07.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/bastrop-comedy-club-2026-2026-11-14.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/bastrop-county-film-industry-meetup-series-2026-2026-12-16.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/bastrop-farm-street-opry-2026-2026-11-05.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/bastrop-farm-street-opry-2026-2026-12-03.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/bastrop-holiday-historic-homes-tour-2026-2026-12-12.jpg": {
+    "height": 676,
+    "width": 1200
+  },
+  "/images/events/bastrop-river-of-lights-2026-11-27.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/bastrop-s-annual-tree-lighting-2026-2026-11-27.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/bastrop-tree-lighting-2026-11-27.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/bastrop-tx-river-of-lights-2026-2026-11-27.jpg": {
+    "height": 676,
+    "width": 1200
+  },
+  "/images/events/bebe-bilingue-2026-10-28.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/bebe-bilingue-2026-11-04.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/bebe-bilingue-2026-11-18.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/bebe-bilingue-2026-11-25.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/bebe-bilingue-2026-12-02.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/bebe-bilingue-2026-12-09.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/bebe-bilingue-2026-12-16.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/bebe-bilingue-2026-12-23.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/bebe-bilingue-2026-12-30.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/beyond-existence-music-festival-2026-2026-11-06.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/big-tex-gun-show-2026-2026-11-07.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/bipoc-book-club-2026-11-14.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/bipoc-book-club-2026-12-12.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/caroling-tour-on-main-2026-12-19.jpg": {
+    "height": 900,
+    "width": 1200
+  },
+  "/images/events/city-of-bastrop-community-unity-2026-11-15.jpg": {
+    "height": 608,
+    "width": 940
+  },
+  "/images/events/colorado-river-run-2026-2026-11-27.jpg": {
+    "height": 676,
+    "width": 1200
+  },
+  "/images/events/cooking-club-2026-11-13.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/cooking-club-2026-12-11.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-09.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-11.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-13.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-15.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-17.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-19.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-21.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/core-body-works-with-regina-at-the-elgin-recreation-ce-2026-11-23.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/cowboy-yeti-2027-2027-01-23.jpg": {
+    "height": 778,
+    "width": 1200
+  },
+  "/images/events/dia-de-los-muertos-at-epl-2026-11-07.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/dia-de-los-muertos-parade-and-festival-2026-11-07.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/do-it-for-dale-rallysprint-2026-2026-12-12.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/fame-day-at-the-museum-holiday-crafts-2026-12-04.jpg": {
+    "height": 831,
+    "width": 620
+  },
+  "/images/events/fame-days-gratitude-2026-11-06.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/family-movie-night-2026-11-20.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/family-movie-night-2026-12-18.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/family-nature-quest-2026-2026-11-07.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/family-nature-quest-2026-2026-11-14.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/farm-street-opry-s-a-country-christmas-2026-2026-12-03.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/fiber-arts-and-friends-2026-10-29.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/fiber-arts-and-friends-2026-11-05.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fiber-arts-and-friends-2026-11-12.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fiber-arts-and-friends-2026-11-19.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fiber-arts-and-friends-2026-12-03.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fiber-arts-and-friends-2026-12-10.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fiber-arts-and-friends-2026-12-17.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fiber-arts-and-friends-2026-12-24.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-10-28.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-10-30.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-11-04.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-11-06.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-11-11.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-11-13.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-11-18.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/fit-and-strong-with-melodie-at-the-elgin-recreation-ce-2026-11-20.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/freezerburn-2027-whimsymaximalist-mayhem-2027-01-15.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/game-day-2026-11-12.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/game-day-2026-12-10.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/heroes-and-horseshoes-wild-west-masquerade-2026-10-30.jpg": {
+    "height": 661,
+    "width": 1200
+  },
+  "/images/events/heroes-hot-rods-car-show-2026-11-14.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/heroes-hot-rods-cruise-in-2026-11-13.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/highland-games-at-sherwood-celtic-yuletide-festival-de-2026-12-12.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/historic-homes-tour-2026-12-12.jpg": {
+    "height": 1200,
+    "width": 900
+  },
+  "/images/events/holiday-traditions-from-around-the-world-2026-11-28.jpg": {
+    "height": 820,
+    "width": 616
+  },
+  "/images/events/hypothermia-safety-training-and-more-2026-12-04.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-10-29.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-11-05.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-11-12.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-11-19.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-11-26.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-12-03.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-12-10.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2026-12-17.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2027-01-07.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2027-01-14.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/introduction-to-strength-and-conditions-with-deshay-fi-2027-01-21.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/keepin-it-real-recovery-2026-10-28.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/keepin-it-real-recovery-2026-11-04.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/keepin-it-real-recovery-2026-11-18.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/keepin-it-real-recovery-2026-11-25.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/keepin-it-real-recovery-2026-12-02.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/keepin-it-real-recovery-2026-12-09.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/keepin-it-real-recovery-2026-12-16.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/keepin-it-real-recovery-2026-12-23.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-10-29.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-03.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-05.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-10.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-12.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-17.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-19.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-24.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/let-your-yoga-dance-with-krista-at-elgin-recreation-ce-2026-11-26.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/library-magic-the-gathering-2026-11-07.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/library-magic-the-gathering-2026-12-05.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/library-magic-the-gathering-2027-01-02.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-hikes-for-birding-2026-series-2026-11-13.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/little-learners-2026-10-30.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/little-learners-2026-11-06.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-learners-2026-11-13.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-learners-2026-11-20.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-learners-2026-12-04.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-learners-2026-12-11.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-learners-2026-12-18.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-learners-2026-12-25.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/little-sits-for-birding-2026-series-2026-11-13.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/lost-pines-christmas-lighted-parade-2026-2026-12-12.jpg": {
+    "height": 752,
+    "width": 1200
+  },
+  "/images/events/lost-pines-christmas-parade-2026-12-12.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/lost-pines-endurance-fest-2027-2027-01-16.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/lost-pines-wildlife-habitat-day-2026-2026-11-07.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/lpac-teen-art-club-2026-11-15.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/mahjong-2026-11-21.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/mcdade-s-colonial-supper-2026-2026-11-19.jpg": {
+    "height": 674,
+    "width": 1200
+  },
+  "/images/events/meet-me-at-the-depot-2026-27-2026-11-07.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/meet-me-at-the-depot-2026-27-2027-01-02.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/merry-on-main-2026-12-12.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/merry-on-main-2026-2026-12-12.jpg": {
+    "height": 676,
+    "width": 1200
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-11-02.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-11-09.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-11-16.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-11-23.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-11-30.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-12-07.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-12-14.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-12-21.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/mind-body-spirit-and-meditation-with-patti-at-elgin-re-2026-12-28.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/musical-annie-2026-12-04.jpg": {
+    "height": 746,
+    "width": 1200
+  },
+  "/images/events/musical-come-from-away-2027-01-22.jpg": {
+    "height": 674,
+    "width": 1200
+  },
+  "/images/events/nocturn-market-2026-2026-11-14.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/nurture-your-mind-2026-11-03.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/nurture-your-mind-2026-11-10.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/nurture-your-mind-2026-11-17.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/nurture-your-mind-2026-11-24.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/nurture-your-mind-2026-12-01.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/nurture-your-mind-2026-12-08.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/nurture-your-mind-2026-12-15.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/nurture-your-mind-2026-12-22.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/nurture-your-mind-2026-12-29.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/peque-y-yo-2026-10-31.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/prime-timer-bingo-sponsored-by-meals-on-wheels-2026-11-09.jpg": {
+    "height": 1006,
+    "width": 1200
+  },
+  "/images/events/prime-timer-craft-dried-flower-ornaments-2026-11-16.jpg": {
+    "height": 788,
+    "width": 940
+  },
+  "/images/events/prime-timer-field-trip-friendsgiving-at-headlong-farm-2026-11-23.jpg": {
+    "height": 788,
+    "width": 940
+  },
+  "/images/events/prime-timer-first-monday-bingo-sponsored-by-e-pard-2026-12-07-2.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/prime-timer-first-monday-bingo-sponsored-by-e-pard-2026-12-07.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/prime-timer-fourth-monday-wishes-wisdom-and-welcome-20-2026-12-28.jpg": {
+    "height": 1006,
+    "width": 1200
+  },
+  "/images/events/prime-timer-second-monday-wreathmaking-at-evergreen-fa-2026-12-14.jpg": {
+    "height": 1006,
+    "width": 1200
+  },
+  "/images/events/prime-timer-skills-sugar-skull-embroidery-with-sylvia-2026-11-02.jpg": {
+    "height": 1006,
+    "width": 1200
+  },
+  "/images/events/prime-timer-social-cards-in-the-community-2026-11-30.jpg": {
+    "height": 788,
+    "width": 940
+  },
+  "/images/events/rendezvous-gala-2026-12-11.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-11-03.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-11-10.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-11-17.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-11-24.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-12-01.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-12-08.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-12-15.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2026-12-22.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2027-01-05.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2027-01-12.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/restorative-yoga-with-patti-at-elgin-recreation-center-2027-01-19.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/ridgeway-baptist-church-food-and-clothing-pantry-2026-11-11.jpg": {
+    "height": 848,
+    "width": 1200
+  },
+  "/images/events/rosanky-pinewood-derby-2026-11-15.jpg": {
+    "height": 672,
+    "width": 1200
+  },
+  "/images/events/s-t-e-a-m-2026-11-05.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/s-t-e-a-m-2026-11-19.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/s-t-e-a-m-2026-12-03.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/s-t-e-a-m-2026-12-17.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/scream-hollow-wicked-halloween-thrills-2026-2026-11-06.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/scream-hollow-wicked-halloween-thrills-2026-2026-11-13.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/senior-game-day-2026-10-28.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/senior-game-day-2026-11-04.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/senior-game-day-2026-11-18.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/senior-game-day-2026-11-25.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/senior-game-day-2026-12-02.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/senior-game-day-2026-12-09.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/senior-game-day-2026-12-16.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/senior-game-day-2026-12-23.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/senior-game-day-2026-12-30.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/sensory-storytime-2026-10-31.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/sensory-storytime-2026-11-07.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/sensory-storytime-2026-11-14.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/sensory-storytime-2026-11-21.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/sensory-storytime-2026-12-05.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/sensory-storytime-2026-12-12.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/sensory-storytime-2026-12-19.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/sensory-storytime-2026-12-26.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/serve-day-2026-11-14.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/sherwood-celtic-yuletide-festival-2026-12-11.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/sherwood-celtic-yuletide-festival-2026-2026-12-11.jpg": {
+    "height": 746,
+    "width": 1200
+  },
+  "/images/events/shop-small-saturday-2026-11-28.jpg": {
+    "height": 473,
+    "width": 439
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-10-30.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-11-06.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-11-13.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-11-20.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-11-27.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-12-04.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-12-11.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-12-18.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/slow-flow-with-melodie-at-elgin-recreation-center-2026-12-25.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/smithville-garden-club-tour-of-homes-2026-2026-11-14.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/smithville-turkey-trot-2026-2026-11-28.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/smithville-tx-airing-of-the-quilts-2026-2026-11-14.jpg": {
+    "height": 748,
+    "width": 1200
+  },
+  "/images/events/spooky-trivia-night-2026-10-30.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/starlight-and-spurs-a-texas-new-year-s-eve-gala-2026-12-31.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/stars-and-s-mores-night-2026-with-elgin-parks-and-recr-2026-11-14.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-11-03.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-11-10.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-11-17.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-11-24.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-12-01.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-12-08.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-12-15.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-12-22.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/stretch-yourself-healthy-with-kelly-and-barbara-at-elg-2026-12-29.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-10-29.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-11-05.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-11-12.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-11-19.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-11-26.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-12-03.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-12-10.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-12-17.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-chuen-with-boaz-at-elgin-recreation-center-2026-12-24.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-10-31.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-11-07.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-11-14.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-11-21.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-11-28.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-12-05.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-12-12.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-12-19.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/tai-chi-for-martial-arts-with-boaz-at-elgin-recreation-2026-12-26.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/taiki-nulight-in-paige-2026-11-06.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/teen-anime-club-2026-11-27.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/teen-anime-club-2026-12-25.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/teen-anime-club-2027-01-22.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/teen-d-and-d-2026-11-14.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/teen-d-and-d-2026-12-12.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/teen-takeover-2026-11-13.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/teen-takeover-2026-12-11.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/texas-viking-festival-and-skaldic-althing-2026-2026-12-12.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/texmas-trail-race-2026-2026-12-12.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/the-barons-birthday-bash-2026-11-21.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/the-grand-gathering-of-hynafol-2026-2026-11-08.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/the-source-mobile-women-s-clinic-at-elgin-recreation-c-2026-11-02.jpg": {
+    "height": 927,
+    "width": 1200
+  },
+  "/images/events/the-source-mobile-women-s-clinic-at-elgin-recreation-c-2026-12-02.jpg": {
+    "height": 927,
+    "width": 1200
+  },
+  "/images/events/thriller-book-club-at-the-owl-2026-10-31.jpg": {
+    "height": 675,
+    "width": 1200
+  },
+  "/images/events/tordenkor-at-texas-viking-festival-2026-12-19.jpg": {
+    "height": 600,
+    "width": 1200
+  },
+  "/images/events/tween-art-club-2026-11-24.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/tween-art-club-2026-12-22.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/tween-invasion-2026-11-06.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/tween-invasion-2026-12-04.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-10-28.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-11-04.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-11-11.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-11-18.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-11-25.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-12-02.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-12-09.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-12-16.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/vinyasa-slow-flow-yoga-at-elgin-recreation-center-2026-12-23.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/walkin-the-line-a-johnny-cash-tribute-2026-11-06.jpg": {
+    "height": 750,
+    "width": 1200
+  },
+  "/images/events/wassail-fest-2026-11-28.jpg": {
+    "height": 800,
+    "width": 1200
+  },
+  "/images/events/wassail-fest-2026-2026-11-28.jpg": {
+    "height": 794,
+    "width": 1200
+  },
+  "/images/events/we-are-blood-community-blood-drive-at-elgin-recreation-2026-12-02.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/winter-wonderland-photos-with-santa-2026-2026-12-12.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/writing-for-mental-health-2026-10-31.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/writing-for-mental-health-2026-11-07.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/writing-for-mental-health-2026-11-14.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/writing-for-mental-health-2026-11-21.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/writing-for-mental-health-2026-12-05.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/writing-for-mental-health-2026-12-12.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/writing-for-mental-health-2026-12-19.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/you-matter-2026-10-29.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/events/you-matter-2026-11-05.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/you-matter-2026-11-12.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/you-matter-2026-11-19.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/you-matter-2026-12-03.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/you-matter-2026-12-10.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/you-matter-2026-12-17.jpg": {
+    "height": 1080,
+    "width": 1080
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-11-02.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-11-09.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-11-16.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-11-23.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-11-30.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-12-07.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-12-14.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-12-21.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/events/zumba-with-juanda-at-elgin-recreation-center-2026-12-28.jpg": {
+    "height": 1200,
+    "width": 927
+  },
+  "/images/header/bastrop-main.webp": {
+    "width": 1024,
+    "height": 341
+  },
+  "/images/header/default.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/development.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/directory.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/eats.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/government.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/groups.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/lost-pines.webp": {
+    "width": 1024,
+    "height": 341
+  },
+  "/images/header/main-night.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/news.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/parade.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/smithville.webp": {
+    "width": 1024,
+    "height": 341
+  },
+  "/images/header/stadium.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/videos.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/weather-rain.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/weather-rainbow.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/weather-storm.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/header/weather-sunny.webp": {
+    "width": 1024,
+    "height": 434
+  },
+  "/images/news/290-toll-extension-bastrop-county-whats-next.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/acutronic-100m-investment-bastrop-jet-engine-factory.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/bastrop-bears-playoff-run-ends-huntsville-2026.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
+  "/images/news/bastrop-colorado-river-streambank-project-comments-nov-24.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
+  "/images/news/bastrop-county-commissioners-court-nov-23-2026-agenda-preview.jpg": {
+    "height": 944,
+    "width": 1600
+  },
+  "/images/news/bastrop-county-esd-3-ambulance-first-month-1023-calls.jpg": {
+    "height": 1022,
+    "width": 1600
+  },
+  "/images/news/bastrop-county-weekend-nov-20-22-2026.jpg": {
+    "height": 854,
+    "width": 1280
+  },
+  "/images/news/bastrop-courthouse-roof-repairs-resume-bee-infestation.jpg": {
+    "height": 944,
+    "width": 1600
+  },
+  "/images/news/bastrop-gas-plant-tceq-meeting.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/bastrop-isd-c-rating-2026.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/bastrop-isd-rejects-tax-rate-hike.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/bastrop-live-music-pilot-downtown-grants.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
+  "/images/news/bastrop-old-iron-bridge-reopens-dec-3.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/bastrop-west-hospital-annexation.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/bastropia-daily-2026-11-18.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
+  "/images/news/bastropia-daily-2026-11-19.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/bastropia-daily-2026-11-20.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/bastropia-daily-2026-11-21.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/boo-bash-halloween.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/buffalo-wild-wings-sendero.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/burleson-crossing-east-phase-2.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/burlington-burleson-crossing.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/burn-ban-clear.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/care-a-van-lost-pines.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/cedar-creek-data-center-gas-plant-neighbors-letter.jpg": {
+    "height": 900,
+    "width": 1600
+  },
+  "/images/news/christmas-tree-farms-near-bastrop-elgin-2026.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/commissioners-court-november-9.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/county-alcohol-sales-measures-pass.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/david-glass-precinct-4.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/dock-jackson-county-judge.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/election-day-tuesday.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/elgin-empty-bowl-2026.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/elgin-high-stabbing.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/elgin-isd-superintendent-dui-board-delay.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/elgin-voters-approve-citywide-mixed-drink-sales.jpg": {
+    "height": 945,
+    "width": 1600
+  },
+  "/images/news/how-listings-work.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/kitty-bingo-bastrop-cats-nov-21-2026.jpg": {
+    "height": 767,
+    "width": 1100
+  },
+  "/images/news/operation-turkey-elgin-3200-thanksgiving-meals-2026.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
+  "/images/news/spacex-bastrop-solar-cell-deal-singulus-road-talks.jpg": {
+    "height": 540,
+    "width": 960
+  },
+  "/images/news/sugar-shack-closes.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/taco-casa-chestnut.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026.jpg": {
+    "height": 944,
+    "width": 1600
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/baron-monument.jpg": {
+    "height": 1400,
+    "width": 933
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/courthouse.jpg": {
+    "height": 944,
+    "width": 1600
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/elgin-1916.jpg": {
+    "height": 364,
+    "width": 562
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/jail.jpg": {
+    "height": 1171,
+    "width": 1600
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/map-1887.jpg": {
+    "height": 1169,
+    "width": 1600
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/postcard-lost-pines.jpg": {
+    "height": 521,
+    "width": 831
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/postcard-refectory.jpg": {
+    "height": 527,
+    "width": 833
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/smithville-main.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/smithville-railroad-museum.jpg": {
+    "height": 1066,
+    "width": 1600
+  },
+  "/images/news/warn-central-texas.jpg": {
+    "height": 1200,
+    "width": 1200
+  },
+  "/images/news/whataburger-bastrop-reopens-dec-8-sh-71.jpg": {
+    "height": 800,
+    "width": 1600
+  },
+  "/images/social/acutronic-100m-investment-bastrop-jet-engine-factory-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/bastrop-bears-playoff-run-ends-huntsville-2026-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/bastrop-colorado-river-streambank-project-comments-nov-24-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/bastrop-live-music-pilot-downtown-grants-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/bastrop-old-iron-bridge-reopens-dec-3-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/cedar-creek-data-center-gas-plant-neighbors-letter-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/christmas-tree-farms-near-bastrop-elgin-2026-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/operation-turkey-elgin-3200-thanksgiving-meals-2026-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/this-week-in-bastrop-county-history-nov-20-26-2026-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  }
+}

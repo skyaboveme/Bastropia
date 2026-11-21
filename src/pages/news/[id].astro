@@ -3,7 +3,10 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MoreFromBastrop from '../../components/MoreFromBastrop.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
+import PlaceName from '../../components/PlaceName.astro';
+import { authorBySlug } from '../../data/authors';
 import { filterEvents } from '../../lib/events';
+import { imageSize } from '../../lib/imageSize';
 import { relatedStories } from '../../lib/relatedStories';
 import { newsNode } from '../../lib/schema';
 import { formatLong } from '../../lib/time';
@@ -28,6 +31,9 @@ const related = relatedStories(
   })),
 );
 const upcoming = filterEvents(events, { when: 'upcoming' }).slice(0, 3);
+const photo = story.data.image ? imageSize(story.data.image) : undefined;
+const writer = authorBySlug(story.data.author);
+const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
 ---
 
 <BaseLayout
@@ -37,19 +43,43 @@ const upcoming = filterEvents(events, { when: 'upcoming' }).slice(0, 3);
   imageAlt={story.data.imageAlt}
   pageType="NewsArticle"
   published={story.data.pubDate}
+  modified={story.data.updated ?? story.data.pubDate}
+  authorPath={writer ? `/authors/${writer.slug}` : '/staff'}
   section={story.data.place}
-  extra={[newsNode(story)]}
+  extra={[newsNode(story, photo)]}
 >
   <article class="wrap">
     <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
-      <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
+      <p class="kicker"><PlaceName name={story.data.place} /> · {formatLong(story.data.pubDate)}</p>
       <h1>{story.data.title}</h1>
-      <p class="meta">By the <a href="/about">Bastropia desk</a></p>
+      <p class="meta">
+        {writer ? (
+          <>By <a href={`/authors/${writer.slug}`}>{writer.name}</a></>
+        ) : (
+          <>By the <a href="/staff">Bastropia desk</a></>
+        )}
+        {story.data.updated && <> · Updated {formatLong(story.data.updated)}</>}
+      </p>
       <p class="lede">{story.data.description}</p>
     </header>
+    {facts.length > 0 && (
+      <aside class="key-facts" aria-label="Key facts">
+        <h2>Key facts</h2>
+        <ul>
+          {facts.map((fact) => <li>{fact}</li>)}
+        </ul>
+      </aside>
+    )}
     {story.data.image && (
       <figure class="story-photo">
-        <img class="event-photo" src={story.data.image} alt={story.data.imageAlt ?? story.data.title} />
+        <img
+          class="event-photo"
+          src={story.data.image}
+          alt={story.data.imageAlt ?? story.data.title}
+          width={photo?.width}
+          height={photo?.height}
+          decoding="async"
+        />
         {story.data.imageCredit && <figcaption class="photo-credit">{story.data.imageCredit}</figcaption>}
       </figure>
     )}

@@ -12,6 +12,7 @@ import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { getExternalNews } from '../lib/externalNews';
 import { offsiteAttrs } from '../lib/links';
 import { phoneHref } from '../lib/format';
+import { linkList } from '../lib/schema';
 import { eventKey, formatMedium, labelFromKey } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
 import { activeUpgrades, resolveTier } from '../lib/intake';
@@ -65,6 +66,13 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
   <BaseLayout
     title={`Things to do in ${town.name} this week`}
     description={`${town.lede} Bastrop County, Texas.`}
+    pageType="CollectionPage"
+    extra={[
+      linkList(`This week in ${town.name}`, [
+        ...weekEvents.map((event) => ({ name: event.data.title, path: `/events/${event.id}` })),
+        ...localNews.map((story) => ({ name: story.data.title, path: `/news/${story.id}` })),
+      ]),
+    ]}
   >
     <PageHead kicker="Town" title={`Things to do in ${town.name} this week`} lede={town.lede} />
     <div class="wrap">
