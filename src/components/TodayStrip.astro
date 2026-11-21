@@ -1,0 +1,130 @@
+---
+import BurnMark from './BurnMark.astro';
+import { burnBan, burnStatus } from '../data/burnBan';
+import { youtubeChannel } from '../data/site';
+import { thumbnail, watchUrl } from '../data/videos';
+import { getCollection } from 'astro:content';
+import { currentDailyVideo } from '../lib/dailyVideo';
+import { capOrganizer, filterEvents } from '../lib/events';
+import { offsiteAttrs } from '../lib/links';
+import { eventKey, labelFromKey, whenLabel } from '../lib/time';
+import { getForecast, weatherLabel } from '../lib/weather';
+
+const now = new Date();
+const today = eventKey(now);
+const todayLabel = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/Chicago',
+  weekday: 'long',
+  month: 'short',
+  day: 'numeric',
+}).format(now);
+const checkedLabel = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/Chicago',
+  month: 'long',
+  day: 'numeric',
+}).format(new Date(`${burnBan.checked}T18:00:00Z`));
+
+const [events, forecast, video] = await Promise.all([
+  getCollection('events'),
+  getForecast('Bastrop'),
+  currentDailyVideo(),
+]);
+
+const todayEvents = capOrganizer(filterEvents(events, { when: 'today' }, now)).slice(0, 3);
+const nextEvents = filterEvents(events, { when: 'upcoming' }, now)
+  .filter((event) => eventKey(event.data.start) > today)
+  .slice(0, 3);
+const shownEvents = todayEvents.length ? todayEvents : nextEvents;
+const eventsAreToday = todayEvents.length > 0;
+const day = forecast?.daily.find((item) => item.date === today) ?? forecast?.daily[0];
+const conditions = forecast ? weatherLabel(forecast.code) : '';
+const clipHref = video ? watchUrl(video.videoId) : `${youtubeChannel}/videos`;
+const clipTitle = video?.title || 'Newest full episode';
+const clipWhen = (() => {
+  const published = Date.parse(video?.published ?? '');
+  if (!Number.isFinite(published)) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Chicago',
+    month: 'short',
+    day: 'numeric',
+  }).format(published);
+})();
+const weatherLabelText = forecast
+  ? `${forecast.temp} degrees, ${conditions}${day ? `, high ${day.high}, low ${day.low}` : ''}, Bastrop, Texas`
+  : 'Bastrop weather forecast';
+---
+
+<section class="today-strip" aria-labelledby="today-heading">
+  <p class="col-title" id="today-heading">Today in Bastrop <span class="today-date">{todayLabel}</span></p>
+  <div class="today-row">
+    <a
+      class:list={['today-card', 'today-burn', burnBan.inEffect ? 'is-stop' : 'is-ok']}
+      href="/burn-ban"
+      aria-label={`${burnStatus} in Bastrop County. Checked ${checkedLabel}.`}
+    >
+      <p class="kicker">Burn ban</p>
+      <strong class:list={['burn-word', burnBan.inEffect ? 'is-stop' : 'is-ok']}>
+        <BurnMark banned={burnBan.inEffect} />
+        <span>{burnStatus}</span>
+      </strong>
+      <span class="meta">Checked {checkedLabel}</span>
+    </a>
+
+    <a class="today-card today-wx" href="/weather?town=Bastrop" aria-label={weatherLabelText}>
+      <p class="kicker">Weather · Bastrop</p>
+      {forecast ? (
+        <>
+          <strong>{forecast.temp}°</strong>
+          <span>{conditions}</span>
+          {day && <span class="meta">High {day.high}° · Low {day.low}°</span>}
+        </>
+      ) : (
+        <>
+          <strong>Forecast</strong>
+          <span class="meta">Unavailable right now</span>
+        </>
+      )}
+    </a>
+
+    <article class="today-card today-events-card" aria-label={eventsAreToday ? "Today's events" : 'Upcoming events'}>
+      <p class="kicker">{eventsAreToday ? 'Today' : 'Next up'}</p>
+      {shownEvents.length ? (
+        <ul class="today-events">
+          {shownEvents.map((event) => (
+            <li>
+              <a href={`/events/${event.id}`}>
+                <span class="when">
+                  {eventsAreToday
+                    ? whenLabel(event.data.schedule, event.data.start, event.data.end)
+                    : labelFromKey(eventKey(event.data.start))}
+                </span>
+                <strong>{event.data.title}</strong>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="meta">Nothing is on the calendar yet.</p>
+      )}
+      <a class="today-more" href="/events">{eventsAreToday ? 'All events' : 'Events calendar'}</a>
+    </article>
+
+    <a class="today-card today-video" href={clipHref} {...offsiteAttrs(clipHref)}>
+      {video && (
+        <img
+          src={thumbnail(video.videoId, 'hqdefault')}
+          alt=""
+          width="320"
+          height="180"
+          loading="lazy"
+          decoding="async"
+        />
+      )}
+      <span class="today-copy">
+        <p class="kicker">Bastropia Daily</p>
+        <strong>{clipTitle}</strong>
+        {clipWhen && <span class="meta">{clipWhen}</span>}
+      </span>
+    </a>
+  </div>
+</section>

@@ -167,13 +167,57 @@ type NwsPeriod = {
   dewpoint?: { value?: number | null };
 };
 
+const NWS_CACHE_SECONDS = 600;
+
+type EdgeCache = {
+  match(request: Request): Promise<Response | undefined>;
+  put(request: Request, response: Response): Promise<void>;
+};
+
+/** Worker Cache API. Absent in Node, and optional when the binding throws. */
+function edgeCache(): EdgeCache | null {
+  try {
+    const storage = (globalThis as { caches?: { default?: EdgeCache } }).caches;
+    return storage?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function nwsJson(url: string) {
+  const cache = edgeCache();
+  const request = new Request(url, { method: 'GET' });
+  if (cache) {
+    try {
+      const hit = await cache.match(request);
+      if (hit) return hit.json();
+    } catch {
+      /* A cold cache still falls through to the network. */
+    }
+  }
+
   const response = await fetch(url, {
     headers: nwsHeaders,
     signal: AbortSignal.timeout(8000),
   });
   if (!response.ok) throw new Error(`NWS ${response.status}`);
-  return response.json();
+  const data = await response.json();
+  if (cache) {
+    try {
+      await cache.put(
+        request,
+        new Response(JSON.stringify(data), {
+          headers: {
+            'content-type': 'application/json',
+            'cache-control': `public, max-age=${NWS_CACHE_SECONDS}`,
+          },
+        }),
+      );
+    } catch {
+      /* The in-memory forecast cache still covers this isolate. */
+    }
+  }
+  return data;
 }
 
 async function forecastFromNws(town: TownName): Promise<Forecast> {

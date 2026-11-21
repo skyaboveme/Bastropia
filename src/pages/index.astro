@@ -7,6 +7,7 @@ import EventCard from '../components/EventCard.astro';
 import ExternalNews from '../components/ExternalNews.astro';
 import CountyFeeds from '../components/CountyFeeds.astro';
 import DailyFeature from '../components/DailyFeature.astro';
+import TodayStrip from '../components/TodayStrip.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import SponsorBanner from '../components/SponsorBanner.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
@@ -139,6 +140,7 @@ const weekendDays = weekend
   ]}
 >
   <div class="wrap home-stack">
+    <TodayStrip />
     <section class="front" aria-label="Front page">
       <div class="col col-lead">
         {lead ? (

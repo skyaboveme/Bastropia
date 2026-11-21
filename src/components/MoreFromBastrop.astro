@@ -1,0 +1,51 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import EventCard from './EventCard.astro';
+import type { StoryRef } from '../lib/relatedStories';
+import { formatMedium } from '../lib/time';
+
+interface Props {
+  stories: StoryRef[];
+  events: CollectionEntry<'events'>[];
+}
+
+const { stories, events } = Astro.props;
+---
+
+<section class="more-from" aria-labelledby="more-from-heading">
+  <div class="section-head">
+    <h2 id="more-from-heading">More from Bastrop</h2>
+    <a href="/news">All news</a>
+  </div>
+  <div class="more-from-grid">
+    <div>
+      <h3 class="col-title">Related stories</h3>
+      {stories.length ? (
+        <div class="news-list">
+          {stories.map((item) => (
+            <article class="story-card">
+              <a href={`/news/${item.id}`}>
+                <p class="kicker">{item.place} · {formatMedium(item.pubDate)}</p>
+                <h4>{item.title}</h4>
+                {item.description && <p class="meta">{item.description}</p>}
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="meta">No other stories are filed yet.</p>
+      )}
+    </div>
+    <div>
+      <h3 class="col-title">Coming up</h3>
+      {events.length ? (
+        <div class="card-list">
+          {events.map((event) => <EventCard event={event} compact />)}
+        </div>
+      ) : (
+        <p class="meta">Nothing upcoming is listed.</p>
+      )}
+      <p class="more"><a href="/events">All events</a></p>
+    </div>
+  </div>
+</section>
