@@ -3,7 +3,8 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import { burnBan, burnStatus } from '../data/burnBan';
+import { burnBan } from '../data/burnBan';
+import { burnView } from '../lib/burnBanView';
 import { getCountyNow } from '../lib/countyNow';
 import { getSchoolDays, schoolSummary } from '../lib/interruptions';
 import { offsiteAttrs } from '../lib/links';
@@ -12,11 +13,7 @@ import { getAlerts, getForecast, isTown, weatherLabel } from '../lib/weather';
 
 const saved = readTown(Astro.cookies.get(townCookie)?.value);
 const town = isTown(saved) ? saved : 'Bastrop';
-const checkedLabel = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'UTC',
-  month: 'long',
-  day: 'numeric',
-}).format(new Date(`${burnBan.checked}T12:00:00Z`));
+const burn = burnView();
 
 const [county, forecast, alerts, schools] = await Promise.all([
   getCountyNow(),
@@ -45,11 +42,11 @@ const cards = [
     alert: false,
   },
   {
-    href: '/burn-ban',
+    href: burn.stale ? burnBan.sourceUrl : '/burn-ban',
     kicker: 'Burn ban',
-    value: burnStatus,
-    detail: `Checked ${checkedLabel}.`,
-    alert: burnBan.inEffect,
+    value: burn.status,
+    detail: burn.stale ? `Status not confirmed since ${burn.checkedLong}.` : `Checked ${burn.checkedLabel}.`,
+    alert: burnBan.inEffect && !burn.stale,
   },
   {
     href: county.river?.href ?? 'https://waterdata.usgs.gov/monitoring-location/08159200/',

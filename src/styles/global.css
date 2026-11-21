@@ -61,6 +61,17 @@ ul { margin: 0; padding: 0; list-style: none; }
   padding: 0.5rem 1rem;
   text-decoration: none;
 }
+.stale-bar {
+  display: block;
+  text-align: center;
+  background: #fff4e5;
+  color: var(--sun-deep);
+  font-weight: 650;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+}
+.stale-bar:hover { text-decoration: underline; }
+.stale-note { margin-top: 0.8rem; max-width: 40rem; font-weight: 650; color: var(--sun-deep); }
 .utility { background: var(--pine-deep); color: #dfeae4; font-size: 0.88rem; }
 .utility-inner, .masthead, .sections-inner, .footer-grid { width: min(var(--wrap), calc(100% - 2.4rem)); margin-inline: auto; }
 .utility-inner { display: flex; justify-content: space-between; gap: 1rem; padding: 0.4rem 0; flex-wrap: wrap; }
@@ -157,9 +168,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 .ear-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--river-deep); }
 .ear strong { font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.4rem); font-weight: 580; line-height: 1; }
 .ear strong.is-ok,
-.ear strong.is-stop { font-size: clamp(1.35rem, 2.3vw, 1.95rem); white-space: nowrap; }
+.ear strong.is-stop,
+.ear strong.is-stale { font-size: clamp(1.35rem, 2.3vw, 1.95rem); white-space: nowrap; }
 .ear strong.is-ok { color: var(--ok); }
 .ear strong.is-stop { color: var(--stop); }
+.ear strong.is-stale { color: var(--sun-deep); }
 .burn-word { display: inline-flex; align-items: center; gap: 0.12em; }
 
 .ear-right .burn-word { justify-content: flex-end; }
@@ -766,6 +779,7 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.65rem; font-weight: 650; text-decoration: none; }
 .pill-ok { background: var(--ok-bg); color: var(--ok); }
 .pill-stop { background: var(--stop-bg); color: var(--stop); }
+.pill-stale { background: #fff4e5; color: var(--sun-deep); }
 
 .forecast { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
 .forecast article { padding: 0.6rem; }
@@ -806,7 +820,8 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
   .ear { max-width: none; }
   .ear strong { font-size: 2.2rem; }
   .ear strong.is-ok,
-  .ear strong.is-stop { font-size: 1.35rem; }
+  .ear strong.is-stop,
+  .ear strong.is-stale { font-size: 1.35rem; }
 
   .county-strip {
     display: grid;
