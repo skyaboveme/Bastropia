@@ -6,7 +6,9 @@ import { currentDailyVideo } from '../lib/dailyVideo';
 import { capOrganizer, filterEvents } from '../lib/events';
 import { offsiteAttrs } from '../lib/links';
 import { eventKey, labelFromKey, stampParts, thisWeekendKeys, whenLabel } from '../lib/time';
-import { getForecast, weatherLabel } from '../lib/weather';
+import { getForecast, weatherLabel, type Forecast, type TownName } from '../lib/weather';
+
+const stripTowns = ['Bastrop', 'Elgin', 'Smithville', 'Paige'] as const satisfies readonly TownName[];
 
 const now = new Date();
 const today = eventKey(now);
@@ -16,10 +18,18 @@ const todayLabel = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
 }).format(now);
-const [events, forecast, video] = await Promise.all([
+const [events, video, forecasts] = await Promise.all([
   getCollection('events'),
-  getForecast('Bastrop'),
   currentDailyVideo(),
+  Promise.all(
+    stripTowns.map(async (town) => {
+      try {
+        return { town, forecast: await getForecast(town) };
+      } catch {
+        return { town, forecast: null as Forecast | null };
+      }
+    }),
+  ),
 ]);
 
 const todayEvents = capOrganizer(filterEvents(events, { when: 'today' }, now)).slice(0, 3);
@@ -36,8 +46,14 @@ const weekendPool = weekendKeys.flatMap((day) =>
 const shownIds = new Set(shownEvents.map((event) => event.id));
 const weekendFresh = weekendPool.filter((event) => !shownIds.has(event.id));
 const weekendHighlights = (weekendFresh.length >= 2 ? weekendFresh : weekendPool).slice(0, 3);
-const day = forecast?.daily.find((item) => item.date === today) ?? forecast?.daily[0];
-const conditions = forecast ? weatherLabel(forecast.code) : '';
+const dayOf = (forecast: Forecast | null) =>
+  forecast?.daily.find((item) => item.date === today) ?? forecast?.daily[0];
+const bastrop = forecasts.find((item) => item.town === 'Bastrop')?.forecast ?? null;
+const bastropDay = dayOf(bastrop);
+const conditions = bastrop ? weatherLabel(bastrop.code) : '';
+const otherTowns = forecasts.filter(
+  (item): item is { town: TownName; forecast: Forecast } => item.town !== 'Bastrop' && item.forecast !== null,
+);
 const clipHref = video ? watchUrl(video.videoId) : `${youtubeChannel}/videos`;
 const clipTitle = video?.title || 'Newest full episode';
 const clipWhen = (() => {
@@ -49,27 +65,47 @@ const clipWhen = (() => {
     day: 'numeric',
   }).format(published);
 })();
-const weatherLabelText = forecast
-  ? `${forecast.temp} degrees, ${conditions}${day ? `, high ${day.high}, low ${day.low}` : ''}, Bastrop, Texas`
-  : 'Bastrop weather forecast';
+const weatherLabelText =
+  forecasts
+    .flatMap(({ town, forecast }) => {
+      if (!forecast) return [];
+      const day = dayOf(forecast);
+      const sky = weatherLabel(forecast.code);
+      const range = day ? `, high ${day.high}, low ${day.low}` : '';
+      return [`${town} ${forecast.temp} degrees, ${sky}${range}`];
+    })
+    .join('. ') || 'County weather forecast';
 ---
 
 <section class="today-strip" aria-labelledby="today-heading">
   <p class="col-title" id="today-heading">Today in Bastrop <span class="today-date">{todayLabel}</span></p>
   <div class="today-row">
-    <a class="today-card today-wx" href="/weather?town=Bastrop" aria-label={weatherLabelText}>
-      <p class="kicker">Weather · Bastrop</p>
-      {forecast ? (
+    <a class="today-card today-wx" href="/weather" aria-label={weatherLabelText}>
+      <p class="kicker">Weather</p>
+      {bastrop ? (
         <>
-          <strong>{forecast.temp}°</strong>
-          <span>{conditions}</span>
-          {day && <span class="meta">High {day.high}° · Low {day.low}°</span>}
+          <strong class="wx-now">{bastrop.temp}°</strong>
+          <span>Bastrop · {conditions}</span>
+          {bastropDay && <span class="meta">High {bastropDay.high}° · Low {bastropDay.low}°</span>}
         </>
       ) : (
-        <>
-          <strong>Forecast</strong>
-          <span class="meta">Unavailable right now</span>
-        </>
+        <span class="meta">Bastrop forecast unavailable</span>
+      )}
+      {otherTowns.length > 0 && (
+        <ul class="wx-towns">
+          {otherTowns.map(({ town, forecast }) => {
+            const sky = weatherLabel(forecast.code);
+            const day = dayOf(forecast);
+            const detail = sky && sky !== 'Forecast' ? sky : day ? `${day.high}°/${day.low}°` : '';
+            return (
+              <li>
+                <span>{town}</span>
+                <strong>{forecast.temp}°</strong>
+                {detail && <span>{detail}</span>}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </a>
 

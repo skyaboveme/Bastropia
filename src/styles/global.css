@@ -1004,7 +1004,7 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
 .today-strip { margin: 0.9rem 0 0.2rem; }
 .today-strip .col-title { display: flex; justify-content: space-between; gap: 0.8rem; align-items: baseline; }
 .today-date { color: var(--ink-soft); font-weight: 650; letter-spacing: 0.08em; }
-.today-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.7rem; align-items: stretch; }
+.today-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.65fr) minmax(0, 0.95fr) minmax(0, 1fr); gap: 0.7rem; align-items: stretch; }
 .today-card {
   display: grid;
   align-content: start;
@@ -1020,7 +1020,17 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
 a.today-card:hover strong { text-decoration: underline; text-underline-offset: 0.08em; }
 .today-card .kicker { margin: 0; }
 .today-card strong { font-family: var(--serif); font-weight: 580; line-height: 1.05; }
-.today-wx strong { font-size: 2rem; }
+.today-wx .wx-now { font-size: clamp(3rem, 4.2vw, 3.7rem); line-height: 0.9; }
+.wx-towns { display: grid; gap: 0.18rem; margin-top: 0.45rem; }
+.wx-towns li {
+  display: grid;
+  grid-template-columns: 5.4rem auto minmax(0, 1fr);
+  gap: 0.35rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+.wx-towns strong { font-size: 1.05rem; color: var(--ink); }
 .today-events { display: grid; }
 .today-events a { display: grid; gap: 0.05rem; padding: 0.32rem 0; border-top: 1px solid var(--line); text-decoration: none; }
 .today-events li:first-child a { border-top: 0; padding-top: 0.1rem; }
@@ -1034,14 +1044,19 @@ a.today-card:hover strong { text-decoration: underline; text-underline-offset: 0
 }
 .today-events a:hover strong { text-decoration: underline; text-underline-offset: 0.08em; }
 .today-more { margin-top: 0.45rem; font-size: 0.78rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--river-deep); }
-.today-video { gap: 0.55rem; align-items: center; align-content: center; border-top-color: var(--sun-deep); }
-.today-video:has(img) { grid-template-columns: 5.6rem minmax(0, 1fr); }
-.today-video img { width: 5.6rem; height: 4.2rem; object-fit: cover; background: var(--paper-2); }
+.today-video {
+  grid-template-columns: 1fr;
+  align-items: start;
+  align-content: start;
+  gap: 0.45rem;
+  border-top-color: var(--sun-deep);
+}
+.today-video img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--paper-2); }
 .today-copy { display: grid; gap: 0.12rem; min-width: 0; }
 .today-copy strong {
-  font-size: 1.02rem;
+  font-size: 1.15rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
