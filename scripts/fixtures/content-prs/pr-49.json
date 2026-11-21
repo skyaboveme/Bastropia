@@ -1,0 +1,62 @@
+[
+  {
+    "filename": "public/images/news/acutronic-100m-investment-bastrop-jet-engine-factory.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/bastrop-bears-playoff-run-ends-huntsville-2026.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/bastrop-colorado-river-streambank-project-comments-nov-24.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/bastrop-live-music-pilot-downtown-grants.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/bastropia-daily-2026-11-21.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/acutronic-100m-investment-bastrop-jet-engine-factory-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/bastrop-bears-playoff-run-ends-huntsville-2026-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/bastrop-colorado-river-streambank-project-comments-nov-24-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/bastrop-live-music-pilot-downtown-grants-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/acutronic-100m-investment-bastrop-jet-engine-factory.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/bastrop-bears-playoff-run-ends-huntsville-2026.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/bastrop-colorado-river-streambank-project-comments-nov-24.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/bastrop-live-music-pilot-downtown-grants.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/bastropia-daily-2026-11-21.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/pages/index.astro",
+    "status": "modified"
+  }
+]
