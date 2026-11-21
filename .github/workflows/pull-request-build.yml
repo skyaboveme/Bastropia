@@ -35,3 +35,5 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: SEO check
+        run: node scripts/seo-check.mjs
