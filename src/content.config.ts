@@ -35,6 +35,10 @@ const news = defineCollection({
     place: z.string(),
     sourceUrl: z.string().url().optional(),
     sourceLabel: z.string().optional(),
+    /** Newest story with lead: true is the homepage lead. Omit it to leave the previous lead in place. */
+    lead: z.boolean().optional(),
+    /** Wire slug or URL to hide on the homepage when it is not the sourceUrl. */
+    covers: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
     image: z.string().optional(),
     imageAlt: z.string().optional(),
     imageCredit: z.string().optional(),

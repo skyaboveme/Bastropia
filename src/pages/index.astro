@@ -11,6 +11,7 @@ import HomeBanner from '../components/HomeBanner.astro';
 import SponsorBanner from '../components/SponsorBanner.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
+import { coveredWire, pinnedLeadHref } from '../lib/frontPage';
 import { offsiteAttrs } from '../lib/links';
 import {
   newsletterFormAction,
@@ -62,25 +63,8 @@ const headlines = latestHeadlines(news, externalNews);
 const shownEvents = new Set([...todayEvents, ...weekendEvents, ...picks].map((event) => event.id));
 const hiddenStories = new Set(['/news/burn-ban-clear']);
 if (shownEvents.has('boo-bash')) hiddenStories.add('/news/boo-bash-halloween');
-/** Desk notes cover these wire items, so the outside link does not also run on the front page. */
-const coveredOnTheDesk = [
-  'acutronic-lands-100m-investment-eyes-larger-bastrop-factory-in-2027',
-  'ev-chargers-and-e-bikes-1-47m-bastrop-carts-expansion-planned',
-  'whataburger-to-make-its-bastrop-comeback-dec-8',
-  'bastrop-isd-launches-tuition-free-program-to-certify-educators',
-  'from-service-to-support-free-roof-repairs-for-bastrop-veterans',
-  '10-bastrop-business-updates-to-know',
-  'esd-3-responds-to-over-1-000-calls-in-first-month',
-  'what-s-next-for-the-290-toll-extension-into-bastrop-county',
-  'spacex-strikes-solar-manufacturing-deal-as-bastrop-operations-expand',
-  'bee-infestation-stalls-repairs-at-historic-bastrop-courthouse',
-  'boots-bling-and-bingo-bastrop-fundraiser-to-benefit-cats',
-  '11m-upgrade-wraps-up-on-historic-bastrop-bridge',
-  'explore-3-christmas-tree-farms-in-the-bastrop-area',
-  'operation-turkey-aims-to-serve-over-3-000-thanksgiving-meals',
-];
-const leadStory = '/news/acutronic-100m-investment-bastrop-jet-engine-factory';
-const coveredElsewhere = (href: string) => coveredOnTheDesk.some((slug) => href.includes(slug));
+const leadHref = pinnedLeadHref(news);
+const coveredElsewhere = (href: string) => coveredWire(href, news);
 let pageHeadlines = headlines.filter((story) => !hiddenStories.has(story.href) && !coveredElsewhere(story.href));
 if (today <= electionDay) {
   const election = pageHeadlines.find((story) => story.href === '/news/election-day-tuesday');
@@ -90,8 +74,8 @@ if (today === '2026-11-05') {
   const careAVan = pageHeadlines.find((story) => story.href === '/news/care-a-van-lost-pines-elementary-nov-5-2026');
   if (careAVan) pageHeadlines = [careAVan, ...pageHeadlines.filter((story) => story.href !== careAVan.href)];
 }
-const pinnedLead = pageHeadlines.find((story) => story.href === leadStory);
-if (pinnedLead) pageHeadlines = [pinnedLead, ...pageHeadlines.filter((story) => story.href !== leadStory)];
+const pinnedLead = leadHref ? pageHeadlines.find((story) => story.href === leadHref) : undefined;
+if (pinnedLead) pageHeadlines = [pinnedLead, ...pageHeadlines.filter((story) => story.href !== leadHref)];
 const lead = pageHeadlines[0];
 const secondary = pageHeadlines.slice(1, 3);
 const briefs = pageHeadlines.slice(3, 7);
@@ -165,7 +149,7 @@ const weekendDays = weekend
       <div class="col col-lead">
         {lead ? (
           <article class="story-lead">
-            <p class="kicker">{lead.href === leadStory ? 'Bastropia · Bastrop' : lead.label} · {formatMedium(lead.date)}</p>
+            <p class="kicker">{leadItem ? `Bastropia · ${leadItem.data.place}` : lead.label} · {formatMedium(lead.date)}</p>
             <h1><a href={lead.href} {...offsiteAttrs(lead.href)}>{lead.title}</a></h1>
             {leadItem?.data.image && (
               <img class="lead-photo" src={leadItem.data.image} alt={leadItem.data.imageAlt ?? lead.title} width="1200" height="675" />
