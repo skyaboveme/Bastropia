@@ -1,0 +1,62 @@
+[
+  {
+    "filename": "package.json",
+    "status": "modified"
+  },
+  {
+    "filename": "scripts/decode-news-images.mjs",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/baron-monument.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/courthouse.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/elgin-1916.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/jail.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/map-1887.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/postcard-lost-pines.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/postcard-refectory.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/smithville-main.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/news/this-week-in-bastrop-county-history-nov-20-26-2026/smithville-railroad-museum.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "scripts/image-payloads/images/social/this-week-in-bastrop-county-history-nov-20-26-2026-ig.jpg.b64",
+    "status": "added"
+  },
+  {
+    "filename": "src/components/PhotoCarousel.astro",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/this-week-in-bastrop-county-history-nov-20-26-2026.mdx",
+    "status": "added"
+  }
+]

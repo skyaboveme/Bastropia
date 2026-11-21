@@ -1,0 +1,47 @@
+name: Auto-merge content
+
+# workflow_run reads this file from the default branch, after Pull request
+# build finishes. The pull request cannot rewrite the merge decision.
+# scripts/content-auto-merge.mjs refuses forks before it merges.
+on:
+  workflow_run:
+    workflows: ["Pull request build"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: content-auto-merge-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout the gate on the default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Merge content pull requests and dispatch deploy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BUILD_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          BUILD_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          BUILD_URL: ${{ github.event.workflow_run.html_url }}
+          BUILD_PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: node scripts/content-auto-merge.mjs

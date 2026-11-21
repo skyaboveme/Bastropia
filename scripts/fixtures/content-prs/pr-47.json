@@ -1,0 +1,62 @@
+[
+  {
+    "filename": "public/images/news/bastrop-old-iron-bridge-reopens-dec-3.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/bastropia-daily-2026-11-20.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/cedar-creek-data-center-gas-plant-neighbors-letter.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/christmas-tree-farms-near-bastrop-elgin-2026.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/news/operation-turkey-elgin-3200-thanksgiving-meals-2026.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/bastrop-old-iron-bridge-reopens-dec-3-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/cedar-creek-data-center-gas-plant-neighbors-letter-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/christmas-tree-farms-near-bastrop-elgin-2026-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "public/images/social/operation-turkey-elgin-3200-thanksgiving-meals-2026-ig.jpg",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/bastrop-old-iron-bridge-reopens-dec-3.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/bastropia-daily-2026-11-20.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/cedar-creek-data-center-gas-plant-neighbors-letter.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/christmas-tree-farms-near-bastrop-elgin-2026.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/content/news/operation-turkey-elgin-3200-thanksgiving-meals-2026.mdx",
+    "status": "added"
+  },
+  {
+    "filename": "src/pages/index.astro",
+    "status": "modified"
+  }
+]
