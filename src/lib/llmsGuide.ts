@@ -1,5 +1,6 @@
 import { getCollection } from 'astro:content';
 import { burnBan } from '../data/burnBan';
+import { burnView } from './burnBanView';
 import { businesses } from '../data/businesses';
 import { churches } from '../data/churches';
 import { eatDayGroups, offerText } from '../data/eatsSpecials';
@@ -92,6 +93,10 @@ export async function llmsFull() {
   const stories = news.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
   const updates = notices.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 
+  const burn = burnView();
+  const burnLine = burn.stale
+    ? `Burn ban: status not confirmed since ${burn.checkedLong}. Last reading: ${burnBan.headline}. ${burnBan.summary} Source: ${burnBan.sourceUrl}`
+    : `Burn ban: ${burnBan.headline}. ${burnBan.summary} Checked ${burnBan.checked}. Source: ${burnBan.sourceUrl}. Forest Service map: ${burnBan.forestUrl}`;
   const lines = [
     '# Bastropia',
     '',
@@ -99,7 +104,7 @@ export async function llmsFull() {
     '',
     'Bastropia is a community site for Bastrop County, Texas. It is not the county, a city, or an emergency service. Burn bans, court dates, polling places, and office numbers are summaries of public pages. The linked official page is the authority.',
     '',
-    `Burn ban: ${burnBan.headline}. ${burnBan.summary} Checked ${burnBan.checked}. Source: ${burnBan.sourceUrl}`,
+    burnLine,
     '',
   ];
 

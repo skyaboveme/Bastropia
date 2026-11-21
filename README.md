@@ -38,7 +38,9 @@ A Grok skill at `.grok/skills/event-scout/SKILL.md` runs the same scout. The bot
 
 ## Burn ban
 
-`src/data/burnBan.ts` is the status shown in the header. Check [the county outdoor burning page](https://www.bastropcounty.gov/page/em.outdoor_burning) daily and update `checked` even when the status is unchanged. Change `inEffect` when the county posts a new order. The county page is the order. The masthead must say “No burn ban” or “Ban in effect”, never a bare “Burn”.
+`src/data/burnBan.ts` is the status shown in the header. The county page is the order. The masthead says “No burn ban” or “Ban in effect” when `checked` is within the last three days, and “Not confirmed” after that. It never says a bare “Burn.”
+
+A GitHub Action (`.github/workflows/burn-ban.yml`) reads [the county outdoor burning page](https://www.bastropcounty.gov/page/em.outdoor_burning) every morning and the [Texas A&M Forest Service burn-ban layer](https://gis.tfs.tamu.edu/arcgis/rest/services/EOC/BurnBan/FeatureServer/0). It updates `checked`, and `inEffect` when needed, only when the county status sentence is exact and the Forest Service flag agrees. `node scripts/check-burn-ban.mjs` prints that reading. `node scripts/check-burn-ban.mjs --write` updates the files. If the sentence changes or the two sources disagree, the action leaves the files alone and the masthead goes stale on purpose. The 15-minute alert cron still compares the status that was deployed. It does not scrape the county page.
 
 
 ## Free business listings

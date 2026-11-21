@@ -3,22 +3,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import BurnMark from '../components/BurnMark.astro';
 import { burnBan, burnStatus } from '../data/burnBan';
-import { formatMedium } from '../lib/time';
+import { burnView } from '../lib/burnBanView';
 
-const checked = formatMedium(new Date(`${burnBan.checked}T12:00:00`));
+const burn = burnView();
 ---
 
 <BaseLayout title="Burn ban" description="Whether Bastrop County currently lists a burn ban, and what to check before you light a fire.">
   <PageHead
     kicker="Outdoor burning"
-    title={burnBan.headline}
-    lede={burnBan.summary}
+    title={burn.pageTitle}
+    lede={burn.pageLede}
   />
   <div class="wrap">
-    <p class={burnBan.inEffect ? 'pill pill-stop' : 'pill pill-ok'}>
-      <BurnMark banned={burnBan.inEffect} />
-      {burnStatus} · checked {checked}
+    <p class={`pill pill-${burn.tone}`}>
+      <BurnMark banned={burnBan.inEffect && !burn.stale} />
+      {burn.status} · {burn.stale ? `since ${burn.checkedLabel}` : `checked ${burn.checkedLabel}`}
     </p>
+    {burn.stale && (
+      <p class="stale-note">
+        Status not confirmed since {burn.checkedLong} — <a href={burnBan.sourceUrl}>check the county page</a>.
+        The last reading on this desk was “{burnStatus}.”
+      </p>
+    )}
     <div class="split" style="margin-top:1rem;">
       <article class="detail-main prose">
         <h2>Before you burn</h2>
