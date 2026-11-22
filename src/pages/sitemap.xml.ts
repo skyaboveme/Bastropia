@@ -51,6 +51,7 @@ const hubs: Entry[] = [
   { path: '/burn-ban', priority: '0.8' },
   { path: '/about', priority: '0.6' },
   { path: '/staff', priority: '0.5' },
+  { path: '/authors', priority: '0.4' },
   { path: '/corrections', priority: '0.5' },
   { path: '/contact', priority: '0.5' },
   { path: '/advertise', priority: '0.6' },

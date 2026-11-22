@@ -39,6 +39,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/government/court-decisions', label: 'What the court decided', note: 'Three bullets after each Commissioners Court meeting, once the minutes are posted' },
   { path: '/about', label: 'About', note: 'What Bastropia is and is not' },
   { path: '/staff', label: 'Staff', note: 'Masthead. Stories use the Bastropia desk byline until a reporter is listed by name' },
+  { path: '/authors', label: 'Authors', note: 'Byline list. Empty until a reporter is named. Stories stay the Bastropia desk' },
   { path: '/corrections', label: 'Corrections', note: 'Editorial policy and how to ask for a factual correction' },
   { path: '/contact', label: 'Contact', note: 'Tip form, event form, and the public Facebook group. No newsroom phone or street address' },
   { path: '/submit', label: 'Add an event', note: 'How a neighbor submits a listing' },
