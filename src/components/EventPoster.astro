@@ -1,0 +1,268 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { categoryMeta, type Tier } from '../data/taxonomy';
+import { eventHref, eventsSourceMode } from '../lib/eventSource';
+import { listingImage, listingPlace, listingSnippet } from '../lib/eventPoster';
+import { offsiteAttrs } from '../lib/links';
+import { stampParts, whenLabel } from '../lib/time';
+
+interface Props {
+  event: CollectionEntry<'events'>;
+  tier?: Tier;
+  href?: string;
+  eager?: boolean;
+  priority?: boolean;
+}
+
+const { event, tier = event.data.tier, eager = false, priority = false } = Astro.props;
+const href = Astro.props.href ?? eventHref(event, eventsSourceMode());
+const stamp = stampParts(event.data.start);
+const category = categoryMeta[event.data.category];
+const photo = listingImage(event.data.image);
+const snippet = listingSnippet(event.data.summary, event.data.title);
+const place = listingPlace(event.data.venue, event.data.city);
+const when = event.data.schedule === 'timed'
+  ? whenLabel(event.data.schedule, event.data.start)
+  : event.data.schedule === 'agenda'
+    ? 'See agenda'
+    : 'All day';
+const tierLabel = tier === 'lost-pines' ? 'Lost Pines' : tier === 'community' ? '' : tier;
+---
+
+<article class:list={['poster', `is-${tier}`]}>
+  <a href={href} {...offsiteAttrs(href)}>
+    <span class:list={['poster-photo', { 'is-fallback': photo.fallback }]}>
+      {!photo.fallback && (
+        <img
+          src={photo.src}
+          alt=""
+          width="640"
+          height="360"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchpriority={priority ? 'high' : undefined}
+        />
+      )}
+      <span class="poster-date">
+        <span>{stamp.month}</span>
+        <strong>{stamp.day}</strong>
+        <em>{when}</em>
+      </span>
+      {photo.fallback && <span class="poster-label">{category.label} · {event.data.city}</span>}
+    </span>
+    <span class="poster-copy">
+      <span class:list={['poster-cat', `cat-${event.data.category}`]}>{category.label}</span>
+      {tierLabel && <span class="poster-tier">{tierLabel}</span>}
+      <h3>{event.data.title}</h3>
+      {snippet && <p>{snippet}</p>}
+      <span class="poster-where">{place}</span>
+    </span>
+  </a>
+</article>
+
+<script>
+  const root = document.documentElement;
+  if (!root.dataset.posterFallback) {
+    root.dataset.posterFallback = '1';
+    document.addEventListener(
+      'error',
+      (event) => {
+        const img = event.target;
+        if (!(img instanceof HTMLImageElement) || !img.closest('.poster-photo')) return;
+        if (img.dataset.fallback === '1') return;
+        img.dataset.fallback = '1';
+        img.closest('.poster-photo')?.classList.add('is-fallback');
+        img.style.display = 'none';
+      },
+      true,
+    );
+  }
+</script>
+
+<style is:global>
+  .event-day { margin: 1.35rem 0 0; }
+  .event-day h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2vw, 1.75rem);
+    padding-bottom: 0.32rem;
+    border-bottom: 3px solid var(--ink);
+  }
+  .poster-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    margin-top: 0.8rem;
+    align-items: stretch;
+  }
+  @media (min-width: 700px) {
+    .poster-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1040px) {
+    .poster-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  .poster {
+    background: var(--card);
+    border: 1px solid rgba(20, 26, 23, 0.08);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(20, 26, 23, 0.05);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 22rem;
+  }
+  .poster.is-spotlight { border-color: var(--river); }
+  .poster.is-featured { border-color: var(--sun); box-shadow: 0 0 0 1px var(--sun); }
+  .poster.is-lost-pines { border-color: var(--pine); box-shadow: 0 0 0 1px var(--pine); }
+  .poster a {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  .poster-photo {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--pine-deep) center / cover no-repeat;
+    overflow: hidden;
+  }
+  /* Same drawing as /brand/event-placeholder.svg, inlined so a missing photo does not wait on another request. */
+  .poster-photo.is-fallback {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%233d9a78'/%3E%3Cstop offset='.42' stop-color='%2317604a'/%3E%3Cstop offset='1' stop-color='%2310281f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='640' height='360' fill='url(%23sky)'/%3E%3Ccircle cx='508' cy='78' r='86' fill='%23f0b429' opacity='.22'/%3E%3Ccircle cx='508' cy='78' r='38' fill='%23f0b429'/%3E%3Cpath d='M36 248L104 78 172 248Z' fill='%23071910'/%3E%3Cpath d='M128 258L214 52 300 258Z' fill='%230c2c20'/%3E%3Cpath d='M236 246L312 96 388 246Z' fill='%23071910'/%3E%3Cpath d='M330 252L392 132 454 252Z' fill='%230c2c20' opacity='.9'/%3E%3Crect y='246' width='640' height='114' fill='%230c3328'/%3E%3Cpath d='M0 292C150 258 280 332 430 286S580 312 660 270V360H0Z' fill='%2317604a'/%3E%3Cpath d='M-12 322C130 298 250 348 390 318S560 340 660 304' fill='none' stroke='%2317b7d4' stroke-width='11' stroke-linecap='round'/%3E%3Ctext x='612' y='40' text-anchor='end' fill='%23fbfaf6' font-family='Georgia,serif' font-size='16' letter-spacing='3'%3EBASTROPIA%3C/text%3E%3C/svg%3E");
+  }
+  .poster-photo img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+  .poster:hover img { transform: scale(1.045); }
+  .poster-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(16, 40, 31, 0.5), transparent 48%);
+    pointer-events: none;
+  }
+  .poster-date {
+    position: absolute;
+    z-index: 1;
+    top: 0.6rem;
+    left: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 3.15rem;
+    padding: 0.32rem 0.4rem 0.38rem;
+    border-radius: 0.55rem;
+    background: #fff;
+    line-height: 1;
+    box-shadow: 0 1px 4px rgba(16, 40, 31, 0.16);
+  }
+  .poster-date > span {
+    font-size: 0.62rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sun-deep);
+  }
+  .poster-date strong {
+    margin-top: 0.16rem;
+    font-family: var(--serif);
+    font-size: 1.28rem;
+    font-weight: 620;
+  }
+  .poster-date em {
+    margin-top: 0.2rem;
+    font-style: normal;
+    font-size: 0.62rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .poster-label {
+    position: absolute;
+    z-index: 1;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.65rem;
+    color: #fbfaf6;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .poster-copy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.4rem;
+    padding: 0.8rem 0.95rem 0.95rem;
+  }
+  .poster-cat, .poster-tier {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.48rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .poster-tier { background: var(--sun); color: #1a1406; text-transform: uppercase; letter-spacing: 0.06em; }
+  .cat-music { background: #fde8e1; color: #8a3418; }
+  .cat-food, .cat-markets { background: #fff1d6; color: #8a4b08; }
+  .cat-family, .cat-community { background: var(--ok-bg); color: var(--ok); }
+  .cat-outdoors, .cat-education, .cat-health { background: #e5f4f6; color: var(--river-deep); }
+  .cat-arts { background: #f3e8f6; color: #6b2d6b; }
+  .cat-government { background: #eef1f3; color: #3d4a55; }
+  .poster h3 {
+    flex: 1 0 100%;
+    font-size: 1.22rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .poster:hover h3 { text-decoration: underline; text-underline-offset: 0.08em; }
+  .poster p {
+    flex: 1 0 100%;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .poster-where {
+    flex: 1 0 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.32rem;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+  }
+  .poster-where::before {
+    content: "";
+    width: 0.72rem;
+    height: 0.72rem;
+    flex: none;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='black' d='M10 2a6 6 0 00-6 6c0 4.2 6 10 6 10s6-5.8 6-10a6 6 0 00-6-6zm0 8.2A2.2 2.2 0 1110 5.8a2.2 2.2 0 010 4.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='black' d='M10 2a6 6 0 00-6 6c0 4.2 6 10 6 10s6-5.8 6-10a6 6 0 00-6-6zm0 8.2A2.2 2.2 0 1110 5.8a2.2 2.2 0 010 4.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  @media (hover: hover) {
+    .poster { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .poster:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(16, 40, 31, 0.12);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .poster, .poster-photo img { transition: none; }
+    .poster:hover { transform: none; }
+    .poster:hover img { transform: none; }
+  }
+</style>

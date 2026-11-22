@@ -3,11 +3,12 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import EventCard from '../components/EventCard.astro';
 import EventCredit from '../components/EventCredit.astro';
+import EventPoster from '../components/EventPoster.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import WeekendBanner from '../components/WeekendBanner.astro';
-import { listEvents } from '../lib/eventSource';
+import { eventHref, listEvents } from '../lib/eventSource';
+import { cardImageUrl } from '../lib/eventPoster';
 import { filterEvents, sortByDayThenTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, labelFromKey, thisWeekendKeys } from '../lib/time';
@@ -15,13 +16,31 @@ import { eventKey, labelFromKey, thisWeekendKeys } from '../lib/time';
 const now = new Date();
 const days = thisWeekendKeys(now);
 const upgrades = await activeUpgrades(eventKey(now));
-const { events: all } = await listEvents();
+const { events: all, source } = await listEvents();
 const tierOf = (event: (typeof all)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const events = sortByDayThenTier(filterEvents(all, { when: 'weekend' }, now), tierOf);
 const span = days.length < 2 ? labelFromKey(days[0]) : `${labelFromKey(days[0])} through ${labelFromKey(days[days.length - 1])}`;
+const groups: { key: string; label: string; banner: boolean; rows: typeof events }[] = [];
+let count = 0;
 const bannerAt = Math.min(5, events.length);
-const listBefore = events.slice(0, bannerAt);
-const listAfter = events.slice(bannerAt);
+for (const event of events) {
+  count += 1;
+  const key = eventKey(event.data.start);
+  let group = groups[groups.length - 1];
+  if (!group || group.key !== key) {
+    group = { key, label: labelFromKey(key), banner: false, rows: [] };
+    groups.push(group);
+  }
+  group.rows.push(event);
+  if (count === bannerAt) group.banner = true;
+}
+let posterIndex = 0;
+function posterFlags(image?: string | null) {
+  if (!cardImageUrl(image)) return { eager: false, priority: false };
+  const index = posterIndex;
+  posterIndex += 1;
+  return { eager: index < 3, priority: index === 0 };
+}
 ---
 
 <BaseLayout
@@ -36,15 +55,28 @@ const listAfter = events.slice(bannerAt);
   <div class="wrap">
     <EventCredit content="this-weekend" />
     {events.length ? (
-      <>
-        <div class="card-list">
-          {listBefore.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
-        </div>
-        <WeekendBanner />
-        <div class="card-list">
-          {listAfter.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
-        </div>
-      </>
+      groups.map((group) => (
+        <>
+          <section class="event-day">
+            <h2>{group.label}</h2>
+            <div class="poster-grid">
+              {group.rows.map((event) => {
+                const flags = posterFlags(event.data.image);
+                return (
+                  <EventPoster
+                    event={event}
+                    tier={tierOf(event)}
+                    href={eventHref(event, source)}
+                    eager={flags.eager}
+                    priority={flags.priority}
+                  />
+                );
+              })}
+            </div>
+          </section>
+          {group.banner && <WeekendBanner />}
+        </>
+      ))
     ) : (
       <p class="lede">Nothing is listed for this weekend. <a class="text-link" href="/submit">Submit a listing</a> if the desk has not heard about it yet.</p>
     )}

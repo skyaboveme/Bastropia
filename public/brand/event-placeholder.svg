@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-label="Bastropia">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d9a78"/>
+      <stop offset="0.42" stop-color="#17604a"/>
+      <stop offset="1" stop-color="#10281f"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#sky)"/>
+  <circle cx="508" cy="78" r="86" fill="#f0b429" opacity="0.22"/>
+  <circle cx="508" cy="78" r="38" fill="#f0b429"/>
+  <path d="M36 248 L104 78 L172 248 Z" fill="#071910"/>
+  <path d="M128 258 L214 52 L300 258 Z" fill="#0c2c20"/>
+  <path d="M236 246 L312 96 L388 246 Z" fill="#071910"/>
+  <path d="M330 252 L392 132 L454 252 Z" fill="#0c2c20" opacity="0.9"/>
+  <rect y="246" width="640" height="114" fill="#0c3328"/>
+  <path d="M0 292 C 150 258, 280 332, 430 286 S 580 312, 660 270 V 360 H 0 Z" fill="#17604a"/>
+  <path d="M-12 322 C 130 298, 250 348, 390 318 S 560 340, 660 304" fill="none" stroke="#17b7d4" stroke-width="11" stroke-linecap="round"/>
+  <text x="612" y="40" text-anchor="end" fill="#fbfaf6" font-family="Georgia, 'Times New Roman', serif" font-size="16" letter-spacing="3">BASTROPIA</text>
+</svg>
