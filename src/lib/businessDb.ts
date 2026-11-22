@@ -1,6 +1,8 @@
 import { env } from 'cloudflare:workers';
 import { placements, type PlacementId } from '../data/commerce';
-import type { DirectoryEntry } from '../data/directory';
+import type { DirectoryEntry, DirectoryTier } from '../data/directory';
+import { directoryTowns } from '../data/taxonomy';
+import { mapsSearchUrl } from './maps';
 import { eventKey } from './time';
 import { hashPassword, passwordMatches } from './passwords';
 import { sessionKv } from './sessionKv';
@@ -39,6 +41,13 @@ export type Biz = {
   status: BizStatus;
   created_at: string;
   updated_at: string;
+  /** Present after migrations/0005_directory_meta.sql. Absent until that file is applied. */
+  source?: string;
+  last_verified?: string | null;
+  socials?: string;
+  in_county?: number | null;
+  /** Not created by a migration yet. Read when a later column exists so paid tiers can sort first. */
+  tier?: string;
 };
 
 export type BizAccount = {
@@ -138,6 +147,10 @@ const reservedSlugs = new Set([
   'mcdade',
   'paige',
   'rosanky',
+  'red-rock',
+  'wyldwood',
+  'dale',
+  'camp-swift',
   'directory',
   'eats',
   'government',
@@ -348,30 +361,89 @@ export async function listBusinesses() {
   return rows.results ?? [];
 }
 
+function missingColumn(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /no such column/i.test(message);
+}
+
+async function allRows<T>(db: Database, sql: string, fallback: string) {
+  try {
+    const rows = await db.prepare(sql).all<T>();
+    return rows.results ?? [];
+  } catch (error) {
+    if (!missingColumn(error)) throw error;
+    const rows = await db.prepare(fallback).all<T>();
+    return rows.results ?? [];
+  }
+}
+
 export async function listLiveBusinesses() {
   const db = database();
   if (!db) return [];
-  const rows = await db.prepare(`SELECT * FROM businesses WHERE status = 'live' ORDER BY name`).all<Biz>();
-  return rows.results ?? [];
+  return allRows<Biz>(
+    db,
+    `SELECT * FROM businesses WHERE status = 'live' AND COALESCE(in_county, 1) = 1 ORDER BY name`,
+    `SELECT * FROM businesses WHERE status = 'live' ORDER BY name`,
+  );
 }
 
-const directoryTowns = new Set(['Bastrop', 'Elgin', 'Smithville', 'Cedar Creek', 'McDade', 'Paige', 'Rosanky']);
+/** Names that must not come back from the chamber JSON snapshot. Null when D1 is not bound. */
+export async function listSuppressedDirectoryNames() {
+  const db = database();
+  if (!db) return null;
+  const rows = await allRows<{ name: string }>(
+    db,
+    `SELECT name FROM businesses WHERE status = 'hidden' OR COALESCE(in_county, 1) = 0`,
+    `SELECT name FROM businesses WHERE status = 'hidden'`,
+  );
+  return rows.map((row) => row.name);
+}
+
+export function listingIsPublic(biz: { status: string; in_county?: number | string | null }) {
+  if (biz.status !== 'live') return false;
+  if (biz.in_county === undefined || biz.in_county === null || biz.in_county === '') return true;
+  return Number(biz.in_county) !== 0;
+}
+
+const directoryTownNames = new Set<string>(directoryTowns);
+
+function listingTier(biz: Biz): DirectoryTier | undefined {
+  const value = String(biz.tier || '').toLowerCase();
+  if (value === 'featured' || value === 'spotlight') return value;
+  return undefined;
+}
+
+function listingFacebook(biz: Biz) {
+  if (!biz.socials) return undefined;
+  try {
+    const parsed = JSON.parse(biz.socials) as { facebook?: unknown };
+    const url = typeof parsed.facebook === 'string' ? parsed.facebook.trim() : '';
+    if (/^https?:\/\//i.test(url)) return url;
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
 
 export function toDirectoryEntry(biz: Biz): DirectoryEntry {
   const digits = biz.phone.replace(/\D/g, '');
   const phoneHref = digits.length === 10 ? `tel:+1${digits}` : digits.length === 11 && digits.startsWith('1') ? `tel:+${digits}` : undefined;
+  const place = biz.address || biz.city;
   return {
     id: biz.id,
     name: biz.name,
     category: biz.category,
-    place: biz.address || biz.city,
-    town: directoryTowns.has(biz.city) ? biz.city : null,
+    place,
+    town: directoryTownNames.has(biz.city) ? biz.city : null,
     phone: biz.phone || undefined,
     phoneHref,
     website: biz.website || null,
+    facebook: listingFacebook(biz),
+    mapsUrl: mapsSearchUrl(biz.address || place),
     href: `/${biz.slug}`,
     summary: biz.details,
     source: 'listed',
+    tier: listingTier(biz),
     areas: `${biz.city} ${biz.areas}`,
     hours: biz.hours || undefined,
     dailySpecial: biz.daily_special || undefined,

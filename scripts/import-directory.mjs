@@ -19,7 +19,7 @@ const partnerNames = new Set(
   ['String Prairie Heating & Air', 'Barron Homes', 'Barefoot Flower Farms', 'Lost Pines Toyota', 'RosaTex Landscaping'].map(normalize),
 );
 const reserved = new Set([
-  'bastrop', 'elgin', 'smithville', 'cedar-creek', 'mcdade', 'paige', 'rosanky',
+  'bastrop', 'elgin', 'smithville', 'cedar-creek', 'mcdade', 'paige', 'rosanky', 'red-rock', 'wyldwood', 'dale', 'camp-swift',
   'directory', 'eats', 'government', 'news', 'events', 'weather', 'scores', 'videos',
   'groups', 'development', 'advertise', 'search', 'about', 'desk', 'business', 'businesses',
   'tips', 'thanks', 'alerts', 'now', 'newsletter', 'submit', 'upgrade', 'phone-numbers',
@@ -36,6 +36,10 @@ const towns = {
   mcdade: 'McDade',
   paige: 'Paige',
   rosanky: 'Rosanky',
+  'red rock': 'Red Rock',
+  wyldwood: 'Wyldwood',
+  dale: 'Dale',
+  'camp swift': 'Camp Swift',
 };
 
 function normalize(value) {

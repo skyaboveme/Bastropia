@@ -1,4 +1,4 @@
-export const cities = [
+export const directoryTowns = [
   'Bastrop',
   'Elgin',
   'Smithville',
@@ -6,8 +6,15 @@ export const cities = [
   'McDade',
   'Paige',
   'Rosanky',
-  'Countywide',
+  'Red Rock',
+  'Wyldwood',
+  'Dale',
+  'Camp Swift',
 ] as const;
+
+export type DirectoryTown = (typeof directoryTowns)[number];
+
+export const cities = [...directoryTowns, 'Countywide'] as const;
 
 export type City = (typeof cities)[number];
 

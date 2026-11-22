@@ -91,7 +91,7 @@ function current(href: string) {
     </div>
   </div>
 
-  <div class="header-stage has-hero">
+  <div class:list={['header-stage', 'has-hero', path === '/directory' && 'is-directory-page']}>
     <div
       class:list={['header-hero', hero.heroClass]}
       data-header-hero={hero.rest.length > 0 ? 'true' : undefined}

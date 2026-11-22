@@ -3,10 +3,16 @@
  * Chamber data is a snapshot from business.bastropchamber.com.
  */
 
-import chamberRaw from './chamberDirectory.json';
-import { businesses, type Business } from './businesses';
+import chamberRaw from './chamberDirectory.json' with { type: 'json' };
+import { businesses, type Business } from './businesses.ts';
+import { publicCategoryFor } from './directoryCategories.ts';
+import { directoryTowns, type DirectoryTown } from './taxonomy.ts';
+import { mapsSearchUrl } from '../lib/maps.ts';
+
+export type { DirectoryTown };
 
 export type DirectorySource = 'partner' | 'chamber' | 'listed';
+export type DirectoryTier = 'community' | 'spotlight' | 'featured';
 
 export type DirectoryEntry = {
   id: string;
@@ -17,9 +23,12 @@ export type DirectoryEntry = {
   phone?: string;
   phoneHref?: string;
   website?: string | null;
+  facebook?: string;
+  mapsUrl?: string;
   href: string;
   summary: string;
   source: DirectorySource;
+  tier?: DirectoryTier;
   partnerSlug?: string;
   areas?: string;
   hours?: string;
@@ -41,18 +50,6 @@ type ChamberRecord = {
   summary?: string | null;
 };
 
-const directoryTowns = [
-  'Bastrop',
-  'Elgin',
-  'Smithville',
-  'Cedar Creek',
-  'McDade',
-  'Paige',
-  'Rosanky',
-] as const;
-
-export type DirectoryTown = (typeof directoryTowns)[number];
-
 const localityAliases: Record<string, DirectoryTown> = {
   bastrop: 'Bastrop',
   batsrop: 'Bastrop',
@@ -62,15 +59,26 @@ const localityAliases: Record<string, DirectoryTown> = {
   mcdade: 'McDade',
   paige: 'Paige',
   rosanky: 'Rosanky',
+  'red rock': 'Red Rock',
+  wyldwood: 'Wyldwood',
+  dale: 'Dale',
+  'camp swift': 'Camp Swift',
 };
 
-function normalizeName(value: string) {
+const townsByLength = [...directoryTowns].sort((a, b) => b.length - a.length);
+
+export function directoryNameKey(value: string) {
   return value
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/[^a-z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function mentionsTown(haystack: string, town: string) {
+  const escaped = town.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+');
+  return new RegExp(`\\b${escaped}\\b`, 'i').test(haystack);
 }
 
 function phoneHref(phone?: string | null) {
@@ -84,10 +92,12 @@ function phoneHref(phone?: string | null) {
 function townFromLocality(locality?: string | null, place?: string | null): string | null {
   const candidates = [locality, place].filter(Boolean) as string[];
   for (const value of candidates) {
-    const key = value.toLowerCase().trim();
+    const key = value.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (key === 'bastrop county' || key === 'countywide') continue;
     if (localityAliases[key]) return localityAliases[key];
-    for (const town of directoryTowns) {
-      if (key === town.toLowerCase() || key.includes(town.toLowerCase())) return town;
+    const stripped = value.replace(/\bbastrop county\b/gi, ' ');
+    for (const town of townsByLength) {
+      if (mentionsTown(stripped, town)) return town;
     }
   }
   return null;
@@ -116,10 +126,13 @@ function partnerEntry(business: Business): DirectoryEntry {
     phone: business.phone,
     phoneHref: business.phoneHref,
     website: business.website,
+    facebook: business.facebook,
+    mapsUrl: business.mapsUrl || mapsSearchUrl(business.place),
     href: `/${business.slug}`,
     summary: business.summary,
     source: 'partner',
     partnerSlug: business.slug,
+    hours: business.hours || undefined,
   };
 }
 
@@ -151,7 +164,7 @@ function chamberEntry(record: ChamberRecord, index: number): DirectoryEntry {
   const href = record.website || record.detailUrl || 'https://business.bastropchamber.com/list';
   const bits = [category, place, record.phone].filter(Boolean);
   return {
-    id: `chamber:${record.detailUrl || normalizeName(record.name) || index}`,
+    id: `chamber:${record.detailUrl || directoryNameKey(record.name) || index}`,
     name: record.name,
     category,
     place,
@@ -159,6 +172,7 @@ function chamberEntry(record: ChamberRecord, index: number): DirectoryEntry {
     phone: record.phone || undefined,
     phoneHref: phoneHref(record.phone),
     website: record.website,
+    mapsUrl: mapsSearchUrl(place),
     href,
     summary: record.summary?.trim() || bits.join(' · '),
     source: 'chamber',
@@ -168,11 +182,11 @@ function chamberEntry(record: ChamberRecord, index: number): DirectoryEntry {
 const chamberRecords = (chamberRaw as { businesses: ChamberRecord[] }).businesses || [];
 
 const partnerEntries = businesses.map(partnerEntry);
-const partnerNames = new Set(partnerEntries.map((entry) => normalizeName(entry.name)));
+const partnerNames = new Set(partnerEntries.map((entry) => directoryNameKey(entry.name)));
 
 const chamberEntries = chamberRecords
   .map(chamberEntry)
-  .filter((entry) => !partnerNames.has(normalizeName(entry.name)));
+  .filter((entry) => !partnerNames.has(directoryNameKey(entry.name)));
 
 /** Partners first, then Chamber members A–Z. */
 export const directoryEntries: DirectoryEntry[] = [
@@ -197,10 +211,11 @@ export function directoryTownOptions(list = directoryEntries): DirectoryTown[] {
 export function entryServesTown(entry: DirectoryEntry, town: string) {
   const needle = town.toLowerCase();
   if (entry.town?.toLowerCase() === needle) return true;
-  if (entry.place.toLowerCase().includes(needle)) return true;
+  const place = entry.place.replace(/\bbastrop county\b/gi, ' ');
+  if (mentionsTown(place, town)) return true;
   if (entry.source === 'listed') {
-    const blob = `${entry.town ?? ''} ${entry.place} ${entry.areas ?? ''}`.toLowerCase();
-    return blob.includes(needle);
+    const blob = `${entry.areas ?? ''}`.replace(/\bbastrop county\b/gi, ' ');
+    return mentionsTown(blob, town);
   }
   if (entry.source === 'partner' && entry.partnerSlug) {
     const business = businesses.find((item) => item.slug === entry.partnerSlug);
@@ -213,6 +228,28 @@ export function entryServesTown(entry: DirectoryEntry, town: string) {
   return false;
 }
 
+export function entryMatchesCategory(entry: DirectoryEntry, category?: string | null) {
+  if (!category) return true;
+  const group = publicCategoryFor(entry.category);
+  if (group.slug === category || group.label.toLowerCase() === category.toLowerCase()) return true;
+  return entry.category.toLowerCase() === category.toLowerCase();
+}
+
+export function entryInCountywide(entry: DirectoryEntry) {
+  return !entry.town;
+}
+
+/** Featured, then Spotlight, then partner pages, then everyone else. */
+export function compareDirectory(a: DirectoryEntry, b: DirectoryEntry) {
+  const rank = (entry: DirectoryEntry) => {
+    if (entry.tier === 'featured') return 0;
+    if (entry.tier === 'spotlight') return 1;
+    if (entry.source === 'partner') return 2;
+    return 3;
+  };
+  return rank(a) - rank(b) || a.name.localeCompare(b.name);
+}
+
 export function filterDirectory(
   query: {
     category?: string | null;
@@ -223,10 +260,13 @@ export function filterDirectory(
 ) {
   const needle = query.q?.trim().toLowerCase();
   return entries.filter((entry) => {
-    if (query.category && entry.category !== query.category) return false;
-    if (query.town && !entryServesTown(entry, query.town)) return false;
+    if (!entryMatchesCategory(entry, query.category)) return false;
+    if (query.town === 'Countywide') {
+      if (!entryInCountywide(entry)) return false;
+    } else if (query.town && !entryServesTown(entry, query.town)) return false;
     if (needle) {
-      const hay = `${entry.name} ${entry.category} ${entry.place} ${entry.summary}`.toLowerCase();
+      const group = publicCategoryFor(entry.category);
+      const hay = `${entry.name} ${entry.category} ${group.label} ${entry.place} ${entry.summary}`.toLowerCase();
       const stem = needle.replace(/(ers|er|ists|ist|ing|s)$/i, '');
       const words = hay.split(/[^a-z0-9]+/);
       const hit = hay.includes(needle) || (stem.length >= 4 && stem !== needle && words.some((word) => word.startsWith(stem)));

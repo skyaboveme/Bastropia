@@ -5,60 +5,70 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CategoryIcon from '../components/CategoryIcon.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import { categoryIcon, categoryIconSvg } from '../data/categoryIcons';
-import {
-  directoryEntries,
-  directoryTownOptions,
-  filterDirectory,
-  type DirectoryEntry,
-} from '../data/directory';
-import { listLiveBusinesses, toDirectoryEntry } from '../lib/businessDb';
+import { publicCategories, publicCategoryBySlug, publicCategoryFor } from '../data/directoryCategories';
+import { filterDirectory, type DirectoryEntry } from '../data/directory';
+import { directoryTowns } from '../data/taxonomy';
+import { loadDirectoryEntries } from '../lib/directoryFeed';
+import { outboundLabel } from '../lib/maps';
 
 const params = Astro.url.searchParams;
-const category = params.get('category');
-const town = params.get('town');
-const q = params.get('q');
+const requestedTown = params.get('town');
+const town =
+  requestedTown === 'Countywide' || (directoryTowns as readonly string[]).includes(requestedTown || '')
+    ? requestedTown || ''
+    : '';
+const category = (params.get('category') || '').trim().slice(0, 80);
+const q = (params.get('q') || '').trim().slice(0, 80);
+const page = Math.max(1, Number.parseInt(params.get('page') || '1', 10) || 1);
+const pageSize = 24;
+const group = publicCategoryBySlug(category);
+const categoryLabel = group?.label || category;
 const filtered = Boolean(category || town || q);
-const showResults = Boolean(category || town || (q && q.trim()));
-function inSelectedTown(entry: DirectoryEntry) {
-  if (!town) return true;
-  if (town === 'Countywide') return !entry.town;
-  return entry.town === town;
-}
-const nameKey = (name: string) => name.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
-const partnerNames = new Set(
-  directoryEntries.filter((entry) => entry.source === 'partner').map((entry) => nameKey(entry.name)),
-);
-const listed = (await listLiveBusinesses())
-  .map(toDirectoryEntry)
-  .filter((entry) => !partnerNames.has(nameKey(entry.name)));
-const listedNames = new Set(listed.map((entry) => nameKey(entry.name)));
-const staticEntries = directoryEntries.filter((entry) => entry.source === 'partner' || !listedNames.has(nameKey(entry.name)));
-const all = [...listed, ...staticEntries];
-const inTown = all.filter(inSelectedTown);
-const visible = filterDirectory({ category, q }, all).filter(inSelectedTown).sort((a, b) => {
-  const rank = (entry: DirectoryEntry) => (entry.source === 'partner' ? 0 : 1);
-  return rank(a) - rank(b) || a.name.localeCompare(b.name);
-});
-const shown = visible.slice(0, 40);
-const countText = shown.length < visible.length
-  ? `Showing ${shown.length} of ${visible.length} businesses${town ? ` in ${town}` : ''}.`
-  : `${visible.length} ${visible.length === 1 ? 'business' : 'businesses'}${town ? ` in ${town}` : ''}.`;
 
-const title =
-  category && town
-    ? `${category} in ${town}`
-    : category
-      ? `${category} in Bastrop County`
-      : town
-        ? `Businesses in ${town}`
-        : q
-          ? `Businesses matching “${q}”`
-          : 'Bastrop County business directory';
+const all = await loadDirectoryEntries();
+const visible = filterDirectory({ category, town, q }, all);
+const start = (page - 1) * pageSize;
+const shown = visible.slice(start, start + pageSize);
+const placeLabel = town ? ` in ${town}` : '';
+const kind = categoryLabel ? `${categoryLabel} ` : '';
+const from = visible.length ? start + 1 : 0;
+const to = start + shown.length;
+const countText = !visible.length
+  ? `No ${kind}businesses${placeLabel}.`
+  : to < visible.length
+    ? `Showing ${from}–${to} of ${visible.length} ${kind}businesses${placeLabel}.`
+    : `${visible.length} ${kind}${visible.length === 1 ? 'business' : 'businesses'}${placeLabel}.`;
 
-const description =
-  category && town
-    ? `${category} businesses serving ${town} and nearby Bastrop County towns.`
-    : 'Find Bastrop County businesses by category and town, including Bastrop Regional Chamber members. Free listings, with paid landing pages for partners.';
+const title = group && town
+  ? `${group.label} in ${town}`
+  : group
+    ? `${group.label} in Bastrop County`
+    : category && town
+      ? `${category} in ${town}`
+      : category
+        ? `${category} in Bastrop County`
+        : town
+          ? `Businesses in ${town}`
+          : q
+            ? `Businesses matching “${q}”`
+            : 'Bastrop County business directory';
+
+const description = group && town
+  ? `${group.label} businesses in ${town}, Bastrop County, with phone numbers, hours, and directions.`
+  : group
+    ? `${group.label} businesses across Bastrop County, with phone numbers, hours, and directions.`
+    : category && town
+      ? `${category} businesses in ${town}, Bastrop County, with phone numbers, hours, and directions.`
+      : category
+        ? `${category} businesses across Bastrop County, with phone numbers, hours, and directions.`
+        : town
+          ? `Businesses in ${town}, Bastrop County. Browse by category or search by name, with phone numbers and directions.`
+          : 'Find Bastrop County businesses by town and category. Free listings, with phone numbers, hours, and directions.';
+
+const canonicalParams = new URLSearchParams();
+if (category) canonicalParams.set('category', category);
+if (town) canonicalParams.set('town', town);
+const canonicalPath = canonicalParams.toString() ? `/directory?${canonicalParams}` : '/directory';
 
 function href(overrides: Record<string, string | null>) {
   const next = new URLSearchParams();
@@ -70,185 +80,263 @@ function href(overrides: Record<string, string | null>) {
   return search ? `/directory?${search}` : '/directory';
 }
 
+function pageHref(nextPage: number) {
+  const next = new URLSearchParams();
+  if (category) next.set('category', category);
+  if (town) next.set('town', town);
+  if (q) next.set('q', q);
+  if (nextPage > 1) next.set('page', String(nextPage));
+  const search = next.toString();
+  return search ? `/directory?${search}` : '/directory';
+}
+
 function external(url: string) {
   return url.startsWith('http');
 }
 
-const searchRows = inTown
-  .map((entry) => ({
+function badgeOf(entry: DirectoryEntry) {
+  if (entry.tier === 'featured') return 'Featured';
+  if (entry.tier === 'spotlight') return 'Spotlight';
+  if (entry.source === 'partner') return 'Partner page';
+  return '';
+}
+
+function linksOf(entry: DirectoryEntry) {
+  const siteIsFacebook = outboundLabel(entry.website) === 'Facebook';
+  return {
+    website: !siteIsFacebook ? entry.website || '' : '',
+    facebook: entry.facebook || (siteIsFacebook ? entry.website || '' : ''),
+  };
+}
+
+const townPool = filterDirectory({ category }, all);
+const townCards = directoryTowns
+  .map((name) => ({ town: name, count: filterDirectory({ category, town: name }, townPool).length }))
+  .filter((card) => card.count > 0);
+const countywideCount = townPool.filter((entry) => !entry.town).length;
+const categoryPool = filterDirectory({ town }, all);
+const categoryCards = publicCategories
+  .map((item) => ({
+    ...item,
+    count: categoryPool.filter((entry) => publicCategoryFor(entry.category).slug === item.slug).length,
+  }))
+  .filter((item) => item.count > 0);
+const resultsHeading = categoryLabel && town ? `${categoryLabel} in ${town}` : categoryLabel || (town ? `Businesses in ${town}` : 'All businesses');
+const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
+
+const searchRows = filterDirectory({ town }, all).map((entry) => {
+  const entryGroup = publicCategoryFor(entry.category);
+  const links = linksOf(entry);
+  return {
     n: entry.name,
     c: entry.category,
+    g: entryGroup.slug,
+    gl: entryGroup.label,
     t: entry.town || '',
     p: entry.place && entry.place !== entry.town && entry.place !== 'Bastrop County' ? entry.place : '',
     h: entry.href,
     ph: entry.phone || '',
     pt: entry.phoneHref || '',
-    w: entry.website || '',
+    w: links.website,
+    fb: links.facebook,
+    maps: entry.mapsUrl || '',
     hr: entry.hours || '',
     ds: entry.dailySpecial || '',
     su: entry.source === 'chamber' ? '' : entry.summary || '',
-    pr: entry.source === 'partner' ? 1 : 0,
+    r: entry.tier === 'featured' ? 0 : entry.tier === 'spotlight' ? 1 : entry.source === 'partner' ? 2 : 3,
+    b: badgeOf(entry),
     i: categoryIcon(entry.category),
     lg: entry.logo || '',
-    q: `${entry.name} ${entry.category} ${entry.place} ${entry.summary}`.toLowerCase(),
-  }))
-  .sort((a, b) => Number(b.pr) - Number(a.pr) || a.n.localeCompare(b.n));
+  };
+});
 const searchIcons = Object.fromEntries(
   [...new Set(searchRows.map((row) => row.i))].map((key) => [key, categoryIconSvg[key] || categoryIconSvg.store]),
 );
-const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }).replace(/</g, '\\u003c');
-const townCards = directoryTownOptions(all).map((town) => ({
-  town,
-  count: all.filter((entry) => entry.town === town).length,
-}));
-const skipTrades = new Set([
-  'friends of the chamber',
-  'non-profits',
-  'nonprofits',
-  'civic organizations',
-  'government',
-  'chamber of commerce',
-  'thoughtleader investor',
-  'investors',
-  'investor',
-]);
-const tradeCounts = new Map<string, number>();
-for (const entry of all) tradeCounts.set(entry.category, (tradeCounts.get(entry.category) ?? 0) + 1);
-const trades = [...tradeCounts.entries()]
-  .map(([name, count]) => ({ name, count, icon: categoryIcon(name) }))
-  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-const featuredTrades = trades.filter((trade) => !skipTrades.has(trade.name.toLowerCase())).slice(0, 12);
-const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
+const searchIndex = JSON.stringify({ rows: searchRows, icons: searchIcons }, (key, value) => (value === '' ? undefined : value)).replace(/</g, '\\u003c');
 ---
 
-<BaseLayout title={title} description={description} noindex={filtered} nofollow={false}>
-  <h1 class="sr">{title}</h1>
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  noindex={Boolean(q) || page > 1}
+  nofollow={false}
+>
   <div class="wrap">
-    <section class="board" aria-label="County directory">
+    <header class="directory-head">
+      <h1>Bastrop County business directory</h1>
+      <p class="lede">Search by name, or browse a town and a category. Listings are free.</p>
+    </header>
+
+    <div class="looking-row">
       <form class="looking" method="get" action="/directory" role="search">
-        <label class="looking-label" for="q">Looking for</label>
+        <label class="looking-label" for="q">Search businesses</label>
         <div class="looking-bar">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
             <path d="M16 16.5 20.5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
           </svg>
-          <input id="q" type="search" name="q" value={q || ''} placeholder="plumber, dentist, coffee" autocomplete="off" enterkeyhint="search" />
+          <input id="q" type="search" name="q" value={q} placeholder="plumber, dentist, coffee" autocomplete="off" enterkeyhint="search" />
           <button class="looking-clear" type="button" aria-label="Clear search" hidden={!q}>×</button>
           {category ? <input type="hidden" name="category" value={category} /> : null}
           {town ? <input type="hidden" name="town" value={town} /> : null}
         </div>
       </form>
-
-      <section class="results-well" id="directory-results" data-category={category || ''} aria-label="Matching businesses">
-        <div id="directory-ready" hidden={showResults}>
-          <p class="results-ready">Matches show up here as you type.</p>
-          <div class="suggest">
-            {suggestions.map((word) => (
-              <button type="button" data-fill={word}>{word}</button>
-            ))}
-          </div>
-        </div>
-        {category && (
-          <div class="cat-current">
-            <h2>{category}{town ? ` in ${town}` : ''}</h2>
-            <a class="text-link" href={href({ category: null, q: null })}>All listings</a>
-          </div>
-        )}
-        <p class="meta" id="directory-count" aria-live="polite" hidden={!showResults}>
-          {showResults ? countText : ''}
-        </p>
-        <div id="directory-list">
-        {showResults && visible.length === 0 ? (
-          <p>Nothing matches that search. Try another word, or <a class="text-link" href="/directory/submit">submit a business</a>.</p>
-        ) : showResults ? (
-          <ul class="biz-list">
-            {shown.map((entry) => (
-              <li class="biz-row">
-                <span class:list={['biz-mark', entry.logo && 'has-logo']} aria-hidden="true">
-                  {entry.logo ? <img class="biz-logo" src={entry.logo} alt="" /> : <CategoryIcon icon={categoryIcon(entry.category)} large />}
-                </span>
-                <div>
-                  <a class="biz-name" href={entry.href} target={external(entry.href) ? '_blank' : undefined} rel={external(entry.href) ? 'noopener noreferrer' : undefined}>{entry.name}</a>
-                  {entry.source === 'partner' ? <span class="badge">Partner page</span> : null}
-                  <span class="biz-line">{entry.category} · {entry.town || 'Bastrop County'}</span>
-                  {entry.place && entry.place !== entry.town && entry.place !== 'Bastrop County' && <span class="biz-line">{entry.place}</span>}
-                  {entry.hours && <span class="biz-line">{entry.hours}</span>}
-                  {entry.dailySpecial && <span class="biz-line">Daily special: {entry.dailySpecial}</span>}
-                  {entry.source !== 'chamber' && entry.summary && <p class="biz-summary">{entry.summary}</p>}
-                </div>
-                {(entry.phone || entry.website) && (
-                  <p class="biz-actions">
-                    {entry.phoneHref ? <a href={entry.phoneHref}>{entry.phone}</a> : entry.phone}
-                    {entry.website && (
-                      <a href={entry.website} target="_blank" rel="noopener noreferrer">Website</a>
-                    )}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        </div>
-      </section>
-      <p class="looking-note">
-        <a class="text-link" href="/directory/submit">List your business free</a>
-        <span aria-hidden="true"> · </span>
-        <a class="text-link" href="/advertise">Paid partner pages</a>
-      </p>
-    </section>
-
-    <section class="atlas" aria-label="Browse the county">
-      <h2>Browse the county</h2>
-      <ul class="atlas-figures">
-        <li><strong>{all.length}</strong><span>businesses</span></li>
-        <li><strong>{townCards.length}</strong><span>towns</span></li>
-        <li><strong>{trades.length}</strong><span>trades</span></li>
-      </ul>
-      <h3>By town</h3>
-      <ul class="town-cards">
-        {townCards.map((card) => (
-          <li>
-            <a href={href({ town: card.town, category: null, q: null })} aria-current={town === card.town ? 'page' : undefined}>
-              <strong>{card.count}</strong>
-              <em>{card.town}</em>
-            </a>
-          </li>
-        ))}
-      </ul>
-      <h3>Popular trades</h3>
-      <ul class="trade-grid">
-        {featuredTrades.map((trade) => (
-          <li>
-            <a href={href({ category: trade.name, town: null, q: null })} aria-current={category === trade.name ? 'page' : undefined}>
-              <span class="trade-mark" aria-hidden="true"><CategoryIcon icon={trade.icon} /></span>
-              <strong>{trade.name}</strong>
-              <span>{trade.count} {trade.count === 1 ? 'listing' : 'listings'}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-      <p class="atlas-note">Search for a name or another trade. Matches stay in the box above.</p>
-    </section>
-
-    <div class="site-banner">
-      <HomeBanner />
+      <a class="button list-free" href="/directory/submit">List your business free</a>
     </div>
+
+    {(town || category || q) && (
+      <ul class="filter-chips">
+        {town && (
+          <li>
+            <a href={href({ town: null })}>Town: {town} <span aria-hidden="true">×</span><span class="sr"> Remove town</span></a>
+          </li>
+        )}
+        {category && (
+          <li>
+            <a href={href({ category: null })}>{categoryLabel} <span aria-hidden="true">×</span><span class="sr"> Remove category</span></a>
+          </li>
+        )}
+        {q && (
+          <li>
+            <a href={href({ q: null })}>“{q}” <span aria-hidden="true">×</span><span class="sr"> Remove search</span></a>
+          </li>
+        )}
+      </ul>
+    )}
+
+    <div class="suggest" aria-label="Common searches">
+      {suggestions.map((word) => (
+        <a href={href({ q: word })} data-fill={word}>{word}</a>
+      ))}
+    </div>
+
+    <div class="directory-stack" id="directory-stack" data-mode={filtered ? 'results' : 'browse'}>
+      <details class="atlas" id="directory-browse" open={!filtered}>
+        <summary>Browse by town and category</summary>
+        <h2 class="atlas-label">By town</h2>
+        <ul class="town-cards">
+          {townCards.map((card) => (
+            <li>
+              <a href={href({ town: card.town })} aria-current={town === card.town ? 'true' : undefined}>
+                <strong>{card.count}</strong>
+                <em>{card.town}</em>
+              </a>
+            </li>
+          ))}
+          {countywideCount > 0 && (
+            <li>
+              <a href={href({ town: 'Countywide' })} aria-current={town === 'Countywide' ? 'true' : undefined}>
+                <strong>{countywideCount}</strong>
+                <em>Countywide</em>
+              </a>
+            </li>
+          )}
+        </ul>
+        <h2 class="atlas-label">All categories</h2>
+        <label class="cat-find">
+          <span class="sr">Find a category</span>
+          <input id="category-find" type="search" placeholder="All categories" autocomplete="off" />
+        </label>
+        <ul class="trade-grid" id="cat-grid">
+          {categoryCards.map((item) => (
+            <li>
+              <a href={href({ category: item.slug })} aria-current={category === item.slug ? 'true' : undefined}>
+                <span class="trade-mark" aria-hidden="true"><CategoryIcon icon={item.icon} /></span>
+                <strong>{item.label}</strong>
+                <span>{item.count} {item.count === 1 ? 'listing' : 'listings'}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      <section class="results" id="directory-results" data-category={category} data-town={town} data-label={categoryLabel} aria-label="Businesses">
+        <h2 id="directory-heading">{resultsHeading}</h2>
+        <p class="meta" id="directory-count" aria-live="polite">{countText}</p>
+        <div id="directory-list">
+          {visible.length === 0 ? (
+            <p>Nothing matches that search. Try another word, or <a class="text-link" href="/directory/submit">list your business</a>.</p>
+          ) : (
+            <ul class="biz-list">
+              {shown.map((entry) => {
+                const links = linksOf(entry);
+                const badge = badgeOf(entry);
+                return (
+                  <li class="biz-row">
+                    <span class:list={['biz-mark', entry.logo && 'has-logo']} aria-hidden="true">
+                      {entry.logo ? <img class="biz-logo" src={entry.logo} alt="" /> : <CategoryIcon icon={categoryIcon(entry.category)} />}
+                    </span>
+                    <div class="biz-copy">
+                      <p class="biz-title">
+                        <a class="biz-name" href={entry.href} target={external(entry.href) ? '_blank' : undefined} rel={external(entry.href) ? 'noopener noreferrer' : undefined}>{entry.name}</a>
+                        {badge && <span class:list={['badge', entry.tier === 'featured' && 'badge-featured', entry.tier === 'spotlight' && 'badge-spotlight']}>{badge}</span>}
+                      </p>
+                      <span class="biz-line">{entry.category} · {entry.town || 'Countywide'}</span>
+                      {entry.place && entry.place !== entry.town && entry.place !== 'Bastrop County' && <span class="biz-line">{entry.place}</span>}
+                      {entry.hours && <span class="biz-line">{entry.hours}</span>}
+                      {entry.dailySpecial && <span class="biz-line">Daily special: {entry.dailySpecial}</span>}
+                      {entry.source !== 'chamber' && entry.summary && <p class="biz-summary">{entry.summary}</p>}
+                      {(entry.phoneHref || entry.mapsUrl || links.website || links.facebook) && (
+                        <p class="biz-actions">
+                          {entry.phoneHref && <a class="button biz-call" href={entry.phoneHref}>Call {entry.phone}</a>}
+                          {entry.mapsUrl && <a class="button button-ghost" href={entry.mapsUrl} target="_blank" rel="noopener noreferrer">Directions</a>}
+                          {links.website && <a class="button button-ghost" href={links.website} target="_blank" rel="noopener noreferrer">Website</a>}
+                          {links.facebook && <a class="button button-ghost" href={links.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+        <p class="more-row">
+          {page > 1 && <a class="button button-ghost" href={pageHref(page - 1)}>Previous</a>}
+          <a class="button button-ghost" id="directory-more" href={pageHref(page + 1)} hidden={to >= visible.length}>Show more</a>
+        </p>
+      </section>
+
+      <details class="directory-extra">
+        <summary>Ads and partner pages</summary>
+        <div class="site-banner">
+          <HomeBanner />
+        </div>
+        <section class="notice">
+          <p class="kicker" style="color: var(--river);">Partners</p>
+          <h2>Free listing. Paid pages when you want the full treatment.</h2>
+          <p class="lede" style="color:#d5e4dc;">
+            A free listing puts your name, trade, town, phone, and hours on this directory. Partner pages add a branded landing page.
+          </p>
+          <p class="cluster">
+            <a class="button" href="/directory/submit">List your business free</a>
+            <a class="button button-ghost" href="/advertise">Ask about a partner page</a>
+          </p>
+        </section>
+      </details>
+    </div>
+
     <template id="directory-row">
       <li class="biz-row">
         <span class="biz-mark" aria-hidden="true"><img class="biz-logo" alt="" hidden /><span class="cat-svg"></span></span>
-        <div>
-          <a class="biz-name"></a>
-          <span class="badge">Partner page</span>
+        <div class="biz-copy">
+          <p class="biz-title">
+            <a class="biz-name"></a>
+            <span class="badge"></span>
+          </p>
           <span class="biz-line" data-line="meta"></span>
           <span class="biz-line" data-line="place"></span>
           <span class="biz-line" data-line="hours"></span>
           <span class="biz-line" data-line="special"></span>
           <p class="biz-summary"></p>
+          <p class="biz-actions">
+            <a class="button biz-call" data-act="phone"></a>
+            <a class="button button-ghost" data-act="maps" target="_blank" rel="noopener noreferrer">Directions</a>
+            <a class="button button-ghost" data-act="site" target="_blank" rel="noopener noreferrer">Website</a>
+            <a class="button button-ghost" data-act="facebook" target="_blank" rel="noopener noreferrer">Facebook</a>
+          </p>
         </div>
-        <p class="biz-actions">
-          <a data-act="phone"></a>
-          <a data-act="site" target="_blank" rel="noopener noreferrer">Website</a>
-        </p>
       </li>
     </template>
     <script id="directory-index" type="application/json" is:inline set:html={searchIndex}></script>
@@ -259,20 +347,34 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
       const results = document.getElementById('directory-results');
       const listHost = document.getElementById('directory-list');
       const count = document.getElementById('directory-count');
-      if (indexNode && input && results && listHost && count) {
+      const more = document.getElementById('directory-more');
+      const template = document.getElementById('directory-row');
+      const stack = document.getElementById('directory-stack');
+      const browse = document.getElementById('directory-browse');
+      const find = document.getElementById('category-find');
+      if (indexNode && input && results && listHost && count && template) {
         const data = JSON.parse(indexNode.textContent || '{"rows":[],"icons":{}}');
         const rows = data.rows || [];
         const icons = data.icons || {};
         const category = results.getAttribute('data-category') || '';
-        const townLabel = new URL(location.href).searchParams.get('town') || '';
-        const cap = 40;
+        const townLabel = results.getAttribute('data-town') || '';
+        const pageSize = 24;
+        const serverPage = Math.max(1, parseInt(new URL(location.href).searchParams.get('page') || '1', 10) || 1);
+        let clientMode = serverPage === 1;
+        let limit = pageSize;
+        const hay = (row) => [row.n, row.c, row.gl, row.p, row.su].filter(Boolean).join(' ').toLowerCase();
         const hit = (row, needle) => {
           if (!needle) return true;
+          const text = hay(row);
           const stem = needle.replace(/(ers|er|ists|ist|ing|s)$/i, '');
-          const words = row.q.split(/[^a-z0-9]+/);
-          return row.q.includes(needle) || (stem.length >= 4 && stem !== needle && words.some((word) => word.startsWith(stem)));
+          const words = text.split(/[^a-z0-9]+/);
+          return text.includes(needle) || (stem.length >= 4 && stem !== needle && words.some((word) => word.startsWith(stem)));
         };
-        const template = document.getElementById('directory-row');
+        const matchesCategory = (row) => {
+          if (!category) return true;
+          const wanted = category.toLowerCase();
+          return row.g === category || row.gl.toLowerCase() === wanted || row.c.toLowerCase() === wanted;
+        };
         const fillLine = (node, text) => {
           if (!text) {
             node.remove();
@@ -280,23 +382,26 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
           }
           node.textContent = text;
         };
-        const ready = document.getElementById('directory-ready');
-        const paint = (matches) => {
-          if (ready) ready.hidden = true;
-          count.hidden = false;
-          const shown = matches.slice(0, cap);
+        const paint = () => {
+          const needle = input.value.trim().toLowerCase();
+          const matches = rows.filter((row) => matchesCategory(row) && hit(row, needle));
+          const slice = matches.slice(0, limit);
           const place = townLabel ? ' in ' + townLabel : '';
-          count.textContent = shown.length < matches.length
-            ? 'Showing ' + shown.length + ' of ' + matches.length + ' businesses' + place + '.'
-            : matches.length + ' ' + (matches.length === 1 ? 'business' : 'businesses') + place + '.';
+          const kind = results.getAttribute('data-label') ? results.getAttribute('data-label') + ' ' : '';
+          count.textContent = !matches.length
+            ? 'No ' + kind + 'businesses' + place + '.'
+            : slice.length < matches.length
+              ? 'Showing 1–' + slice.length + ' of ' + matches.length + ' ' + kind + 'businesses' + place + '.'
+              : matches.length + ' ' + kind + (matches.length === 1 ? 'business' : 'businesses') + place + '.';
+          if (more) more.hidden = slice.length >= matches.length;
           listHost.replaceChildren();
-          if (!shown.length) {
+          if (!slice.length) {
             const empty = document.createElement('p');
             empty.append('Nothing matches that search. Try another word, or ');
             const link = document.createElement('a');
             link.className = 'text-link';
             link.href = '/directory/submit';
-            link.textContent = 'submit a business';
+            link.textContent = 'list your business';
             empty.append(link, '.');
             listHost.append(empty);
             return;
@@ -305,7 +410,7 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
           list.className = 'biz-list';
           const scope = [...template.attributes].find((attr) => attr.name.startsWith('data-astro-cid'));
           if (scope) list.setAttribute(scope.name, scope.value);
-          shown.forEach((row) => {
+          slice.forEach((row) => {
             const item = template.content.firstElementChild.cloneNode(true);
             const mark = item.querySelector('.biz-mark');
             const glyph = item.querySelector('.cat-svg');
@@ -326,29 +431,43 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
               name.target = '_blank';
               name.rel = 'noopener noreferrer';
             }
-            if (!row.pr) item.querySelector('.badge').remove();
-            fillLine(item.querySelector('[data-line="meta"]'), row.c + ' · ' + (row.t || 'Bastrop County'));
+            const badge = item.querySelector('.badge');
+            if (row.b) {
+              badge.textContent = row.b;
+              if (row.r === 0) badge.classList.add('badge-featured');
+              if (row.r === 1) badge.classList.add('badge-spotlight');
+            } else badge.remove();
+            fillLine(item.querySelector('[data-line="meta"]'), row.c + ' · ' + (row.t || 'Countywide'));
             fillLine(item.querySelector('[data-line="place"]'), row.p);
             fillLine(item.querySelector('[data-line="hours"]'), row.hr);
             fillLine(item.querySelector('[data-line="special"]'), row.ds ? 'Daily special: ' + row.ds : '');
             const summary = item.querySelector('.biz-summary');
             if (row.su) summary.textContent = row.su;
             else summary.remove();
-            const actions = item.querySelector('.biz-actions');
             const phone = item.querySelector('[data-act="phone"]');
+            const maps = item.querySelector('[data-act="maps"]');
             const site = item.querySelector('[data-act="site"]');
-            if (row.ph && row.pt) {
+            const facebook = item.querySelector('[data-act="facebook"]');
+            if (row.pt) {
               phone.href = row.pt;
-              phone.textContent = row.ph;
-            } else if (row.ph) {
-              phone.replaceWith(document.createTextNode(row.ph));
+              phone.textContent = 'Call ' + row.ph;
             } else phone.remove();
+            if (row.maps) maps.href = row.maps;
+            else maps.remove();
             if (row.w) site.href = row.w;
             else site.remove();
-            if (!row.ph && !row.w) actions.remove();
+            if (row.fb) facebook.href = row.fb;
+            else facebook.remove();
+            if (!row.pt && !row.maps && !row.w && !row.fb) item.querySelector('.biz-actions').remove();
             list.append(item);
           });
           listHost.append(list);
+        };
+        const setMode = (hasQuery) => {
+          const active = Boolean(hasQuery || category || townLabel);
+          if (stack) stack.dataset.mode = active ? 'results' : 'browse';
+          if (browse && hasQuery) browse.open = false;
+          if (browse && !active) browse.open = true;
         };
         const apply = () => {
           const value = input.value.trim();
@@ -356,216 +475,68 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
           const url = new URL(location.href);
           if (value) url.searchParams.set('q', value);
           else url.searchParams.delete('q');
+          url.searchParams.delete('page');
           history.replaceState(null, '', url);
-          if (!value && !category && !townLabel) {
-            if (ready) ready.hidden = false;
-            count.hidden = true;
-            listHost.replaceChildren();
-            return;
-          }
-          const needle = value.toLowerCase();
-          paint(rows.filter((row) => (!category || row.c === category) && hit(row, needle)));
+          clientMode = true;
+          limit = pageSize;
+          setMode(Boolean(value));
+          paint();
         };
         input.addEventListener('input', apply);
-        document.querySelectorAll('[data-fill]').forEach((button) => {
-          button.addEventListener('click', () => {
-            input.value = button.getAttribute('data-fill') || '';
-            input.focus();
-            apply();
-          });
-        });
         clearButton?.addEventListener('click', () => {
           input.value = '';
           input.focus();
           apply();
         });
+        document.querySelectorAll('[data-fill]').forEach((link) => {
+          link.addEventListener('click', (event) => {
+            event.preventDefault();
+            input.value = link.getAttribute('data-fill') || '';
+            input.focus();
+            apply();
+          });
+        });
+        more?.addEventListener('click', (event) => {
+          if (!clientMode && serverPage > 1) return;
+          event.preventDefault();
+          clientMode = true;
+          limit += pageSize;
+          paint();
+        });
+      }
+      if (find) {
+        const items = () => [...document.querySelectorAll('#cat-grid li')];
+        find.addEventListener('input', () => {
+          const needle = find.value.trim().toLowerCase();
+          items().forEach((item) => {
+            item.hidden = Boolean(needle) && !item.textContent.toLowerCase().includes(needle);
+          });
+        });
+        find.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter') return;
+          const visible = items().filter((item) => !item.hidden);
+          const link = visible.length === 1 ? visible[0].querySelector('a') : null;
+          if (!link || !find.value.trim()) return;
+          event.preventDefault();
+          location.href = link.href;
+        });
       }
     </script>
-
-    <section class="notice" style="margin-top:1.5rem;">
-      <p class="kicker" style="color: var(--river);">Partners</p>
-      <h2>Free listing. Paid pages when you want the full treatment.</h2>
-      <p class="lede" style="color:#d5e4dc;">
-        Chamber members appear from the public Bastrop Regional Chamber directory. A free Bastropia note puts your name, trade, town, and phone on the desk. Partner pages like String Prairie and Barron Homes get a branded landing, LocalBusiness schema, and a share image.
-      </p>
-      <p class="cluster">
-        <a class="button" href="/directory/submit">Submit free</a>
-        <a class="button button-ghost" href="/advertise">Ask about a partner page</a>
-        <a class="button button-ghost" href="https://business.bastropchamber.com/list" target="_blank" rel="noopener noreferrer">Chamber directory</a>
-      </p>
-    </section>
   </div>
 </BaseLayout>
 
 <style>
-  .board {
-    margin: 0.2rem 0 1.4rem;
-    padding: 0.2rem 0 0.2rem;
-    background: transparent;
-    border: 0;
-  }
-  .results-well {
-    min-height: 8.5rem;
-    margin-top: 0.85rem;
-    padding: 0.95rem 1rem 0.7rem;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 1.1rem;
-  }
-  .results-ready {
-    margin: 0.15rem 0 0;
-    color: var(--ink-soft);
-    font-size: 1.05rem;
-  }
-  .suggest {
+  .directory-head { padding: 0.15rem 0 0.85rem; }
+  .directory-head h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.05rem); }
+  .directory-head .lede { margin-top: 0.3rem; max-width: 38rem; }
+  .looking-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-top: 0.75rem;
+    align-items: center;
+    gap: 0.75rem;
   }
-  .suggest button {
-    border: 1px solid var(--line);
-    background: var(--paper);
-    border-radius: 999px;
-    padding: 0.4rem 0.8rem;
-    color: var(--ink);
-    font: inherit;
-    font-size: 0.95rem;
-    text-transform: capitalize;
-    cursor: pointer;
-  }
-  #directory-ready[hidden],
-  #directory-count[hidden] {
-    display: none !important;
-  }
-  .suggest button:hover {
-    border-color: var(--pine);
-    color: var(--pine-deep);
-  }
-  .atlas {
-    margin: 0.4rem 0 1.6rem;
-  }
-  .atlas h2 {
-    margin: 0 0 0.8rem;
-    font-size: clamp(1.7rem, 3vw, 2.3rem);
-  }
-  .atlas h3 {
-    margin: 1.15rem 0 0.55rem;
-    font-family: var(--sans);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-  }
-  .atlas-figures {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.8rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .atlas-figures li {
-    padding: 0.15rem 0 0.2rem;
-  }
-  .atlas-figures strong {
-    display: block;
-    font-family: var(--serif);
-    font-size: clamp(2.1rem, 4.4vw, 3.2rem);
-    font-weight: 600;
-    line-height: 0.95;
-    color: var(--pine-deep);
-  }
-  .atlas-figures span,
-  .town-cards em {
-    color: var(--ink-soft);
-    font-style: normal;
-    font-size: 0.92rem;
-  }
-  .town-cards {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.55rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .town-cards a,
-  .trade-grid a {
-    display: block;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 0.85rem;
-    color: inherit;
-    text-decoration: none;
-  }
-  .town-cards a {
-    padding: 0.75rem 0.6rem 0.7rem;
-  }
-  .town-cards a:hover,
-  .trade-grid a:hover,
-  .town-cards a[aria-current='page'],
-  .trade-grid a[aria-current='page'] {
-    border-color: var(--pine);
-  }
-  .town-cards strong {
-    display: block;
-    font-family: var(--serif);
-    font-size: 1.65rem;
-    font-weight: 600;
-    line-height: 1;
-  }
-  .trade-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.65rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .trade-grid a {
-    display: grid;
-    justify-items: start;
-    gap: 0.28rem;
-    min-height: 7.4rem;
-    padding: 0.85rem 0.8rem 0.75rem;
-  }
-  .trade-mark {
-    width: 2.45rem;
-    height: 2.45rem;
-    border-radius: 0.6rem;
-    background: var(--pine);
-    color: #f4efe6;
-    display: grid;
-    place-items: center;
-  }
-  .trade-mark :global(svg) {
-    width: 1.35rem;
-    height: 1.35rem;
-  }
-  .trade-grid strong {
-    font-family: var(--serif);
-    font-size: 1.08rem;
-    font-weight: 600;
-    line-height: 1.15;
-  }
-  .trade-grid a > span:last-child {
-    color: var(--ink-soft);
-    font-size: 0.85rem;
-  }
-  .atlas-note {
-    margin: 0.9rem 0 0;
-    color: var(--ink-soft);
-  }
-  @media (max-width: 900px) {
-    .town-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .trade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  .looking {
-    margin: 0;
-  }
-  .looking-label {
+  .looking { flex: 1 1 auto; margin: 0; min-width: 0; }
+  .list-free { flex: none; }
+  .looking-label, .cat-find span.sr {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -575,9 +546,9 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
   .looking-bar {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    min-height: 4.8rem;
-    padding: 0.25rem 0.55rem 0.25rem 1.2rem;
+    gap: 0.7rem;
+    min-height: 3.6rem;
+    padding: 0.2rem 0.45rem 0.2rem 1rem;
     background: var(--paper);
     border: 3px solid var(--ink);
     border-radius: 999px;
@@ -586,123 +557,181 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
     outline: 3px solid color-mix(in srgb, var(--river) 55%, white);
     outline-offset: 2px;
   }
-  .looking-bar svg {
-    width: 1.7rem;
-    height: 1.7rem;
-    flex: none;
-    color: var(--ink);
-  }
+  .looking-bar svg { width: 1.35rem; height: 1.35rem; flex: none; }
   .looking-bar input {
     flex: 1 1 auto;
     min-width: 0;
     border: 0;
     background: transparent;
     font: inherit;
-    font-size: clamp(1.15rem, 2.4vw, 1.55rem);
-    padding: 0.85rem 0;
+    font-size: 1.15rem;
+    padding: 0.7rem 0;
     color: var(--ink);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
-  .looking-bar input:focus {
-    outline: none;
-  }
-  .looking-bar input::-webkit-search-cancel-button {
-    display: none;
-  }
+  .looking-bar input:focus { outline: none; }
+  .looking-bar input::-webkit-search-cancel-button { display: none; }
   .looking-clear {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.4rem;
+    height: 2.4rem;
     flex: none;
     border: 0;
     border-radius: 50%;
     background: transparent;
     color: var(--ink);
-    font-size: 1.45rem;
+    font-size: 1.4rem;
     line-height: 1;
     cursor: pointer;
   }
-  .looking-clear:hover {
-    background: var(--paper-2);
-  }
-  .looking-clear[hidden] {
-    display: none;
-  }
-  .biz-mark :global(svg) {
-    width: 2rem;
-    height: 2rem;
-    display: block;
-  }
-  .biz-mark.has-logo {
-    background: #fff;
-    overflow: hidden;
-  }
-  .biz-mark :global(.biz-logo) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .looking-note {
-    margin: 0.85rem 0 0;
-    color: var(--ink-soft);
-  }
-  @media (max-width: 640px) {
-    .board { padding: 0.85rem 0.75rem 0.75rem; }
-  }
-  .cat-current {
+  .looking-clear[hidden] { display: none; }
+  .filter-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 0.9rem;
-    align-items: baseline;
-    margin: 0.2rem 0 0.6rem;
-  }
-  .cat-current h2 {
-    font-size: clamp(1.45rem, 2.4vw, 1.9rem);
-    margin: 0;
-  }
-  .biz-list {
+    gap: 0.4rem;
     list-style: none;
-    margin: 0.3rem 0 1.2rem;
+    margin: 0.75rem 0 0;
     padding: 0;
   }
+  .filter-chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.92rem;
+  }
+  .suggest { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+  .suggest a {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 0.28rem 0.7rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.92rem;
+    text-transform: capitalize;
+  }
+  .directory-stack { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+  .directory-stack[data-mode="browse"] .atlas { order: 1; }
+  .directory-stack[data-mode="browse"] .results { order: 2; }
+  .directory-stack[data-mode="browse"] .directory-extra { order: 3; }
+  .directory-stack[data-mode="results"] .results { order: 1; }
+  .directory-stack[data-mode="results"] .atlas { order: 2; }
+  .directory-stack[data-mode="results"] .directory-extra { order: 3; }
+  .atlas, .directory-extra { margin: 0; }
+  .atlas summary, .directory-extra summary {
+    cursor: pointer;
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+  .atlas summary::-webkit-details-marker, .directory-extra summary::-webkit-details-marker { display: none; }
+  .atlas-label {
+    margin: 0.9rem 0 0.45rem;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .town-cards, .trade-grid { list-style: none; margin: 0; padding: 0; }
+  .town-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr));
+    gap: 0.5rem;
+  }
+  .town-cards a, .trade-grid a {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .town-cards a { padding: 0.7rem 0.65rem 0.6rem; }
+  .town-cards a[aria-current="true"], .trade-grid a[aria-current="true"],
+  .town-cards a:hover, .trade-grid a:hover { border-color: var(--pine); }
+  .town-cards strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 1.45rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .town-cards em { color: var(--ink-soft); font-style: normal; font-size: 0.92rem; }
+  .cat-find { display: block; margin: 0.15rem 0 0.55rem; }
+  .cat-find input {
+    width: min(100%, 22rem);
+    border: 1.5px solid var(--ink);
+    background: #fff;
+    border-radius: 999px;
+    font: inherit;
+    padding: 0.55rem 0.9rem;
+  }
+  .trade-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: 0.55rem;
+  }
+  .trade-grid a {
+    display: grid;
+    justify-items: start;
+    gap: 0.2rem;
+    min-height: 0;
+    padding: 0.7rem 0.75rem 0.65rem;
+  }
+  .trade-mark {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: var(--pine);
+    color: #f4efe6;
+    display: grid;
+    place-items: center;
+  }
+  .trade-mark :global(svg) { width: 1.15rem; height: 1.15rem; }
+  .trade-grid strong { font-family: var(--serif); font-size: 1.02rem; font-weight: 600; line-height: 1.15; }
+  .trade-grid a > span:last-child { color: var(--ink-soft); font-size: 0.82rem; }
+  .results h2 { margin: 0 0 0.25rem; font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
+  .biz-list { list-style: none; margin: 0.4rem 0 0; padding: 0; }
   .biz-row {
     display: grid;
-    grid-template-columns: 4.4rem minmax(0, 1fr);
-    gap: 0.35rem 0.9rem;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.35rem 0.75rem;
     align-items: start;
-    padding: 1rem 0;
+    padding: 0.85rem 0;
     border-top: 1px solid var(--line);
   }
-  .results-well .biz-row:first-child {
-    border-top: 0;
-    padding-top: 0.15rem;
-  }
+  .biz-row:first-child { border-top: 0; padding-top: 0.2rem; }
   .biz-mark {
-    width: 4.4rem;
-    height: 4.4rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 0.4rem;
     background: var(--pine-deep);
     color: #f4efe6;
     display: grid;
     place-items: center;
   }
+  .biz-mark :global(svg) { width: 1.25rem; height: 1.25rem; display: block; }
+  .biz-mark.has-logo { background: #fff; overflow: hidden; }
+  .biz-mark :global(.biz-logo) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .biz-title { margin: 0; }
   .biz-name {
     font-family: var(--serif);
-    font-size: 1.35rem;
+    font-size: 1.28rem;
     font-weight: 600;
     line-height: 1.15;
     text-decoration: none;
     color: inherit;
   }
-  .biz-name:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.08em;
-  }
+  .biz-name:hover { text-decoration: underline; text-underline-offset: 0.08em; }
   .badge {
     display: inline-block;
-    margin-left: 0.4rem;
+    margin-left: 0.35rem;
     padding: 0.08rem 0.4rem;
     border: 1px solid color-mix(in srgb, var(--river) 35%, transparent);
     border-radius: 4px;
@@ -711,14 +740,11 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
     letter-spacing: 0.02em;
     vertical-align: middle;
   }
-  .biz-line {
-    display: block;
-    margin-top: 0.16rem;
-    color: var(--ink-soft);
-    font-size: 0.92rem;
-  }
+  .badge-featured { color: #8a5a00; border-color: var(--sun); background: #fff6e0; }
+  .badge-spotlight { color: var(--pine-deep); border-color: var(--pine); }
+  .biz-line { display: block; margin-top: 0.12rem; color: var(--ink-soft); font-size: 0.92rem; }
   .biz-summary {
-    margin: 0.28rem 0 0;
+    margin: 0.25rem 0 0;
     color: var(--ink-soft);
     font-size: 0.92rem;
     display: -webkit-box;
@@ -726,12 +752,26 @@ const suggestions = ['plumber', 'dentist', 'coffee', 'restaurant'];
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .biz-actions {
-    grid-column: 2;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem 0.9rem;
-    margin: 0.15rem 0 0;
-    font-size: 0.92rem;
+  .biz-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.55rem 0 0; }
+  .biz-call { min-height: 2.75rem; }
+  .more-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0 0; }
+  #directory-more[hidden] { display: none; }
+  .directory-extra .notice { margin-top: 0.8rem; }
+  .cat-grid-item[hidden], #cat-grid li[hidden] { display: none; }
+  @media (max-width: 700px) {
+    .directory-head h1 { font-size: 1.7rem; }
+    .directory-head .lede { font-size: 1rem; }
+    .looking-row { flex-direction: column; align-items: stretch; }
+    .list-free { width: 100%; }
+    .looking-bar { min-height: 3.1rem; }
+    .looking-bar input { font-size: 1rem; padding: 0.55rem 0; }
+    .town-cards {
+      display: flex;
+      overflow-x: auto;
+      gap: 0.45rem;
+      padding-bottom: 0.2rem;
+    }
+    .town-cards li { flex: 0 0 7.4rem; }
+    .trade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 </style>
