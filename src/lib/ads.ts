@@ -4,6 +4,7 @@ import { placements, type PlacementId } from '../data/commerce';
 import { eventBanners } from '../data/eventBanners';
 import { homeBanners } from '../data/homeBanners';
 import { weekendBanners } from '../data/weekendBanners';
+import { activeBanners } from './bannerSchedule';
 import { bannersForPlacement } from './businessDb';
 import { httpUrl } from './intake';
 import { eventKey } from './time';
@@ -224,7 +225,7 @@ async function imageAds(
 export async function placementAds(placement: PlacementId): Promise<LiveAd[]> {
   const files =
     placement === 'home-banner' ? homeBanners : placement === 'event-banner' ? eventBanners : placement === 'weekend-banner' ? weekendBanners : [];
-  return imageAds(placement, files);
+  return imageAds(placement, activeBanners(files));
 }
 
 export async function bannerAds(): Promise<LiveAd[]> {
