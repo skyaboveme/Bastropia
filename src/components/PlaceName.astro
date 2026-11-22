@@ -1,0 +1,12 @@
+---
+import { townByName } from '../data/towns';
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+const town = townByName(name);
+---
+
+{town ? <a href={`/${town.slug}`}>{name}</a> : name}

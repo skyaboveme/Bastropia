@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import EventCard from './EventCard.astro';
 import type { StoryRef } from '../lib/relatedStories';
+import PlaceName from './PlaceName.astro';
 import { formatMedium } from '../lib/time';
 
 interface Props {
@@ -24,11 +25,9 @@ const { stories, events } = Astro.props;
         <div class="news-list">
           {stories.map((item) => (
             <article class="story-card">
-              <a href={`/news/${item.id}`}>
-                <p class="kicker">{item.place} · {formatMedium(item.pubDate)}</p>
-                <h4>{item.title}</h4>
-                {item.description && <p class="meta">{item.description}</p>}
-              </a>
+              <p class="kicker"><PlaceName name={item.place} /> · {formatMedium(item.pubDate)}</p>
+              <h4><a href={`/news/${item.id}`}>{item.title}</a></h4>
+              {item.description && <p class="meta">{item.description}</p>}
             </article>
           ))}
         </div>

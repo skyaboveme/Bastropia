@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { facebookGroup } from '../data/site';
+import { offsiteAttrs } from '../lib/links';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Reach the Bastropia desk with a tip, a photo, or an event. The desk does not publish a phone number or street address."
+>
+  <PageHead
+    kicker="Desk"
+    title="Contact the desk"
+    lede="Bastropia does not publish a newsroom phone number or a street address. Use one of the paths below. A person reads what comes in."
+  />
+  <div class="wrap prose">
+    <ul>
+      <li><a href="/tips">Send a tip or photo</a>. Say what you saw, where, and when. A photo can ride along.</li>
+      <li><a href="/submit">Add an event</a>. The desk reviews it before it goes on the calendar.</li>
+      <li><a href="/corrections">Ask for a correction</a> when a fact on a story is wrong.</li>
+      <li><a href="/newsletter">Join the newsletter</a> for the weekend list, Thursday at 7 AM.</li>
+      <li>
+        Write in the <a href={facebookGroup} {...offsiteAttrs(facebookGroup)}>Bastropia Facebook group</a>. That room is public, and it is not a private line to the desk.
+      </li>
+    </ul>
+    <p>
+      Bastropia is not Bastrop County, a city, or an emergency service. For a fire, a crime, or a medical emergency, call 911. Office numbers for the sheriff, the cities, and the schools are on the <a href="/phone-numbers">phone numbers</a> page.
+    </p>
+    <p>The <a href="/staff">masthead</a> says who the byline is. The <a href="/about">about page</a> says what this site is and is not.</p>
+  </div>
+</BaseLayout>

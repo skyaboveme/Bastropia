@@ -79,6 +79,18 @@ const calendarHref = event ? googleCalendarUrl(event, pageUrl) : '';
               <dt>Cost</dt>
               <dd>{event.data.cost}</dd>
             </div>
+            {event.data.performer && (
+              <div>
+                <dt>Performer</dt>
+                <dd>{Array.isArray(event.data.performer) ? event.data.performer.join(', ') : event.data.performer}</dd>
+              </div>
+            )}
+            {event.data.eventStatus && event.data.eventStatus !== 'scheduled' && (
+              <div>
+                <dt>Status</dt>
+                <dd>{event.data.eventStatus}</dd>
+              </div>
+            )}
             {event.data.organizer && (
               <div>
                 <dt>Host</dt>

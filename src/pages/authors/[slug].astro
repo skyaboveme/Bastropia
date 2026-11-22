@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { authors, type Author } from '../../data/authors';
+import { absolute, orgId } from '../../lib/schema';
+import { formatLong } from '../../lib/time';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('news');
+  return authors.map((author) => ({
+    params: { slug: author.slug },
+    props: {
+      author,
+      stories: stories
+        .filter((story) => story.data.author === author.slug)
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}
+
+interface Props {
+  author: Author;
+  stories: { id: string; data: { title: string; description: string; pubDate: Date; place: string } }[];
+}
+
+const { author, stories } = Astro.props;
+const person = {
+  '@type': 'Person',
+  name: author.name,
+  url: absolute(`/authors/${author.slug}`),
+  description: author.description,
+  ...(author.jobTitle ? { jobTitle: author.jobTitle } : {}),
+  worksFor: { '@id': orgId },
+};
+---
+
+<BaseLayout
+  title={author.name}
+  description={author.description}
+  pageType="ProfilePage"
+  extra={[person]}
+>
+  <PageHead kicker={author.jobTitle ?? 'Bastropia'} title={author.name} lede={author.description} />
+  <div class="wrap">
+    <p class="meta"><a href="/staff">Masthead</a></p>
+    <div class="news-list">
+      {stories.map((story) => (
+        <article class="story-card">
+          <p class="kicker">{story.data.place} · {formatLong(story.data.pubDate)}</p>
+          <h2><a href={`/news/${story.id}`}>{story.data.title}</a></h2>
+          <p class="meta">{story.data.description}</p>
+        </article>
+      ))}
+      {!stories.length && <p class="meta">No story is filed under this name yet.</p>}
+    </div>
+  </div>
+</BaseLayout>

@@ -4,8 +4,9 @@ import SocialIcons from './SocialIcons.astro';
 import { burnBan } from '../data/burnBan';
 import { burnView } from '../lib/burnBanView';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
-import { chicagoParts, eventKey, formatLong, labelFromKey } from '../lib/time';
-import { getForecast, isTown, weatherHeroSrc, weatherLabel } from '../lib/weather';
+import { headerHero, headerNight } from '../lib/headerHero';
+import { eventKey, formatLong, labelFromKey } from '../lib/time';
+import { getForecast, isTown, weatherLabel } from '../lib/weather';
 import { readTown, townCookie } from '../lib/townChoice';
 
 const path = Astro.url.pathname.replace(/\/index\.html$/, '').replace(/\/+$/, '') || '/';
@@ -36,31 +37,7 @@ const voteBanner =
         ? `Early voting is open today, ${earlyToday.hours}. Election Day is ${labelFromKey(electionDay)}.`
         : `Election Day is ${labelFromKey(electionDay)}, polls open ${electionHours}. See hours and polling places.`;
 
-const paradeHero = path === '/events' || path === '/this-weekend';
-const weatherHero = path === '/weather';
-const developmentHero = path === '/development';
-const directoryHero = path === '/directory';
-const groupsHero = path === '/groups';
-const governmentHero = path === '/government';
-const newsHero = path === '/news';
-const videosHero = path === '/videos';
-const eatsHero = path === '/eats';
-const churchesHero = path === '/churches';
-const chicagoHour = chicagoParts(now).hour;
-const nightHero = chicagoHour >= 18 || chicagoHour < 6;
-const sectionHero =
-  path === '/' ||
-  path === '/scores' ||
-  paradeHero ||
-  weatherHero ||
-  developmentHero ||
-  directoryHero ||
-  groupsHero ||
-  governmentHero ||
-  newsHero ||
-  videosHero ||
-  eatsHero ||
-  churchesHero;
+const hero = headerHero(path, { night: headerNight(now), scene: forecast?.scene });
 const links = [
   { href: '/', label: 'Front page' },
   { href: '/weather', label: 'Weather' },
@@ -114,86 +91,34 @@ function current(href: string) {
   </div>
 
   <div class="header-stage has-hero">
-    {path === '/' && nightHero && (
-      <div class="header-hero is-night" aria-hidden="true">
-        <img class="is-on" src="/images/header/main-night.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {path === '/' && !nightHero && (
-      <div class="header-hero" data-header-hero aria-hidden="true">
-        <img class="is-on" src="/images/header/smithville.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
-        <img src="/images/header/lost-pines.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
-        <img src="/images/header/bastrop-main.webp" alt="" width="1024" height="341" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {path === '/scores' && (
-      <div class="header-hero is-stadium" aria-hidden="true">
-        <img class="is-on" src="/images/header/stadium.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {paradeHero && (
-      <div class="header-hero is-parade" aria-hidden="true">
-        <img class="is-on" src="/images/header/parade.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {weatherHero && (
-      <div class="header-hero is-weather" aria-hidden="true">
+    <div
+      class:list={['header-hero', hero.heroClass]}
+      data-header-hero={hero.rest.length > 0 ? 'true' : undefined}
+      aria-hidden="true"
+    >
+      <img
+        class="is-on"
+        src={hero.visible.src}
+        alt=""
+        width={hero.visible.width}
+        height={hero.visible.height}
+        decoding="async"
+        fetchpriority="high"
+        sizes="100vw"
+      />
+      {hero.rest.map((image) => (
         <img
-          class="is-on"
-          src={weatherHeroSrc(forecast?.scene ?? 'sunny')}
+          src={image.src}
           alt=""
-          width="1024"
-          height="434"
+          width={image.width}
+          height={image.height}
           decoding="async"
           fetchpriority="low"
+          loading="lazy"
+          sizes="100vw"
         />
-      </div>
-    )}
-    {developmentHero && (
-      <div class="header-hero is-development" aria-hidden="true">
-        <img class="is-on" src="/images/header/development.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {directoryHero && (
-      <div class="header-hero is-directory" aria-hidden="true">
-        <img class="is-on" src="/images/header/directory.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {groupsHero && (
-      <div class="header-hero is-groups" aria-hidden="true">
-        <img class="is-on" src="/images/header/groups.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {governmentHero && (
-      <div class="header-hero is-government" aria-hidden="true">
-        <img class="is-on" src="/images/header/government.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {newsHero && (
-      <div class="header-hero is-news" aria-hidden="true">
-        <img class="is-on" src="/images/header/news.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {videosHero && (
-      <div class="header-hero is-videos" aria-hidden="true">
-        <img class="is-on" src="/images/header/videos.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {eatsHero && (
-      <div class="header-hero is-eats" aria-hidden="true">
-        <img class="is-on" src="/images/header/eats.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {churchesHero && (
-      <div class="header-hero is-directory" aria-hidden="true">
-        <img class="is-on" src="/images/header/directory.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
-    {!sectionHero && (
-      <div class="header-hero is-default" aria-hidden="true">
-        <img class="is-on" src="/images/header/default.webp" alt="" width="1024" height="434" decoding="async" fetchpriority="low" />
-      </div>
-    )}
+      ))}
+    </div>
   <div class="masthead">
     <a class="ear ear-left" href={`/weather?town=${encodeURIComponent(weatherTown)}`}>
       <span class="ear-label">Right now</span>

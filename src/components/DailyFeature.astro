@@ -1,11 +1,13 @@
 ---
 import { tiktokProfile, youtubeChannel } from '../data/site';
-import { currentDailyVideo, playlistEmbed, videoEmbed } from '../lib/dailyVideo';
+import { currentDailyVideo, playlistEmbed, videoEmbed, type DailyVideoRecord } from '../lib/dailyVideo';
 import { offsiteAttrs } from '../lib/links';
 
 interface Props {
   /** Home uses h1. The news page already has a page title. */
   level?: 'h1' | 'h2';
+  /** Pass a record already loaded for schema. Omit it and the component reads KV. */
+  video?: DailyVideoRecord | null;
 }
 
 const { level = 'h2' } = Astro.props;
@@ -16,7 +18,7 @@ const Title = level;
  * /api/daily-video. Empty KV refreshes once here. The playlist is only the
  * last fallback, and the script replaces it when the API has an id.
  */
-const video = await currentDailyVideo();
+const video = Astro.props.video !== undefined ? Astro.props.video : await currentDailyVideo();
 const embedSrc = video ? videoEmbed(video.videoId) : playlistEmbed;
 const frameTitle = video?.title || 'Latest Bastropia Daily episode';
 const subscribeHref = `${youtubeChannel}?sub_confirmation=1`;

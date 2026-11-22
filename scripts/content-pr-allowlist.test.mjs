@@ -223,6 +223,17 @@ test('this change is outside the allowlist', () => {
   assert.equal(own.blocked.length, 7);
 });
 
+test('news frontmatter stays inside the content allowlist', () => {
+  assert.equal(isAllowedContentPath('src/content/news/bridge-reopens.md'), true);
+  assert.equal(isAllowedContentPath('src/content/news/bridge-reopens.mdx'), true);
+  const result = classifyFiles(files(
+    ['src/content/news/bridge-reopens.mdx', 'modified'],
+    ['public/images/news/bridge-reopens.jpg', 'added'],
+  ));
+  assert.equal(result.eligible, true);
+  assert.deepEqual(result.blocked, []);
+});
+
 test('workflows keep the gate and the deploy token apart', () => {
   const root = new URL('../.github/workflows/', import.meta.url);
   const auto = readFileSync(new URL('auto-merge-content.yml', root), 'utf8');
@@ -243,12 +254,15 @@ test('workflows keep the gate and the deploy token apart', () => {
   assert.match(build, /persist-credentials: false/);
   assert.match(build, /npm ci/);
   assert.match(build, /npm run build/);
+  assert.match(build, /node scripts\/seo-check\.mjs/);
   assert.doesNotMatch(build, /contents: write/);
   assert.doesNotMatch(build, /CLOUDFLARE_API_TOKEN/);
 
   assert.match(deploy, /workflow_dispatch:/);
   assert.match(deploy, /ref="main"/);
   assert.match(deploy, /npx wrangler deploy/);
+  assert.match(deploy, /node scripts\/indexnow\.mjs/);
+  assert.match(deploy, /continue-on-error: true/);
   assert.doesNotMatch(deploy.split('name: Deploy to Cloudflare')[0], /CLOUDFLARE_API_TOKEN/);
   assert.match(deploy, /npm run build/);
 });

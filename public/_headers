@@ -9,6 +9,10 @@
 /images/bastrop-aerial*
   Cache-Control: public, max-age=604800
 
+# News JPEGs are reused under the same filename, so a day plus a week of stale-while-revalidate.
+/images/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
 /brand/*
   Cache-Control: public, max-age=604800
 

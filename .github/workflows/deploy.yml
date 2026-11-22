@@ -63,3 +63,9 @@ jobs:
             exit 1
           fi
           npx wrangler deploy
+      - name: Ping IndexNow
+        if: success()
+        continue-on-error: true
+        env:
+          INDEXNOW_BEFORE: ${{ github.event.before }}
+        run: node scripts/indexnow.mjs || true
