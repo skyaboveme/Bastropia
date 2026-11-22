@@ -1,98 +1,175 @@
 ---
 /**
- * One church card for the worship-times directory: town badge, denomination,
- * address, listed times, website, and the date those times were checked.
+ * One congregation in the church directory.
+ * Full cards are for posted worship times. Compact rows are the list of
+ * congregations that have not posted a schedule.
  */
-import { townSlug, websiteLabel, type Church } from '../data/churches';
+import { offsiteAttrs } from '../lib/links';
+import {
+  aggregatorTimesNote,
+  churchSearchText,
+  officialTimesNote,
+  phoneLinks,
+  townSlug,
+  websiteLabel,
+  type Church,
+} from '../data/churches';
 
 interface Props {
   church: Church;
+  compact?: boolean;
 }
 
-const { church } = Astro.props;
+const { church, compact = false } = Astro.props;
 const slug = townSlug(church.city);
-const timeLines = church.times
-  .split(';')
-  .map((line) => line.trim())
-  .filter(Boolean);
-const linkLabel = websiteLabel(church.website);
+const worshipLines = church.worshipTimes.split(';').map((line) => line.trim()).filter(Boolean);
+const midweekLines = church.midweekServices.split(';').map((line) => line.trim()).filter(Boolean);
+const phones = phoneLinks(church.phone);
+const websiteHost = church.website ? websiteLabel(church.website) : '';
+const search = churchSearchText(church);
+const timesNote = church.confirmWithChurch ? aggregatorTimesNote : church.worshipTimes || church.midweekServices ? officialTimesNote : '';
 ---
 
-<article class:list={['church-card', `church-card-${slug}`, church.confirmWithChurch && 'is-confirm']}>
-  <header class="church-card-head">
-    <div class="church-card-title">
-      <h3>{church.name}</h3>
-      {church.denomination && <p class="church-card-denom">{church.denomination}</p>}
-      {church.address && <p class="church-card-address">{church.address}</p>}
+{compact ? (
+  <li
+    class="church-more-item"
+    data-church
+    data-town={church.city}
+    data-denom={church.denomination}
+    data-search={search}
+  >
+    <p>
+      <strong>{church.name}</strong>
+      <em>{[church.city, church.denomination].filter(Boolean).join(' · ')}</em>
+      <span class="note">
+        {church.directions ? (
+          <a href={church.directions} aria-label={`Directions to ${church.name}`} {...offsiteAttrs(church.directions)}>{church.address}</a>
+        ) : (
+          church.address && <span>{church.address}</span>
+        )}
+        {church.website && <a href={church.website} {...offsiteAttrs(church.website)}>Website</a>}
+        {church.facebook && <a href={church.facebook} {...offsiteAttrs(church.facebook)}>Facebook</a>}
+        {phones.map((phone) => <a href={phone.href}>{phone.label}</a>)}
+      </span>
+    </p>
+  </li>
+) : (
+  <article
+    class:list={['church-card', `church-card-${slug}`, church.confirmWithChurch && 'is-confirm', (church.featured || church.partner) && 'is-featured']}
+    data-church
+    data-town={church.city}
+    data-denom={church.denomination}
+    data-search={search}
+  >
+    {church.image && (
+      <img class="church-card-photo" src={church.image} alt={church.imageAlt || church.name} width="1200" height="500" loading="lazy" decoding="async" />
+    )}
+    <div class="church-card-body">
+      <header class="church-card-head">
+        <div class="church-card-title">
+          <p class="kicker">{church.denomination}</p>
+          <h3>{church.name}</h3>
+          {church.aka && <p class="meta">Also known as {church.aka}</p>}
+        </div>
+        <span class="church-town-badge">{church.city}</span>
+      </header>
+
+      {church.address && (
+        <p class="church-card-address">
+          {church.directions ? (
+            <a href={church.directions} aria-label={`Directions to ${church.name}`} {...offsiteAttrs(church.directions)}>{church.address}</a>
+          ) : (
+            church.address
+          )}
+        </p>
+      )}
+
+      {(worshipLines.length > 0 || midweekLines.length > 0) && (
+        <section class="church-times" aria-label="Worship times">
+          {worshipLines.length > 0 && (
+            <>
+              <h4>Worship times</h4>
+              {worshipLines.length > 1 ? (
+                <ul>
+                  {worshipLines.map((line) => <li>{line}</li>)}
+                </ul>
+              ) : (
+                <p>{worshipLines[0]}</p>
+              )}
+            </>
+          )}
+          {midweekLines.length > 0 && (
+            <>
+              <h4 class:list={[{ 'is-follow': worshipLines.length > 0 }]}>Midweek</h4>
+              {midweekLines.length > 1 ? (
+                <ul>
+                  {midweekLines.map((line) => <li>{line}</li>)}
+                </ul>
+              ) : (
+                <p>{midweekLines[0]}</p>
+              )}
+            </>
+          )}
+          {timesNote && <p class:list={['church-note', church.confirmWithChurch && 'is-confirm']}>{timesNote}</p>}
+        </section>
+      )}
+
+      <p class="church-card-links">
+        {church.partner && <span class="badge">Partner</span>}
+        {church.website && <a href={church.website} {...offsiteAttrs(church.website)}>{websiteHost}</a>}
+        {church.facebook && <a href={church.facebook} {...offsiteAttrs(church.facebook)}>Facebook</a>}
+        {phones.map((phone) => <a href={phone.href}>{phone.label}</a>)}
+      </p>
     </div>
-    <span class="church-town-badge">{church.city}</span>
-  </header>
-
-  <section class="church-times" aria-label="Worship times">
-    <h4>Worship times</h4>
-    {timeLines.length > 1 ? (
-      <ul>
-        {timeLines.map((line) => (
-          <li>{line}</li>
-        ))}
-      </ul>
-    ) : (
-      <p>{church.times}</p>
-    )}
-    {church.confirmWithChurch && (
-      <p class="church-confirm">Confirm these times with the church. They were taken from a directory listing, not the congregation’s own page.</p>
-    )}
-  </section>
-
-  <p class="church-card-meta">
-    <a href={church.website} target="_blank" rel="noopener noreferrer">{linkLabel}</a>
-    {church.verified && (
-      <>
-        <span aria-hidden="true"> · </span>
-        <span>Verified {church.verified}</span>
-      </>
-    )}
-  </p>
-</article>
+  </article>
+)}
 
 <style>
   .church-card {
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 0.45rem;
-    padding: 0.85rem 0.95rem 0.9rem;
+    border: 1px solid rgba(20, 26, 23, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px rgba(20, 26, 23, 0.05);
+    overflow: hidden;
+    min-width: 0;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 18rem;
+  }
+  .church-card[hidden] { display: none; }
+  .church-card.is-confirm { border-color: #e6c8b8; }
+  .church-card.is-featured { border-color: var(--sun); box-shadow: 0 0 0 1px var(--sun); }
+  .church-card-photo {
+    display: block;
+    width: 100%;
+    height: 8.5rem;
+    object-fit: cover;
+    background: var(--paper-2);
+  }
+  .church-card-body {
     display: grid;
     gap: 0.7rem;
-    min-width: 0;
-    break-inside: avoid;
+    padding: 0.85rem 0.95rem 0.95rem;
   }
   .church-card-head {
     display: flex;
     justify-content: space-between;
     align-items: start;
     gap: 0.7rem;
-    padding-bottom: 0.65rem;
-    border-bottom: 1px solid var(--line);
   }
   .church-card-title h3 {
     font-family: var(--serif);
     font-size: 1.32rem;
     font-weight: 620;
     line-height: 1.15;
-    margin: 0;
+    margin: 0.15rem 0 0;
   }
-  .church-card-denom,
+  .church-card-title .kicker { margin: 0; }
   .church-card-address {
-    margin: 0.2rem 0 0;
-    font-family: var(--sans);
-    font-size: 0.9rem;
-    line-height: 1.35;
-    color: var(--ink-soft);
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.4;
   }
-  .church-card-denom {
-    font-weight: 650;
-    color: var(--pine-deep);
-  }
+  .church-card-address a { color: inherit; }
   .church-town-badge {
     flex: none;
     display: inline-flex;
@@ -101,7 +178,7 @@ const linkLabel = websiteLabel(church.website);
     font-family: var(--sans);
     font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     border-radius: 999px;
     background: var(--paper-2);
@@ -112,17 +189,19 @@ const linkLabel = websiteLabel(church.website);
   .church-card-smithville .church-town-badge { background: #f8e7c0; color: var(--sun-deep); }
   .church-card-mcdade .church-town-badge { background: #ece6f6; color: #4c3480; }
   .church-card-cedar-creek .church-town-badge { background: #e8f3e4; color: #2d5a27; }
-  .church-card.is-confirm { border-color: #e6c8b8; }
+  .church-card-paige .church-town-badge { background: #f3ead8; color: #6a4b16; }
+  .church-card-red-rock .church-town-badge { background: #f8e4dc; color: #8a3b24; }
+  .church-card-rosanky .church-town-badge { background: #e7f0e4; color: #245c32; }
 
   .church-times {
     min-width: 0;
     padding: 0.55rem 0.65rem 0.65rem;
-    border-radius: 0.35rem;
+    border-radius: 0.55rem;
     background: var(--paper);
     border-left: 3px solid var(--pine);
   }
   .church-times h4 {
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.3rem;
     font-family: var(--sans);
     font-size: 0.7rem;
     font-weight: 700;
@@ -130,6 +209,7 @@ const linkLabel = websiteLabel(church.website);
     text-transform: uppercase;
     color: var(--pine-deep);
   }
+  .church-times h4.is-follow { margin-top: 0.65rem; }
   .church-times ul {
     list-style: none;
     margin: 0;
@@ -138,28 +218,52 @@ const linkLabel = websiteLabel(church.website);
     gap: 0.28rem;
   }
   .church-times li,
-  .church-times p {
-    margin: 0;
-    font-family: var(--sans);
-    font-size: 0.95rem;
-    line-height: 1.45;
-    color: var(--ink);
-  }
-  .church-confirm {
-    margin: 0.5rem 0 0 !important;
-    font-size: 0.86rem !important;
+  .church-times p { margin: 0; font-size: 0.95rem; line-height: 1.45; }
+  .church-note {
+    margin: 0.55rem 0 0 !important;
+    font-size: 0.82rem !important;
     line-height: 1.4;
-    color: var(--sun-deep);
-    font-weight: 650;
-  }
-
-  .church-card-meta {
-    margin: 0;
-    font-family: var(--sans);
-    font-size: 0.82rem;
-    font-weight: 650;
     color: var(--ink-soft);
   }
-  .church-card-meta a { color: var(--river-deep); text-decoration: none; }
-  .church-card-meta a:hover { text-decoration: underline; text-underline-offset: 0.1em; }
+  .church-note.is-confirm { color: var(--sun-deep); font-weight: 650; }
+
+  .church-card-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    align-items: center;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+  .church-card-links a { color: var(--river-deep); font-weight: 650; text-decoration: none; }
+  .church-card-links a:hover { text-decoration: underline; text-underline-offset: 0.1em; }
+  .church-card-links .badge { margin: 0; }
+
+  .church-more-item { border-top: 1px solid var(--line); }
+  .church-more-item[hidden] { display: none; }
+  .church-more-item p { margin: 0; padding: 0.65rem 0; }
+  .church-more-item strong {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.15rem;
+    line-height: 1.2;
+  }
+  .church-more-item em,
+  .church-more-item .note {
+    display: block;
+    font-style: normal;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+  }
+  .church-more-item .note { margin-top: 0.15rem; }
+  .church-more-item .note a { color: var(--river-deep); font-weight: 650; text-decoration: none; }
+  .church-more-item .note a:hover { text-decoration: underline; text-underline-offset: 0.1em; }
+  .church-more-item .note a + a::before,
+  .church-more-item .note span + a::before,
+  .church-more-item .note a + span::before {
+    content: " · ";
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
 </style>

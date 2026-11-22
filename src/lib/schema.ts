@@ -3,6 +3,7 @@ import { authorBySlug } from '../data/authors.ts';
 import { offerText } from '../data/eatsSpecials.ts';
 import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site.ts';
 import { videoEmbed } from './dailyVideoFeed.ts';
+import { phoneLinks, type Church } from '../data/churches.ts';
 import { mapsSearchUrl } from './maps.ts';
 import { eventKey, TZ } from './time.ts';
 
@@ -402,38 +403,40 @@ export function directoryBusiness(business: {
   };
 }
 
-const churchConfirm = 'Confirm these times with the church. They were taken from a directory listing, not the congregation’s own page.';
+const churchConfirm = 'Times from a third-party listing; confirm with the church.';
 
-export function churchDirectory(list: {
-  name: string;
-  denomination: string;
-  city: string;
-  address: string;
-  times: string;
-  website: string;
-  confirmWithChurch: boolean;
-}[]) {
+export function churchDirectory(list: Church[]) {
   return {
     '@type': 'ItemList',
-    name: 'Bastrop County churches with posted worship times',
+    name: 'Bastrop County church directory',
     numberOfItems: list.length,
-    itemListElement: list.map((church, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Church',
-        name: church.name,
-        url: church.website,
-        description: [church.denomination, church.times, church.confirmWithChurch ? churchConfirm : ''].filter(Boolean).join(' '),
-        address: {
-          '@type': 'PostalAddress',
-          ...(church.address ? { streetAddress: church.address } : {}),
-          addressLocality: church.city,
-          addressRegion: 'TX',
-          addressCountry: 'US',
+    itemListElement: list.map((church, index) => {
+      const url = church.website || church.facebook;
+      const telephone = phoneLinks(church.phone)[0]?.href.replace(/^tel:/, '') ?? '';
+      const sameAs = church.facebook && church.facebook !== url ? [church.facebook] : undefined;
+      const schedule = [church.worshipTimes, church.midweekServices && `Midweek: ${church.midweekServices}`].filter(Boolean).join(' ');
+      const description = [church.denomination, schedule, church.confirmWithChurch ? churchConfirm : ''].filter(Boolean).join(' ');
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': ['Church', 'PlaceOfWorship'],
+          name: church.name,
+          ...(url ? { url } : {}),
+          ...(telephone ? { telephone } : {}),
+          ...(sameAs ? { sameAs } : {}),
+          ...(description ? { description } : {}),
+          address: {
+            '@type': 'PostalAddress',
+            ...(church.streetAddress ? { streetAddress: church.streetAddress } : {}),
+            ...(church.city ? { addressLocality: church.city } : {}),
+            ...(church.state ? { addressRegion: church.state } : {}),
+            ...(church.zip ? { postalCode: church.zip } : {}),
+            addressCountry: 'US',
+          },
         },
-      },
-    })),
+      };
+    }),
   };
 }
 
