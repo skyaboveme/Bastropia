@@ -271,16 +271,25 @@ export function newsImage(path: string, size?: { width: number; height: number }
   };
 }
 
+function articleAbstract(story: CollectionEntry<'news'>): string {
+  const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
+  if (facts.length) return facts.join(' ');
+  return (story.data.stats ?? [])
+    .map((stat) => [stat.value, stat.label, stat.note].map((part) => part?.trim() ?? '').filter(Boolean).join(' '))
+    .filter(Boolean)
+    .join(' ');
+}
+
 export function newsNode(story: CollectionEntry<'news'>, size?: { width: number; height: number }) {
   const path = `/news/${story.id}`;
   const modified = story.data.updated ?? story.data.pubDate;
-  const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
+  const abstract = articleAbstract(story);
   return {
     '@type': 'NewsArticle',
     '@id': `${absolute(path)}#article`,
     headline: story.data.title,
     description: story.data.description,
-    ...(facts.length ? { abstract: facts.join(' ') } : {}),
+    ...(abstract ? { abstract } : {}),
     datePublished: schemaDate(story.data.pubDate),
     dateModified: schemaDate(modified),
     articleSection: story.data.place,

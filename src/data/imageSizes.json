@@ -1539,8 +1539,16 @@
     "height": 944,
     "width": 1600
   },
+  "/images/news/bastrop-county-edgeconnex-tax-break-talk-state-data-center-exemption.jpg": {
+    "height": 1200,
+    "width": 1600
+  },
   "/images/news/bastrop-county-esd-3-ambulance-first-month-1023-calls.jpg": {
     "height": 1022,
+    "width": 1600
+  },
+  "/images/news/bastrop-county-thanksgiving-week-2026-tree-lighting-wassail-fest.jpg": {
+    "height": 1139,
     "width": 1600
   },
   "/images/news/bastrop-county-weekend-nov-20-22-2026.jpg": {
@@ -1562,6 +1570,10 @@
   "/images/news/bastrop-isd-rejects-tax-rate-hike.jpg": {
     "height": 1200,
     "width": 1200
+  },
+  "/images/news/bastrop-isd-winter-blast-2026-toy-registration-dec-1.jpg": {
+    "height": 1200,
+    "width": 1600
   },
   "/images/news/bastrop-live-music-pilot-downtown-grants.jpg": {
     "height": 1200,
@@ -1588,6 +1600,10 @@
     "width": 1600
   },
   "/images/news/bastropia-daily-2026-11-21.jpg": {
+    "height": 1067,
+    "width": 1600
+  },
+  "/images/news/bastropia-daily-2026-11-22.jpg": {
     "height": 1067,
     "width": 1600
   },
@@ -1667,6 +1683,10 @@
     "height": 767,
     "width": 1100
   },
+  "/images/news/musk-companies-bastrop-county-jobs-worth-impact.jpg": {
+    "height": 900,
+    "width": 1600
+  },
   "/images/news/operation-turkey-elgin-3200-thanksgiving-meals-2026.jpg": {
     "height": 1200,
     "width": 1600
@@ -1682,6 +1702,10 @@
   "/images/news/taco-casa-chestnut.jpg": {
     "height": 1200,
     "width": 1200
+  },
+  "/images/news/texas-71-readdressing-bastrop-county-911-1700-addresses.jpg": {
+    "height": 1067,
+    "width": 1600
   },
   "/images/news/this-week-in-bastrop-county-history-nov-20-26-2026.jpg": {
     "height": 944,
@@ -1743,6 +1767,18 @@
     "height": 1350,
     "width": 1080
   },
+  "/images/social/bastrop-county-edgeconnex-tax-break-talk-state-data-center-exemption-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/bastrop-county-thanksgiving-week-2026-tree-lighting-wassail-fest-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/bastrop-isd-winter-blast-2026-toy-registration-dec-1-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
   "/images/social/bastrop-live-music-pilot-downtown-grants-ig.jpg": {
     "height": 1350,
     "width": 1080
@@ -1759,7 +1795,15 @@
     "height": 1350,
     "width": 1080
   },
+  "/images/social/musk-companies-bastrop-county-jobs-worth-impact-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
   "/images/social/operation-turkey-elgin-3200-thanksgiving-meals-2026-ig.jpg": {
+    "height": 1350,
+    "width": 1080
+  },
+  "/images/social/texas-71-readdressing-bastrop-county-911-1700-addresses-ig.jpg": {
     "height": 1350,
     "width": 1080
   },

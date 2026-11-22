@@ -1,6 +1,11 @@
 ---
 /**
- * Stat box and a lighter note for news stories.
+ * In-story stat box and a lighter note for news stories.
+ *
+ * The story header infographic comes from `stats` in frontmatter (see
+ * docs/news-format.md). Use this component inside the body when one figure
+ * or a short note still belongs next to a paragraph. `variant="note"` is the
+ * side callout: on a wide screen it sits in the right margin.
  *
  * Plain `.md` stories stay as they are. A story that needs a box is `.mdx`
  * in `src/content/news/` and imports this component:

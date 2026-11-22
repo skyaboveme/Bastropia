@@ -41,8 +41,24 @@ const news = defineCollection({
     place: z.string(),
     /** Slug from src/data/authors.ts. Omit it to keep the Bastropia desk byline. */
     author: z.string().min(1).optional(),
-    /** Short bullets shown on the story and copied into the article abstract. */
+    /** Short bullets copied into the article abstract. Also the fallback for the infographic when `stats` is omitted. */
     keyFacts: z.array(z.string().min(1)).max(8).optional(),
+    /**
+     * Infographic figures under the hero. Each card is a big figure, a short label,
+     * and an optional note or source. Use only numbers already in the story.
+     * When omitted, the page builds cards from keyFacts. See docs/news-format.md.
+     */
+    stats: z
+      .array(
+        z.object({
+          value: z.string().min(1),
+          label: z.string().min(1),
+          note: z.string().min(1).optional(),
+          source: z.string().min(1).optional(),
+        }),
+      )
+      .max(8)
+      .optional(),
     sourceUrl: z.string().url().optional(),
     sourceLabel: z.string().optional(),
     /** Newest story with lead: true is the homepage lead. Omit it to leave the previous lead in place. */
