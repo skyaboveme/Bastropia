@@ -4,6 +4,7 @@ import { authors } from '../data/authors';
 import { businesses } from '../data/businesses';
 import { siteUrl } from '../data/site';
 import { listLiveBusinesses } from '../lib/businessDb';
+import { listEvents } from '../lib/eventSource';
 
 export const prerender = false;
 
@@ -77,8 +78,8 @@ const hubs: Entry[] = [
 ];
 
 export const GET: APIRoute = async () => {
-  const [events, news, social, updates, listed] = await Promise.all([
-    getCollection('events'),
+  const [{ events, source }, news, social, updates, listed] = await Promise.all([
+    listEvents(),
     getCollection('news'),
     getCollection('social'),
     getCollection('updates'),
@@ -90,12 +91,14 @@ export const GET: APIRoute = async () => {
     ...businesses.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
     ...authors.map((author) => ({ path: `/authors/${author.slug}`, priority: '0.4' })),
     ...listed.map((business) => ({ path: `/${business.slug}`, priority: '0.6' })),
-    ...events.map((event) => ({
-      path: `/events/${event.id}`,
-      lastmod: event.data.start,
-      priority: '0.8',
-      image: event.data.image,
-    })),
+    ...(source === 'bcc'
+      ? []
+      : events.map((event) => ({
+          path: `/events/${event.id}`,
+          lastmod: event.data.start,
+          priority: '0.8',
+          image: event.data.image,
+        }))),
     ...news.map((story) => ({
       path: `/news/${story.id}`,
       lastmod: story.data.updated ?? story.data.pubDate,

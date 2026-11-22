@@ -1,6 +1,8 @@
 import { handle } from '@astrojs/cloudflare/handler';
 import { runAlertWatch } from './lib/alertWatch';
 import { refreshDailyVideo } from './lib/dailyVideo';
+import { refreshBccEvents, runWithEventsSource, type EventsSourceMode } from './lib/eventSource';
+import type { SessionKv } from './lib/sessionKv';
 import {
   HOME_CACHE_CONTROL,
   HOME_STORE_CONTROL,
@@ -108,8 +110,35 @@ async function homepage(request: Request, env: Env, ctx: ExecutionContext) {
   return fillHome(request, env, ctx, key);
 }
 
+function eventsMode(env: unknown): EventsSourceMode {
+  return (env as { EVENTS_SOURCE?: string }).EVENTS_SOURCE === 'bcc' ? 'bcc' : 'local';
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    return runWithEventsSource(eventsMode(env), () => render(request, env, ctx));
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(
+      runAlertWatch().catch((error) => {
+        console.error('alert watch failed', error);
+      }),
+    );
+    ctx.waitUntil(
+      refreshDailyVideo().catch((error) => {
+        console.error('daily video refresh failed', error);
+      }),
+    );
+    ctx.waitUntil(
+      refreshBccEvents({ kv: (env as { SESSION?: SessionKv }).SESSION }).catch((error) => {
+        console.error('bcc events refresh failed', error);
+      }),
+    );
+  },
+};
+
+async function render(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     if (url.hostname === WWW_HOST) {
       url.hostname = APEX_HOST;
@@ -123,18 +152,4 @@ export default {
 
     const response = await handle(request, env, ctx);
     return withSecurityHeaders(response);
-  },
-
-  async scheduled(_controller: ScheduledController, _env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(
-      runAlertWatch().catch((error) => {
-        console.error('alert watch failed', error);
-      }),
-    );
-    ctx.waitUntil(
-      refreshDailyVideo().catch((error) => {
-        console.error('daily video refresh failed', error);
-      }),
-    );
-  },
-};
+}

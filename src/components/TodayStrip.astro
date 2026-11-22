@@ -1,8 +1,9 @@
 ---
+import EventCredit from './EventCredit.astro';
 import { youtubeChannel } from '../data/site';
 import { thumbnail, watchUrl } from '../data/videos';
-import { getCollection } from 'astro:content';
 import { currentDailyVideo } from '../lib/dailyVideo';
+import { eventHref, listEvents } from '../lib/eventSource';
 import { capOrganizer, filterEvents } from '../lib/events';
 import { offsiteAttrs } from '../lib/links';
 import { eventKey, labelFromKey, stampParts, thisWeekendKeys, whenLabel } from '../lib/time';
@@ -18,8 +19,8 @@ const todayLabel = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
 }).format(now);
-const [events, video, forecasts] = await Promise.all([
-  getCollection('events'),
+const [{ events, source }, video, forecasts] = await Promise.all([
+  listEvents(),
   currentDailyVideo(),
   Promise.all(
     stripTowns.map(async (town) => {
@@ -133,7 +134,7 @@ const weatherLabelText =
         <ul class="today-events">
           {shownEvents.map((event) => (
             <li>
-              <a href={`/events/${event.id}`}>
+              <a href={eventHref(event, source)} {...offsiteAttrs(eventHref(event, source))}>
                 <span class="when">
                   {eventsAreToday
                     ? whenLabel(event.data.schedule, event.data.start, event.data.end)
@@ -148,6 +149,7 @@ const weatherLabelText =
         <p class="meta">Nothing is on the calendar yet.</p>
       )}
       <a class="today-more" href="/events">{eventsAreToday ? 'All events' : 'Events calendar'}</a>
+      <EventCredit compact content="today-strip" />
     </article>
 
     <article class="today-card today-events-card" aria-label="This weekend">
@@ -156,7 +158,7 @@ const weatherLabelText =
         <ul class="today-events">
           {weekendHighlights.map((event) => (
             <li>
-              <a href={`/events/${event.id}`}>
+              <a href={eventHref(event, source)} {...offsiteAttrs(eventHref(event, source))}>
                 <span class="when">{stampParts(event.data.start).weekday} · {whenLabel(event.data.schedule, event.data.start, event.data.end)}</span>
                 <strong>{event.data.title}</strong>
               </a>
@@ -167,6 +169,7 @@ const weatherLabelText =
         <p class="meta">Nothing is listed for this weekend.</p>
       )}
       <a class="today-more" href="/this-weekend">Friday to Sunday</a>
+      <EventCredit compact content="weekend-strip" />
     </article>
   </div>
 </section>

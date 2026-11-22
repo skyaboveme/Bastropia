@@ -5,6 +5,7 @@ import MoreFromBastrop from '../../components/MoreFromBastrop.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import PlaceName from '../../components/PlaceName.astro';
 import { authorBySlug } from '../../data/authors';
+import { listEvents } from '../../lib/eventSource';
 import { filterEvents } from '../../lib/events';
 import { imageSize } from '../../lib/imageSize';
 import { relatedStories } from '../../lib/relatedStories';
@@ -18,7 +19,7 @@ export async function getStaticPaths() {
 
 const { story } = Astro.props;
 const { Content } = await render(story);
-const [stories, events] = await Promise.all([getCollection('news'), getCollection('events')]);
+const [stories, { events }] = await Promise.all([getCollection('news'), listEvents()]);
 const related = relatedStories(
   story.id,
   stories.map((item) => ({
