@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import MoreFromBastrop from '../../components/MoreFromBastrop.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import PlaceName from '../../components/PlaceName.astro';
+import StoryGlance from '../../components/StoryGlance.astro';
 import { authorBySlug } from '../../data/authors';
 import { listEvents } from '../../lib/eventSource';
 import { filterEvents } from '../../lib/events';
@@ -34,7 +35,6 @@ const related = relatedStories(
 const upcoming = filterEvents(events, { when: 'upcoming' }).slice(0, 3);
 const photo = story.data.image ? imageSize(story.data.image) : undefined;
 const writer = authorBySlug(story.data.author);
-const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
 ---
 
 <BaseLayout
@@ -49,8 +49,8 @@ const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ??
   section={story.data.place}
   extra={[newsNode(story, photo)]}
 >
-  <article class="wrap">
-    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+  <article class="wrap story">
+    <header class="page-head story-top">
       <p class="kicker"><PlaceName name={story.data.place} /> · {formatLong(story.data.pubDate)}</p>
       <h1>{story.data.title}</h1>
       <p class="meta">
@@ -63,16 +63,8 @@ const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ??
       </p>
       <p class="lede">{story.data.description}</p>
     </header>
-    {facts.length > 0 && (
-      <aside class="key-facts" aria-label="Key facts">
-        <h2>Key facts</h2>
-        <ul>
-          {facts.map((fact) => <li>{fact}</li>)}
-        </ul>
-      </aside>
-    )}
     {story.data.image && (
-      <figure class="story-photo">
+      <figure class="story-photo story-hero">
         <img
           class="event-photo"
           src={story.data.image}
@@ -84,11 +76,50 @@ const facts = story.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ??
         {story.data.imageCredit && <figcaption class="photo-credit">{story.data.imageCredit}</figcaption>}
       </figure>
     )}
-    <div class="prose">
+    <StoryGlance stats={story.data.stats} keyFacts={story.data.keyFacts} />
+    <div class="prose story-body">
       <Content />
-      {story.data.sourceUrl && <p>Source: <a href={story.data.sourceUrl}>{story.data.sourceLabel ?? 'Public source'}</a></p>}
+      {story.data.sourceUrl && (
+        <p class="story-credit">Source: <a href={story.data.sourceUrl}>{story.data.sourceLabel ?? 'Public source'}</a></p>
+      )}
     </div>
     <MoreFromBastrop stories={related} events={upcoming} />
     <NewsletterSignup />
   </article>
 </BaseLayout>
+
+<script>
+  const glanceLabels = new Set(['whats next', 'what happens next', 'timeline', 'at a glance']);
+
+  function sectionLabel(element: Element): string {
+    return (element.textContent || '').trim().toLowerCase().replace(/['’]/g, '');
+  }
+
+  function markStorySections() {
+    const root = document.querySelector('.story-body');
+    if (!root) return;
+    const headings = root.querySelectorAll(':scope > p, :scope > h2, :scope > h3');
+    headings.forEach((heading) => {
+      const strong = heading.querySelector(':scope > strong');
+      const text = (heading.textContent || '').trim();
+      const onlyStrong = strong && text === (strong.textContent || '').trim();
+      if (heading.tagName === 'P' && !onlyStrong) return;
+      if (heading.tagName === 'P') heading.classList.add('story-subhead');
+      const label = sectionLabel(heading);
+      const next = heading.nextElementSibling;
+      if (!next || (next.tagName !== 'UL' && next.tagName !== 'OL')) return;
+      if (label === 'sources') next.classList.add('story-sources');
+      else if (glanceLabels.has(label)) next.classList.add('story-timeline');
+    });
+    root.querySelectorAll('table').forEach((table) => {
+      if (table.parentElement?.classList.contains('story-table')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'story-table';
+      wrap.tabIndex = 0;
+      table.replaceWith(wrap);
+      wrap.appendChild(table);
+    });
+  }
+
+  markStorySections();
+</script>

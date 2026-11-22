@@ -94,6 +94,25 @@ test('an updated date and key facts land on the article', () => {
   assert.equal(image.height, 900);
 });
 
+test('stats fill the abstract only when the story has no key facts', () => {
+  const story = {
+    id: 'plant',
+    data: {
+      title: 'Plant grows',
+      description: 'A plant.',
+      pubDate: new Date('2026-11-21T06:00:00-06:00'),
+      place: 'Bastrop',
+      stats: [{ value: '$100 million', label: 'private investment', note: 'Announced Nov. 17' }],
+    },
+  } as CollectionEntry<'news'>;
+  assert.equal(newsNode(story).abstract, '$100 million private investment Announced Nov. 17');
+  const both = newsNode({
+    ...story,
+    data: { ...story.data, keyFacts: ['Keeps the written facts'] },
+  } as CollectionEntry<'news'>);
+  assert.equal(both.abstract, 'Keeps the written facts');
+});
+
 test('a guide article carries the updated date and an FAQ page when questions exist', () => {
   const guide = guideNode({
     id: 'moving-to-bastrop-county',

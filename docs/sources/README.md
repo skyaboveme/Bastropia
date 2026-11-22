@@ -35,6 +35,10 @@ These can later power a searchable church directory page (filter by town and den
 
 These can later power a county government reference page and automatic agenda-preview stories.
 
+## News story format
+
+- `../news-format.md` — frontmatter for a news story, including the `stats` infographic cards. Use it on every new story.
+
 ## Article images
 
 - `image-guide.md` — how to add a photo to a news story: file path, frontmatter fields, size targets, licensing rules, and credit format. Use this on every new article when a properly licensed image is available.
