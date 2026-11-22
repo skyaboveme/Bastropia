@@ -4,11 +4,14 @@ export type HomeBanner = {
   src: string;
   alt: string;
   href: string;
+  /** Inclusive last day to show this banner, YYYY-MM-DD in America/Chicago. */
+  endDate?: string;
 };
 
 /**
  * Sitewide rotating banners. Each file is 1200×500.
  * Add one object per advertiser. The spot rotates when there is more than one.
+ * A banner past endDate is left off at request time. An empty list shows the house invitation.
  */
 export const homeBanners: HomeBanner[] = [
   {
