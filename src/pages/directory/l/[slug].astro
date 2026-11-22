@@ -1,9 +1,9 @@
 ---
 export const prerender = false;
 
-import { getBusiness } from '../../../lib/businessDb';
+import { getBusiness, listingIsPublic } from '../../../lib/businessDb';
 
 const business = await getBusiness(Astro.params.slug ?? '');
-if (!business || business.status !== 'live') return Astro.redirect('/directory');
+if (!business || !listingIsPublic(business)) return Astro.redirect('/directory');
 return Astro.redirect(`/${business.slug}`, 301);
 ---

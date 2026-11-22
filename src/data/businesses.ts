@@ -5,6 +5,10 @@
  * Facts should come from the business's own site. Confirm a phone before publishing it.
  */
 
+import { directoryTowns, type DirectoryTown } from './taxonomy.ts';
+
+export type { DirectoryTown };
+
 export type BusinessImage = {
   src: string;
   alt: string;
@@ -856,18 +860,6 @@ export function businessBySlug(slug: string) {
 }
 
 /** Towns used for directory filters. Prefer service areas; fall back to locality. */
-const directoryTowns = [
-  'Bastrop',
-  'Elgin',
-  'Smithville',
-  'Cedar Creek',
-  'McDade',
-  'Paige',
-  'Rosanky',
-] as const;
-
-export type DirectoryTown = (typeof directoryTowns)[number];
-
 export function businessCategories() {
   return [...new Set(businesses.map((business) => business.category))].sort((a, b) => a.localeCompare(b));
 }

@@ -3,6 +3,7 @@ import { authorBySlug } from '../data/authors.ts';
 import { offerText } from '../data/eatsSpecials.ts';
 import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site.ts';
 import { videoEmbed } from './dailyVideoFeed.ts';
+import { mapsSearchUrl } from './maps.ts';
 import { eventKey, TZ } from './time.ts';
 
 export const orgId = `${siteUrl}/#organization`;
@@ -379,6 +380,7 @@ export function directoryBusiness(business: {
   const telephone = digits.length === 10 ? `+1${digits}` : digits.length === 11 ? `+${digits}` : '';
   const areas = business.areas.split(',').map((name) => name.trim()).filter(Boolean);
   const hours = tidy(business.hours);
+  const map = mapsSearchUrl(business.address);
   return {
     '@type': 'LocalBusiness',
     '@id': `${absolute(path)}#business`,
@@ -387,6 +389,7 @@ export function directoryBusiness(business: {
     url: absolute(path),
     ...(telephone ? { telephone } : {}),
     ...(business.website ? { sameAs: [business.website] } : {}),
+    ...(map ? { hasMap: map } : {}),
     ...(hours ? { openingHours: hours } : {}),
     address: {
       '@type': 'PostalAddress',

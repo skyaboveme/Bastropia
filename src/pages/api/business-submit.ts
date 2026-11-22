@@ -32,6 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
       contact: input.contact,
       address: input.address,
       details: input.details,
+      hours: input.hours,
       status: 'pending',
     });
     id = row.id;
@@ -54,6 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
       website: input.website || '',
       contact: input.contact || '',
       address: input.address || '',
+      hours: input.hours || '',
       details: input.details,
     },
   });

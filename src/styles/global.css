@@ -1152,6 +1152,10 @@ a.today-card:hover strong { text-decoration: underline; text-underline-offset: 0
 @media (max-width: 760px) {
   .quick-links { display: flex; align-items: center; gap: 0.15rem 0.7rem; margin-left: auto; }
   .slim-brand span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+  .header-stage.is-directory-page .header-hero { display: none; }
+  .header-stage.is-directory-page .brand img { height: 64px; }
+  .header-stage.is-directory-page .masthead { padding-top: 0.3rem; padding-bottom: 0.15rem; }
+  .header-stage.is-directory-page .ear strong { font-size: 1.45rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .today-row { scroll-snap-type: none; }

@@ -3,8 +3,9 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import { directoryEntries, type DirectoryEntry } from '../data/directory';
-import { listLiveBusinesses, toDirectoryEntry } from '../lib/businessDb';
+import { type DirectoryEntry } from '../data/directory';
+import { directoryTowns } from '../data/taxonomy';
+import { loadDirectoryEntries } from '../lib/directoryFeed';
 import { addDays, chicagoParts, labelFromKey } from '../lib/time';
 import { eatDayGroups, eatPlaces as places, offerOnDay as onDay, offerText, type EatPlace as Place, type Offer } from '../data/eatsSpecials';
 import { eatDealList } from '../lib/schema';
@@ -17,7 +18,7 @@ const foodCategories = new Set([
   'Wineries / Wine Shops / Breweries',
 ]);
 
-const countyTowns = ['Bastrop', 'Elgin', 'Smithville', 'Cedar Creek', 'McDade', 'Paige', 'Rosanky'];
+const countyTowns: readonly string[] = directoryTowns;
 
 function norm(value: string) {
   return value
@@ -81,15 +82,8 @@ function specialEntry(place: Place): DirectoryEntry {
   };
 }
 
-let listed: DirectoryEntry[] = [];
-try {
-  listed = (await listLiveBusinesses()).map(toDirectoryEntry);
-} catch {
-  listed = [];
-}
-
 const seen = new Set<string>();
-const directoryFood = [...listed, ...directoryEntries].filter((entry) => {
+const directoryFood = (await loadDirectoryEntries()).filter((entry) => {
   if (!isFood(entry) || !inCounty(entry)) return false;
   const key = norm(entry.name);
   if (seen.has(key)) return false;

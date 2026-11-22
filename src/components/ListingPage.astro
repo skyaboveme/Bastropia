@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { directoryBusiness, listingSummary } from '../lib/schema';
 import { logoSrc, type Biz, type BizEvent, type BizSpecial } from '../lib/businessDb';
+import { publicCategoryFor } from '../data/directoryCategories';
+import { mapsSearchUrl, outboundLabel } from '../lib/maps';
 
 interface Props {
   business: Biz;
@@ -13,6 +15,9 @@ const { business, specials = [], events = [] } = Astro.props;
 const phoneDigits = business.phone.replace(/\D/g, '');
 const upcoming = events.filter((item) => item.starts >= new Date().toISOString().slice(0, 10));
 const description = listingSummary(business);
+const map = mapsSearchUrl(business.address);
+const siteLabel = outboundLabel(business.website);
+const publicGroup = publicCategoryFor(business.category);
 ---
 
 <BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]}>
@@ -28,6 +33,7 @@ const description = listingSummary(business);
         </div>
       </div>
       {business.details && <p class="lede">{business.details}</p>}
+      {business.hours && <p class="listing-hours">{business.hours}</p>}
     </header>
     {business.banner_url && (
       <section class="home-banner banner-poster" data-listing-banner={business.id} aria-label="Sponsored" style="margin-top:1rem;">
@@ -53,16 +59,22 @@ const description = listingSummary(business);
         <h2>{business.daily_special}</h2>
       </section>
     )}
-    <p class="cluster">
+    <p class="cluster listing-actions">
       {phoneDigits && <a class="button" href={`/go/biz/${business.id}?to=phone`}>Call {business.phone}</a>}
-      {business.website && <a class="button button-ghost" href={`/go/biz/${business.id}?to=site`}>Website</a>}
-      <a class="button button-ghost" href={`/directory?category=${encodeURIComponent(business.category)}`}>More {business.category}</a>
+      {map && <a class="button button-ghost" href={map} target="_blank" rel="noopener noreferrer">Directions</a>}
+      {business.website && <a class="button button-ghost" href={`/go/biz/${business.id}?to=site`}>{siteLabel}</a>}
+      <a class="button button-ghost" href={`/directory?category=${encodeURIComponent(publicGroup.slug)}`}>More {publicGroup.label}</a>
     </p>
     <dl class="facts">
-      {business.address && <div><dt>Address</dt><dd>{business.address}</dd></div>}
+      {business.address && (
+        <div>
+          <dt>Address</dt>
+          <dd>{business.address}{map && <> · <a href={map} target="_blank" rel="noopener noreferrer">Map</a></>}</dd>
+        </div>
+      )}
       {business.hours && <div><dt>Hours</dt><dd>{business.hours}</dd></div>}
       {business.phone && <div><dt>Phone</dt><dd><a href={`/go/biz/${business.id}?to=phone`}>{business.phone}</a></dd></div>}
-      {business.website && <div><dt>Website</dt><dd><a href={`/go/biz/${business.id}?to=site`}>{business.website.replace(/^https?:\/\//, '')}</a></dd></div>}
+      {business.website && <div><dt>{siteLabel}</dt><dd><a href={`/go/biz/${business.id}?to=site`}>{business.website.replace(/^https?:\/\//, '')}</a></dd></div>}
       {business.areas && <div><dt>Also serves</dt><dd>{business.areas}</dd></div>}
     </dl>
     {specials.length > 0 && (
@@ -91,3 +103,9 @@ const description = listingSummary(business);
     )}
   </article>
 </BaseLayout>
+
+<style>
+  .listing-hours { margin: 0.35rem 0 0; font-weight: 650; }
+  .listing-actions { margin-top: 1rem; }
+  .listing-actions .button { min-height: 2.75rem; }
+</style>
