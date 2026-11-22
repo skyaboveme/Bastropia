@@ -502,6 +502,54 @@ export function localBusiness(business: {
   };
 }
 
+export function guideNode(guide: {
+  id: string;
+  data: {
+    title: string;
+    description: string;
+    updated: Date;
+    keyFacts?: string[];
+    heroImage?: string;
+  };
+}) {
+  const path = `/guides/${guide.id}`;
+  const facts = guide.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
+  return {
+    '@type': 'Article',
+    '@id': `${absolute(path)}#article`,
+    headline: guide.data.title,
+    description: guide.data.description,
+    ...(facts.length ? { abstract: facts.join(' ') } : {}),
+    datePublished: schemaDate(guide.data.updated),
+    dateModified: schemaDate(guide.data.updated),
+    inLanguage: 'en-US',
+    isAccessibleForFree: true,
+    mainEntityOfPage: absolute(path),
+    ...(guide.data.heroImage ? { image: [absolute(guide.data.heroImage)] } : {}),
+    author: articleAuthor(undefined),
+    publisher: { '@id': orgId },
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['.page-head h1', '.direct-answer'],
+    },
+  };
+}
+
+export function faqPage(path: string, faqs: { q: string; a: string }[]) {
+  return {
+    '@type': 'FAQPage',
+    '@id': `${absolute(path)}#faq`,
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.a,
+      },
+    })),
+  };
+}
+
 export function noticeNode(update: CollectionEntry<'updates'>) {
   const path = `/government/${update.id}`;
   return {

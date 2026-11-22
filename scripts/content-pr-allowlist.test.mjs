@@ -35,6 +35,13 @@ const openContent = {
   buildConclusion: 'success',
 };
 
+test('guide files stay outside the auto-merge allowlist', () => {
+  assert.equal(isAllowedContentPath('src/content/guides/moving-to-bastrop-county.mdx'), false);
+  const guidePr = classifyFiles(files(['src/content/guides/moving-to-bastrop-county.mdx', 'added']));
+  assert.equal(guidePr.eligible, false);
+  assert.ok(guidePr.blocked.some((file) => file.path === 'src/content/guides/moving-to-bastrop-county.mdx'));
+});
+
 test('recorded pull requests', () => {
   const pr46 = classifyFiles(load(46));
   const pr47 = classifyFiles(load(47));

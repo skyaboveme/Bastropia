@@ -1,0 +1,101 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MoreFromBastrop from '../../components/MoreFromBastrop.astro';
+import NewsletterSignup from '../../components/NewsletterSignup.astro';
+import { townPages } from '../../data/towns';
+import { filterEvents } from '../../lib/events';
+import { offsiteAttrs } from '../../lib/links';
+import { faqPage, guideNode } from '../../lib/schema';
+import { formatLong } from '../../lib/time';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides');
+  return guides.map((guide) => ({ params: { slug: guide.id }, props: { guide } }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+const [stories, events] = await Promise.all([getCollection('news'), getCollection('events')]);
+const names = new Set<string>(guide.data.towns.filter((town) => town !== 'Countywide'));
+const sortedNews = stories.slice().sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const localNews = names.size ? sortedNews.filter((story) => names.has(story.data.place)) : sortedNews;
+const related = (localNews.length ? localNews : sortedNews).slice(0, 3).map((story) => ({
+  id: story.id,
+  title: story.data.title,
+  description: story.data.description,
+  place: story.data.place,
+  pubDate: story.data.pubDate,
+  tags: story.data.tags,
+}));
+const upcoming = filterEvents(events, { when: 'upcoming' })
+  .filter((event) => names.size === 0 || names.has(event.data.city) || event.data.city === 'Countywide')
+  .slice(0, 3);
+const townLinks = names.size ? townPages.filter((town) => names.has(town.name)) : townPages;
+const faqs = guide.data.faqs ?? [];
+const facts = guide.data.keyFacts?.map((fact) => fact.trim()).filter(Boolean) ?? [];
+---
+
+<BaseLayout
+  title={guide.data.title}
+  description={guide.data.description}
+  image={guide.data.heroImage}
+  pageType="Article"
+  published={guide.data.updated}
+  modified={guide.data.updated}
+  authorPath="/staff"
+  section="Guides"
+  extra={[guideNode(guide), ...(faqs.length ? [faqPage(`/guides/${guide.id}`, faqs)] : [])]}
+>
+  <article class="wrap">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+      <p class="kicker"><a href="/guides">Bastrop County guides</a></p>
+      <h1>{guide.data.title}</h1>
+      <p class="meta">Last updated {formatLong(guide.data.updated)}</p>
+      <p class="lede direct-answer">{guide.data.answer}</p>
+    </header>
+    {facts.length > 0 && (
+      <aside class="key-facts" aria-label="Key facts">
+        <h2>Key facts</h2>
+        <ul>
+          {facts.map((fact) => <li>{fact}</li>)}
+        </ul>
+      </aside>
+    )}
+    <div class="prose">
+      <Content />
+    </div>
+    {townLinks.length > 0 && (
+      <div class="prose">
+        <h2>Town pages</h2>
+        <ul>
+          {townLinks.map((town) => (
+            <li><a href={`/${town.slug}`}>This week in {town.name}</a></li>
+          ))}
+        </ul>
+      </div>
+    )}
+    <MoreFromBastrop stories={related} events={upcoming} />
+    {faqs.length > 0 && (
+      <section class="prose" aria-labelledby="guide-faq">
+        <h2 id="guide-faq">Frequently asked questions</h2>
+        {faqs.map((faq) => (
+          <div>
+            <h3>{faq.q}</h3>
+            <p>{faq.a}</p>
+          </div>
+        ))}
+      </section>
+    )}
+    <section class="prose">
+      <h2>Sources</h2>
+      <ul>
+        {guide.data.sources.map((source) => (
+          <li><a href={source.url} {...offsiteAttrs(source.url)}>{source.title}</a></li>
+        ))}
+      </ul>
+      <p>Bastropia is a community site. It is not the county, a city, or an emergency service. If a page above and this guide disagree, follow the official page.</p>
+    </section>
+    <NewsletterSignup />
+  </article>
+</BaseLayout>

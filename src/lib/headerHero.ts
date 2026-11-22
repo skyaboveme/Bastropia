@@ -52,6 +52,7 @@ export function headerHero(pathname: string, options: { night: boolean; scene?: 
   if (path === '/groups') return { visible: heroes.groups, rest: [], heroClass: 'is-groups' };
   if (path === '/government') return { visible: heroes.government, rest: [], heroClass: 'is-government' };
   if (path === '/news') return { visible: heroes.news, rest: [], heroClass: 'is-news' };
+  if (path === '/guides' || path.startsWith('/guides/')) return { visible: heroes.lostPines, rest: [], heroClass: '' };
   if (path === '/videos') return { visible: heroes.videos, rest: [], heroClass: 'is-videos' };
   if (path === '/eats') return { visible: heroes.eats, rest: [], heroClass: 'is-eats' };
   return { visible: heroes.fallback, rest: [], heroClass: 'is-default' };

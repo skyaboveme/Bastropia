@@ -116,6 +116,7 @@ function loadRoutes() {
     exact.add(`/${rel}`);
   }
   for (const id of idsIn('src/content/news')) exact.add(`/news/${id}`);
+  for (const id of idsIn('src/content/guides')) exact.add(`/guides/${id}`);
   for (const id of idsIn('src/content/events')) exact.add(`/events/${id}`);
   for (const id of idsIn('src/content/social')) exact.add(`/social/${id}`);
   for (const id of idsIn('src/content/updates')) exact.add(`/government/${id}`);
@@ -143,7 +144,7 @@ function normalizePath(pathname) {
 function isListing(pathname) {
   return (
     pathname === '/' ||
-    /^\/(news|events|directory|eats|social|groups|churches|videos|government|sitemap)$/.test(pathname) ||
+    /^\/(news|events|directory|eats|social|groups|churches|videos|government|sitemap|guides)$/.test(pathname) ||
     /\/page\/\d+$/.test(pathname)
   );
 }
@@ -207,7 +208,28 @@ function localTarget(href, page) {
   return { path: normalizePath(url.pathname), href: value };
 }
 
-function sitemapCoverage(stories) {
+function contentFile(dir, id) {
+  return (
+    existsSync(join(root, dir, `${id}.md`)) ||
+    existsSync(join(root, dir, `${id}.mdx`))
+  );
+}
+
+function sitemapSource() {
+  const sourcePath = join(root, 'src/pages/sitemap.xml.ts');
+  return existsSync(sourcePath) ? readFileSync(sourcePath, 'utf8') : '';
+}
+
+function guidesMapped(source) {
+  return (
+    source.includes("getCollection('guides')") &&
+    source.includes('/guides/${guide.id}') &&
+    source.includes('...guides.map(') &&
+    source.includes("path: '/guides'")
+  );
+}
+
+function sitemapCoverage(stories, guides) {
   const files = walk(dist).filter((file) => file.endsWith('.xml') || file.endsWith('sitemap.xml'));
   const locs = [];
   for (const file of files) {
@@ -215,28 +237,54 @@ function sitemapCoverage(stories) {
     if (!text.includes('<loc>')) continue;
     for (const match of text.matchAll(/<loc>([^<]+)<\/loc>/g)) locs.push(decode(match[1]));
   }
+  const source = sitemapSource();
   if (locs.length) {
     const have = new Set(locs.map((loc) => normalizePath(new URL(loc, 'https://bastropia.com').pathname)));
     for (const story of stories) {
       if (!have.has(story.path)) failures.push(`${story.path} is missing from sitemap.xml`);
     }
+    const mainSitemap = files.filter((file) => /\/sitemap\.xml$/.test(file.split(sep).join('/')) && !file.endsWith('news-sitemap.xml'));
+    if (mainSitemap.length) {
+      const listed = new Set();
+      for (const file of mainSitemap) {
+        const text = readFileSync(file, 'utf8');
+        for (const match of text.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+          listed.add(normalizePath(new URL(decode(match[1]), 'https://bastropia.com').pathname));
+        }
+      }
+      for (const guide of guides) {
+        if (!listed.has(guide.path)) failures.push(`${guide.path} is missing from sitemap.xml`);
+      }
+    } else if (!guidesMapped(source)) {
+      failures.push('sitemap.xml in the build does not list guides, and the sitemap route does not map them');
+    }
+    for (const guide of guides) {
+      const id = guide.path.split('/').pop();
+      if (!contentFile('src/content/guides', id)) {
+        failures.push(`${guide.path} is not in sitemap.xml because it has no guide content file`);
+      }
+    }
     return `sitemap.xml in the build lists ${locs.length} URLs`;
   }
-  const sourcePath = join(root, 'src/pages/sitemap.xml.ts');
-  const source = existsSync(sourcePath) ? readFileSync(sourcePath, 'utf8') : '';
   if (!source.includes("getCollection('news')") || !source.includes('/news/${story.id}') || !source.includes('...news.map(')) {
     failures.push('sitemap.xml is not in the build, and the sitemap route does not map every news story');
-    return 'sitemap route is missing the news map';
+  }
+  if (!guidesMapped(source)) {
+    failures.push('sitemap.xml is not in the build, and the sitemap route does not map every guide');
   }
   for (const story of stories) {
     const id = story.path.split('/').pop();
-    const markdown = existsSync(join(root, 'src/content/news', `${id}.md`));
-    const mdx = existsSync(join(root, 'src/content/news', `${id}.mdx`));
-    if (!markdown && !mdx) {
+    if (!contentFile('src/content/news', id)) {
       failures.push(`${story.path} is not in sitemap.xml because it has no news content file`);
     }
   }
-  return 'sitemap.xml is rendered by the worker; the route maps every news file and each built story has one';
+  for (const guide of guides) {
+    const id = guide.path.split('/').pop();
+    if (!contentFile('src/content/guides', id)) {
+      failures.push(`${guide.path} is not in sitemap.xml because it has no guide content file`);
+    }
+  }
+  return 'sitemap.xml is rendered by the worker; the route maps every news file and every guide, and each built page has a content file';
 }
 
 function checkPage(file, html) {
@@ -272,6 +320,33 @@ function checkPage(file, html) {
     const target = localTarget(tag[2], path);
     if (!target) continue;
     if (target.broken || !known(target.path)) failures.push(`${path} links to ${target.href}, which is not a page or file`);
+  }
+
+  if (/^\/guides\/[^/]+$/.test(path)) {
+    const nodes = jsonNodes(html);
+    if (nodes.includes(null)) failures.push(`${path} has JSON-LD that did not parse`);
+    const webpage = nodes.find((node) => node && typesOf(node).includes('WebPage'));
+    if (!webpage) failures.push(`${path} is missing WebPage JSON-LD`);
+    const article = nodes.find((node) => node && typesOf(node).includes('Article'));
+    if (!article) failures.push(`${path} is missing Article JSON-LD`);
+    else {
+      if (!String(article.headline ?? '').trim()) failures.push(`${path} Article is missing headline`);
+      if (!String(article.dateModified ?? '').trim()) failures.push(`${path} Article is missing dateModified`);
+      if (!hasParty(article.author)) failures.push(`${path} Article is missing author`);
+      if (!hasParty(article.publisher)) failures.push(`${path} Article is missing publisher`);
+    }
+    const crumbs = nodes.find((node) => node && typesOf(node).includes('BreadcrumbList'));
+    if (!crumbs) failures.push(`${path} is missing BreadcrumbList JSON-LD`);
+    if (!/Last updated/i.test(html)) failures.push(`${path} is missing a visible Last updated date`);
+    if (/Frequently asked questions/i.test(html)) {
+      const faq = nodes.find((node) => node && typesOf(node).includes('FAQPage'));
+      const questions = Array.isArray(faq?.mainEntity) ? faq.mainEntity : [];
+      if (!faq) failures.push(`${path} is missing FAQPage JSON-LD`);
+      else if (!questions.length) failures.push(`${path} FAQPage has no questions`);
+      else if (questions.some((question) => !String(question?.name ?? '').trim() || !String(question?.acceptedAnswer?.text ?? '').trim())) {
+        failures.push(`${path} FAQPage has a question without an answer`);
+      }
+    }
   }
 
   if (/^\/news\/[^/]+$/.test(path)) {
@@ -338,9 +413,27 @@ for (const file of htmlFiles) {
 duplicates(pages, 'title');
 duplicates(pages, 'description');
 const stories = pages.filter((page) => /^\/news\/[^/]+$/.test(page.path));
-const sitemapNote = sitemapCoverage(stories);
+const guides = pages.filter((page) => /^\/guides\/[^/]+$/.test(page.path));
+const sitemapNote = sitemapCoverage(stories, guides);
 
-console.log(`SEO check: ${pages.length} indexable pages, ${skipped} noindex pages skipped, ${stories.length} stories`);
+function expectSource(file, needle, message) {
+  const text = existsSync(join(root, file)) ? readFileSync(join(root, file), 'utf8') : '';
+  if (!text.includes(needle)) failures.push(message);
+}
+
+expectSource('src/components/Footer.astro', 'href="/guides"', 'the footer does not link /guides');
+expectSource('src/components/Header.astro', "href: '/guides'", 'the main nav does not link /guides');
+expectSource('src/lib/llmsGuide.ts', '/guides/', 'llms.txt does not list guide pages');
+expectSource('scripts/indexnow.mjs', 'src/content/guides/', 'the IndexNow ping list does not include guides');
+expectSource('src/pages/[town].astro', 'Guides for', 'town pages do not include a Guides for <town> section');
+const allowlist = existsSync(join(root, 'scripts/content-pr-allowlist.mjs'))
+  ? readFileSync(join(root, 'scripts/content-pr-allowlist.mjs'), 'utf8')
+  : '';
+if (allowlist.includes('content/guides')) {
+  failures.push('guides were added to the content auto-merge allowlist');
+}
+
+console.log(`SEO check: ${pages.length} indexable pages, ${skipped} noindex pages skipped, ${stories.length} stories, ${guides.length} guides`);
 console.log(sitemapNote);
 printList('Warnings', warnings);
 printList('Failures', failures);

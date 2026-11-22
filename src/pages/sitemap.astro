@@ -6,17 +6,19 @@ import { getCollection } from 'astro:content';
 import { authors } from '../data/authors';
 import { businesses } from '../data/businesses';
 
-const [events, news, social, updates] = await Promise.all([
+const [events, news, social, updates, guides] = await Promise.all([
   getCollection('events'),
   getCollection('news'),
   getCollection('social'),
   getCollection('updates'),
+  getCollection('guides'),
 ]);
 
 const hubs = [
   '/',
   '/events',
   '/news',
+  '/guides',
   '/development',
   '/this-weekend',
   '/scores',
@@ -65,6 +67,10 @@ const links = [
     .slice()
     .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
     .map((story) => ({ href: `/news/${story.id}`, label: story.data.title })),
+  ...guides
+    .slice()
+    .sort((a, b) => a.data.title.localeCompare(b.data.title))
+    .map((guide) => ({ href: `/guides/${guide.id}`, label: guide.data.title })),
   ...social
     .slice()
     .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
