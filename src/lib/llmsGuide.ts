@@ -14,6 +14,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/events', label: 'Events', note: 'List and month view. Bastrop County Calendar (https://bastropcountycalendar.com) is the authority for county events. /calendar opens the month view.' },
   { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans in the same list as the events calendar.' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source.' },
+  { path: '/guides', label: 'County guides', note: 'Evergreen guides to moving, parks and the river, burn bans, county government, and Elgin, Smithville, and Paige.' },
   { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, restaurants, industry, expansions, and new retail under watch in Bastrop County' },
   { path: '/eats', label: 'Eats', note: 'Happy hours and specials for today and tomorrow, posted on each restaurant or bar’s own site. Confirm before you go.' },
   { path: '/churches', label: 'Churches', note: 'Worship times for churches in Bastrop County that publish a website and a weekly schedule. Times were checked in mid-November 2026. Confirm before you go.' },
@@ -54,6 +55,7 @@ function link(path: string) {
 }
 
 export async function llmsIndex() {
+  const guides = (await getCollection('guides')).sort((a, b) => a.data.title.localeCompare(b.data.title));
   const lines = [
     '# Bastropia',
     '',
@@ -66,6 +68,9 @@ export async function llmsIndex() {
     '',
     '## Start here',
     ...pages.map((page) => `- [${page.label}](${link(page.path)}): ${page.note}`),
+    '',
+    '## Guides',
+    ...guides.map((guide) => `- [${guide.data.title}](${link(`/guides/${guide.id}`)}): ${guide.data.description}`),
     '',
     '## Towns',
     ...towns.map((town) => `- [This week in ${town}](${link(`/${town.toLowerCase().replace(/ /g, '-')}`)}): Weather, this week’s listings, school dates, and headlines for ${town}`),
@@ -86,10 +91,11 @@ export async function llmsIndex() {
 
 export async function llmsFull() {
   const today = eventKey(new Date());
-  const [{ events, source }, news, notices] = await Promise.all([
+  const [{ events, source }, news, notices, guides] = await Promise.all([
     listEvents(),
     getCollection('news'),
     getCollection('updates'),
+    getCollection('guides'),
   ]);
   const upcoming = events
     .filter((event) => eventKey(event.data.start) >= today)
@@ -176,6 +182,16 @@ export async function llmsFull() {
     const href = eventHref(event, source);
     lines.push(href.startsWith('http') ? href : link(href));
     if (event.data.sourceUrl) lines.push(`Source: ${event.data.sourceUrl}`);
+    lines.push('');
+  }
+
+  lines.push('## Guides', '');
+  const guideList = guides.slice().sort((a, b) => a.data.title.localeCompare(b.data.title));
+  for (const guide of guideList) {
+    lines.push(`### ${guide.data.title}`);
+    lines.push(`Updated ${formatLong(guide.data.updated)}.`);
+    lines.push(guide.data.answer);
+    lines.push(link(`/guides/${guide.id}`));
     lines.push('');
   }
 

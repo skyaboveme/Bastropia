@@ -33,6 +33,7 @@ const hubs: Entry[] = [
   { path: '/', priority: '1.0' },
   { path: '/events', priority: '0.9' },
   { path: '/news', priority: '0.9' },
+  { path: '/guides', priority: '0.8' },
   { path: '/development', priority: '0.9' },
   { path: '/this-weekend', priority: '0.9' },
   { path: '/scores', priority: '0.8' },
@@ -78,11 +79,12 @@ const hubs: Entry[] = [
 ];
 
 export const GET: APIRoute = async () => {
-  const [{ events, source }, news, social, updates, listed] = await Promise.all([
+  const [{ events, source }, news, social, updates, guides, listed] = await Promise.all([
     listEvents(),
     getCollection('news'),
     getCollection('social'),
     getCollection('updates'),
+    getCollection('guides'),
     listLiveBusinesses(),
   ]);
 
@@ -104,6 +106,12 @@ export const GET: APIRoute = async () => {
       lastmod: story.data.updated ?? story.data.pubDate,
       priority: '0.7',
       image: story.data.image,
+    })),
+    ...guides.map((guide) => ({
+      path: `/guides/${guide.id}`,
+      lastmod: guide.data.updated,
+      priority: '0.8',
+      image: guide.data.heroImage,
     })),
     ...social.map((item) => ({
       path: `/social/${item.id}`,

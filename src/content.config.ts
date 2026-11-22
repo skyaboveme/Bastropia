@@ -100,4 +100,35 @@ const social = defineCollection({
   }),
 });
 
-export const collections = { events, news, updates, decisions, social };
+const guides = defineCollection({
+  loader: glob({ base: './src/content/guides', pattern: '**/*.mdx' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    /** Direct answer shown under the title. Two or three sentences. */
+    answer: z.string().min(1),
+    updated: z.coerce.date(),
+    towns: z.array(z.enum(cities)).min(1),
+    heroImage: z.string().optional(),
+    faqs: z
+      .array(
+        z.object({
+          q: z.string().min(1),
+          a: z.string().min(1),
+        }),
+      )
+      .max(8)
+      .optional(),
+    keyFacts: z.array(z.string().min(1)).max(8).optional(),
+    sources: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          url: z.string().url(),
+        }),
+      )
+      .min(1),
+  }),
+});
+
+export const collections = { events, news, updates, decisions, social, guides };

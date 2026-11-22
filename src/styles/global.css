@@ -691,6 +691,7 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .prose li { margin: 0.3rem 0; }
 .prose a { color: var(--river-deep); }
 .prose h2 { font-size: 1.7rem; margin-top: 1.5rem; }
+.prose h3 { font-size: 1.25rem; margin-top: 1.15rem; }
 
 .stat-box {
   margin: 1.15rem 0 1.3rem;
