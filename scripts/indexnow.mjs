@@ -54,6 +54,10 @@ function urlsFor(file) {
     const name = (file.split('/').pop() ?? '').replace(/\.mdx?$/, '');
     return name ? [`${ORIGIN}/news/${name}`] : [];
   }
+  if (file.startsWith('src/content/guides/')) {
+    const name = (file.split('/').pop() ?? '').replace(/\.mdx?$/, '');
+    return name ? [`${ORIGIN}/guides/${name}`, `${ORIGIN}/guides`] : [];
+  }
   if (!file.startsWith('src/pages/') || file.includes('/api/')) return [];
   let route = file.slice('src/pages/'.length).replace(/\.(astro|ts|mjs|js|md|mdx)$/, '');
   if (route.endsWith('/index')) route = route.slice(0, -'/index'.length);

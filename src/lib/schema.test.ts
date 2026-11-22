@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { CollectionEntry } from 'astro:content';
-import { articleAuthor, dailyVideoNode, eventNode, eventOffers, newsNode } from './schema.ts';
+import { articleAuthor, dailyVideoNode, eventNode, eventOffers, faqPage, guideNode, newsNode } from './schema.ts';
 
 const start = new Date('2026-11-21T18:00:00-06:00');
 
@@ -92,6 +92,27 @@ test('an updated date and key facts land on the article', () => {
   const image = (node.image as { width: number; height: number }[])[0];
   assert.equal(image.width, 1600);
   assert.equal(image.height, 900);
+});
+
+test('a guide article carries the updated date and an FAQ page when questions exist', () => {
+  const guide = guideNode({
+    id: 'moving-to-bastrop-county',
+    data: {
+      title: 'Moving to Bastrop County',
+      description: 'Towns, schools, and the tax office.',
+      updated: new Date('2026-11-22T12:00:00-06:00'),
+      keyFacts: ['Three city halls', 'Four school districts'],
+    },
+  });
+  assert.equal(guide['@type'], 'Article');
+  assert.equal(guide.headline, 'Moving to Bastrop County');
+  assert.equal(guide.dateModified, guide.datePublished);
+  assert.equal(guide.abstract, 'Three city halls Four school districts');
+  assert.equal(guide.author['@type'], 'Organization');
+  assert.equal(guide.mainEntityOfPage, 'https://bastropia.com/guides/moving-to-bastrop-county');
+  const faq = faqPage('/guides/moving-to-bastrop-county', [{ q: 'Who bills the tax?', a: 'The county tax office.' }]);
+  assert.equal(faq['@type'], 'FAQPage');
+  assert.equal(faq.mainEntity[0].acceptedAnswer.text, 'The county tax office.');
 });
 
 test('a daily video uses the YouTube fields already on the record', () => {

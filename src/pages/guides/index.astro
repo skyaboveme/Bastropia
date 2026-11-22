@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { linkList } from '../../lib/schema';
+import { formatLong } from '../../lib/time';
+
+const guides = await getCollection('guides');
+const order = [
+  'moving-to-bastrop-county',
+  'things-to-do-in-bastrop-county',
+  'burn-bans-and-fire-safety',
+  'bastrop-county-government',
+  'elgin',
+  'smithville',
+  'paige',
+];
+const sorted = guides.slice().sort((a, b) => {
+  const ai = order.indexOf(a.id);
+  const bi = order.indexOf(b.id);
+  return (ai === -1 ? order.length : ai) - (bi === -1 ? order.length : bi) || a.data.title.localeCompare(b.data.title);
+});
+
+function places(towns: string[]) {
+  const named = towns.filter((town) => town !== 'Countywide');
+  if (!named.length || towns.includes('Countywide') && named.length >= 6) return 'Countywide';
+  return named.join(', ');
+}
+---
+
+<BaseLayout
+  title="Bastrop County guides"
+  description="Evergreen guides to moving, parks, burn bans, county government, and the towns of Bastrop County, Texas."
+  extra={[linkList('Bastrop County guides', sorted.map((guide) => ({ name: guide.data.title, path: `/guides/${guide.id}` })))]}
+>
+  <PageHead
+    kicker="Evergreen"
+    title="Bastrop County guides"
+    lede="Practical answers for living here, written from city, county, and state pages. Each guide names the source and the date it was checked."
+  />
+  <div class="wrap">
+    <div class="news-list">
+      {sorted.map((guide) => (
+        <article class="story-card">
+          <p class="kicker">{places(guide.data.towns)} · Last updated {formatLong(guide.data.updated)}</p>
+          <h3><a href={`/guides/${guide.id}`}>{guide.data.title}</a></h3>
+          <p class="meta">{guide.data.description}</p>
+        </article>
+      ))}
+    </div>
+    <p class="disclaimer">
+      These pages are a community desk, not an ordinance or a tax bill. Hours, bans, and meeting times change.
+      The official page linked in each guide is the one to follow.
+    </p>
+  </div>
+</BaseLayout>
