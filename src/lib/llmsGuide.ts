@@ -3,7 +3,7 @@ import { BCC_ORIGIN, eventHref, listEvents } from './eventSource';
 import { burnBan } from '../data/burnBan';
 import { burnView } from './burnBanView';
 import { businesses } from '../data/businesses';
-import { churches } from '../data/churches';
+import { aggregatorTimesCount, churchesWithTimes, churchesWithoutTimes, officialTimesCount, officialTimesNote, aggregatorTimesNote } from '../data/churches';
 import { eatDayGroups, offerText } from '../data/eatsSpecials';
 import { facebookPage, siteDescription, siteUrl, youtubeChannel } from '../data/site';
 import { electionDay, voteIsLive, voteSource } from '../data/vote';
@@ -17,7 +17,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/guides', label: 'County guides', note: 'Evergreen guides to moving, parks and the river, burn bans, county government, and Elgin, Smithville, and Paige.' },
   { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, restaurants, industry, expansions, and new retail under watch in Bastrop County' },
   { path: '/eats', label: 'Eats', note: 'Happy hours and specials for today and tomorrow, posted on each restaurant or bar’s own site. Confirm before you go.' },
-  { path: '/churches', label: 'Churches', note: 'Worship times for churches in Bastrop County that publish a website and a weekly schedule. Times were checked in mid-November 2026. Confirm before you go.' },
+  { path: '/churches', label: 'Churches', note: 'Bastrop County church directory. Worship times checked November 22, 2026 are listed first. Congregations with no posted schedule are named at the bottom. Confirm before you go.' },
   { path: '/new-here', label: 'New resident guide', note: 'Utilities, trash day, tax dates, and which commissioner covers your road' },
   { path: '/tips', label: 'Send a tip or photo', note: 'Neighbor tips and photos for the site and the Facebook group' },
   { path: '/newsletter', label: 'Newsletter', note: 'Free weekend email every Thursday at 7 AM, with reasons to subscribe' },
@@ -129,20 +129,27 @@ export async function llmsFull() {
   lines.push(
     '## Churches',
     '',
-    `${churches.length} churches with a posted website and worship times. Times were checked in mid-November 2026 and can change. Confirm on the church’s own site before you go.`,
+    `${churchesWithTimes.length + churchesWithoutTimes.length} congregations. ${churchesWithTimes.length} have posted worship times (${officialTimesCount} verified on the church’s own website on Nov. 22, 2026; ${aggregatorTimesCount} from a third-party listing). ${churchesWithoutTimes.length} have no times posted. Confirm before you go.`,
     link('/churches'),
     '',
   );
-  for (const church of churches) {
+  for (const church of churchesWithTimes) {
     lines.push(`### ${church.name}`);
     lines.push(`${[church.denomination, church.city, church.address].filter(Boolean).join('. ')}.`);
-    lines.push(church.times);
-    lines.push(church.website);
-    if (church.confirmWithChurch) {
-      lines.push('Confirm these times with the church. They were taken from a directory listing, not the congregation’s own page.');
-    }
+    if (church.worshipTimes) lines.push(church.worshipTimes);
+    if (church.midweekServices) lines.push(`Midweek: ${church.midweekServices}`);
+    if (church.website) lines.push(church.website);
+    if (church.facebook) lines.push(church.facebook);
+    if (church.phone) lines.push(church.phone);
+    lines.push(church.confirmWithChurch ? aggregatorTimesNote : officialTimesNote);
     lines.push('');
   }
+  lines.push('### More churches in Bastrop County', '', 'No weekly schedule was posted for these congregations.', '');
+  for (const church of churchesWithoutTimes) {
+    const links = [church.website, church.facebook].filter(Boolean).join(' ');
+    lines.push(`- ${church.name} (${[church.city, church.denomination].filter(Boolean).join(', ')})${church.address ? `. ${church.address}` : ''}${church.phone ? `. ${church.phone}` : ''}${links ? `. ${links}` : ''}`);
+  }
+  lines.push('');
 
   const todayKey = chicagoParts(new Date()).key;
   const tomorrowKey = addDays(todayKey, 1);

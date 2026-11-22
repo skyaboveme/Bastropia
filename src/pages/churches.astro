@@ -2,59 +2,93 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import ChurchCard from '../components/ChurchCard.astro';
-import { churchCount, churchGroupsList } from '../data/churches';
+import {
+  aggregatorTimesCount,
+  churchDenominations,
+  churchGroupsList,
+  churchMoreGroups,
+  churchTowns,
+  churchesWithTimes,
+  churchesWithoutTimes,
+  churchesWithTimesCount,
+  churchesWithoutTimesCount,
+  churchCount,
+  officialTimesCount,
+} from '../data/churches';
 import { facebookPage } from '../data/site';
+import { offsiteAttrs } from '../lib/links';
 import { churchDirectory } from '../lib/schema';
 
-const groups = churchGroupsList;
-const officialCount = groups.reduce(
-  (sum, group) => sum + group.churches.filter((church) => !church.confirmWithChurch).length,
-  0,
-);
-const confirmCount = churchCount - officialCount;
+const description = `Sunday worship times for ${churchesWithTimesCount} Bastrop County churches, with ${officialTimesCount} verified on the church website Nov. 22, 2026, and ${churchesWithoutTimesCount} more listed by town.`;
+const listed = [...churchesWithTimes, ...churchesWithoutTimes];
 ---
 
 <BaseLayout
-  title="Bastrop County Church Directory: Worship Times"
-  description="Worship times for churches in Bastrop County, Texas, that publish both a website and a weekly schedule. Grouped by town, with a link to each church’s own page."
-  extra={[churchDirectory(groups.flatMap((group) => group.churches))]}
+  title="Bastrop County Church Directory"
+  description={description}
+  extra={[churchDirectory(listed)]}
 >
   <PageHead
     kicker="Churches"
-    title="Bastrop County Church Directory: Worship Times"
-    lede="A countywide list of churches that publish both a website and weekly worship times, grouped by town for Bastrop, Elgin, Smithville, McDade, Cedar Creek, and nearby communities."
+    title="Bastrop County Church Directory"
+    lede="Posted worship times come first, grouped by town. Congregations that do not publish a weekly schedule are listed at the bottom."
   />
 
-  <div class="wrap church-page">
+  <div class="wrap church-page" data-church-page>
     <p class="church-intro">
-      Times were checked in mid-November 2026 and can change, especially around holidays. Please confirm on the church’s own website or by calling before you go.
-      {confirmCount > 0 && (
-        <>
-          {' '}
-          A few listings come from church directories rather than the congregation’s own page; those are marked so you can confirm them.
-        </>
+      Times were checked on November 22, 2026 and can change, especially around holidays. Confirm on the church’s own website or by calling before you go.
+      {aggregatorTimesCount > 0 && (
+        <> {aggregatorTimesCount} listings come from a third-party directory and are marked so you can confirm them.</>
       )}
-      {' '}
-      If your church’s times are missing or out of date, send an update through the <a href={facebookPage} target="_blank" rel="noopener noreferrer">Bastropia Facebook page</a>.
     </p>
 
     <p class="church-count">
-      {churchCount} {churchCount === 1 ? 'church' : 'churches'} with a posted website and worship times.
-      {officialCount > 0 && <> {officialCount} from the church’s own site.</>}
-      {confirmCount > 0 && <> {confirmCount} {confirmCount === 1 ? 'listing' : 'listings'} to confirm with the church.</>}
+      {churchCount} congregations.
+      {' '}{churchesWithTimesCount} with posted worship times
+      ({officialTimesCount} verified on the church’s website, {aggregatorTimesCount} from a third-party listing).
+      {' '}{churchesWithoutTimesCount} more with no times posted.
     </p>
 
+    <div class="search" role="search">
+      <label class="sr" for="church-q">Search churches</label>
+      <input id="church-q" type="search" placeholder="Search by name, town, or denomination" autocomplete="off" enterkeyhint="search" />
+    </div>
+
+    <div class="filters">
+      <div class="filter-row">
+        <span>Town</span>
+        <button type="button" class="chip" data-town-chip="" aria-pressed="true">All</button>
+        {churchTowns.map((town) => (
+          <button type="button" class="chip" data-town-chip={town} aria-pressed="false">{town}</button>
+        ))}
+      </div>
+      <div class="church-denom-row">
+        <label for="church-denom">Denomination</label>
+        <select id="church-denom">
+          <option value="">All denominations</option>
+          {churchDenominations.map((denomination) => (
+            <option value={denomination}>{denomination}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+    <p class="church-showing" data-church-live aria-live="polite"></p>
+    <p class="church-empty" data-church-empty hidden>No churches match that search.</p>
+    <noscript>
+      <p class="church-intro">Search and the town and denomination filters need JavaScript. Every church is still listed below.</p>
+    </noscript>
+
     <nav class="church-jump" aria-label="Jump to a town">
-      {groups.map((group) => (
-        <a href={`#${group.id}`}>{group.label}</a>
+      {churchGroupsList.map((group) => (
+        <a href={`#${group.id}`} data-town-jump={group.id}>{group.label}</a>
       ))}
     </nav>
 
-    {groups.map((group) => (
-      <section class:list={['church-town', `church-town-${group.id}`]} id={group.id}>
+    {churchGroupsList.map((group) => (
+      <section class:list={['church-town', `church-town-${group.id}`]} id={group.id} data-town-section>
         <h2>
           {group.label}
-          <span class="church-town-count">
+          <span class="church-town-count" data-town-count>
             {group.churches.length} {group.churches.length === 1 ? 'church' : 'churches'}
           </span>
         </h2>
@@ -65,13 +99,100 @@ const confirmCount = churchCount - officialCount;
         </div>
       </section>
     ))}
+
+    <section class="church-more" id="more-churches" data-more>
+      <h2>
+        More churches in Bastrop County
+        <span class="church-town-count" data-town-count>
+          {churchesWithoutTimesCount} {churchesWithoutTimesCount === 1 ? 'church' : 'churches'}
+        </span>
+      </h2>
+      <p class="church-intro">
+        A weekly schedule was not posted for these congregations as of November 22, 2026.
+        If your church’s times are missing, send them through the <a href={facebookPage} {...offsiteAttrs(facebookPage)}>Bastropia Facebook page</a>.
+      </p>
+      {churchMoreGroups.map((group) => (
+        <div class="church-more-town" data-town-section>
+          <h3>{group.label}</h3>
+          <ul class="church-more-list">
+            {group.churches.map((church) => (
+              <ChurchCard church={church} compact />
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
   </div>
 </BaseLayout>
 
-<style>
-  .church-page {
-    padding-bottom: 3rem;
+<script is:inline>
+  const page = document.querySelector('[data-church-page]');
+  if (page instanceof HTMLElement) {
+    const input = page.querySelector('#church-q');
+    const denom = page.querySelector('#church-denom');
+    const live = page.querySelector('[data-church-live]');
+    const empty = page.querySelector('[data-church-empty]');
+    const chips = [...page.querySelectorAll('[data-town-chip]')];
+    const cards = [...page.querySelectorAll('[data-church]')];
+    const sections = [...page.querySelectorAll('[data-town-section]')];
+    const jumps = [...page.querySelectorAll('[data-town-jump]')];
+    let town = '';
+
+    const apply = () => {
+      const query = input instanceof HTMLInputElement ? input.value.trim().toLowerCase() : '';
+      const denomination = denom instanceof HTMLSelectElement ? denom.value : '';
+      let shown = 0;
+      for (const card of cards) {
+        if (!(card instanceof HTMLElement)) continue;
+        const ok =
+          (!town || card.dataset.town === town) &&
+          (!denomination || card.dataset.denom === denomination) &&
+          (!query || (card.dataset.search || '').includes(query));
+        card.hidden = !ok;
+        if (ok) shown += 1;
+      }
+      for (const section of sections) {
+        if (!(section instanceof HTMLElement)) continue;
+        const visible = section.querySelectorAll('[data-church]:not([hidden])');
+        section.hidden = visible.length === 0;
+        const count = section.querySelector('[data-town-count]');
+        if (count) count.textContent = `${visible.length} ${visible.length === 1 ? 'church' : 'churches'}`;
+      }
+      const more = page.querySelector('[data-more]');
+      if (more instanceof HTMLElement) {
+        const visible = more.querySelectorAll('[data-church]:not([hidden])');
+        more.hidden = visible.length === 0;
+        const count = more.querySelector(':scope > h2 [data-town-count]');
+        if (count) count.textContent = `${visible.length} ${visible.length === 1 ? 'church' : 'churches'}`;
+      }
+      for (const jump of jumps) {
+        if (!(jump instanceof HTMLAnchorElement)) continue;
+        const id = jump.getAttribute('href')?.slice(1) || '';
+        const section = id ? document.getElementById(id) : null;
+        jump.hidden = !section || section.hidden;
+      }
+      const filtering = Boolean(town || denomination || query);
+      if (live) live.textContent = filtering ? `Showing ${shown} ${shown === 1 ? 'church' : 'churches'}.` : '';
+      if (empty instanceof HTMLElement) empty.hidden = shown !== 0;
+    };
+
+    input?.addEventListener('input', apply);
+    denom?.addEventListener('change', apply);
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        if (!(chip instanceof HTMLButtonElement)) return;
+        town = chip.dataset.townChip || '';
+        for (const other of chips) {
+          if (other instanceof HTMLButtonElement) other.setAttribute('aria-pressed', other === chip ? 'true' : 'false');
+        }
+        apply();
+      });
+    }
   }
+</script>
+
+<style>
+  .church-page { padding-bottom: 3rem; }
   .church-intro {
     max-width: 46rem;
     margin: 0 0 1rem;
@@ -85,13 +206,45 @@ const confirmCount = churchCount - officialCount;
     text-decoration: underline;
     text-underline-offset: 0.12em;
   }
-  .church-count {
+  .church-count,
+  .church-showing {
     margin: 0 0 1.1rem;
-    font-family: var(--sans);
     font-size: 0.92rem;
     font-weight: 650;
     color: var(--ink-soft);
   }
+  .church-showing:empty { display: none; }
+  .church-empty { margin: 0 0 1rem; font-weight: 650; }
+  .church-empty[hidden] { display: none; }
+  .church-page .search { margin-top: 0.2rem; }
+  .church-denom-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.7rem;
+    align-items: center;
+  }
+  .church-denom-row label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .church-denom-row select {
+    font: inherit;
+    font-size: 0.92rem;
+    max-width: 100%;
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--line);
+    background: white;
+    color: inherit;
+  }
+  .church-page .chip[aria-pressed="true"] {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
   .church-jump {
     display: flex;
     flex-wrap: wrap;
@@ -106,37 +259,42 @@ const confirmCount = churchCount - officialCount;
     border-radius: 999px;
     background: var(--card);
     color: var(--pine-deep);
-    font-family: var(--sans);
     font-size: 0.82rem;
     font-weight: 650;
     text-decoration: none;
   }
+  .church-jump a[hidden] { display: none; }
   .church-jump a:hover,
   .church-jump a:focus-visible {
     border-color: var(--pine);
     background: var(--ok-bg);
   }
 
-  .church-town {
-    margin: 0 0 2rem;
-  }
-  .church-town h2 {
+  .church-town,
+  .church-more { margin: 0 0 2rem; }
+  .church-town[hidden],
+  .church-more[hidden],
+  .church-more-town[hidden] { display: none; }
+  .church-town h2,
+  .church-more h2 {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
     gap: 0.4rem 1rem;
     margin: 0 0 0.75rem;
-    padding-top: 0.55rem;
-    border-top: 3px solid var(--pine);
-    font-size: 1.7rem;
+    padding-bottom: 0.32rem;
+    border-bottom: 3px solid var(--ink);
+    font-size: clamp(1.4rem, 2vw, 1.75rem);
     scroll-margin-top: 5.5rem;
   }
-  .church-town-elgin h2 { border-top-color: var(--river-deep); }
-  .church-town-smithville h2 { border-top-color: var(--sun-deep); }
-  .church-town-mcdade h2 { border-top-color: #4c3480; }
-  .church-town-cedar-creek h2 { border-top-color: #2d5a27; }
-  .church-town-elsewhere h2 { border-top-color: var(--ink-soft); }
+  .church-town-elgin h2 { border-bottom-color: var(--river-deep); }
+  .church-town-smithville h2 { border-bottom-color: var(--sun-deep); }
+  .church-town-mcdade h2 { border-bottom-color: #4c3480; }
+  .church-town-cedar-creek h2 { border-bottom-color: #2d5a27; }
+  .church-town-paige h2 { border-bottom-color: #6a4b16; }
+  .church-town-red-rock h2 { border-bottom-color: #8a3b24; }
+  .church-town-rosanky h2 { border-bottom-color: #245c32; }
   .church-town-count {
     font-family: var(--sans);
     font-size: 0.8rem;
@@ -145,13 +303,24 @@ const confirmCount = churchCount - officialCount;
     text-transform: uppercase;
     color: var(--ink-soft);
   }
-
   .church-card-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.85rem;
+    gap: 0.9rem;
+    margin-top: 0.8rem;
   }
   @media (min-width: 860px) {
     .church-card-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .church-more-town { margin-top: 1rem; }
+  .church-more-town h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    scroll-margin-top: 5.5rem;
+  }
+  .church-more-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 </style>

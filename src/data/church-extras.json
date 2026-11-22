@@ -1,0 +1,10 @@
+{
+  "byNameCity": {
+    "rosanky baptist church|rosanky": {
+      "partner": true,
+      "featured": true,
+      "image": "/images/banners/rosanky-baptist-church.jpg",
+      "imageAlt": "Rosanky Baptist Church"
+    }
+  }
+}
