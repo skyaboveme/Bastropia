@@ -42,6 +42,6 @@
     "crons": ["*/15 * * * *"]
   },
   "vars": {
-    "EVENTS_SOURCE": "local"
+    "EVENTS_SOURCE": "bcc"
   }
 }
