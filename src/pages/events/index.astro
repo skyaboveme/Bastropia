@@ -5,10 +5,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import EventBanner from '../../components/EventBanner.astro';
 import EventCredit from '../../components/EventCredit.astro';
+import EventPoster from '../../components/EventPoster.astro';
 import HomeBanner from '../../components/HomeBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
 import { eventHref, listEvents } from '../../lib/eventSource';
+import { cardImageUrl } from '../../lib/eventPoster';
 import {
   EVENT_SCHEMA_LIMIT,
   eventsInWindow,
@@ -20,7 +22,7 @@ import {
 import { activeUpgrades, resolveTier } from '../../lib/intake';
 import { offsiteAttrs } from '../../lib/links';
 import { eventNode, linkList } from '../../lib/schema';
-import { addDays, eventKey, labelFromKey, monthGrid, monthTitle, whenLabel } from '../../lib/time';
+import { addDays, eventKey, labelFromKey, monthGrid, monthTitle } from '../../lib/time';
 
 const params = Astro.url.searchParams;
 const query = {
@@ -98,6 +100,13 @@ const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const activeWhen = query.date ? '' : query.when || 'upcoming';
 const filtered = Boolean(query.when || query.category || query.city || query.q || query.date || classesOn);
 const schemaEvents = (view === 'month' ? monthEvents : shown).slice(0, EVENT_SCHEMA_LIMIT);
+let posterIndex = 0;
+function posterFlags(image?: string | null) {
+  if (!cardImageUrl(image)) return { eager: false, priority: false };
+  const index = posterIndex;
+  posterIndex += 1;
+  return { eager: index < 3, priority: index === 0 };
+}
 
 function href(overrides: Record<string, string | null>) {
   const next = new URLSearchParams();
@@ -226,24 +235,20 @@ function href(overrides: Record<string, string | null>) {
           <>
             <section class="event-day">
               <h2>{group.label}</h2>
-              <ul>
+              <div class="poster-grid">
                 {group.rows.map((event) => {
-                  const link = eventHref(event, source);
-                  const tier = tierOf(event);
+                  const flags = posterFlags(event.data.image);
                   return (
-                    <li>
-                      <a href={link} {...offsiteAttrs(link)}>{event.data.title}</a>
-                      <p class="meta">
-                        {whenLabel(event.data.schedule, event.data.start, event.data.end)}
-                        {' · '}{event.data.venue}
-                        {' · '}{event.data.city}
-                        {' · '}{categoryMeta[event.data.category].label}
-                        {tier !== 'community' ? ` · ${tier === 'lost-pines' ? 'Lost Pines' : tier}` : ''}
-                      </p>
-                    </li>
+                    <EventPoster
+                      event={event}
+                      tier={tierOf(event)}
+                      href={eventHref(event, source)}
+                      eager={flags.eager}
+                      priority={flags.priority}
+                    />
                   );
                 })}
-              </ul>
+              </div>
             </section>
             {group.banner && <EventBanner />}
           </>
@@ -270,26 +275,3 @@ function href(overrides: Record<string, string | null>) {
     <NewsletterSignup />
   </div>
 </BaseLayout>
-
-<style>
-  .event-day { margin: 1.15rem 0 0; }
-  .event-day h2 {
-    margin: 0;
-    font-size: 1.35rem;
-  }
-  .event-day ul {
-    list-style: none;
-    margin: 0.35rem 0 0;
-    padding: 0;
-  }
-  .event-day li {
-    padding: 0.55rem 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .event-day a {
-    font-family: var(--serif);
-    font-size: 1.2rem;
-    line-height: 1.25;
-  }
-  .event-day .meta { margin: 0.15rem 0 0; }
-</style>
