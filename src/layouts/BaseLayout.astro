@@ -86,11 +86,11 @@ const sections: Record<string, string> = {
   contact: 'Contact',
   corrections: 'Corrections',
   staff: 'Staff',
+  authors: 'Authors',
 };
 const parts = requestPath.split('/').filter(Boolean);
 const crumbs: { name: string; path: string }[] = [];
-if (parts[0] === 'authors') crumbs.push({ name: 'Staff', path: '/staff' });
-else if (sections[parts[0]]) crumbs.push({ name: sections[parts[0]], path: `/${parts[0]}` });
+if (sections[parts[0]]) crumbs.push({ name: sections[parts[0]], path: `/${parts[0]}` });
 if (parts.length > 1) crumbs.push({ name: title, path: requestPath });
 const schemaType = pageType === 'NewsArticle' || pageType === 'Article' ? 'WebPage' : pageType;
 const nodes = [

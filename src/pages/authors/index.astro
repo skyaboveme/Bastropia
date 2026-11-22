@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { authors } from '../../data/authors';
+---
+
+<BaseLayout
+  title="Authors"
+  description="Bastropia stories use the Bastropia desk byline until a reporter is listed here by name."
+>
+  <PageHead
+    kicker="Masthead"
+    title="Authors"
+    lede="The byline on a story is the Bastropia desk unless it names a reporter listed here."
+  />
+  <div class="wrap prose">
+    {authors.length > 0 ? (
+      <ul>
+        {authors.map((author) => (
+          <li>
+            <a href={`/authors/${author.slug}`}>{author.name}</a>
+            {author.jobTitle ? `, ${author.jobTitle}` : ''}. {author.description}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>No reporter is listed by name yet. Until one is, every story is the Bastropia desk, a shared byline, not a person.</p>
+    )}
+    <p>The <a href="/staff">masthead</a> says what the desk is. The <a href="/corrections">corrections policy</a> says how a wrong fact gets fixed.</p>
+  </div>
+</BaseLayout>
