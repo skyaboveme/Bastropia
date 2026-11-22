@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "node --experimental-strip-types scripts/write-image-sizes.ts && astro build",
     "deploy": "npm run build && wrangler deploy",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts scripts/*.test.ts scripts/*.test.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "scout": "node scripts/event-scout.mjs"

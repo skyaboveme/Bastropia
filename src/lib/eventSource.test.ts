@@ -10,8 +10,10 @@ import {
   mapTier,
   mapTown,
   parsePublicFeed,
+  readCachedBccEvents,
   redirectForLegacyEvent,
   refreshBccEvents,
+  runWithEventsSource,
   toListedEvents,
   type BccPublicEvent,
 } from './eventSource.ts';
@@ -83,7 +85,8 @@ test('towns outside the county list become Countywide', () => {
   assert.equal(mapTown('Elgin'), 'Elgin');
   assert.equal(mapTown('cedar creek'), 'Cedar Creek');
   assert.equal(mapTown(''), 'Countywide');
-  assert.equal(mapTown('Red Rock'), 'Countywide');
+  assert.equal(mapTown('Red Rock'), 'Red Rock');
+  assert.equal(mapTown('Austin'), 'Countywide');
 });
 
 test('tier, featured, and pinned map onto Bastropia tiers', () => {
@@ -123,7 +126,7 @@ test('an unknown town and a cancelled row do not become a local listing', () => 
       slug: 'countywide-market',
       url: 'https://bastropcountycalendar.com/events/countywide-market',
       title: 'Countywide Market',
-      town: 'Red Rock',
+      town: 'Austin',
       venue: '',
       categoryKey: 'markets',
       tier: 'featured',
@@ -274,4 +277,58 @@ test('a bad feed does not replace the last good copy', async () => {
   assert.equal(written.fetchedAt, '2026-11-22T12:00:00.000Z');
   assert.equal(written.omitted[0].reason, 'absurd-date');
   assert.equal(BCC_EVENTS_KV_KEY, 'bcc:events');
+});
+
+test('a stored feed is returned without calling the public feed', async () => {
+  let calls = 0;
+  const events = await readCachedBccEvents({
+    kv: {
+      async get() {
+        return { fetchedAt: '2026-11-22T12:00:00Z', events: [bcc()], omitted: [] };
+      },
+    } as never,
+    allowFetch: true,
+    fetchImpl: async () => {
+      calls += 1;
+      return Response.json({ events: [] });
+    },
+  });
+  assert.equal(calls, 0);
+  assert.equal(events?.[0].title, 'County Festival');
+});
+
+test('a request with an empty KV does not call the public feed', async () => {
+  let calls = 0;
+  const events = await runWithEventsSource('bcc', () =>
+    readCachedBccEvents({
+      kv: {
+        async get() {
+          return null;
+        },
+      } as never,
+      allowFetch: true,
+      fetchImpl: async () => {
+        calls += 1;
+        return Response.json({ events: [bcc()] });
+      },
+    }),
+  );
+  assert.equal(calls, 0);
+  assert.equal(events, null);
+});
+
+test('a build with an empty KV can still fetch once', async () => {
+  let calls = 0;
+  const events = await readCachedBccEvents({
+    kv: null,
+    allowFetch: true,
+    fetchImpl: async () => {
+      calls += 1;
+      return Response.json({
+        events: [bcc({ id: 'evt_build', slug: 'build-festival', url: 'https://bastropcountycalendar.com/events/build-festival', title: 'Build Festival' })],
+      });
+    },
+  });
+  assert.equal(calls, 1);
+  assert.equal(events?.[0].title, 'Build Festival');
 });

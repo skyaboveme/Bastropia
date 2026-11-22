@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { tierRank, type Tier } from '../data/taxonomy.ts';
-import { chicagoParts, eventKey, thisWeekendKeys } from './time.ts';
+import { addDays, chicagoParts, eventKey, thisWeekendKeys } from './time.ts';
 
 export type ListedEvent = CollectionEntry<'events'>;
 
@@ -66,16 +66,6 @@ function samePlace(a: string, b: string) {
   return Boolean(leftCompact && rightCompact && (leftCompact.includes(rightCompact) || rightCompact.includes(leftCompact)));
 }
 
-function sameListing(a: ListedEvent, b: ListedEvent) {
-  if (a.data.city !== b.data.city) return false;
-  if (eventKey(a.data.start) !== eventKey(b.data.start)) return false;
-  const left = chicagoParts(a.data.start);
-  const right = chicagoParts(b.data.start);
-  if (left.hour !== right.hour || left.minute !== right.minute) return false;
-  if (plainTitle(a.data.title) !== plainTitle(b.data.title)) return false;
-  return samePlace(a.data.venue, b.data.venue);
-}
-
 function listingScore(event: ListedEvent) {
   const summary = event.data.summary;
   const boilerplate = /is on the .+ calendar/i.test(summary) ? 0 : 4;
@@ -85,9 +75,19 @@ function listingScore(event: ListedEvent) {
 /** Drop a second listing of the same gathering when two calendars posted it. */
 export function dedupeListings(events: ListedEvent[]) {
   const kept: ListedEvent[] = [];
+  const buckets = new Map<string, number[]>();
   for (const event of events) {
-    const match = kept.findIndex((item) => sameListing(item, event));
-    if (match === -1) {
+    const parts = chicagoParts(event.data.start);
+    const key = `${event.data.city}|${parts.key}|${parts.hour}|${parts.minute}|${plainTitle(event.data.title)}`;
+    const indexes = buckets.get(key);
+    if (!indexes) {
+      buckets.set(key, [kept.length]);
+      kept.push(event);
+      continue;
+    }
+    const match = indexes.find((index) => samePlace(kept[index].data.venue, event.data.venue));
+    if (match === undefined) {
+      indexes.push(kept.length);
       kept.push(event);
       continue;
     }
@@ -116,8 +116,9 @@ export function filterEvents(events: ListedEvent[], query: EventQuery, now = new
   const includeClasses = query.classes === 'include';
 
   const matched = events.filter((event) => {
-      const key = eventKey(event.data.start);
-      const hour = chicagoParts(event.data.start).hour;
+      const parts = chicagoParts(event.data.start);
+      const key = parts.key;
+      const hour = parts.hour;
       const classListing = isClassListing(event);
       if (!includeClasses && (classesOnly ? !classListing : classListing)) return false;
 
@@ -166,4 +167,32 @@ export function sortByDayThenTier(events: ListedEvent[], tierOf: (event: ListedE
     if (rank !== 0) return rank;
     return a.data.start.getTime() - b.data.start.getTime();
   });
+}
+
+/** How many days of upcoming plans the events list prints before "show later". */
+export const EVENT_WINDOW_DAYS = 45;
+
+/**
+ * A day-sized page of a long list. `startKey` is inclusive. The next page
+ * begins on `moreAfter`, the earliest later day, so a gap does not print an empty page.
+ */
+export function sliceEventWindow<T>(
+  events: readonly T[],
+  startKey: string,
+  keyOf: (event: T) => string,
+  days = EVENT_WINDOW_DAYS,
+): { shown: T[]; moreAfter: string | null } {
+  const end = addDays(startKey, days);
+  const shown: T[] = [];
+  let moreAfter: string | null = null;
+  for (const event of events) {
+    const key = keyOf(event);
+    if (key < startKey) continue;
+    if (key >= end) {
+      if (!moreAfter || key < moreAfter) moreAfter = key;
+      continue;
+    }
+    shown.push(event);
+  }
+  return { shown, moreAfter };
 }

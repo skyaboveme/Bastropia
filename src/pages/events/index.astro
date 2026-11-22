@@ -10,12 +10,13 @@ import HomeBanner from '../../components/HomeBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
 import { eventHref, listEvents } from '../../lib/eventSource';
-import { filterEvents, isClassListing, sortByDayThenTier } from '../../lib/events';
+import { EVENT_WINDOW_DAYS, filterEvents, isClassListing, sliceEventWindow, sortByDayThenTier } from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
 import { offsiteAttrs } from '../../lib/links';
 import { eventNode, linkList } from '../../lib/schema';
 import { eventKey, labelFromKey, monthGrid, monthTitle } from '../../lib/time';
 
+const SCHEMA_LIMIT = 30;
 const params = Astro.url.searchParams;
 const query = {
   when: params.get('when'),
@@ -24,18 +25,45 @@ const query = {
   q: params.get('q'),
   date: params.get('date'),
   classes: params.get('classes'),
+  after: params.get('after'),
 };
 const view = params.get('view') === 'month' ? 'month' : 'list';
 const { events, source } = await listEvents();
 const upgrades = await activeUpgrades(eventKey(new Date()));
-const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
+type EventItem = (typeof events)[number];
+const tierOf = (event: EventItem) => resolveTier(event.id, event.data.tier, upgrades);
 const visible = sortByDayThenTier(filterEvents(events, query), tierOf);
 const classesOn = query.classes === '1' || query.classes === 'classes';
-
-const bannerAt = Math.min(5, visible.length);
-const listBefore = visible.slice(0, bannerAt);
-const listAfter = visible.slice(bannerAt);
 const today = eventKey(new Date());
+const afterOk = query.after && /^\d{4}-\d{2}-\d{2}$/.test(query.after) ? query.after : '';
+const narrowWhen = query.when === 'today' || query.when === 'tonight' || query.when === 'weekend';
+const opensWindow = view === 'list' && !query.date && !narrowWhen;
+let shown = visible;
+let moreAfter: string | null = null;
+if (opensWindow) {
+  const start =
+    query.when === 'all'
+      ? afterOk || eventKey(visible[0]?.data.start ?? new Date())
+      : afterOk > today
+        ? afterOk
+        : today;
+  const windowed = sliceEventWindow(shown, start, (event) => eventKey(event.data.start), EVENT_WINDOW_DAYS);
+  shown = windowed.shown;
+  moreAfter = windowed.moreAfter;
+}
+
+function groupByDay(list: EventItem[]) {
+  const groups: { key: string; events: EventItem[] }[] = [];
+  for (const event of list) {
+    const key = eventKey(event.data.start);
+    const last = groups[groups.length - 1];
+    if (last?.key === key) last.events.push(event);
+    else groups.push({ key, events: [event] });
+  }
+  return groups;
+}
+
+const groups = groupByDay(shown);
 const [todayYear, todayMonth] = today.split('-').map(Number);
 const requested = params.get('month');
 const monthMatch = requested?.match(/^(\d{4})-(\d{2})$/);
@@ -58,7 +86,8 @@ const previous = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).p
 const next = month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padStart(2, '0')}`;
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const activeWhen = query.date ? '' : query.when || 'upcoming';
-const filtered = Boolean(query.when || query.category || query.city || query.q || query.date || classesOn);
+const filtered = Boolean(query.when || query.category || query.city || query.q || query.date || classesOn || query.after);
+const schemaEvents = (view === 'month' ? monthEvents : shown).slice(0, SCHEMA_LIMIT);
 
 function href(overrides: Record<string, string | null>) {
   const next = new URLSearchParams();
@@ -69,6 +98,7 @@ function href(overrides: Record<string, string | null>) {
     q: query.q,
     date: query.date,
     classes: query.classes,
+    after: null,
     ...overrides,
   };
   for (const [key, value] of Object.entries(merged)) {
@@ -90,10 +120,10 @@ function href(overrides: Record<string, string | null>) {
       : [
           linkList(
             'Bastrop County Events Calendar',
-            visible.slice(0, 30).map((event) => ({ name: event.data.title, path: eventHref(event, source) })),
+            schemaEvents.map((event) => ({ name: event.data.title, path: eventHref(event, source) })),
           ),
         ]),
-    ...(source === 'bcc' ? [] : visible.map((event) => eventNode(event))),
+    ...(source === 'bcc' || filtered ? [] : schemaEvents.map((event) => eventNode(event))),
   ]}
 >
   <PageHead
@@ -179,16 +209,25 @@ function href(overrides: Record<string, string | null>) {
     </div>
     {query.date && <p class="lede">Showing {labelFromKey(query.date)}.</p>}
     {classesOn && <p class="lede">Rec-center fitness and wellness classes. One-off events stay on the main calendar.</p>}
-    {visible.length ? (
+    {groups.length ? (
       <>
-        <div class="card-list">
-          {listBefore.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
-        </div>
-        <EventBanner />
-        <div class="card-list">
-          {listAfter.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
-        </div>
+        {groups.map((group, index) => (
+          <section class="day-group">
+            <h2>{labelFromKey(group.key)}</h2>
+            <div class="card-list">
+              {group.events.map((event) => <EventCard event={event} tier={tierOf(event)} compact brief />)}
+            </div>
+            {index === 0 && <EventBanner />}
+          </section>
+        ))}
+        {moreAfter && (
+          <p class="more-events">
+            <a class="button" href={href({ after: moreAfter })}>Show later events</a>
+          </p>
+        )}
       </>
+    ) : moreAfter ? (
+      <p class="lede">Nothing in this stretch. <a class="text-link" href={href({ after: moreAfter })}>Show later events</a></p>
     ) : (
       <p class="lede">Nothing matches. <a class="text-link" href="/submit">Submit a listing</a> or <a class="text-link" href="/events">clear the filters</a>.</p>
     )}

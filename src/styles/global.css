@@ -531,6 +531,9 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .date-stamp strong { font-family: var(--serif); font-size: 1.7rem; font-weight: 580; }
 .event-card h3, .story-card h3, .update-card h3, .stream h3 { font-size: 1.3rem; }
 .event-card a:hover h3, .story-card a:hover h3, .update-card a:hover h3 { text-decoration: underline; text-underline-offset: 0.1em; }
+.day-group { margin-top: 1.15rem; }
+.day-group h2 { font-size: 1.45rem; margin: 0; }
+.more-events { margin: 1.2rem 0 0.2rem; }
 .event-actions { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; padding: 0 0 0.75rem; font-size: 0.92rem; }
 .event-actions a { color: var(--river-deep); font-weight: 650; }
 .badge { display: inline-flex; margin-top: 0.35rem; padding: 0.08rem 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--paper-2); }

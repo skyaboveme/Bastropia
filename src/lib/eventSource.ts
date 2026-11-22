@@ -3,8 +3,9 @@
  *
  * EVENTS_SOURCE is `local` (default) or `bcc`. The 15-minute cron stores a
  * successful public-feed response in KV under `bcc:events`. A failed fetch
- * leaves that copy in place. When the flag is `bcc` and KV has no usable
- * copy, pages keep the local collection.
+ * leaves that copy in place. A page request only reads that KV copy. It does
+ * not call the public feed, even when the copy is missing. When the flag is
+ * `bcc` and KV has no usable copy, pages keep the local collection.
  *
  * BCC datetimes are America/Chicago wall times unless they carry an offset.
  * categoryKey uses BCC's normalized vocabulary. Tier mapping:
@@ -41,9 +42,16 @@ export const BCC_EVENTS_KV_KEY = 'bcc:events';
 const SOURCE_LABEL = 'Bastrop County Calendar';
 
 const sourceStore = new AsyncLocalStorage<EventsSourceMode>();
+const requestBag = new AsyncLocalStorage<{
+  events?: Promise<{ events: ListedEvent[]; source: EventSourceKind }>;
+}>();
+
+function inRequest() {
+  return requestBag.getStore() !== undefined;
+}
 
 export function runWithEventsSource<T>(mode: EventsSourceMode, fn: () => T): T {
-  return sourceStore.run(mode, fn);
+  return sourceStore.run(mode, () => requestBag.run({}, fn));
 }
 
 let fileMode: EventsSourceMode | undefined;
@@ -521,43 +529,61 @@ async function localEvents(): Promise<ListedEvent[]> {
 let buildFeed: Promise<BccPublicEvent[] | null> | undefined;
 
 /** Static prerender has no request binding and an empty KV. Fetch once so those pages match the flag. */
-function fetchForBuild(): Promise<BccPublicEvent[] | null> {
-  if (sourceStore.getStore()) return Promise.resolve(null);
-  if (!buildFeed) {
-    buildFeed = fetchPublicFeed(fetch)
+function fetchForBuild(fetchImpl: typeof fetch = fetch): Promise<BccPublicEvent[] | null> {
+  if (inRequest()) return Promise.resolve(null);
+  const load = () =>
+    fetchPublicFeed(fetchImpl)
       .then((feed) => feed?.events ?? null)
       .catch((error) => {
         console.error('bcc events build fetch failed', error);
         return null;
       });
-  }
+  if (fetchImpl !== fetch) return load();
+  if (!buildFeed) buildFeed = load();
   return buildFeed;
 }
 
-async function bccEventsFromStore(): Promise<BccPublicEvent[] | null> {
+/**
+ * KV when it has a usable copy. A request never falls through to the public feed.
+ * A build may fetch once when KV is empty and no fixture was inlined.
+ */
+export async function readCachedBccEvents(options?: {
+  kv?: SessionKv | null;
+  allowFetch?: boolean;
+  fetchImpl?: typeof fetch;
+}): Promise<BccPublicEvent[] | null> {
   const fixture = await readFixture();
   if (fixture) return fixture;
   if (fixture === null) return null;
-  const kv = await loadKv();
+  const kv = options && 'kv' in options ? options.kv : await loadKv();
   if (kv) {
     const stored = await readStored(kv);
     if (stored) return stored.events;
   }
-  return fetchForBuild();
+  if (options?.allowFetch === false || inRequest()) return null;
+  return fetchForBuild(options?.fetchImpl);
 }
 
-export async function listEvents(): Promise<{ events: ListedEvent[]; source: EventSourceKind }> {
+async function loadListedEvents(): Promise<{ events: ListedEvent[]; source: EventSourceKind }> {
   if (eventsSourceMode() === 'bcc') {
-    const stored = await bccEventsFromStore();
+    const stored = await readCachedBccEvents({ allowFetch: !inRequest() });
     if (stored) return { events: toListedEvents(stored), source: 'bcc' };
   }
   return { events: await localEvents(), source: 'local' };
 }
 
+export function listEvents(): Promise<{ events: ListedEvent[]; source: EventSourceKind }> {
+  const bag = requestBag.getStore();
+  if (bag?.events) return bag.events;
+  const pending = loadListedEvents();
+  if (bag) bag.events = pending;
+  return pending;
+}
+
 /** 301 target for /events/[id] and /ics/[id] while BCC is actually being served. */
 export async function legacyEventRedirect(id: string, now = new Date()): Promise<string | null> {
   if (eventsSourceMode() !== 'bcc' || !id) return null;
-  const stored = await bccEventsFromStore();
+  const stored = await readCachedBccEvents({ allowFetch: !inRequest() });
   if (!stored) return null;
   const locals = await localEvents();
   const local = locals.find((event) => event.id === id);

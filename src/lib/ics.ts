@@ -9,7 +9,7 @@ function icsEscape(value: string) {
   return value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
 }
 
-export function googleCalendarUrl(event: ListedEvent, pageUrl: string) {
+export function googleCalendarUrl(event: ListedEvent, pageUrl: string, details?: string) {
   const key = eventKey(event.data.start);
   const dates =
     event.data.schedule === 'all-day' || event.data.schedule === 'agenda'
@@ -20,9 +20,10 @@ export function googleCalendarUrl(event: ListedEvent, pageUrl: string) {
     text: event.data.title,
     dates,
     ctz: 'America/Chicago',
-    details: `${event.data.summary}\n\n${pageUrl}`,
     location: [event.data.venue, event.data.address].filter(Boolean).join(', '),
   });
+  const body = details === undefined ? `${event.data.summary}\n\n${pageUrl}` : details;
+  if (body) params.set('details', body);
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 

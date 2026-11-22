@@ -4,12 +4,18 @@ import { refreshDailyVideo } from './lib/dailyVideo';
 import { refreshBccEvents, runWithEventsSource, type EventsSourceMode } from './lib/eventSource';
 import type { SessionKv } from './lib/sessionKv';
 import {
-  HOME_CACHE_CONTROL,
-  HOME_STORE_CONTROL,
+  EVENTS_FRESH_SECONDS,
+  EVENTS_STALE_SECONDS,
+  HOME_FRESH_SECONDS,
+  HOME_STALE_SECONDS,
+  cacheControlFor,
+  cacheWindowState,
   cookieValue,
-  homeCacheState,
+  eventCacheUrl,
   homeCacheUrl,
+  isEventCachePath,
   isHomePath,
+  storeControlFor,
 } from './lib/homeCache';
 import { readTown, townCookie } from './lib/townChoice';
 
@@ -41,73 +47,110 @@ function withSecurityHeaders(response: Response): Response {
   });
 }
 
-function cacheableHome(response: Response) {
+type PageCache = {
+  fresh: number;
+  stale: number;
+  key: Request;
+  label: string;
+};
+
+function townOf(request: Request) {
+  return readTown(cookieValue(request.headers.get('cookie'), townCookie));
+}
+
+function homePageCache(request: Request): PageCache {
+  return {
+    fresh: HOME_FRESH_SECONDS,
+    stale: HOME_STALE_SECONDS,
+    key: new Request(homeCacheUrl(request.url, townOf(request)), { method: 'GET' }),
+    label: 'home',
+  };
+}
+
+function eventPageCache(request: Request): PageCache {
+  return {
+    fresh: EVENTS_FRESH_SECONDS,
+    stale: EVENTS_STALE_SECONDS,
+    key: new Request(eventCacheUrl(request.url, townOf(request)), { method: 'GET' }),
+    label: 'event',
+  };
+}
+
+function cacheablePage(response: Response) {
+  if (response.status === 301 || response.status === 302 || response.status === 307 || response.status === 308) return true;
   if (response.status !== 200) return false;
   const type = response.headers.get('content-type') ?? '';
   return type.includes('text/html');
 }
 
-async function storeHome(key: Request, response: Response, ctx: ExecutionContext) {
+async function storePage(page: PageCache, response: Response, ctx: ExecutionContext) {
   const setCookies = typeof response.headers.getSetCookie === 'function' ? response.headers.getSetCookie() : [];
   const headers = new Headers(response.headers);
   headers.delete('set-cookie');
-  headers.set('Cache-Control', HOME_STORE_CONTROL);
+  headers.set('Cache-Control', storeControlFor(page.fresh, page.stale));
   headers.set('x-cached-at', String(Date.now()));
   const body = await response.arrayBuffer();
-  const stored = new Response(body, { status: 200, headers });
+  const stored = new Response(body, { status: response.status, statusText: response.statusText, headers });
   ctx.waitUntil(
-    caches.default.put(key, stored).catch((error) => {
-      console.error('home cache store failed', error);
+    caches.default.put(page.key, stored).catch((error) => {
+      console.error(`${page.label} cache store failed`, error);
     }),
   );
   const client = new Headers(headers);
-  client.set('Cache-Control', HOME_CACHE_CONTROL);
+  client.set('Cache-Control', cacheControlFor(page.fresh, page.stale));
   client.set('Vary', 'Cookie');
   client.set('x-edge-cache', 'MISS');
-  const out = new Response(body, { status: 200, headers: client });
+  const out = new Response(body, { status: response.status, statusText: response.statusText, headers: client });
   for (const cookie of setCookies) out.headers.append('set-cookie', cookie);
   return out;
 }
 
-function clientCache(response: Response, state: 'fresh' | 'stale') {
+function clientCache(response: Response, state: 'fresh' | 'stale', page: PageCache) {
   const headers = new Headers(response.headers);
-  headers.set('Cache-Control', HOME_CACHE_CONTROL);
+  headers.set('Cache-Control', cacheControlFor(page.fresh, page.stale));
   headers.set('Vary', 'Cookie');
   headers.set('x-edge-cache', state === 'fresh' ? 'HIT' : 'STALE');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
-async function fillHome(request: Request, env: Env, ctx: ExecutionContext, key: Request) {
+async function fillPage(request: Request, env: Env, ctx: ExecutionContext, page: PageCache) {
   const rendered = withSecurityHeaders(await handle(request, env, ctx));
-  if (!cacheableHome(rendered)) return rendered;
-  return storeHome(key, rendered, ctx);
+  if (!cacheablePage(rendered)) return rendered;
+  return storePage(page, rendered, ctx);
 }
 
-async function homepage(request: Request, env: Env, ctx: ExecutionContext) {
+async function cachedPage(request: Request, env: Env, ctx: ExecutionContext, page: PageCache) {
   const bypass = /no-cache|no-store/i.test(request.headers.get('cache-control') ?? '');
-  const town = readTown(cookieValue(request.headers.get('cookie'), townCookie));
-  const key = new Request(homeCacheUrl(request.url, town), { method: 'GET' });
   if (!bypass) {
     try {
-      const hit = await caches.default.match(key);
+      const hit = await caches.default.match(page.key);
       const cachedAt = Number(hit?.headers.get('x-cached-at') ?? '');
-      const state = hit ? homeCacheState(cachedAt, Date.now()) : 'expired';
+      const state = hit ? cacheWindowState(cachedAt, Date.now(), page.fresh, page.stale) : 'expired';
       if (hit && (state === 'fresh' || state === 'stale')) {
         if (state === 'stale') {
           const refresh = request.clone();
           ctx.waitUntil(
-            fillHome(refresh, env, ctx, key).catch((error) => {
-              console.error('home cache refresh failed', error);
+            fillPage(refresh, env, ctx, page).catch((error) => {
+              console.error(`${page.label} cache refresh failed`, error);
             }),
           );
         }
-        return clientCache(hit, state);
+        return clientCache(hit, state, page);
       }
     } catch (error) {
-      console.error('home cache read failed', error);
+      console.error(`${page.label} cache read failed`, error);
     }
   }
-  return fillHome(request, env, ctx, key);
+  return fillPage(request, env, ctx, page);
+}
+
+async function warmEvents(env: Env, ctx: ExecutionContext) {
+  try {
+    const request = new Request(`https://${APEX_HOST}/events`, { method: 'GET' });
+    await runWithEventsSource(eventsMode(env), () => fillPage(request, env, ctx, eventPageCache(request)));
+  } catch (error) {
+    console.error('event cache warm failed', error);
+  }
 }
 
 function eventsMode(env: unknown): EventsSourceMode {
@@ -131,7 +174,10 @@ export default {
       }),
     );
     ctx.waitUntil(
-      refreshBccEvents({ kv: (env as { SESSION?: SessionKv }).SESSION }).catch((error) => {
+      (async () => {
+        const result = await refreshBccEvents({ kv: (env as { SESSION?: SessionKv }).SESSION });
+        if (result.stored) await warmEvents(env, ctx);
+      })().catch((error) => {
         console.error('bcc events refresh failed', error);
       }),
     );
@@ -146,8 +192,11 @@ async function render(request: Request, env: Env, ctx: ExecutionContext): Promis
     }
 
     if (request.method === 'GET' && isHomePath(url.pathname)) {
-      const response = await homepage(request, env, ctx);
-      return response;
+      return cachedPage(request, env, ctx, homePageCache(request));
+    }
+
+    if (request.method === 'GET' && isEventCachePath(url.pathname)) {
+      return cachedPage(request, env, ctx, eventPageCache(request));
     }
 
     const response = await handle(request, env, ctx);

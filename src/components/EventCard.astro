@@ -12,16 +12,20 @@ interface Props {
   event: CollectionEntry<'events'>;
   tier?: Tier;
   compact?: boolean;
+  /** Calendar list rows omit the summary that used to be copied into every link. */
+  brief?: boolean;
 }
 
-const { event, tier = event.data.tier, compact = false } = Astro.props;
+const { event, tier = event.data.tier, compact = false, brief = false } = Astro.props;
 const stamp = stampParts(event.data.start);
 const category = categoryMeta[event.data.category];
 const href = eventHref(event, eventsSourceMode());
 const pageUrl = new URL(href, siteUrl).toString();
-const place = [event.data.address, event.data.venue, `${event.data.city}, TX`].filter(Boolean).join(', ');
+const place = (brief ? [event.data.venue, `${event.data.city}, TX`] : [event.data.address, event.data.venue, `${event.data.city}, TX`])
+  .filter(Boolean)
+  .join(', ');
 const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
-const calendarHref = googleCalendarUrl(event, pageUrl);
+const calendarHref = googleCalendarUrl(event, pageUrl, brief ? '' : undefined);
 ---
 
 <article class:list={['event-card', `tier-${tier}`, { compact }]}>
@@ -36,7 +40,7 @@ const calendarHref = googleCalendarUrl(event, pageUrl);
     <div>
       <p class="kicker">{category.label} · {event.data.city}</p>
       <h3>{event.data.title}</h3>
-      <p class="meta">{whenLabel(event.data.schedule, event.data.start, event.data.end)}{compact ? '' : ` · ${event.data.venue}`}</p>
+      <p class="meta">{whenLabel(event.data.schedule, event.data.start, event.data.end)}{compact && !brief ? '' : ` · ${event.data.venue}`}</p>
       {tier !== 'community' && <p class="badge">{tier === 'lost-pines' ? 'Lost Pines' : tier}</p>}
     </div>
   </a>
