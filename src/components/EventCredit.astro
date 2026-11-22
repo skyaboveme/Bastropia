@@ -1,0 +1,18 @@
+---
+import { BCC_ORIGIN, bccSubmitHref } from '../lib/eventSource';
+import { offsiteAttrs } from '../lib/links';
+
+interface Props {
+  compact?: boolean;
+  content?: string;
+}
+
+const { compact = false, content = 'events' } = Astro.props;
+const home = BCC_ORIGIN;
+const submit = bccSubmitHref(content);
+---
+
+<p class:list={['event-credit', { compact }]}>
+  <span>Events powered by <a href={home} {...offsiteAttrs(home)}>Bastrop County Calendar</a>.</span>
+  <a class="button" href={submit} {...offsiteAttrs(submit)}>Add your event on BastropCountyCalendar.com</a>
+</p>

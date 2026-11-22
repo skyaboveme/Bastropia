@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { BCC_ORIGIN, eventHref, listEvents } from './eventSource';
 import { burnBan } from '../data/burnBan';
 import { burnView } from './burnBanView';
 import { businesses } from '../data/businesses';
@@ -10,7 +11,7 @@ import { addDays, chicagoParts, eventKey, formatLong, labelFromKey, whenLabel } 
 
 const pages: { path: string; label: string; note: string }[] = [
   { path: '/', label: 'Front page', note: 'Today’s news, Around the county, and upcoming events.' },
-  { path: '/events', label: 'Events', note: 'List and month view of Bastrop County listings. /calendar opens the month view.' },
+  { path: '/events', label: 'Events', note: 'List and month view. Bastrop County Calendar (https://bastropcountycalendar.com) is the authority for county events. /calendar opens the month view.' },
   { path: '/this-weekend', label: 'This weekend', note: 'Friday, Saturday, and Sunday plans in the same list as the events calendar.' },
   { path: '/news', label: 'News', note: 'Short desk stories with a link to the public source.' },
   { path: '/guides', label: 'County guides', note: 'Evergreen guides to moving, parks and the river, burn bans, county government, and Elgin, Smithville, and Paige.' },
@@ -43,7 +44,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/authors', label: 'Authors', note: 'Byline list. Empty until a reporter is named. Stories stay the Bastropia desk' },
   { path: '/corrections', label: 'Corrections', note: 'Editorial policy and how to ask for a factual correction' },
   { path: '/contact', label: 'Contact', note: 'Tip form, event form, and the public Facebook group. No newsroom phone or street address' },
-  { path: '/submit', label: 'Add an event', note: 'How a neighbor submits a listing' },
+  { path: '/submit', label: 'Add an event', note: 'Add a county event at https://bastropcountycalendar.com/events/submit' },
   { path: '/llms-full.txt', label: 'Full text for models', note: 'Current listings, stories, and notices in one file' },
 ];
 
@@ -60,7 +61,7 @@ export async function llmsIndex() {
     '',
     `> ${siteDescription} A community site, not Bastrop County government.`,
     '',
-    'Bastropia covers Bastrop, Elgin, Smithville, Cedar Creek, McDade, Paige, and the rest of Bastrop County, Texas. Event listings come from public city and county calendars and from neighbors. A time, price, or address on a listing should be confirmed on the source linked from that page.',
+    `Bastropia covers Bastrop, Elgin, Smithville, Cedar Creek, McDade, Paige, and the rest of Bastrop County, Texas. Bastrop County Calendar (${BCC_ORIGIN}) is the authority for county events. A time, price, or address should be confirmed there.`,
     '',
     '## How to cite',
     'Name the site Bastropia and link the exact page. News is written by the Bastropia desk unless a story names a reporter on the masthead. Burn bans, court dates, office numbers, and listing times are summaries of public pages. The source linked on that page is the authority. The corrections policy is ' + link('/corrections') + '. Send a correction through ' + link('/tips') + '.',
@@ -90,8 +91,8 @@ export async function llmsIndex() {
 
 export async function llmsFull() {
   const today = eventKey(new Date());
-  const [events, news, notices, guides] = await Promise.all([
-    getCollection('events'),
+  const [{ events, source }, news, notices, guides] = await Promise.all([
+    listEvents(),
     getCollection('news'),
     getCollection('updates'),
     getCollection('guides'),
@@ -171,14 +172,15 @@ export async function llmsFull() {
     }
   }
 
-  lines.push('## Upcoming events', '');
+  lines.push('## Upcoming events', '', `Bastrop County Calendar is the authority for county events: ${BCC_ORIGIN}`, '');
   if (upcoming.length === 0) lines.push('No upcoming listings are on the calendar.', '');
   for (const event of upcoming) {
     const when = `${formatLong(event.data.start)}, ${whenLabel(event.data.schedule, event.data.start, event.data.end)}`;
     lines.push(`### ${event.data.title}`);
     lines.push(`${when}. ${event.data.city}. ${event.data.venue}.`);
     lines.push(event.data.summary);
-    lines.push(link(`/events/${event.id}`));
+    const href = eventHref(event, source);
+    lines.push(href.startsWith('http') ? href : link(href));
     if (event.data.sourceUrl) lines.push(`Source: ${event.data.sourceUrl}`);
     lines.push('');
   }

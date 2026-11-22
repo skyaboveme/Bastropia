@@ -40,5 +40,8 @@
   ],
   "triggers": {
     "crons": ["*/15 * * * *"]
+  },
+  "vars": {
+    "EVENTS_SOURCE": "local"
   }
 }

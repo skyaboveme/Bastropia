@@ -1,4 +1,5 @@
 ---
+import EventCredit from './EventCredit.astro';
 import SocialIcons from './SocialIcons.astro';
 import { facebookGroupReason } from '../data/site';
 ---
@@ -20,6 +21,7 @@ import { facebookGroupReason } from '../data/site';
         </picture>
       </a>
       <p class="legal">Everything in Bastrop County.</p>
+      <EventCredit content="footer" />
       <SocialIcons class="footer-social" />
       <p class="meta">{facebookGroupReason}</p>
     </div>

@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { categoryMeta, type Tier } from '../data/taxonomy';
 import { siteUrl } from '../data/site';
+import { eventHref, eventsSourceMode } from '../lib/eventSource';
 import { phoneHref } from '../lib/format';
 import { googleCalendarUrl } from '../lib/ics';
 import { offsiteAttrs } from '../lib/links';
@@ -16,14 +17,15 @@ interface Props {
 const { event, tier = event.data.tier, compact = false } = Astro.props;
 const stamp = stampParts(event.data.start);
 const category = categoryMeta[event.data.category];
-const pageUrl = new URL(`/events/${event.id}`, siteUrl).toString();
+const href = eventHref(event, eventsSourceMode());
+const pageUrl = new URL(href, siteUrl).toString();
 const place = [event.data.address, event.data.venue, `${event.data.city}, TX`].filter(Boolean).join(', ');
 const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
 const calendarHref = googleCalendarUrl(event, pageUrl);
 ---
 
 <article class:list={['event-card', `tier-${tier}`, { compact }]}>
-  <a class:list={[{ 'has-photo': Boolean(event.data.image) }]} href={`/events/${event.id}`}>
+  <a class:list={[{ 'has-photo': Boolean(event.data.image) }]} href={href} {...offsiteAttrs(href)}>
     {!compact && (
       <time class="date-stamp" datetime={event.data.start.toISOString()}>
         <span>{stamp.month}</span>

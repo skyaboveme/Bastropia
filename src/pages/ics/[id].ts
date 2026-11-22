@@ -1,18 +1,21 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
 import { buildIcs } from '../../lib/ics';
+import { legacyEventRedirect, listEvents } from '../../lib/eventSource';
 
-export async function getStaticPaths() {
-  const events = await getCollection('events');
-  return events.map((event) => ({ params: { id: event.id }, props: { event } }));
-}
+export const prerender = false;
 
-export const GET: APIRoute = ({ props, site, params }) => {
-  const pageUrl = new URL(`/events/${params.id}`, site).toString();
-  return new Response(buildIcs(props.event, pageUrl), {
+export const GET: APIRoute = async ({ params, site, redirect }) => {
+  const id = params.id ?? '';
+  const target = await legacyEventRedirect(id);
+  if (target) return redirect(target, 301);
+  const { events } = await listEvents();
+  const event = events.find((item) => item.id === id);
+  if (!event) return new Response('Not found', { status: 404 });
+  const pageUrl = new URL(`/events/${id}`, site).toString();
+  return new Response(buildIcs(event, pageUrl), {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${params.id}.ics"`,
+      'Content-Disposition': `attachment; filename="${id}.ics"`,
     },
   });
 };

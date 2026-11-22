@@ -824,6 +824,12 @@ pre.markdown { white-space: pre-wrap; background: var(--pine-deep); color: #f4ef
 .site-footer a:hover { color: var(--river-deep); text-decoration: underline; }
 .site-footer .legal { color: var(--ink-soft); margin-top: 0.6rem; }
 .fine { grid-column: 1 / -1; color: var(--ink-soft); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.event-credit { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem 0.9rem; margin: 0.9rem 0 0.2rem; color: var(--ink-soft); }
+.event-credit.compact { display: block; margin: 0.45rem 0 0; font-size: 0.75rem; line-height: 1.35; }
+.event-credit.compact .button { margin-top: 0.4rem; padding: 0.4rem 0.55rem; font-size: 0.72rem; }
+.site-footer .event-credit { margin-top: 0.8rem; }
+.site-footer .event-credit a.button,
+.site-footer .event-credit a.button:hover { color: #1a1406; text-decoration: none; }
 
 :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 

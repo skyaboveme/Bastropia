@@ -1,16 +1,18 @@
 ---
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import EventCard from '../../components/EventCard.astro';
 import EventBanner from '../../components/EventBanner.astro';
+import EventCredit from '../../components/EventCredit.astro';
 import HomeBanner from '../../components/HomeBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
+import { eventHref, listEvents } from '../../lib/eventSource';
 import { filterEvents, isClassListing, sortByDayThenTier } from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
+import { offsiteAttrs } from '../../lib/links';
 import { eventNode, linkList } from '../../lib/schema';
 import { eventKey, labelFromKey, monthGrid, monthTitle } from '../../lib/time';
 
@@ -24,7 +26,7 @@ const query = {
   classes: params.get('classes'),
 };
 const view = params.get('view') === 'month' ? 'month' : 'list';
-const events = await getCollection('events');
+const { events, source } = await listEvents();
 const upgrades = await activeUpgrades(eventKey(new Date()));
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const visible = sortByDayThenTier(filterEvents(events, query), tierOf);
@@ -83,8 +85,15 @@ function href(overrides: Record<string, string | null>) {
   noindex={filtered}
   nofollow={false}
   extra={[
-    ...(filtered ? [] : [linkList('Bastrop County Events Calendar', visible.slice(0, 30).map((event) => ({ name: event.data.title, path: `/events/${event.id}` })))]),
-    ...visible.map((event) => eventNode(event)),
+    ...(filtered
+      ? []
+      : [
+          linkList(
+            'Bastrop County Events Calendar',
+            visible.slice(0, 30).map((event) => ({ name: event.data.title, path: eventHref(event, source) })),
+          ),
+        ]),
+    ...(source === 'bcc' ? [] : visible.map((event) => eventNode(event))),
   ]}
 >
   <PageHead
@@ -95,6 +104,7 @@ function href(overrides: Record<string, string | null>) {
       : 'Festivals, meetings, markets, and ordinary Tuesday plans. Filter the list, or switch to the month.'}
   />
   <div class="wrap">
+    <EventCredit content="events" />
     <div class="filters">
       <div class="filter-row">
         <span>View</span>
@@ -122,13 +132,13 @@ function href(overrides: Record<string, string | null>) {
           <h2>Listed in {monthName}</h2>
           <div class="card-list" style="margin-top:0.8rem;">
             {monthBefore.map((event) => (
-              <a class="text-link" href={`/events/${event.id}`}>{labelFromKey(eventKey(event.data.start))} — {event.data.title}</a>
+              <a class="text-link" href={eventHref(event, source)} {...offsiteAttrs(eventHref(event, source))}>{labelFromKey(eventKey(event.data.start))} — {event.data.title}</a>
             ))}
           </div>
           {monthEvents.length > 0 && <EventBanner />}
           <div class="card-list">
             {monthAfter.map((event) => (
-              <a class="text-link" href={`/events/${event.id}`}>{labelFromKey(eventKey(event.data.start))} — {event.data.title}</a>
+              <a class="text-link" href={eventHref(event, source)} {...offsiteAttrs(eventHref(event, source))}>{labelFromKey(eventKey(event.data.start))} — {event.data.title}</a>
             ))}
             {!monthEvents.length && <p>Nothing is filed for this month yet.</p>}
           </div>

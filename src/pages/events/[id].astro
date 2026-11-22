@@ -11,10 +11,13 @@ import { phoneHref } from '../../lib/format';
 import { googleCalendarUrl } from '../../lib/ics';
 import { offsiteAttrs } from '../../lib/links';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
+import { legacyEventRedirect } from '../../lib/eventSource';
 import { eventNode } from '../../lib/schema';
 import { eventKey, formatLong, whenLabel } from '../../lib/time';
 
 const id = Astro.params.id ?? '';
+const target = await legacyEventRedirect(id);
+if (target) return Astro.redirect(target, 301);
 const event = await getEntry('events', id);
 if (!event) Astro.response.status = 404;
 const rendered = event ? await render(event) : null;

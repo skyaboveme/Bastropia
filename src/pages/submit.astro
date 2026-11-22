@@ -1,11 +1,17 @@
 ---
+export const prerender = false;
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
 import { categories, categoryMeta, cities } from '../data/taxonomy';
+import { bccSubmitHref, eventsSourceMode } from '../lib/eventSource';
+import { offsiteAttrs } from '../lib/links';
 import { addDays, eventKey } from '../lib/time';
 
 const tomorrow = addDays(eventKey(new Date()), 1);
+const bcc = eventsSourceMode() === 'bcc';
+const submitHref = bccSubmitHref('submit');
 ---
 
 <BaseLayout title="Add an event" description="Submit a community listing for Bastrop County. A person reviews it before it goes on the calendar.">
@@ -15,6 +21,13 @@ const tomorrow = addDays(eventKey(new Date()), 1);
     lede="Free for gatherings, fundraisers, worship nights, school events, and civic meetings. The desk reviews it before it is public. If you want it pinned or shared to the Facebook group, upgrade it after it is published."
   />
   <div class="wrap">
+    {bcc ? (
+      <>
+        <p class="lede">County events are added on Bastrop County Calendar. Bastropia lists them from there.</p>
+        <a class="button" href={submitHref} {...offsiteAttrs(submitHref)}>Add your event on BastropCountyCalendar.com</a>
+      </>
+    ) : (
+    <>
     <FormError />
     <form class="form" action="/api/intake" method="post">
       <input type="hidden" name="type" value="event" />
@@ -95,5 +108,7 @@ const tomorrow = addDays(eventKey(new Date()), 1);
       </div>
       <button class="button" type="submit">Send it to the desk</button>
     </form>
+    </>
+    )}
   </div>
 </BaseLayout>

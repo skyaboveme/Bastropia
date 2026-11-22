@@ -12,10 +12,12 @@ import { footballSchools, getFridayScores } from '../lib/fridayScores';
 import { getExternalNews } from '../lib/externalNews';
 import { offsiteAttrs } from '../lib/links';
 import { phoneHref } from '../lib/format';
+import { eventHref, listEvents } from '../lib/eventSource';
 import { linkList } from '../lib/schema';
 import { eventKey, formatMedium, labelFromKey } from '../lib/time';
 import { getForecast, weatherLabel } from '../lib/weather';
 import { activeUpgrades, resolveTier } from '../lib/intake';
+import EventCredit from '../components/EventCredit.astro';
 import ListingPage from '../components/ListingPage.astro';
 import { bumpStat, getBusiness, listBizEvents, listSpecials } from '../lib/businessDb';
 
@@ -31,7 +33,7 @@ const now = new Date();
 const today = eventKey(now);
 const weekEnd = eventKey(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
 const forecast = town ? await getForecast(town.weather) : null;
-const events = town ? await getCollection('events') : [];
+const { events, source: eventSource } = town ? await listEvents() : { events: [], source: 'local' as const };
 const upgrades = town ? await activeUpgrades(today) : [];
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const weekEvents = events
@@ -74,7 +76,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
     pageType="CollectionPage"
     extra={[
       linkList(`This week in ${town.name}`, [
-        ...weekEvents.map((event) => ({ name: event.data.title, path: `/events/${event.id}` })),
+        ...weekEvents.map((event) => ({ name: event.data.title, path: eventHref(event, eventSource) })),
         ...localNews.map((story) => ({ name: story.data.title, path: `/news/${story.id}` })),
       ]),
     ]}
@@ -159,6 +161,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
           {weekEvents.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
           {!weekEvents.length && <p class="meta">Nothing is listed in {town.name} for the next seven days.</p>}
         </div>
+        <EventCredit content={`town-${town.slug}`} />
       </section>
 
       <section class="section split">

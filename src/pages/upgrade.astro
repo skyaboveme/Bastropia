@@ -1,20 +1,22 @@
 ---
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
 import { listingTiers } from '../data/commerce';
+import { bccSubmitHref, eventsSourceMode, listEvents } from '../lib/eventSource';
 import { filterEvents } from '../lib/events';
 import { money } from '../lib/format';
 import { activeUpgrades } from '../lib/intake';
+import { offsiteAttrs } from '../lib/links';
 import { eventKey, formatMedium } from '../lib/time';
 
 const selectedEvent = Astro.url.searchParams.get('event');
 const selectedTier = Astro.url.searchParams.get('tier');
 const now = new Date();
-const allEvents = await getCollection('events');
+const bcc = eventsSourceMode() === 'bcc';
+const { events: allEvents } = await listEvents();
 let events = filterEvents(allEvents, { when: 'upcoming', classes: 'include' }, now);
 if (selectedEvent && !events.some((event) => event.id === selectedEvent)) {
   const selected = allEvents.find((event) => event.id === selectedEvent);
@@ -43,6 +45,17 @@ const prices = Object.fromEntries(listingTiers.map((tier) => [tier.id, tier.pric
         </article>
       ))}
     </div>
+    {bcc ? (
+      <>
+        <p class="lede">These prices stay on Bastropia. The listing and the upgrade are placed on Bastrop County Calendar.</p>
+        <p class="cluster">
+          {listingTiers.filter((tier) => tier.id !== 'community').map((tier) => (
+            <a class="button" href={bccSubmitHref(`upgrade-${tier.id}`)} {...offsiteAttrs(bccSubmitHref(`upgrade-${tier.id}`))}>{tier.name} · {money(tier.price)}</a>
+          ))}
+        </p>
+      </>
+    ) : (
+    <>
     <FormError />
     <form id="upgrade-form" class="form" action="/api/intake" method="post">
       <input type="hidden" name="type" value="upgrade" />
@@ -93,6 +106,8 @@ const prices = Object.fromEntries(listingTiers.map((tier) => [tier.id, tier.pric
       </label>
       <button class="button" type="submit">Request this upgrade</button>
     </form>
+    </>
+    )}
   </div>
 </BaseLayout>
 <script define:vars={{ prices }}>

@@ -5,9 +5,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { authors } from '../data/authors';
 import { businesses } from '../data/businesses';
+import { listEvents } from '../lib/eventSource';
 
-const [events, news, social, updates, guides] = await Promise.all([
-  getCollection('events'),
+const [{ events, source }, news, social, updates, guides] = await Promise.all([
+  listEvents(),
   getCollection('news'),
   getCollection('social'),
   getCollection('updates'),
@@ -76,10 +77,12 @@ const links = [
     .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
     .map((item) => ({ href: `/social/${item.id}`, label: item.data.title })),
   ...updates.map((item) => ({ href: `/government/${item.id}`, label: item.data.title })),
-  ...events
-    .slice()
-    .sort((a, b) => a.data.start.getTime() - b.data.start.getTime())
-    .map((event) => ({ href: `/events/${event.id}`, label: event.data.title })),
+  ...(source === 'bcc'
+    ? []
+    : events
+        .slice()
+        .sort((a, b) => a.data.start.getTime() - b.data.start.getTime())
+        .map((event) => ({ href: `/events/${event.id}`, label: event.data.title }))),
 ];
 
 const total = links.length;

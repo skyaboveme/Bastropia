@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
-import { tierRank, type Tier } from '../data/taxonomy';
-import { chicagoParts, eventKey, thisWeekendKeys } from './time';
+import { tierRank, type Tier } from '../data/taxonomy.ts';
+import { chicagoParts, eventKey, thisWeekendKeys } from './time.ts';
 
 export type ListedEvent = CollectionEntry<'events'>;
 

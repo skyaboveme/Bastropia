@@ -22,7 +22,8 @@ import { readTown, townCookie } from '../lib/townChoice';
 import { currentDailyVideo } from '../lib/dailyVideo';
 import PlaceName from '../components/PlaceName.astro';
 import { imageSize } from '../lib/imageSize';
-import { dailyVideoNode, eventNode, linkList, newsNode } from '../lib/schema';
+import { eventHref, eventListingNodes, listEvents } from '../lib/eventSource';
+import { dailyVideoNode, newsNode } from '../lib/schema';
 import { categoryMeta, cities } from '../data/taxonomy';
 import { streams } from '../data/streams';
 import { capOrganizer, filterEvents, sortByDayThenTier, sortByTier } from '../lib/events';
@@ -34,7 +35,7 @@ const homeTown = readTown(Astro.cookies.get(townCookie)?.value);
 const homePage = homeTown ? townByName(homeTown) : undefined;
 const weekend = thisWeekendKeys(now);
 const upgrades = await activeUpgrades(today);
-const events = await getCollection('events');
+const { events, source: eventSource } = await listEvents();
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const todayEvents = capOrganizer(filterEvents(events, { when: 'today' }, now));
 const weekendEvents = filterEvents(events, { when: 'weekend' }, now);
@@ -139,8 +140,7 @@ const weekendDays = weekend
   title="Bastropia"
   description={siteDescription}
   extra={[
-    linkList('Events on the front page', listed.map((event) => ({ name: event.data.title, path: `/events/${event.id}` }))),
-    ...listed.map((event) => eventNode(event)),
+    ...eventListingNodes('Events on the front page', listed, eventSource),
     ...deskStories.map((story) => newsNode(story, story.data.image ? imageSize(story.data.image) : undefined)),
     ...(dailyNode ? [dailyNode] : []),
   ]}
@@ -214,7 +214,7 @@ const weekendDays = weekend
           <ul class="agenda">
             {(todayShown.length ? todayShown : nextUp).map((event) => (
               <li class={`tier-${tierOf(event)}`}>
-                <a href={`/events/${event.id}`}>
+                <a href={eventHref(event, eventSource)} {...offsiteAttrs(eventHref(event, eventSource))}>
                   <span class="when">{todayShown.length ? whenLabel(event.data.schedule, event.data.start, event.data.end) : labelFromKey(eventKey(event.data.start))}</span>
                   <strong>{event.data.title}</strong>
                   <span class="where">{event.data.city}</span>

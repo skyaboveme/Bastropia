@@ -1,12 +1,13 @@
 ---
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import EventCard from '../components/EventCard.astro';
+import EventCredit from '../components/EventCredit.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import WeekendBanner from '../components/WeekendBanner.astro';
+import { listEvents } from '../lib/eventSource';
 import { filterEvents, sortByDayThenTier } from '../lib/events';
 import { activeUpgrades, resolveTier } from '../lib/intake';
 import { eventKey, labelFromKey, thisWeekendKeys } from '../lib/time';
@@ -14,7 +15,7 @@ import { eventKey, labelFromKey, thisWeekendKeys } from '../lib/time';
 const now = new Date();
 const days = thisWeekendKeys(now);
 const upgrades = await activeUpgrades(eventKey(now));
-const all = await getCollection('events');
+const { events: all } = await listEvents();
 const tierOf = (event: (typeof all)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const events = sortByDayThenTier(filterEvents(all, { when: 'weekend' }, now), tierOf);
 const span = days.length < 2 ? labelFromKey(days[0]) : `${labelFromKey(days[0])} through ${labelFromKey(days[days.length - 1])}`;
@@ -33,6 +34,7 @@ const listAfter = events.slice(bannerAt);
     lede={`${span}. Events that have already ended are left off. If your plans are not here, the desk has not heard about them yet.`}
   />
   <div class="wrap">
+    <EventCredit content="this-weekend" />
     {events.length ? (
       <>
         <div class="card-list">
