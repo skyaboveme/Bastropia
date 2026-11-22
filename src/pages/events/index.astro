@@ -3,18 +3,24 @@ export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
-import EventCard from '../../components/EventCard.astro';
 import EventBanner from '../../components/EventBanner.astro';
 import EventCredit from '../../components/EventCredit.astro';
 import HomeBanner from '../../components/HomeBanner.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { categories, categoryMeta, cities } from '../../data/taxonomy';
 import { eventHref, listEvents } from '../../lib/eventSource';
-import { filterEvents, isClassListing, sortByDayThenTier } from '../../lib/events';
+import {
+  EVENT_SCHEMA_LIMIT,
+  eventsInWindow,
+  filterEvents,
+  isClassListing,
+  listWindow,
+  sortByDayThenTier,
+} from '../../lib/events';
 import { activeUpgrades, resolveTier } from '../../lib/intake';
 import { offsiteAttrs } from '../../lib/links';
 import { eventNode, linkList } from '../../lib/schema';
-import { eventKey, labelFromKey, monthGrid, monthTitle } from '../../lib/time';
+import { addDays, eventKey, labelFromKey, monthGrid, monthTitle, whenLabel } from '../../lib/time';
 
 const params = Astro.url.searchParams;
 const query = {
@@ -26,16 +32,44 @@ const query = {
   classes: params.get('classes'),
 };
 const view = params.get('view') === 'month' ? 'month' : 'list';
-const { events, source } = await listEvents();
-const upgrades = await activeUpgrades(eventKey(new Date()));
+const [{ events, source }, upgrades] = await Promise.all([
+  listEvents(),
+  activeUpgrades(eventKey(new Date())),
+]);
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const visible = sortByDayThenTier(filterEvents(events, query), tierOf);
 const classesOn = query.classes === '1' || query.classes === 'classes';
-
-const bannerAt = Math.min(5, visible.length);
-const listBefore = visible.slice(0, bannerAt);
-const listAfter = visible.slice(bannerAt);
 const today = eventKey(new Date());
+const requestedPage = Number(params.get('page'));
+const page = Number.isInteger(requestedPage) && requestedPage > 1 ? requestedPage : 1;
+const narrow = Boolean(query.date) || query.when === 'today' || query.when === 'tonight' || query.when === 'weekend';
+const windowed = view === 'list' && !narrow;
+const anchor = query.when === 'all' && visible[0] ? eventKey(visible[0].data.start) : today;
+const dateWindow = windowed ? listWindow(page, anchor) : null;
+const shown = dateWindow ? eventsInWindow(visible, dateWindow.start, dateWindow.end) : visible;
+const hasLater = dateWindow ? visible.some((event) => eventKey(event.data.start) >= dateWindow.end) : false;
+const rangeLabel = dateWindow ? `${labelFromKey(dateWindow.start)} through ${labelFromKey(addDays(dateWindow.end, -1))}` : '';
+const groups: {
+  key: string;
+  label: string;
+  banner: boolean;
+  rows: (typeof shown)[number][];
+}[] = [];
+if (view === 'list') {
+  let count = 0;
+  const bannerAt = Math.min(5, shown.length);
+  for (const event of shown) {
+    count += 1;
+    const key = eventKey(event.data.start);
+    let group = groups[groups.length - 1];
+    if (!group || group.key !== key) {
+      group = { key, label: labelFromKey(key), banner: false, rows: [] };
+      groups.push(group);
+    }
+    group.rows.push(event);
+    if (count === bannerAt) group.banner = true;
+  }
+}
 const [todayYear, todayMonth] = today.split('-').map(Number);
 const requested = params.get('month');
 const monthMatch = requested?.match(/^(\d{4})-(\d{2})$/);
@@ -44,13 +78,17 @@ const month = monthMatch ? Number(monthMatch[2]) : todayMonth;
 const monthName = monthTitle(year, month);
 const cells = monthGrid(year, month);
 const counts = new Map<string, number>();
-for (const event of events) {
-  if (isClassListing(event)) continue;
-  const key = eventKey(event.data.start);
-  counts.set(key, (counts.get(key) ?? 0) + 1);
+if (view === 'month') {
+  for (const event of events) {
+    if (isClassListing(event)) continue;
+    const key = eventKey(event.data.start);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
 }
 const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-const monthEvents = filterEvents(events, { when: 'all' }).filter((event) => eventKey(event.data.start).startsWith(monthKey));
+const monthEvents = view === 'month'
+  ? filterEvents(events, { when: 'all' }).filter((event) => eventKey(event.data.start).startsWith(monthKey))
+  : [];
 const monthBannerAt = Math.min(5, monthEvents.length);
 const monthBefore = monthEvents.slice(0, monthBannerAt);
 const monthAfter = monthEvents.slice(monthBannerAt);
@@ -59,6 +97,7 @@ const next = month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padS
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const activeWhen = query.date ? '' : query.when || 'upcoming';
 const filtered = Boolean(query.when || query.category || query.city || query.q || query.date || classesOn);
+const schemaEvents = (view === 'month' ? monthEvents : shown).slice(0, EVENT_SCHEMA_LIMIT);
 
 function href(overrides: Record<string, string | null>) {
   const next = new URLSearchParams();
@@ -69,6 +108,7 @@ function href(overrides: Record<string, string | null>) {
     q: query.q,
     date: query.date,
     classes: query.classes,
+    page: page > 1 ? String(page) : null,
     ...overrides,
   };
   for (const [key, value] of Object.entries(merged)) {
@@ -82,18 +122,18 @@ function href(overrides: Record<string, string | null>) {
 <BaseLayout
   title="Bastrop County Events Calendar"
   description="Bastrop County events calendar — filter by day, town, and the kind of plans you want."
-  noindex={filtered}
+  noindex={filtered || page > 1}
   nofollow={false}
   extra={[
-    ...(filtered
+    ...(filtered || page > 1
       ? []
       : [
           linkList(
             'Bastrop County Events Calendar',
-            visible.slice(0, 30).map((event) => ({ name: event.data.title, path: eventHref(event, source) })),
+            schemaEvents.map((event) => ({ name: event.data.title, path: eventHref(event, source) })),
           ),
         ]),
-    ...(source === 'bcc' ? [] : visible.map((event) => eventNode(event))),
+    ...(source === 'bcc' || filtered || page > 1 ? [] : schemaEvents.map((event) => eventNode(event))),
   ]}
 >
   <PageHead
@@ -158,39 +198,69 @@ function href(overrides: Record<string, string | null>) {
       <div class="filter-row">
         <span>When</span>
         {[['upcoming', 'Upcoming'], ['today', 'Today'], ['tonight', 'Tonight'], ['weekend', 'This weekend'], ['all', 'All dates']].map(([id, label]) => (
-          <a class="chip" href={href({ when: id, date: null })} aria-current={activeWhen === id ? 'true' : undefined}>{label}</a>
+          <a class="chip" href={href({ when: id, date: null, page: null })} aria-current={activeWhen === id ? 'true' : undefined}>{label}</a>
         ))}
       </div>
       <div class="filter-row">
         <span>What</span>
-        <a class="chip" href={href({ category: null, classes: null })} aria-current={!query.category && !classesOn ? 'true' : undefined}>All</a>
-        <a class="chip" href={href({ classes: '1', category: null })} aria-current={classesOn ? 'true' : undefined}>Classes</a>
+        <a class="chip" href={href({ category: null, classes: null, page: null })} aria-current={!query.category && !classesOn ? 'true' : undefined}>All</a>
+        <a class="chip" href={href({ classes: '1', category: null, page: null })} aria-current={classesOn ? 'true' : undefined}>Classes</a>
         {categories.map((category) => (
-          <a class="chip" href={href({ category, classes: null })} aria-current={query.category === category ? 'true' : undefined}>{categoryMeta[category].label}</a>
+          <a class="chip" href={href({ category, classes: null, page: null })} aria-current={query.category === category ? 'true' : undefined}>{categoryMeta[category].label}</a>
         ))}
       </div>
       <div class="filter-row">
         <span>Where</span>
-        <a class="chip" href={href({ city: null })} aria-current={query.city ? undefined : 'true'}>All</a>
+        <a class="chip" href={href({ city: null, page: null })} aria-current={query.city ? undefined : 'true'}>All</a>
         {cities.map((city) => (
-          <a class="chip" href={href({ city })} aria-current={query.city === city ? 'true' : undefined}>{city}</a>
+          <a class="chip" href={href({ city, page: null })} aria-current={query.city === city ? 'true' : undefined}>{city}</a>
         ))}
       </div>
     </div>
     {query.date && <p class="lede">Showing {labelFromKey(query.date)}.</p>}
+    {dateWindow && <p class="lede">{rangeLabel}.{hasLater ? ' Later dates are on the next page.' : ''}</p>}
     {classesOn && <p class="lede">Rec-center fitness and wellness classes. One-off events stay on the main calendar.</p>}
-    {visible.length ? (
+    {shown.length ? (
       <>
-        <div class="card-list">
-          {listBefore.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
-        </div>
-        <EventBanner />
-        <div class="card-list">
-          {listAfter.map((event) => <EventCard event={event} tier={tierOf(event)} />)}
-        </div>
+        {groups.map((group) => (
+          <>
+            <section class="event-day">
+              <h2>{group.label}</h2>
+              <ul>
+                {group.rows.map((event) => {
+                  const link = eventHref(event, source);
+                  const tier = tierOf(event);
+                  return (
+                    <li>
+                      <a href={link} {...offsiteAttrs(link)}>{event.data.title}</a>
+                      <p class="meta">
+                        {whenLabel(event.data.schedule, event.data.start, event.data.end)}
+                        {' · '}{event.data.venue}
+                        {' · '}{event.data.city}
+                        {' · '}{categoryMeta[event.data.category].label}
+                        {tier !== 'community' ? ` · ${tier === 'lost-pines' ? 'Lost Pines' : tier}` : ''}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+            {group.banner && <EventBanner />}
+          </>
+        ))}
+        {(page > 1 || hasLater) && (
+          <p class="cluster">
+            {page > 1 && <a class="button button-ghost" href={href({ page: page > 2 ? String(page - 1) : null })}>Previous dates</a>}
+            {hasLater && <a class="button" href={href({ page: String(page + 1) })}>Later dates</a>}
+          </p>
+        )}
       </>
     ) : (
-      <p class="lede">Nothing matches. <a class="text-link" href="/submit">Submit a listing</a> or <a class="text-link" href="/events">clear the filters</a>.</p>
+      <p class="lede">
+        Nothing matches.
+        {hasLater && <> <a class="text-link" href={href({ page: String(page + 1) })}>Check later dates</a> or</>}
+        {' '}<a class="text-link" href="/submit">Submit a listing</a> or <a class="text-link" href="/events">clear the filters</a>.
+      </p>
     )}
     </>
     )}
@@ -200,3 +270,26 @@ function href(overrides: Record<string, string | null>) {
     <NewsletterSignup />
   </div>
 </BaseLayout>
+
+<style>
+  .event-day { margin: 1.15rem 0 0; }
+  .event-day h2 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+  .event-day ul {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0;
+  }
+  .event-day li {
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .event-day a {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    line-height: 1.25;
+  }
+  .event-day .meta { margin: 0.15rem 0 0; }
+</style>

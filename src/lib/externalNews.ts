@@ -207,6 +207,62 @@ function finish(story: Omit<ExternalStory, 'place' | 'sponsored'>): ExternalStor
 }
 
 const TTL = 10 * 60 * 1000;
+const FEED_TIMEOUT_MS = 4_000;
+const FEED_CACHE_SECONDS = 600;
+
+type EdgeCache = {
+  match(request: Request): Promise<Response | undefined>;
+  put(request: Request, response: Response): Promise<void>;
+};
+
+function edgeCache(): EdgeCache | null {
+  try {
+    const storage = (globalThis as { caches?: { default?: EdgeCache } }).caches;
+    return storage?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function readFeed(source: NewsSource): Promise<string> {
+  const request = new Request(source.feed, { method: 'GET' });
+  const cache = edgeCache();
+  if (cache) {
+    try {
+      const hit = await cache.match(request);
+      if (hit) return hit.text();
+    } catch {
+      /* A cold cache still falls through to the network. */
+    }
+  }
+  const response = await fetch(source.feed, {
+    headers: {
+      'user-agent': 'BastropiaBot/1.0 (+https://bastropia.com)',
+      accept: source.html
+        ? 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'
+        : 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
+    },
+    signal: AbortSignal.timeout(FEED_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`${source.name} feed returned ${response.status}`);
+  const body = await response.text();
+  if (cache) {
+    try {
+      await cache.put(
+        request,
+        new Response(body, {
+          headers: {
+            'content-type': 'text/plain; charset=utf-8',
+            'cache-control': `public, max-age=${FEED_CACHE_SECONDS}`,
+          },
+        }),
+      );
+    } catch {
+      /* The in-memory story cache still covers this isolate. */
+    }
+  }
+  return body;
+}
 // Only stories that name a place in the county. "The Colony" here is the Bastrop subdivision, because these feeds are already county sections.
 const aboutBastrop = /\b(bastrop|elgin|smithville|rosanky|cedar creek|tahitian village|the colony|paige|mcdade|red rock)\b/i;
 // Outlets also tag stories with a town, so a "Bastrop" or "Elgin" tag counts. The broad "Bastrop County" tag alone does not.
@@ -342,17 +398,7 @@ async function loadSource(source: NewsSource): Promise<ExternalStory[]> {
   const hit = cache.get(source.id);
   if (hit && Date.now() - hit.at < TTL) return hit.items;
   try {
-    const response = await fetch(source.feed, {
-      headers: {
-        'user-agent': 'BastropiaBot/1.0 (+https://bastropia.com)',
-        accept: source.html
-          ? 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'
-          : 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
-      },
-      signal: AbortSignal.timeout(12000),
-    });
-    if (!response.ok) throw new Error(`${source.name} feed returned ${response.status}`);
-    const body = await response.text();
+    const body = await readFeed(source);
     const parsed = source.html ? parseFoxTagPage(body, source) : parseFeed(body, source);
     const items = parsed.filter(isLocal);
     cache.set(source.id, { at: Date.now(), items });

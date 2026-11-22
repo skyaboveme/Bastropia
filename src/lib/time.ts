@@ -1,17 +1,43 @@
 export const TZ = 'America/Chicago';
 
+const chicagoFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: TZ,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  weekday: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+const timeFormat = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' });
+const longFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: TZ,
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+const mediumFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: TZ,
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+const stampMonth = new Intl.DateTimeFormat('en-US', { timeZone: TZ, month: 'short' });
+const stampDay = new Intl.DateTimeFormat('en-US', { timeZone: TZ, day: 'numeric' });
+const stampWeekday = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short' });
+const labelFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC',
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+});
+const monthFormat = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' });
+
 export function chicagoParts(date: Date) {
   const bag: Record<string, string> = {};
-  for (const part of new Intl.DateTimeFormat('en-US', {
-    timeZone: TZ,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(date)) {
+  for (const part of chicagoFormat.formatToParts(date)) {
     bag[part.type] = part.value;
   }
   return {
@@ -58,58 +84,34 @@ export function thisWeekendKeys(now = new Date()) {
 }
 
 export function formatTime(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: TZ,
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date);
+  return timeFormat.format(date);
 }
 
 export function formatLong(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: TZ,
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
+  return longFormat.format(date);
 }
 
 export function formatMedium(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: TZ,
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
+  return mediumFormat.format(date);
 }
 
 export function stampParts(date: Date) {
   return {
-    month: new Intl.DateTimeFormat('en-US', { timeZone: TZ, month: 'short' }).format(date),
-    day: new Intl.DateTimeFormat('en-US', { timeZone: TZ, day: 'numeric' }).format(date),
-    weekday: new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short' }).format(date),
+    month: stampMonth.format(date),
+    day: stampDay.format(date),
+    weekday: stampWeekday.format(date),
   };
 }
 
 export function labelFromKey(key: string) {
   const [year, month, day] = key.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1, day, 12));
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'UTC',
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
+  return labelFormat.format(date);
 }
 
 export function monthTitle(year: number, month: number) {
   const date = new Date(Date.UTC(year, month - 1, 1, 12));
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'UTC',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
+  return monthFormat.format(date);
 }
 
 export function monthGrid(year: number, month: number) {

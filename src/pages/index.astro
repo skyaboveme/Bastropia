@@ -12,6 +12,8 @@ import HomeBanner from '../components/HomeBanner.astro';
 import SponsorBanner from '../components/SponsorBanner.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
+import { getForecast } from '../lib/weather';
+import { latestChannelVideos } from '../lib/youtubeLatest';
 import { coveredWire, pinnedLeadHref } from '../lib/frontPage';
 import { offsiteAttrs } from '../lib/links';
 import { siteDescription } from '../data/site';
@@ -34,8 +36,19 @@ const today = eventKey(now);
 const homeTown = readTown(Astro.cookies.get(townCookie)?.value);
 const homePage = homeTown ? townByName(homeTown) : undefined;
 const weekend = thisWeekendKeys(now);
-const upgrades = await activeUpgrades(today);
-const { events, source: eventSource } = await listEvents();
+const stripTowns = ['Bastrop', 'Elgin', 'Smithville', 'Paige'] as const;
+const [upgrades, eventListing, noticeList, news, externalNews, scores, dailyVideo] = await Promise.all([
+  activeUpgrades(today),
+  listEvents(),
+  getCollection('updates'),
+  getCollection('news'),
+  getExternalNews(20, 5),
+  homePage?.football.length ? getFridayScores() : Promise.resolve([]),
+  currentDailyVideo(),
+  latestChannelVideos().catch(() => []),
+  ...stripTowns.map((town) => getForecast(town).catch(() => null)),
+]);
+const { events, source: eventSource } = eventListing;
 const tierOf = (event: (typeof events)[number]) => resolveTier(event.id, event.data.tier, upgrades);
 const todayEvents = capOrganizer(filterEvents(events, { when: 'today' }, now));
 const weekendEvents = filterEvents(events, { when: 'weekend' }, now);
@@ -48,12 +61,7 @@ const picks = capOrganizer(
 ).slice(0, 4);
 const boosted = picks.some((event) => tierOf(event) !== 'community');
 const byTime = <T extends { data: { pubDate: Date } }>(a: T, b: T) => b.data.pubDate.getTime() - a.data.pubDate.getTime();
-const notices = (await getCollection('updates')).sort(byTime);
-const news = await getCollection('news');
-const [externalNews, scores] = await Promise.all([
-  getExternalNews(20, 5),
-  homePage?.football.length ? getFridayScores() : Promise.resolve([]),
-]);
+const notices = noticeList.sort(byTime);
 const homeScores = (homePage ? scores.filter((score) => homePage.football.includes(score.id)) : []).map((score) => ({
   ...score,
   mascot: footballSchools.find((school) => school.id === score.id)?.mascot ?? '',
@@ -118,7 +126,6 @@ const deskStories = pageHeadlines
   .map((story) => news.find((item) => `/news/${item.id}` === story.href))
   .filter((story) => story !== undefined);
 const leadItem = lead && !lead.external ? news.find((item) => `/news/${item.id}` === lead.href) : undefined;
-const dailyVideo = await currentDailyVideo();
 const dailyNode = dailyVideo ? dailyVideoNode(dailyVideo) : undefined;
 const inTown = (event: (typeof events)[number]) => !homeTown || event.data.city === homeTown;
 const todayShown = todayEvents.filter(inTown);

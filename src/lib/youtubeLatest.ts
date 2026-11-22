@@ -96,7 +96,7 @@ async function fetchLatest(channel: YoutubeChannel): Promise<LatestVideo | null>
   const hit = cache.get(channel.id);
   if (hit && Date.now() - hit.at < TTL) return hit.video;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 4000);
   try {
     const page = channelPage(channel);
     const response = await fetch(`${page}/videos`, {
@@ -136,7 +136,7 @@ export async function channelVideos(channel: YoutubeChannel, limit = 6): Promise
   const hit = listCache.get(channel.id);
   if (hit && Date.now() - hit.at < TTL) return hit.videos;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 4000);
   const page = channelPage(channel);
   try {
     const response = await fetch(`${page}/videos`, {
