@@ -390,10 +390,10 @@ export async function getCountySpots(): Promise<TownSpot[]> {
   );
 }
 
-export async function getForecast(town: TownName): Promise<Forecast | null> {
-  const hit = cache.get(town);
-  if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.value;
+const forecastPending = new Map<TownName, Promise<Forecast | null>>();
 
+async function loadForecast(town: TownName): Promise<Forecast | null> {
+  const hit = cache.get(town);
   // NWS first: Open-Meteo is often unreachable from Cloudflare Workers.
   for (const loader of [forecastFromNws, forecastFromOpenMeteo]) {
     try {
@@ -404,8 +404,19 @@ export async function getForecast(town: TownName): Promise<Forecast | null> {
       /* try the next source */
     }
   }
-
   return hit?.value ?? null;
+}
+
+export function getForecast(town: TownName): Promise<Forecast | null> {
+  const hit = cache.get(town);
+  if (hit && Date.now() - hit.at < 10 * 60 * 1000) return Promise.resolve(hit.value);
+  const existing = forecastPending.get(town);
+  if (existing) return existing;
+  const pending = loadForecast(town).finally(() => {
+    forecastPending.delete(town);
+  });
+  forecastPending.set(town, pending);
+  return pending;
 }
 
 export async function getAlerts(): Promise<WeatherAlert[] | null> {

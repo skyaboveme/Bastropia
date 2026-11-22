@@ -534,24 +534,59 @@ function fetchForBuild(): Promise<BccPublicEvent[] | null> {
   return buildFeed;
 }
 
+/**
+ * A stored feed wins. The request path sets allowNetwork false, so a missing
+ * or unreadable KV copy falls back to local Markdown and does not wait on
+ * the public feed. The build sandbox is the only caller that may fetch.
+ */
+export async function resolveBccFeed(options: {
+  stored: BccPublicEvent[] | null;
+  allowNetwork: boolean;
+  fetchFeed: () => Promise<BccPublicEvent[] | null>;
+}): Promise<BccPublicEvent[] | null> {
+  if (options.stored) return options.stored;
+  if (!options.allowNetwork) return null;
+  return options.fetchFeed();
+}
+
 async function bccEventsFromStore(): Promise<BccPublicEvent[] | null> {
   const fixture = await readFixture();
   if (fixture) return fixture;
   if (fixture === null) return null;
   const kv = await loadKv();
-  if (kv) {
-    const stored = await readStored(kv);
-    if (stored) return stored.events;
-  }
-  return fetchForBuild();
+  const stored = kv ? await readStored(kv) : null;
+  return resolveBccFeed({
+    stored: stored ? stored.events : null,
+    allowNetwork: !sourceStore.getStore(),
+    fetchFeed: () => fetchForBuild(),
+  });
 }
 
-export async function listEvents(): Promise<{ events: ListedEvent[]; source: EventSourceKind }> {
+const LIST_MEMO_MS = 30_000;
+let listMemo: {
+  mode: EventsSourceMode;
+  at: number;
+  pending: Promise<{ events: ListedEvent[]; source: EventSourceKind }>;
+} | undefined;
+
+async function loadListedEvents(): Promise<{ events: ListedEvent[]; source: EventSourceKind }> {
   if (eventsSourceMode() === 'bcc') {
     const stored = await bccEventsFromStore();
     if (stored) return { events: toListedEvents(stored), source: 'bcc' };
   }
   return { events: await localEvents(), source: 'local' };
+}
+
+export function listEvents(): Promise<{ events: ListedEvent[]; source: EventSourceKind }> {
+  const mode = eventsSourceMode();
+  const now = Date.now();
+  if (listMemo && listMemo.mode === mode && now - listMemo.at < LIST_MEMO_MS) return listMemo.pending;
+  const pending = loadListedEvents();
+  listMemo = { mode, at: now, pending };
+  pending.catch(() => {
+    if (listMemo?.pending === pending) listMemo = undefined;
+  });
+  return pending;
 }
 
 /** 301 target for /events/[id] and /ics/[id] while BCC is actually being served. */

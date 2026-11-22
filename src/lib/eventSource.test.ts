@@ -12,6 +12,7 @@ import {
   parsePublicFeed,
   redirectForLegacyEvent,
   refreshBccEvents,
+  resolveBccFeed,
   toListedEvents,
   type BccPublicEvent,
 } from './eventSource.ts';
@@ -274,4 +275,41 @@ test('a bad feed does not replace the last good copy', async () => {
   assert.equal(written.fetchedAt, '2026-11-22T12:00:00.000Z');
   assert.equal(written.omitted[0].reason, 'absurd-date');
   assert.equal(BCC_EVENTS_KV_KEY, 'bcc:events');
+});
+
+test('a stored feed is served without calling the public feed', async () => {
+  let calls = 0;
+  const stored = [bcc()];
+  const fromKv = await resolveBccFeed({
+    stored,
+    allowNetwork: true,
+    fetchFeed: async () => {
+      calls += 1;
+      return [];
+    },
+  });
+  assert.equal(fromKv, stored);
+  assert.equal(calls, 0);
+
+  const onRequest = await resolveBccFeed({
+    stored: null,
+    allowNetwork: false,
+    fetchFeed: async () => {
+      calls += 1;
+      return [bcc()];
+    },
+  });
+  assert.equal(onRequest, null);
+  assert.equal(calls, 0);
+
+  const built = await resolveBccFeed({
+    stored: null,
+    allowNetwork: true,
+    fetchFeed: async () => {
+      calls += 1;
+      return stored;
+    },
+  });
+  assert.equal(built, stored);
+  assert.equal(calls, 1);
 });

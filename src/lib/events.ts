@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { tierRank, type Tier } from '../data/taxonomy.ts';
-import { chicagoParts, eventKey, thisWeekendKeys } from './time.ts';
+import { addDays, chicagoParts, eventKey, thisWeekendKeys } from './time.ts';
 
 export type ListedEvent = CollectionEntry<'events'>;
 
@@ -82,18 +82,57 @@ function listingScore(event: ListedEvent) {
   return boilerplate + Math.min(summary.length, 500) / 100 + (event.data.image ? 0.5 : 0);
 }
 
-/** Drop a second listing of the same gathering when two calendars posted it. */
+/**
+ * Drop a second listing of the same gathering when two calendars posted it.
+ * Buckets by city, clock time, and title so a few hundred listings stay cheap.
+ * Venue matching stays fuzzy inside that bucket.
+ */
 export function dedupeListings(events: ListedEvent[]) {
-  const kept: ListedEvent[] = [];
+  const buckets = new Map<string, ListedEvent[]>();
+  const order: ListedEvent[] = [];
   for (const event of events) {
-    const match = kept.findIndex((item) => sameListing(item, event));
-    if (match === -1) {
-      kept.push(event);
+    const parts = chicagoParts(event.data.start);
+    const key = `${event.data.city}|${parts.key}|${parts.hour}|${parts.minute}|${plainTitle(event.data.title)}`;
+    const bucket = buckets.get(key);
+    if (!bucket) {
+      buckets.set(key, [event]);
+      order.push(event);
       continue;
     }
-    if (listingScore(event) > listingScore(kept[match])) kept[match] = event;
+    const match = bucket.findIndex((item) => sameListing(item, event));
+    if (match === -1) {
+      bucket.push(event);
+      order.push(event);
+      continue;
+    }
+    if (listingScore(event) > listingScore(bucket[match])) {
+      const previous = bucket[match];
+      bucket[match] = event;
+      const index = order.indexOf(previous);
+      if (index !== -1) order[index] = event;
+    }
   }
-  return kept;
+  return order;
+}
+
+/** Days of listings on one /events page. Later dates are the next page. */
+export const EVENT_LIST_DAYS = 45;
+
+/** ItemList and Event nodes on the calendar page. The HTML list can be longer. */
+export const EVENT_SCHEMA_LIMIT = 24;
+
+export function listWindow(page: number, anchor: string) {
+  const safe = Number.isInteger(page) && page > 0 ? page : 1;
+  const start = addDays(anchor, (safe - 1) * EVENT_LIST_DAYS);
+  const end = addDays(start, EVENT_LIST_DAYS);
+  return { page: safe, start, end };
+}
+
+export function eventsInWindow(events: ListedEvent[], start: string, end: string) {
+  return events.filter((event) => {
+    const key = eventKey(event.data.start);
+    return key >= start && key < end;
+  });
 }
 
 /** Keep the first listings from each organizer so one calendar cannot fill the page. */

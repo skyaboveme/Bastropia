@@ -4,12 +4,18 @@ import { refreshDailyVideo } from './lib/dailyVideo';
 import { refreshBccEvents, runWithEventsSource, type EventsSourceMode } from './lib/eventSource';
 import type { SessionKv } from './lib/sessionKv';
 import {
-  HOME_CACHE_CONTROL,
-  HOME_STORE_CONTROL,
+  HOME_FRESH_SECONDS,
+  HOME_STALE_SECONDS,
+  PAGE_FRESH_SECONDS,
+  PAGE_STALE_SECONDS,
+  cacheAgeState,
+  cacheControl,
+  cacheKind,
   cookieValue,
-  homeCacheState,
+  eventCacheUrl,
   homeCacheUrl,
-  isHomePath,
+  storeControl,
+  variesByTown,
 } from './lib/homeCache';
 import { readTown, townCookie } from './lib/townChoice';
 
@@ -41,73 +47,108 @@ function withSecurityHeaders(response: Response): Response {
   });
 }
 
-function cacheableHome(response: Response) {
+type CachePolicy = {
+  fresh: number;
+  stale: number;
+  varyCookie: boolean;
+  key: Request;
+};
+
+function policyFor(request: Request): CachePolicy | null {
+  if (request.method !== 'GET') return null;
+  const url = new URL(request.url);
+  const kind = cacheKind(url.pathname);
+  if (!kind) return null;
+  const varyCookie = kind === 'home' || variesByTown(url.pathname);
+  const town = varyCookie ? readTown(cookieValue(request.headers.get('cookie'), townCookie)) : '';
+  const href = kind === 'home' ? homeCacheUrl(request.url, town) : eventCacheUrl(request.url, town);
+  const fresh = kind === 'home' ? HOME_FRESH_SECONDS : PAGE_FRESH_SECONDS;
+  const stale = kind === 'home' ? HOME_STALE_SECONDS : PAGE_STALE_SECONDS;
+  return { fresh, stale, varyCookie, key: new Request(href, { method: 'GET' }) };
+}
+
+function cacheableHtml(response: Response) {
   if (response.status !== 200) return false;
   const type = response.headers.get('content-type') ?? '';
   return type.includes('text/html');
 }
 
-async function storeHome(key: Request, response: Response, ctx: ExecutionContext) {
+async function storeCached(policy: CachePolicy, response: Response, ctx: ExecutionContext) {
   const setCookies = typeof response.headers.getSetCookie === 'function' ? response.headers.getSetCookie() : [];
   const headers = new Headers(response.headers);
   headers.delete('set-cookie');
-  headers.set('Cache-Control', HOME_STORE_CONTROL);
+  headers.set('Cache-Control', storeControl(policy.fresh, policy.stale));
   headers.set('x-cached-at', String(Date.now()));
   const body = await response.arrayBuffer();
   const stored = new Response(body, { status: 200, headers });
   ctx.waitUntil(
-    caches.default.put(key, stored).catch((error) => {
-      console.error('home cache store failed', error);
+    caches.default.put(policy.key, stored).catch((error) => {
+      console.error('page cache store failed', error);
     }),
   );
   const client = new Headers(headers);
-  client.set('Cache-Control', HOME_CACHE_CONTROL);
-  client.set('Vary', 'Cookie');
+  client.set('Cache-Control', cacheControl(policy.fresh, policy.stale));
+  if (policy.varyCookie) client.set('Vary', 'Cookie');
   client.set('x-edge-cache', 'MISS');
   const out = new Response(body, { status: 200, headers: client });
   for (const cookie of setCookies) out.headers.append('set-cookie', cookie);
   return out;
 }
 
-function clientCache(response: Response, state: 'fresh' | 'stale') {
+function clientCache(response: Response, policy: CachePolicy, state: 'fresh' | 'stale') {
   const headers = new Headers(response.headers);
-  headers.set('Cache-Control', HOME_CACHE_CONTROL);
-  headers.set('Vary', 'Cookie');
+  headers.set('Cache-Control', cacheControl(policy.fresh, policy.stale));
+  if (policy.varyCookie) headers.set('Vary', 'Cookie');
+  else headers.delete('Vary');
   headers.set('x-edge-cache', state === 'fresh' ? 'HIT' : 'STALE');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
-async function fillHome(request: Request, env: Env, ctx: ExecutionContext, key: Request) {
+async function fillCached(request: Request, env: Env, ctx: ExecutionContext, policy: CachePolicy) {
   const rendered = withSecurityHeaders(await handle(request, env, ctx));
-  if (!cacheableHome(rendered)) return rendered;
-  return storeHome(key, rendered, ctx);
+  if (!cacheableHtml(rendered)) return rendered;
+  return storeCached(policy, rendered, ctx);
 }
 
-async function homepage(request: Request, env: Env, ctx: ExecutionContext) {
+async function cachedPage(request: Request, env: Env, ctx: ExecutionContext, policy: CachePolicy) {
   const bypass = /no-cache|no-store/i.test(request.headers.get('cache-control') ?? '');
-  const town = readTown(cookieValue(request.headers.get('cookie'), townCookie));
-  const key = new Request(homeCacheUrl(request.url, town), { method: 'GET' });
   if (!bypass) {
     try {
-      const hit = await caches.default.match(key);
+      const hit = await caches.default.match(policy.key);
       const cachedAt = Number(hit?.headers.get('x-cached-at') ?? '');
-      const state = hit ? homeCacheState(cachedAt, Date.now()) : 'expired';
+      const state = hit ? cacheAgeState(cachedAt, Date.now(), policy.fresh, policy.stale) : 'expired';
       if (hit && (state === 'fresh' || state === 'stale')) {
         if (state === 'stale') {
           const refresh = request.clone();
           ctx.waitUntil(
-            fillHome(refresh, env, ctx, key).catch((error) => {
-              console.error('home cache refresh failed', error);
+            fillCached(refresh, env, ctx, policy).catch((error) => {
+              console.error('page cache refresh failed', error);
             }),
           );
         }
-        return clientCache(hit, state);
+        return clientCache(hit, policy, state);
       }
     } catch (error) {
-      console.error('home cache read failed', error);
+      console.error('page cache read failed', error);
     }
   }
-  return fillHome(request, env, ctx, key);
+  return fillCached(request, env, ctx, policy);
+}
+
+const WARM_PATHS = ['/', '/events', '/this-weekend', '/now'];
+
+async function warmCachedPages(env: Env, ctx: ExecutionContext) {
+  const origin = `https://${APEX_HOST}`;
+  for (const path of WARM_PATHS) {
+    try {
+      const request = new Request(`${origin}${path}`, { method: 'GET' });
+      const policy = policyFor(request);
+      if (!policy) continue;
+      await fillCached(request, env, ctx, policy);
+    } catch (error) {
+      console.error('page warm failed', path, error);
+    }
+  }
 }
 
 function eventsMode(env: unknown): EventsSourceMode {
@@ -131,9 +172,18 @@ export default {
       }),
     );
     ctx.waitUntil(
-      refreshBccEvents({ kv: (env as { SESSION?: SessionKv }).SESSION }).catch((error) => {
-        console.error('bcc events refresh failed', error);
-      }),
+      (async () => {
+        try {
+          await refreshBccEvents({ kv: (env as { SESSION?: SessionKv }).SESSION });
+        } catch (error) {
+          console.error('bcc events refresh failed', error);
+        }
+        try {
+          await runWithEventsSource(eventsMode(env), () => warmCachedPages(env, ctx));
+        } catch (error) {
+          console.error('page warm failed', error);
+        }
+      })(),
     );
   },
 };
@@ -145,9 +195,9 @@ async function render(request: Request, env: Env, ctx: ExecutionContext): Promis
       return Response.redirect(url.toString(), 301);
     }
 
-    if (request.method === 'GET' && isHomePath(url.pathname)) {
-      const response = await homepage(request, env, ctx);
-      return response;
+    if (request.method === 'GET') {
+      const policy = policyFor(request);
+      if (policy) return cachedPage(request, env, ctx, policy);
     }
 
     const response = await handle(request, env, ctx);
