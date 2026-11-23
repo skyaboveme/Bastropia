@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-11-22",
+ "generated": "2026-11-22T20:31:13-06:00",
  "source": "Built against the live /directory index (960 rows) and category labels on origin/main 757ab92.",
  "stopwords": [
   "a",
@@ -91,7 +91,9 @@
   "pool",
   "roof",
   "shop",
-  "print"
+  "print",
+  "mechanic",
+  "mechanics"
  ],
  "concepts": [
   {
@@ -1356,7 +1358,10 @@
     "check engine",
     "alignment",
     "auto parts",
-    "car parts"
+    "car parts",
+    "auto mechanic",
+    "car mechanic",
+    "mechanic shop"
    ],
    "categories": [
     "Auto Repairs / Service",
@@ -1372,7 +1377,15 @@
     "fleet",
     "rv service"
    ],
-   "groups": []
+   "groups": [],
+   "excludeCategories": [
+    "Plumbing",
+    "Plumbing Services",
+    "Air Conditioning / Heating",
+    "Heating and Air",
+    "Electrical",
+    "Electrical Contractors / Electrician"
+   ]
   },
   {
    "id": "oilchange",
@@ -4328,6 +4341,15 @@
   ],
   "airport shuttle": [
    "transport"
+  ],
+  "auto mechanic": [
+   "mechanic"
+  ],
+  "car mechanic": [
+   "mechanic"
+  ],
+  "mechanic shop": [
+   "mechanic"
   ]
  }
 }
