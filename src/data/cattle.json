@@ -1,0 +1,1548 @@
+{
+  "generatedAt": "2026-11-23T01:42:52.115Z",
+  "census": {
+    "inventoryDate": "2022-12-31",
+    "priorInventoryDate": "2017-12-31",
+    "sources": {
+      "texasTable": "https://www.nass.usda.gov/sites/default/files/publications/agcensus/2022/Full_Report/Volume_1,_Chapter_2_County_Level/Texas/st48_2_011_011.pdf",
+      "usInventory": "https://www.nass.usda.gov/sites/default/files/publications/agcensus/2022/Full_Report/Volume_1,_Chapter_1_US/st99_1_011_012.pdf",
+      "usSales": "https://www.nass.usda.gov/sites/default/files/publications/agcensus/2022/Full_Report/Volume_1,_Chapter_1_US/st99_1_013_014.pdf",
+      "bastropProfile": "https://www.nass.usda.gov/sites/default/files/publications/agcensus/2022/Online_Resources/County_Profiles/Texas/cp48021.pdf",
+      "bastropProfile2017": "https://www.nass.usda.gov/sites/default/files/publications/agcensus/2017/Online_Resources/County_Profiles/Texas/cp48021.pdf"
+    },
+    "levels": {
+      "us": {
+        "label": "United States",
+        "inventory": {
+          "head": 87954742,
+          "farms": 732123
+        },
+        "inventory2017": {
+          "head": 93648041,
+          "farms": 882692
+        },
+        "beefCows": {
+          "head": 29214479,
+          "farms": 622162
+        },
+        "beefCows2017": {
+          "head": 31722039,
+          "farms": 729046
+        },
+        "milkCows": {
+          "head": 9309855,
+          "farms": 36024
+        },
+        "milkCows2017": {
+          "head": 9539631,
+          "farms": 54599
+        },
+        "sales": {
+          "dollars": 89377637000,
+          "farms": 593004,
+          "head": 69090585
+        },
+        "sales2017": {
+          "dollars": 77189334000,
+          "farms": 711827,
+          "head": 69812061
+        },
+        "size": [
+          {
+            "band": "1-9",
+            "farms": 189417,
+            "head": 923354
+          },
+          {
+            "band": "10-19",
+            "farms": 135886,
+            "head": 1859610
+          },
+          {
+            "band": "20-49",
+            "farms": 177822,
+            "head": 5482413
+          },
+          {
+            "band": "50-99",
+            "farms": 93311,
+            "head": 6413135
+          },
+          {
+            "band": "100-199",
+            "farms": 61595,
+            "head": 8390706
+          },
+          {
+            "band": "200-499",
+            "farms": 45145,
+            "head": 13649704
+          },
+          {
+            "band": "500+",
+            "farms": 28947,
+            "head": 51235820
+          }
+        ],
+        "largeBands": [
+          {
+            "band": "500-999",
+            "farms": 17139,
+            "head": 11715792
+          },
+          {
+            "band": "1,000-2,499",
+            "farms": 8375,
+            "head": 12197284
+          },
+          {
+            "band": "2,500-4,999",
+            "farms": 1980,
+            "head": 6780419
+          },
+          {
+            "band": "5,000 or more",
+            "farms": 1453,
+            "head": 20542325
+          }
+        ]
+      },
+      "tx": {
+        "label": "Texas",
+        "inventory": {
+          "head": 12543300,
+          "farms": 131815
+        },
+        "inventory2017": {
+          "head": 12573876,
+          "farms": 152882
+        },
+        "beefCows": {
+          "head": 4360026,
+          "farms": 117838
+        },
+        "beefCows2017": {
+          "head": 4572742,
+          "farms": 134250
+        },
+        "milkCows": {
+          "head": 639506,
+          "farms": 479
+        },
+        "milkCows2017": {
+          "head": 531849,
+          "farms": 467
+        },
+        "sales": {
+          "dollars": 15502042000,
+          "farms": 100863,
+          "head": 11697605
+        },
+        "sales2017": {
+          "dollars": 12291224000,
+          "farms": 114079,
+          "head": 10478530
+        },
+        "size": [
+          {
+            "band": "1-9",
+            "farms": 41288,
+            "head": 214041
+          },
+          {
+            "band": "10-19",
+            "farms": 30244,
+            "head": 411457
+          },
+          {
+            "band": "20-49",
+            "farms": 32831,
+            "head": 988703
+          },
+          {
+            "band": "50-99",
+            "farms": 13096,
+            "head": 888811
+          },
+          {
+            "band": "100-199",
+            "farms": 7038,
+            "head": 960400
+          },
+          {
+            "band": "200-499",
+            "farms": 4286,
+            "head": 1285742
+          },
+          {
+            "band": "500+",
+            "farms": 3032,
+            "head": 7794146
+          }
+        ]
+      },
+      "bastrop": {
+        "label": "Bastrop County",
+        "fips": "48021",
+        "inventory": {
+          "head": 46801,
+          "farms": 1256
+        },
+        "inventory2017": {
+          "head": 76438,
+          "farms": 1536
+        },
+        "beefCows": {
+          "head": 29780,
+          "farms": 1128
+        },
+        "beefCows2017": {
+          "head": 36749,
+          "farms": 1396
+        },
+        "milkCows": {
+          "head": 65,
+          "farms": 5
+        },
+        "milkCows2017": {
+          "head": 0,
+          "farms": 0
+        },
+        "cowsCalved": {
+          "head": 29845,
+          "farms": 1133
+        },
+        "sales": {
+          "dollars": 26989000,
+          "farms": 1014,
+          "head": 34279
+        },
+        "sales2017": {
+          "dollars": 29286000,
+          "farms": 1211,
+          "head": 34954
+        },
+        "size": [
+          {
+            "band": "1-9",
+            "farms": 320,
+            "head": 1868
+          },
+          {
+            "band": "10-19",
+            "farms": 392,
+            "head": 5356
+          },
+          {
+            "band": "20-49",
+            "farms": 358,
+            "head": 10627
+          },
+          {
+            "band": "50-99",
+            "farms": 103,
+            "head": 7348
+          },
+          {
+            "band": "100-199",
+            "farms": 48,
+            "head": 6407
+          },
+          {
+            "band": "200-499",
+            "farms": 25,
+            "head": 7282
+          },
+          {
+            "band": "500+",
+            "farms": 10,
+            "head": 7913
+          }
+        ],
+        "beefCowSize": [
+          {
+            "band": "1-9",
+            "farms": 449,
+            "head": 2416
+          },
+          {
+            "band": "10-19",
+            "farms": 300,
+            "head": 3897
+          },
+          {
+            "band": "20-49",
+            "farms": 252,
+            "head": 6969
+          },
+          {
+            "band": "50-99",
+            "farms": 80,
+            "head": 5329
+          },
+          {
+            "band": "100-199",
+            "farms": 26,
+            "head": 3304
+          },
+          {
+            "band": "200-499",
+            "farms": 16,
+            "head": 4837
+          },
+          {
+            "band": "500+",
+            "farms": 5,
+            "head": 3028
+          }
+        ]
+      }
+    }
+  },
+  "january": {
+    "inventoryYear": 2026,
+    "calfYear": 2025,
+    "sourceUrl": "https://release.nass.usda.gov/reports/catl0126.txt",
+    "reportList": "https://release.nass.usda.gov/reports/catl0126.txt",
+    "us": {
+      "all": 86155300,
+      "beef": 27607200,
+      "milk": 9568300,
+      "calf": 32895600,
+      "onFeed": 13847900
+    },
+    "tx": {
+      "all": 12100000,
+      "beef": 4045000,
+      "milk": 705000,
+      "calf": 4250000,
+      "onFeed": 2540000
+    },
+    "prior": {
+      "year": 2025,
+      "usAll": 86472200,
+      "txAll": 12100000,
+      "usBeef": 27892000,
+      "txBeef": 4075000
+    },
+    "series": [
+      {
+        "year": 2016,
+        "usAll": 91918000,
+        "txAll": 11800000,
+        "usBeef": 30165800,
+        "txBeef": 4290000,
+        "usMilk": 9310400,
+        "txMilk": 460000,
+        "usOnFeed": null,
+        "txOnFeed": null
+      },
+      {
+        "year": 2017,
+        "usAll": 93704600,
+        "txAll": 12300000,
+        "usBeef": 31213200,
+        "txBeef": 4460000,
+        "usMilk": 9346000,
+        "txMilk": 490000,
+        "usOnFeed": null,
+        "txOnFeed": null
+      },
+      {
+        "year": 2018,
+        "usAll": 94399000,
+        "txAll": 12500000,
+        "usBeef": 31723000,
+        "txBeef": 4585000,
+        "usMilk": 9399600,
+        "txMilk": 515000,
+        "usOnFeed": null,
+        "txOnFeed": null
+      },
+      {
+        "year": 2019,
+        "usAll": 94804700,
+        "txAll": 13000000,
+        "usBeef": 31690700,
+        "txBeef": 4655000,
+        "usMilk": 9353400,
+        "txMilk": 545000,
+        "usOnFeed": null,
+        "txOnFeed": null
+      },
+      {
+        "year": 2020,
+        "usAll": 93793300,
+        "txAll": 12900000,
+        "usBeef": 31338700,
+        "txBeef": 4570000,
+        "usMilk": 9342600,
+        "txMilk": 580000,
+        "usOnFeed": null,
+        "txOnFeed": null
+      },
+      {
+        "year": 2021,
+        "usAll": 93789500,
+        "txAll": 13100000,
+        "usBeef": 30843600,
+        "txBeef": 4635000,
+        "usMilk": 9442400,
+        "txMilk": 615000,
+        "usOnFeed": null,
+        "txOnFeed": null
+      },
+      {
+        "year": 2022,
+        "usAll": 92076600,
+        "txAll": 12700000,
+        "usBeef": 29983100,
+        "txBeef": 4425000,
+        "usMilk": 9377000,
+        "txMilk": 625000,
+        "usOnFeed": 14694600,
+        "txOnFeed": 2930000
+      },
+      {
+        "year": 2023,
+        "usAll": 88841000,
+        "txAll": 12500000,
+        "usBeef": 28939300,
+        "txBeef": 4300000,
+        "usMilk": 9397500,
+        "txMilk": 650000,
+        "usOnFeed": 14195800,
+        "txOnFeed": 2780000
+      },
+      {
+        "year": 2024,
+        "usAll": 87157400,
+        "txAll": 12000000,
+        "usBeef": 28013000,
+        "txBeef": 4015000,
+        "usMilk": 9346800,
+        "txMilk": 635000,
+        "usOnFeed": 14426300,
+        "txOnFeed": 2870000
+      },
+      {
+        "year": 2025,
+        "usAll": 86472200,
+        "txAll": 12100000,
+        "usBeef": 27892000,
+        "txBeef": 4075000,
+        "usMilk": 9380800,
+        "txMilk": 675000,
+        "usOnFeed": 14322800,
+        "txOnFeed": 2800000
+      },
+      {
+        "year": 2026,
+        "usAll": 86155300,
+        "txAll": 12100000,
+        "usBeef": 27607200,
+        "txBeef": 4045000,
+        "usMilk": 9568300,
+        "txMilk": 705000,
+        "usOnFeed": 13847900,
+        "txOnFeed": 2540000
+      }
+    ]
+  },
+  "july": {
+    "year": 2026,
+    "sourceUrl": "https://release.nass.usda.gov/reports/catl0726.txt",
+    "usAll": 94200000,
+    "usBeef": 28450000,
+    "usMilk": 9650000,
+    "usOnFeed": 13200000,
+    "calfRevisedPrior": 32995600,
+    "calfPreliminary": 32500000
+  },
+  "onFeed": {
+    "sourceUrl": "https://release.nass.usda.gov/reports/cofd1126.txt",
+    "note": "Feedlots with capacity of 1,000 or more head.",
+    "points": [
+      {
+        "date": "2024-04-01",
+        "us": 11826000,
+        "tx": 2840000
+      },
+      {
+        "date": "2024-05-01",
+        "us": 11554000,
+        "tx": 2770000
+      },
+      {
+        "date": "2024-06-01",
+        "us": 11583000,
+        "tx": 2840000
+      },
+      {
+        "date": "2024-07-01",
+        "us": 11304000,
+        "tx": 2790000
+      },
+      {
+        "date": "2024-08-01",
+        "us": 11095000,
+        "tx": 2740000
+      },
+      {
+        "date": "2024-09-01",
+        "us": 11198000,
+        "tx": 2750000
+      },
+      {
+        "date": "2024-11-01",
+        "us": 11966000,
+        "tx": 2880000
+      },
+      {
+        "date": "2024-12-01",
+        "us": 11982000,
+        "tx": 2880000
+      },
+      {
+        "date": "2025-01-01",
+        "us": 11823000,
+        "tx": 2780000
+      },
+      {
+        "date": "2025-03-01",
+        "us": 11577000,
+        "tx": 2640000
+      },
+      {
+        "date": "2025-04-01",
+        "us": 11638000,
+        "tx": 2670000
+      },
+      {
+        "date": "2025-05-01",
+        "us": 11376000,
+        "tx": 2590000
+      },
+      {
+        "date": "2025-06-01",
+        "us": 11443000,
+        "tx": 2630000
+      },
+      {
+        "date": "2025-07-01",
+        "us": 11124000,
+        "tx": 2570000
+      },
+      {
+        "date": "2025-08-01",
+        "us": 10922000,
+        "tx": 2490000
+      },
+      {
+        "date": "2025-09-01",
+        "us": 11080000,
+        "tx": 2500000
+      },
+      {
+        "date": "2025-10-01",
+        "us": 11418000,
+        "tx": 2570000
+      },
+      {
+        "date": "2025-11-01",
+        "us": 11706000,
+        "tx": 2630000
+      },
+      {
+        "date": "2025-12-01",
+        "us": 11727000,
+        "tx": 2610000
+      },
+      {
+        "date": "2026-01-01",
+        "us": 11450000,
+        "tx": 2530000
+      },
+      {
+        "date": "2026-02-01",
+        "us": 11510000,
+        "tx": 2510000
+      },
+      {
+        "date": "2026-03-01",
+        "us": 11549000,
+        "tx": 2530000
+      },
+      {
+        "date": "2026-04-01",
+        "us": 11576000,
+        "tx": 2560000
+      },
+      {
+        "date": "2026-05-01",
+        "us": 11584000,
+        "tx": 2580000
+      },
+      {
+        "date": "2026-06-01",
+        "us": 11682000,
+        "tx": 2610000
+      },
+      {
+        "date": "2026-07-01",
+        "us": 11370000,
+        "tx": 2560000
+      },
+      {
+        "date": "2026-08-01",
+        "us": 11117000,
+        "tx": 2510000
+      },
+      {
+        "date": "2026-09-01",
+        "us": 11168000,
+        "tx": 2500000
+      },
+      {
+        "date": "2026-10-01",
+        "us": 11372000,
+        "tx": 2520000
+      },
+      {
+        "date": "2026-11-01",
+        "us": 11590000,
+        "tx": 2580000
+      }
+    ]
+  },
+  "slaughter": {
+    "period": "2026-10",
+    "label": "October 2026",
+    "usHead": 2484700,
+    "txHead": 420600,
+    "usBeefPounds": 2225400000,
+    "usBeefYtdPounds": 20632100000,
+    "usHeadYtd": 23186700,
+    "sourceUrl": "https://release.nass.usda.gov/reports/lstk1126.txt"
+  },
+  "prices": {
+    "cutout": {
+      "sourceUrl": "https://www.ams.usda.gov/mnreports/ams_2453.pdf",
+      "latest": {
+        "date": "2026-11-20",
+        "choice": 352.84,
+        "select": 342.92
+      },
+      "monthly": [
+        {
+          "date": "2024-12-31",
+          "choice": 324.22,
+          "select": 294.52
+        },
+        {
+          "date": "2025-01-31",
+          "choice": 327.68,
+          "select": 317.07
+        },
+        {
+          "date": "2025-02-28",
+          "choice": 311.83,
+          "select": 302.05
+        },
+        {
+          "date": "2025-03-31",
+          "choice": 335.26,
+          "select": 320.01
+        },
+        {
+          "date": "2025-04-30",
+          "choice": 345.31,
+          "select": 322.02
+        },
+        {
+          "date": "2025-05-30",
+          "choice": 366.34,
+          "select": 356.65
+        },
+        {
+          "date": "2025-06-30",
+          "choice": 395.56,
+          "select": 384.1
+        },
+        {
+          "date": "2025-07-31",
+          "choice": 361.32,
+          "select": 341.37
+        },
+        {
+          "date": "2025-08-29",
+          "choice": 415.41,
+          "select": 390
+        },
+        {
+          "date": "2025-09-30",
+          "choice": 371.03,
+          "select": 347.25
+        },
+        {
+          "date": "2025-10-31",
+          "choice": 378.13,
+          "select": 358.65
+        },
+        {
+          "date": "2025-11-28",
+          "choice": 366.82,
+          "select": 351.05
+        },
+        {
+          "date": "2025-12-31",
+          "choice": 347.45,
+          "select": 342.38
+        },
+        {
+          "date": "2026-01-30",
+          "choice": 365.56,
+          "select": 361.94
+        },
+        {
+          "date": "2026-02-27",
+          "choice": 379.84,
+          "select": 374.31
+        },
+        {
+          "date": "2026-03-31",
+          "choice": 395.49,
+          "select": 392.93
+        },
+        {
+          "date": "2026-04-30",
+          "choice": 389.52,
+          "select": 388.17
+        },
+        {
+          "date": "2026-05-29",
+          "choice": 391.47,
+          "select": 383.18
+        },
+        {
+          "date": "2026-06-30",
+          "choice": 393.16,
+          "select": 371.68
+        },
+        {
+          "date": "2026-07-31",
+          "choice": 361.38,
+          "select": 346.23
+        },
+        {
+          "date": "2026-08-31",
+          "choice": 375.82,
+          "select": 358.49
+        },
+        {
+          "date": "2026-09-30",
+          "choice": 382.79,
+          "select": 360.59
+        },
+        {
+          "date": "2026-10-30",
+          "choice": 364.66,
+          "select": 351.98
+        },
+        {
+          "date": "2026-11-20",
+          "choice": 352.84,
+          "select": 342.92
+        }
+      ]
+    },
+    "fedSteer": {
+      "sourceUrl": "https://www.ams.usda.gov/mnreports/ams_2477.pdf",
+      "basis": "Live FOB, steers, over 80% Choice",
+      "latest": {
+        "date": "2026-11-16",
+        "price": 214.27,
+        "head": 12571,
+        "weight": 1633
+      },
+      "monthly": [
+        {
+          "date": "2024-12-30",
+          "price": 195.68,
+          "head": 10832,
+          "weight": 1548
+        },
+        {
+          "date": "2025-01-27",
+          "price": 210.22,
+          "head": 27919,
+          "weight": 1541
+        },
+        {
+          "date": "2025-02-24",
+          "price": 199.87,
+          "head": 12737,
+          "weight": 1537
+        },
+        {
+          "date": "2025-03-31",
+          "price": 212.96,
+          "head": 16419,
+          "weight": 1541
+        },
+        {
+          "date": "2025-04-28",
+          "price": 217.05,
+          "head": 14485,
+          "weight": 1541
+        },
+        {
+          "date": "2025-05-26",
+          "price": 229.73,
+          "head": 11473,
+          "weight": 1502
+        },
+        {
+          "date": "2025-06-30",
+          "price": 230.98,
+          "head": 11593,
+          "weight": 1497
+        },
+        {
+          "date": "2025-07-28",
+          "price": 240.73,
+          "head": 18674,
+          "weight": 1506
+        },
+        {
+          "date": "2025-08-25",
+          "price": 244.76,
+          "head": 23718,
+          "weight": 1532
+        },
+        {
+          "date": "2025-09-29",
+          "price": 232.35,
+          "head": 15590,
+          "weight": 1552
+        },
+        {
+          "date": "2025-10-27",
+          "price": 237.77,
+          "head": 23741,
+          "weight": 1578
+        },
+        {
+          "date": "2025-11-24",
+          "price": 216.87,
+          "head": 15397,
+          "weight": 1587
+        },
+        {
+          "date": "2025-12-29",
+          "price": 229.39,
+          "head": 10941,
+          "weight": 1589
+        },
+        {
+          "date": "2026-01-26",
+          "price": 234.65,
+          "head": 21652,
+          "weight": 1603
+        },
+        {
+          "date": "2026-02-23",
+          "price": 246.62,
+          "head": 21180,
+          "weight": 1590
+        },
+        {
+          "date": "2026-03-30",
+          "price": 235.35,
+          "head": 12229,
+          "weight": 1614
+        },
+        {
+          "date": "2026-04-27",
+          "price": 246.19,
+          "head": 16204,
+          "weight": 1594
+        },
+        {
+          "date": "2026-05-25",
+          "price": 260.64,
+          "head": 14078,
+          "weight": 1560
+        },
+        {
+          "date": "2026-06-29",
+          "price": 259.65,
+          "head": 13338,
+          "weight": 1554
+        },
+        {
+          "date": "2026-07-27",
+          "price": 230.47,
+          "head": 9192,
+          "weight": 1545
+        },
+        {
+          "date": "2026-08-31",
+          "price": 219.23,
+          "head": 18075,
+          "weight": 1548
+        },
+        {
+          "date": "2026-09-28",
+          "price": 220.67,
+          "head": 10406,
+          "weight": 1590
+        },
+        {
+          "date": "2026-10-26",
+          "price": 227.08,
+          "head": 5175,
+          "weight": 1592
+        },
+        {
+          "date": "2026-11-16",
+          "price": 214.27,
+          "head": 12571,
+          "weight": 1633
+        }
+      ]
+    },
+    "texasFeeder": {
+      "sourceUrl": "https://www.ams.usda.gov/mnreports/ams_1955.pdf",
+      "basis": "Medium and large 1 steers, per cwt",
+      "price": 423.19,
+      "head": 98,
+      "range": "500-545",
+      "week": "2026-11-15/2026-11-21"
+    },
+    "groundBeef": {
+      "seriesId": "APU0000703112",
+      "sourceUrl": "https://data.bls.gov/timeseries/APU0000703112",
+      "latest": {
+        "date": "2026-10-01",
+        "label": "October 2026",
+        "value": 6.755
+      },
+      "monthly": [
+        {
+          "date": "2023-01-01",
+          "label": "January 2023",
+          "value": 4.791
+        },
+        {
+          "date": "2023-02-01",
+          "label": "February 2023",
+          "value": 4.778
+        },
+        {
+          "date": "2023-03-01",
+          "label": "March 2023",
+          "value": 4.813
+        },
+        {
+          "date": "2023-04-01",
+          "label": "April 2023",
+          "value": 4.79
+        },
+        {
+          "date": "2023-05-01",
+          "label": "May 2023",
+          "value": 4.96
+        },
+        {
+          "date": "2023-06-01",
+          "label": "June 2023",
+          "value": 5.028
+        },
+        {
+          "date": "2023-07-01",
+          "label": "July 2023",
+          "value": 5.102
+        },
+        {
+          "date": "2023-08-01",
+          "label": "August 2023",
+          "value": 5.076
+        },
+        {
+          "date": "2023-09-01",
+          "label": "September 2023",
+          "value": 5.109
+        },
+        {
+          "date": "2023-10-01",
+          "label": "October 2023",
+          "value": 5.226
+        },
+        {
+          "date": "2023-11-01",
+          "label": "November 2023",
+          "value": 5.353
+        },
+        {
+          "date": "2023-12-01",
+          "label": "December 2023",
+          "value": 5.21
+        },
+        {
+          "date": "2024-01-01",
+          "label": "January 2024",
+          "value": 5.03
+        },
+        {
+          "date": "2024-02-01",
+          "label": "February 2024",
+          "value": 5.132
+        },
+        {
+          "date": "2024-03-01",
+          "label": "March 2024",
+          "value": 5.132
+        },
+        {
+          "date": "2024-04-01",
+          "label": "April 2024",
+          "value": 5.236
+        },
+        {
+          "date": "2024-05-01",
+          "label": "May 2024",
+          "value": 5.148
+        },
+        {
+          "date": "2024-06-01",
+          "label": "June 2024",
+          "value": 5.472
+        },
+        {
+          "date": "2024-07-01",
+          "label": "July 2024",
+          "value": 5.497
+        },
+        {
+          "date": "2024-08-01",
+          "label": "August 2024",
+          "value": 5.577
+        },
+        {
+          "date": "2024-09-01",
+          "label": "September 2024",
+          "value": 5.67
+        },
+        {
+          "date": "2024-10-01",
+          "label": "October 2024",
+          "value": 5.588
+        },
+        {
+          "date": "2024-11-01",
+          "label": "November 2024",
+          "value": 5.628
+        },
+        {
+          "date": "2024-12-01",
+          "label": "December 2024",
+          "value": 5.605
+        },
+        {
+          "date": "2025-01-01",
+          "label": "January 2025",
+          "value": 5.545
+        },
+        {
+          "date": "2025-02-01",
+          "label": "February 2025",
+          "value": 5.625
+        },
+        {
+          "date": "2025-03-01",
+          "label": "March 2025",
+          "value": 5.79
+        },
+        {
+          "date": "2025-04-01",
+          "label": "April 2025",
+          "value": 5.801
+        },
+        {
+          "date": "2025-05-01",
+          "label": "May 2025",
+          "value": 5.981
+        },
+        {
+          "date": "2025-06-01",
+          "label": "June 2025",
+          "value": 6.12
+        },
+        {
+          "date": "2025-07-01",
+          "label": "July 2025",
+          "value": 6.254
+        },
+        {
+          "date": "2025-08-01",
+          "label": "August 2025",
+          "value": 6.318
+        },
+        {
+          "date": "2025-09-01",
+          "label": "September 2025",
+          "value": 6.323
+        },
+        {
+          "date": "2025-11-01",
+          "label": "November 2025",
+          "value": 6.54
+        },
+        {
+          "date": "2025-12-01",
+          "label": "December 2025",
+          "value": 6.687
+        },
+        {
+          "date": "2026-01-01",
+          "label": "January 2026",
+          "value": 6.752
+        },
+        {
+          "date": "2026-02-01",
+          "label": "February 2026",
+          "value": 6.739
+        },
+        {
+          "date": "2026-03-01",
+          "label": "March 2026",
+          "value": 6.701
+        },
+        {
+          "date": "2026-04-01",
+          "label": "April 2026",
+          "value": 6.899
+        },
+        {
+          "date": "2026-05-01",
+          "label": "May 2026",
+          "value": 6.745
+        },
+        {
+          "date": "2026-06-01",
+          "label": "June 2026",
+          "value": 6.825
+        },
+        {
+          "date": "2026-07-01",
+          "label": "July 2026",
+          "value": 6.885
+        },
+        {
+          "date": "2026-08-01",
+          "label": "August 2026",
+          "value": 6.923
+        },
+        {
+          "date": "2026-09-01",
+          "label": "September 2026",
+          "value": 6.792
+        },
+        {
+          "date": "2026-10-01",
+          "label": "October 2026",
+          "value": 6.755
+        }
+      ]
+    },
+    "retail": {
+      "sourceUrl": "https://www.ers.usda.gov/data-products/meat-price-spreads",
+      "choice": {
+        "date": "2026-10-01",
+        "cents": 994.9
+      },
+      "allFresh": {
+        "date": "2026-10-01",
+        "cents": 943.9
+      },
+      "choiceMonthly": [
+        {
+          "date": "2026-05-01",
+          "cents": 1034.7
+        },
+        {
+          "date": "2026-06-01",
+          "cents": 1045
+        },
+        {
+          "date": "2026-07-01",
+          "cents": 1048.7
+        },
+        {
+          "date": "2026-08-01",
+          "cents": 1022.9
+        },
+        {
+          "date": "2026-09-01",
+          "cents": 994.4
+        },
+        {
+          "date": "2026-10-01",
+          "cents": 994.9
+        }
+      ],
+      "allFreshMonthly": [
+        {
+          "date": "2026-05-01",
+          "cents": 951.1
+        },
+        {
+          "date": "2026-06-01",
+          "cents": 966.1
+        },
+        {
+          "date": "2026-07-01",
+          "cents": 975.1
+        },
+        {
+          "date": "2026-08-01",
+          "cents": 966.3
+        },
+        {
+          "date": "2026-09-01",
+          "cents": 946.8
+        },
+        {
+          "date": "2026-10-01",
+          "cents": 943.9
+        }
+      ]
+    }
+  },
+  "consumption": {
+    "sourceUrl": "https://www.ers.usda.gov/data-products/food-availability-per-capita-data-system",
+    "basis": "Food availability, retail weight. This is supply per person, not pounds eaten after waste.",
+    "latest": {
+      "year": 2021,
+      "pounds": 58.781
+    },
+    "series": [
+      {
+        "year": 2001,
+        "pounds": 66.043
+      },
+      {
+        "year": 2002,
+        "pounds": 67.501
+      },
+      {
+        "year": 2003,
+        "pounds": 64.815
+      },
+      {
+        "year": 2004,
+        "pounds": 65.937
+      },
+      {
+        "year": 2005,
+        "pounds": 65.368
+      },
+      {
+        "year": 2006,
+        "pounds": 65.681
+      },
+      {
+        "year": 2007,
+        "pounds": 64.998
+      },
+      {
+        "year": 2008,
+        "pounds": 62.133
+      },
+      {
+        "year": 2009,
+        "pounds": 60.772
+      },
+      {
+        "year": 2010,
+        "pounds": 59.301
+      },
+      {
+        "year": 2011,
+        "pounds": 56.941
+      },
+      {
+        "year": 2012,
+        "pounds": 57.067
+      },
+      {
+        "year": 2013,
+        "pounds": 56.073
+      },
+      {
+        "year": 2014,
+        "pounds": 53.946
+      },
+      {
+        "year": 2015,
+        "pounds": 53.809
+      },
+      {
+        "year": 2016,
+        "pounds": 55.393
+      },
+      {
+        "year": 2017,
+        "pounds": 56.832
+      },
+      {
+        "year": 2018,
+        "pounds": 57.106
+      },
+      {
+        "year": 2019,
+        "pounds": 57.924
+      },
+      {
+        "year": 2020,
+        "pounds": 58.284
+      },
+      {
+        "year": 2021,
+        "pounds": 58.781
+      }
+    ]
+  },
+  "receipts": {
+    "sourceUrl": "https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/data-files-us-and-state-level-farm-income-and-wealth-statistics",
+    "file": "FarmIncome_WealthStatisticsData_September2026.csv",
+    "us": [
+      {
+        "year": 2008,
+        "state": "United States",
+        "dollars": 48394131000,
+        "forecast": false
+      },
+      {
+        "year": 2009,
+        "state": "United States",
+        "dollars": 43720324000,
+        "forecast": false
+      },
+      {
+        "year": 2010,
+        "state": "United States",
+        "dollars": 51246136000,
+        "forecast": false
+      },
+      {
+        "year": 2011,
+        "state": "United States",
+        "dollars": 62321217000,
+        "forecast": false
+      },
+      {
+        "year": 2012,
+        "state": "United States",
+        "dollars": 66090126000,
+        "forecast": false
+      },
+      {
+        "year": 2013,
+        "state": "United States",
+        "dollars": 67849440000,
+        "forecast": false
+      },
+      {
+        "year": 2014,
+        "state": "United States",
+        "dollars": 81076720000,
+        "forecast": false
+      },
+      {
+        "year": 2015,
+        "state": "United States",
+        "dollars": 78252807000,
+        "forecast": false
+      },
+      {
+        "year": 2016,
+        "state": "United States",
+        "dollars": 63691327000,
+        "forecast": false
+      },
+      {
+        "year": 2017,
+        "state": "United States",
+        "dollars": 66936726000,
+        "forecast": false
+      },
+      {
+        "year": 2018,
+        "state": "United States",
+        "dollars": 67179793000,
+        "forecast": false
+      },
+      {
+        "year": 2019,
+        "state": "United States",
+        "dollars": 66192571000,
+        "forecast": false
+      },
+      {
+        "year": 2020,
+        "state": "United States",
+        "dollars": 63321336000,
+        "forecast": false
+      },
+      {
+        "year": 2021,
+        "state": "United States",
+        "dollars": 72706908000,
+        "forecast": false
+      },
+      {
+        "year": 2022,
+        "state": "United States",
+        "dollars": 86288348000,
+        "forecast": false
+      },
+      {
+        "year": 2023,
+        "state": "United States",
+        "dollars": 101173858000,
+        "forecast": false
+      },
+      {
+        "year": 2024,
+        "state": "United States",
+        "dollars": 112365240000,
+        "forecast": false
+      },
+      {
+        "year": 2025,
+        "state": "United States",
+        "dollars": 133674891000,
+        "forecast": false
+      },
+      {
+        "year": 2026,
+        "state": "United States",
+        "dollars": 140656598000,
+        "forecast": true
+      }
+    ],
+    "tx": [
+      {
+        "year": 2008,
+        "state": "Texas",
+        "dollars": 7230267000,
+        "forecast": false
+      },
+      {
+        "year": 2009,
+        "state": "Texas",
+        "dollars": 6938721000,
+        "forecast": false
+      },
+      {
+        "year": 2010,
+        "state": "Texas",
+        "dollars": 7647699000,
+        "forecast": false
+      },
+      {
+        "year": 2011,
+        "state": "Texas",
+        "dollars": 11050080000,
+        "forecast": false
+      },
+      {
+        "year": 2012,
+        "state": "Texas",
+        "dollars": 9884326000,
+        "forecast": false
+      },
+      {
+        "year": 2013,
+        "state": "Texas",
+        "dollars": 10097183000,
+        "forecast": false
+      },
+      {
+        "year": 2014,
+        "state": "Texas",
+        "dollars": 10938332000,
+        "forecast": false
+      },
+      {
+        "year": 2015,
+        "state": "Texas",
+        "dollars": 11459962000,
+        "forecast": false
+      },
+      {
+        "year": 2016,
+        "state": "Texas",
+        "dollars": 8467800000,
+        "forecast": false
+      },
+      {
+        "year": 2017,
+        "state": "Texas",
+        "dollars": 8899836000,
+        "forecast": false
+      },
+      {
+        "year": 2018,
+        "state": "Texas",
+        "dollars": 8473061000,
+        "forecast": false
+      },
+      {
+        "year": 2019,
+        "state": "Texas",
+        "dollars": 8469663000,
+        "forecast": false
+      },
+      {
+        "year": 2020,
+        "state": "Texas",
+        "dollars": 8794871000,
+        "forecast": false
+      },
+      {
+        "year": 2021,
+        "state": "Texas",
+        "dollars": 10053767000,
+        "forecast": false
+      },
+      {
+        "year": 2022,
+        "state": "Texas",
+        "dollars": 11557144000,
+        "forecast": false
+      },
+      {
+        "year": 2023,
+        "state": "Texas",
+        "dollars": 13374298000,
+        "forecast": false
+      },
+      {
+        "year": 2024,
+        "state": "Texas",
+        "dollars": 13797655000,
+        "forecast": false
+      },
+      {
+        "year": 2025,
+        "state": "Texas",
+        "dollars": 15667360000,
+        "forecast": false
+      }
+    ]
+  },
+  "gaps": []
+}

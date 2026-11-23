@@ -1,0 +1,163 @@
+---
+interface Line {
+  name: string;
+  color: string;
+  values: number[];
+}
+
+interface Panel {
+  lines: Line[];
+}
+
+interface Props {
+  title: string;
+  labels: string[];
+  panels: Panel[];
+  format: (value: number) => string;
+  axisFormat?: (value: number) => string;
+  sourceHref: string;
+  sourceLabel: string;
+}
+
+const { title, labels, panels, format, axisFormat = format, sourceHref, sourceLabel } = Astro.props;
+const width = 640;
+const pad = { l: 58, r: 36, t: 16, b: 32 };
+const panelHeight = 148;
+
+function ticks(count: number) {
+  if (count <= 12) return Array.from({ length: count }, (_, index) => index);
+  const step = Math.ceil(count / 7);
+  const indexes: number[] = [];
+  for (let index = 0; index < count; index += step) indexes.push(index);
+  if (indexes.at(-1) !== count - 1) indexes.push(count - 1);
+  return indexes;
+}
+
+function geometry(lines: Line[]) {
+  const values = lines.flatMap((line) => line.values).filter((value) => Number.isFinite(value));
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  const padValue = (high - low) * 0.12 || Math.abs(high) * 0.08 || 1;
+  const min = low - padValue;
+  const max = high + padValue;
+  const innerW = width - pad.l - pad.r;
+  const innerH = panelHeight - pad.t - pad.b;
+  const point = (value: number, index: number, count: number) => {
+    const x = pad.l + (count === 1 ? innerW / 2 : (index / (count - 1)) * innerW);
+    const y = pad.t + (1 - (value - min) / (max - min)) * innerH;
+    return { x, y };
+  };
+  const yTicks = [max, min + (max - min) / 2, min];
+  return { min, max, point, yTicks, innerH };
+}
+
+const labelTicks = ticks(labels.length);
+---
+
+<figure class="cattle-chart">
+  <figcaption>
+    <strong>{title}</strong>
+    <a href={sourceHref}>{sourceLabel}</a>
+  </figcaption>
+  {panels.map((panel) => {
+    const drawn = geometry(panel.lines);
+    const count = panel.lines[0]?.values.length ?? 0;
+    return (
+      <svg viewBox={`0 0 ${width} ${panelHeight}`} role="img" aria-label={title}>
+        {drawn.yTicks.map((tick) => {
+          const y = drawn.point(tick, 0, count).y;
+          return (
+            <g>
+              <line x1={pad.l} x2={width - pad.r} y1={y} y2={y} />
+              <text x={pad.l - 8} y={y + 4} text-anchor="end">{axisFormat(tick)}</text>
+            </g>
+          );
+        })}
+        {panel.lines.map((line) => {
+          const points = line.values.map((value, index) => drawn.point(value, index, count));
+          const last = points.at(-1);
+          return (
+            <g>
+              <polyline points={points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ')} stroke={line.color} />
+              {last && <circle cx={last.x} cy={last.y} r="3.5" fill={line.color} />}
+            </g>
+          );
+        })}
+        {labelTicks.map((index) => {
+          const x = drawn.point(drawn.min, index, count).x;
+          const anchor = index === 0 ? 'start' : index === count - 1 ? 'end' : 'middle';
+          return <text x={x} y={panelHeight - 8} text-anchor={anchor}>{labels[index]}</text>;
+        })}
+      </svg>
+    );
+  })}
+  <ul class="cattle-legend">
+    {panels.flatMap((panel) => panel.lines).map((line) => (
+      <li><span style={`background:${line.color}`}></span>{line.name}</li>
+    ))}
+  </ul>
+  <details>
+    <summary>Numbers in this chart</summary>
+    <div class="cattle-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Period</th>
+            {panels.flatMap((panel) => panel.lines).map((line) => <th>{line.name}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {labels.map((label, index) => (
+            <tr>
+              <td>{label}</td>
+              {panels.flatMap((panel) => panel.lines).map((line) => <td>{format(line.values[index])}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
+
+<style>
+  .cattle-chart {
+    margin: 0;
+    padding: 0.85rem 0.85rem 0.7rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--pine);
+    min-width: 0;
+  }
+  .cattle-chart figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    align-items: baseline;
+    margin-bottom: 0.35rem;
+  }
+  .cattle-chart figcaption strong {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 620;
+  }
+  .cattle-chart figcaption a { color: var(--river-deep); font-weight: 650; font-size: 0.92rem; }
+  .cattle-chart svg { display: block; width: 100%; height: auto; }
+  .cattle-chart line { stroke: var(--line); stroke-width: 1; }
+  .cattle-chart polyline { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+  .cattle-chart text { fill: var(--ink-soft); font-size: 12px; font-family: var(--sans); }
+  .cattle-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1rem;
+    margin: 0.35rem 0 0.2rem;
+    font-size: 0.92rem;
+  }
+  .cattle-legend li { display: flex; align-items: center; gap: 0.4rem; }
+  .cattle-legend span { width: 0.85rem; height: 0.35rem; }
+  .cattle-chart details { margin-top: 0.45rem; }
+  .cattle-chart summary { cursor: pointer; font-weight: 650; color: var(--river-deep); }
+  .cattle-chart table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-top: 0.45rem; }
+  .cattle-chart th, .cattle-chart td { text-align: right; padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line); }
+  .cattle-chart th:first-child, .cattle-chart td:first-child { text-align: left; }
+  .cattle-chart th { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--river-deep); }
+</style>
