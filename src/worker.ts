@@ -18,13 +18,11 @@ import {
   storeControl,
   variesByTown,
 } from './lib/homeCache';
+import { APEX_HOST, HSTS_HEADER, canonicalRedirect } from './lib/httpsRedirect';
 import { readTown, townCookie } from './lib/townChoice';
 
-const APEX_HOST = 'bastropia.com';
-const WWW_HOST = `www.${APEX_HOST}`;
-
 const SECURITY_HEADERS: Record<string, string> = {
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'Strict-Transport-Security': HSTS_HEADER,
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -158,6 +156,8 @@ function eventsMode(env: unknown): EventsSourceMode {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const redirect = canonicalRedirect(request);
+    if (redirect) return redirect;
     return runWithEventsSource(eventsMode(env), () => render(request, env, ctx));
   },
 
@@ -195,17 +195,11 @@ export default {
 };
 
 async function render(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    if (url.hostname === WWW_HOST) {
-      url.hostname = APEX_HOST;
-      return Response.redirect(url.toString(), 301);
-    }
+  if (request.method === 'GET') {
+    const policy = policyFor(request);
+    if (policy) return cachedPage(request, env, ctx, policy);
+  }
 
-    if (request.method === 'GET') {
-      const policy = policyFor(request);
-      if (policy) return cachedPage(request, env, ctx, policy);
-    }
-
-    const response = await handle(request, env, ctx);
-    return withSecurityHeaders(response);
+  const response = await handle(request, env, ctx);
+  return withSecurityHeaders(response);
 }
