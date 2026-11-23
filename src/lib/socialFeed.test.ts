@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { directoryShelves } from '../data/facebookDirectory.ts';
 import { socialSources } from '../data/socialSources.ts';
 import { describeListing, directoryCards } from './directoryListing.ts';
-import { collectSocialFeed, mergeSourcePosts, parsePublicPosts, parseSocialFeed, relativeTime, type StoredPost } from './socialFeed.ts';
+import { collectSocialFeed, mergeSourcePosts, newestPerSource, parsePublicPosts, parseSocialFeed, relativeTime, type StoredPost } from './socialFeed.ts';
 
 const html = `
 "post_id":"122112926109525900","creation_time":1795394399,"attachments":[]
@@ -67,6 +67,29 @@ test('mergeSourcePosts keeps a blocked source and replaces a successful one', ()
     { sourceId: 'oem', ok: false, posts: [] },
   ], now);
   assert.deepEqual(merged.map((post) => post.id), ['city:2', 'oem:1']);
+});
+
+test('newestPerSource keeps the latest post from a repeated page', () => {
+  const city: StoredPost = {
+    id: 'city:1',
+    sourceId: 'city',
+    sourceName: 'City of Bastrop',
+    lane: 'government',
+    text: 'Power restored',
+    url: 'https://www.facebook.com/bastroptx/posts/1',
+    published: '2026-11-22T18:00:00.000Z',
+  };
+  const older: StoredPost = {
+    id: 'elections:1',
+    sourceId: 'elections',
+    sourceName: 'Bastrop County Elections',
+    lane: 'government',
+    text: 'Same story',
+    url: 'https://www.facebook.com/BastropCountyElections/posts/1',
+    published: '2026-11-20T01:00:00.000Z',
+  };
+  const newer: StoredPost = { ...older, id: 'elections:2', published: '2026-11-20T01:23:00.000Z' };
+  assert.deepEqual(newestPerSource([older, newer, city]).map((post) => post.id), ['city:1', 'elections:2']);
 });
 
 test('parseSocialFeed drops a broken record', () => {
