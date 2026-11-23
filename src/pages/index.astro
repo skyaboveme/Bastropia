@@ -11,6 +11,7 @@ import TodayStrip from '../components/TodayStrip.astro';
 import HomeBanner from '../components/HomeBanner.astro';
 import SponsorBanner from '../components/SponsorBanner.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
+import HebDealRotator from '../components/HebDealRotator.astro';
 import { getExternalNews, latestHeadlines } from '../lib/externalNews';
 import { getForecast } from '../lib/weather';
 import { latestChannelVideos } from '../lib/youtubeLatest';
@@ -209,6 +210,7 @@ const weekendDays = weekend
       </aside>
 
       <aside class="col col-right" aria-label="Today in the county">
+        <HebDealRotator />
         <label class="city-pick">
           <span class="sr">Your town</span>
           <select id="home-town">

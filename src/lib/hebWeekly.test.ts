@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import {
   collectHebWeekly,
   formatValidRange,
+  formatValidThru,
   hebSearchUrl,
   normalizeProduct,
   parseHebWeekly,
@@ -144,6 +145,8 @@ test('formatValidRange uses the calendar dates on the circular', () => {
     formatValidRange('2026-11-18T00:00:00-05:00', '2026-11-26T23:59:59-05:00'),
     'Valid Wednesday, November 18 through Thursday, November 26, 2026.',
   );
+  assert.equal(formatValidThru('2026-11-26T23:59:59-05:00'), 'Valid thru Nov 26');
+  assert.equal(formatValidThru('not-a-date'), '');
 });
 
 test('trending puts a named featured box first, then the biggest savings', () => {
