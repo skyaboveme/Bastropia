@@ -102,6 +102,7 @@ test('collect stops after a block streak and does not call the rest', async () =
   assert.equal(fresh.results.filter((result) => result.ok).length, 2);
   assert.equal(facebookCalls, 5);
   assert.equal(fresh.posts.length, 2);
+  assert.equal(fresh.posts.filter((post) => post.sourceId === sources[0].id).length, 1);
 });
 
 test('directory cards keep every shelf item', () => {
