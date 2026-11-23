@@ -1,4 +1,4 @@
-.dir { padding: 0.35rem 16px 1rem; }
+.dir { padding: 0.15rem 16px 1rem; }
 @media (max-width: 379px) {
   .dir { padding-inline: 12px; }
 }
@@ -7,8 +7,15 @@
 }
 .dir-intro h1 { margin: 0; font-size: 1.55rem; line-height: 1.1; }
 .dir-intro p { margin: 0.15rem 0 0; color: var(--ink-soft); font-size: 0.875rem; }
-.dir-dock { background: var(--paper); padding: 0.45rem 0 0.35rem; }
-.dir-dock.is-stuck { position: sticky; top: 0; z-index: 40; box-shadow: 0 2px 8px rgba(16, 40, 31, 0.06); }
+.dir-dock {
+  position: sticky;
+  top: var(--sticky-offset);
+  z-index: 25;
+  background: var(--paper);
+  padding: 0.15rem 0 0.35rem;
+  scroll-margin-top: var(--sticky-offset);
+}
+.dir-dock.is-stuck { box-shadow: 0 2px 8px rgba(16, 40, 31, 0.06); }
 .looking { margin: 0; }
 .looking-bar {
   display: flex;
@@ -397,7 +404,6 @@
 .dir-cat.is-on { color: var(--pine-deep); font-weight: 700; }
 .dir-recent { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .dir-recent button { min-height: 44px; min-width: 44px; border: 0; background: transparent; color: var(--river-deep); font-weight: 650; cursor: pointer; text-decoration: underline; }
-body.dir-searching .compact-head { display: none; }
 @media (min-width: 1024px) {
   .dir-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 1.4rem; align-items: start; }
   .dir-side { display: grid; align-content: start; gap: 0.15rem; position: sticky; top: 0.6rem; }

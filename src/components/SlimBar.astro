@@ -1,0 +1,25 @@
+---
+interface Props {
+  /** Always visible, in the page flow. The home page reveals the same bar after scroll. */
+  pinned?: boolean;
+  newsCurrent?: boolean;
+  eventsCurrent?: boolean;
+  newsletterCurrent?: boolean;
+}
+
+const { pinned = false, newsCurrent = false, eventsCurrent = false, newsletterCurrent = false } = Astro.props;
+---
+
+<div class:list={['slim-bar', pinned && 'is-on is-pinned']} data-slim-bar inert={pinned ? undefined : true} aria-hidden={pinned ? undefined : 'true'}>
+  <div class="slim-inner">
+    <a class="slim-brand" href="/">
+      <img src="/brand/logo-masthead.png" alt="" width="36" height="38" decoding="async" />
+      <span>Bastropia</span>
+    </a>
+    <nav class="slim-nav" aria-label="Shortcuts">
+      <a href="/news" aria-current={newsCurrent ? 'page' : undefined}>News</a>
+      <a href="/events" aria-current={eventsCurrent ? 'page' : undefined}>Events</a>
+      <a class="slim-join" href="/newsletter#newsletter" aria-current={newsletterCurrent ? 'page' : undefined}>Newsletter</a>
+    </nav>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 ---
 import BurnMark from './BurnMark.astro';
 import SectionNav from './SectionNav.astro';
+import SlimBar from './SlimBar.astro';
 import SocialIcons from './SocialIcons.astro';
 import { burnBan } from '../data/burnBan';
 import { burnView } from '../lib/burnBanView';
@@ -72,9 +73,11 @@ function current(href: string) {
 
 interface Props {
   compact?: boolean;
+  /** The shared sticky bar only, shown at once. Directory, listings, and submit use this. */
+  pinnedBar?: boolean;
 }
 
-const { compact = false } = Astro.props;
+const { compact = false, pinnedBar = false } = Astro.props;
 const statusHref = burnBan.inEffect && !burn.stale ? '/burn-ban' : '/now';
 const statusText = forecast
   ? `${forecast.temp}° · ${burnBan.inEffect && !burn.stale ? 'Burn ban' : burn.stale ? 'Burn status unconfirmed' : 'No burn ban'}`
@@ -83,7 +86,9 @@ const statusText = forecast
     : 'No burn ban';
 ---
 
-{compact ? (
+{pinnedBar ? (
+  <SlimBar pinned newsCurrent={current('/news')} eventsCurrent={current('/events')} newsletterCurrent={current('/newsletter')} />
+) : compact ? (
   <header class="compact-head">
     <div class="compact-bar">
       <a class="compact-brand" href="/">
@@ -361,19 +366,7 @@ const statusText = forecast
     </div>
   </div>
 </header>
-<div class="slim-bar" data-slim-bar inert aria-hidden="true">
-  <div class="slim-inner">
-    <a class="slim-brand" href="/">
-        <img src="/brand/logo-masthead.png" alt="" width="36" height="38" decoding="async" />
-      <span>Bastropia</span>
-    </a>
-    <nav class="slim-nav" aria-label="Shortcuts">
-      <a href="/news" aria-current={current('/news') ? 'page' : undefined}>News</a>
-      <a href="/events" aria-current={current('/events') ? 'page' : undefined}>Events</a>
-      <a class="slim-join" href="/newsletter#newsletter" aria-current={current('/newsletter') ? 'page' : undefined}>Newsletter</a>
-    </nav>
-  </div>
-</div>
+<SlimBar newsCurrent={current('/news')} eventsCurrent={current('/events')} newsletterCurrent={current('/newsletter')} />
   </>
 )}
 <script is:inline>
