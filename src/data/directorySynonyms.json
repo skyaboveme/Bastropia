@@ -1,0 +1,4333 @@
+{
+ "version": 1,
+ "generated": "2026-11-22",
+ "source": "Built against the live /directory index (960 rows) and category labels on origin/main 757ab92.",
+ "stopwords": [
+  "a",
+  "an",
+  "the",
+  "in",
+  "at",
+  "near",
+  "nearby",
+  "me",
+  "my",
+  "around",
+  "best",
+  "good",
+  "cheap",
+  "local",
+  "open",
+  "now",
+  "today",
+  "tonight",
+  "place",
+  "places",
+  "for",
+  "of",
+  "and",
+  "&",
+  "to",
+  "find",
+  "with"
+ ],
+ "towns": {
+  "bastrop": "Bastrop",
+  "elgin": "Elgin",
+  "smithville": "Smithville",
+  "cedar creek": "Cedar Creek",
+  "paige": "Paige",
+  "mcdade": "McDade",
+  "mc dade": "McDade",
+  "rosanky": "Rosanky",
+  "red rock": "Red Rock",
+  "wyldwood": "Wyldwood",
+  "dale": "Dale",
+  "camp swift": "Camp Swift"
+ },
+ "countyPhrases": [
+  "bastrop county",
+  "bastrop co",
+  "countywide",
+  "county wide"
+ ],
+ "exactWordOnly": [
+  "vet",
+  "vets",
+  "ac",
+  "a/c",
+  "er",
+  "pt",
+  "it",
+  "rx",
+  "bar",
+  "bars",
+  "eat",
+  "gas",
+  "tax",
+  "spa",
+  "gym",
+  "dr",
+  "oil",
+  "pit",
+  "ram",
+  "ups",
+  "art",
+  "dog",
+  "cat",
+  "pet",
+  "tan",
+  "rv",
+  "bbq",
+  "isd",
+  "tea",
+  "fish",
+  "hair",
+  "lock",
+  "tire",
+  "wash",
+  "ride",
+  "feed",
+  "pool",
+  "roof",
+  "shop",
+  "print"
+ ],
+ "concepts": [
+  {
+   "id": "mexican",
+   "label": "Mexican food",
+   "terms": [
+    "tacos",
+    "taco",
+    "mexican",
+    "mexican food",
+    "tex mex",
+    "tex-mex",
+    "texmex",
+    "taqueria",
+    "burrito",
+    "burritos",
+    "enchiladas",
+    "fajitas",
+    "nachos",
+    "tamales",
+    "mariscos"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "mexican",
+    "mexicano",
+    "taco",
+    "taqueria",
+    "cocina",
+    "cocinas",
+    "cantina",
+    "guadalajara",
+    "jalisco",
+    "chapala",
+    "maguey",
+    "chuy's",
+    "mariscos",
+    "micheladas"
+   ],
+   "groups": []
+  },
+  {
+   "id": "bbq",
+   "label": "Barbecue",
+   "terms": [
+    "bbq",
+    "barbecue",
+    "barbeque",
+    "bar-b-q",
+    "brisket",
+    "smokehouse",
+    "ribs"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "bbq",
+    "barbecue",
+    "barbeque",
+    "smokehouse",
+    "pit"
+   ],
+   "groups": []
+  },
+  {
+   "id": "pizza",
+   "label": "Pizza",
+   "terms": [
+    "pizza",
+    "pizzeria",
+    "pizzas"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "pizza",
+    "pizzeria",
+    "domino's"
+   ],
+   "groups": []
+  },
+  {
+   "id": "italian",
+   "label": "Italian food",
+   "terms": [
+    "italian",
+    "pasta",
+    "spaghetti"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "italian",
+    "pizzeria",
+    "bistro"
+   ],
+   "groups": []
+  },
+  {
+   "id": "burgers",
+   "label": "Burgers & fast food",
+   "terms": [
+    "burger",
+    "burgers",
+    "hamburger",
+    "fast food",
+    "drive thru",
+    "drive-thru",
+    "fries"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "burger",
+    "whataburger",
+    "mcdonalds",
+    "mcdonald's",
+    "dairy queen",
+    "sonic",
+    "jack in the box",
+    "chick-fil-a",
+    "chicken express",
+    "subway",
+    "schlotzsky's"
+   ],
+   "groups": []
+  },
+  {
+   "id": "chicken",
+   "label": "Chicken",
+   "terms": [
+    "chicken",
+    "wings",
+    "tenders"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "chicken",
+    "chick-fil-a",
+    "wings"
+   ],
+   "groups": []
+  },
+  {
+   "id": "steak",
+   "label": "Steakhouses",
+   "terms": [
+    "steak",
+    "steakhouse",
+    "steaks",
+    "chophouse",
+    "chop house"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "steakhouse",
+    "roadhouse",
+    "chop house",
+    "espadas"
+   ],
+   "groups": []
+  },
+  {
+   "id": "asian",
+   "label": "Asian food",
+   "terms": [
+    "chinese",
+    "asian",
+    "sushi",
+    "thai",
+    "indian",
+    "curry",
+    "pho",
+    "hibachi"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "chinese",
+    "beijing",
+    "indian",
+    "cuisine",
+    "phoenix kingdom",
+    "sushi",
+    "thai",
+    "pho",
+    "hibachi"
+   ],
+   "groups": []
+  },
+  {
+   "id": "seafood",
+   "label": "Seafood",
+   "terms": [
+    "seafood",
+    "fish",
+    "shrimp",
+    "crawfish",
+    "oysters"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "mariscos",
+    "seafood",
+    "fish",
+    "shrimp",
+    "costa azul"
+   ],
+   "groups": []
+  },
+  {
+   "id": "breakfast",
+   "label": "Breakfast & brunch",
+   "terms": [
+    "breakfast",
+    "brunch",
+    "pancakes",
+    "diner",
+    "kolaches",
+    "kolache",
+    "donuts",
+    "doughnuts"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "first watch",
+    "denny's",
+    "diner",
+    "kolache",
+    "donut",
+    "bakery",
+    "maxine's"
+   ],
+   "groups": []
+  },
+  {
+   "id": "coffee",
+   "label": "Coffee",
+   "terms": [
+    "coffee",
+    "espresso",
+    "latte",
+    "cafe",
+    "café",
+    "coffee shop",
+    "tea",
+    "boba"
+   ],
+   "categories": [
+    "Coffee / Beverage Shops"
+   ],
+   "nameKeywords": [
+    "coffee",
+    "espresso",
+    "scooter's"
+   ],
+   "groups": []
+  },
+  {
+   "id": "dessert",
+   "label": "Desserts & bakeries",
+   "terms": [
+    "bakery",
+    "bakeries",
+    "cake",
+    "cakes",
+    "cupcakes",
+    "cookies",
+    "dessert",
+    "desserts",
+    "sweets",
+    "ice cream",
+    "snow cone",
+    "snowcones",
+    "shaved ice",
+    "italian ice"
+   ],
+   "categories": [
+    "Bakeries / Baked Goods"
+   ],
+   "nameKeywords": [
+    "bakery",
+    "bakes",
+    "cupcake",
+    "treats",
+    "cinnabon",
+    "italian ice",
+    "kona ice",
+    "dairy queen",
+    "sweet",
+    "candiez",
+    "smoothie",
+    "juice"
+   ],
+   "groups": []
+  },
+  {
+   "id": "drinks",
+   "label": "Bars, breweries & wine",
+   "terms": [
+    "bar",
+    "bars",
+    "beer",
+    "brewery",
+    "breweries",
+    "brewpub",
+    "wine",
+    "winery",
+    "vineyard",
+    "cocktails",
+    "drinks",
+    "happy hour",
+    "distillery",
+    "whiskey",
+    "liquor",
+    "liquor store",
+    "pub"
+   ],
+   "categories": [
+    "Wineries / Wine Shops / Breweries",
+    "Distilleries",
+    "Lounges / Bar",
+    "Cigar Lounges",
+    "Liquor Stores / Distributors",
+    "Brewery and restaurant"
+   ],
+   "nameKeywords": [
+    "brewing",
+    "brewery",
+    "beer",
+    "wine",
+    "winery",
+    "vineyard",
+    "cellars",
+    "distillery",
+    "lounge",
+    "bar",
+    "liquors"
+   ],
+   "groups": []
+  },
+  {
+   "id": "restaurant",
+   "label": "Restaurants",
+   "terms": [
+    "restaurant",
+    "restaurants",
+    "dining",
+    "dine",
+    "dinner",
+    "lunch",
+    "sit down",
+    "takeout",
+    "take out",
+    "food truck",
+    "food trucks"
+   ],
+   "categories": [
+    "Restaurants",
+    "Brewery and restaurant",
+    "Food Trucks"
+   ],
+   "nameKeywords": [
+    "restaurant",
+    "grill",
+    "kitchen",
+    "diner",
+    "eatery",
+    "bistro",
+    "steakhouse",
+    "smokehouse",
+    "cafe"
+   ],
+   "groups": []
+  },
+  {
+   "id": "food",
+   "label": "Food & Drink",
+   "terms": [
+    "food",
+    "eat",
+    "eats",
+    "places to eat",
+    "where to eat",
+    "hungry",
+    "delivery",
+    "catering",
+    "caterer",
+    "grub"
+   ],
+   "groups": [
+    "food-drink"
+   ],
+   "categories": [],
+   "nameKeywords": []
+  },
+  {
+   "id": "grocery",
+   "label": "Groceries",
+   "terms": [
+    "grocery",
+    "groceries",
+    "grocery store",
+    "supermarket",
+    "heb",
+    "h-e-b",
+    "h.e.b.",
+    "walmart",
+    "market"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "h.e.b.",
+    "heb",
+    "brookshire",
+    "walmart",
+    "storehouse market",
+    "general store",
+    "food lockers",
+    "farmers' market",
+    "farmer's market"
+   ],
+   "groups": []
+  },
+  {
+   "id": "pharmacy",
+   "label": "Pharmacy",
+   "terms": [
+    "pharmacy",
+    "pharmacies",
+    "drugstore",
+    "drug store",
+    "prescriptions",
+    "rx",
+    "cvs",
+    "walgreens"
+   ],
+   "categories": [
+    "Pharmacies"
+   ],
+   "nameKeywords": [
+    "pharmacy",
+    "medicine shop",
+    "h.e.b.",
+    "walmart"
+   ],
+   "groups": []
+  },
+  {
+   "id": "gas",
+   "label": "Gas & propane",
+   "terms": [
+    "gas",
+    "gas station",
+    "fuel",
+    "diesel",
+    "propane",
+    "buc-ees",
+    "buc-ee's"
+   ],
+   "categories": [
+    "Propane Sales / Supplies"
+   ],
+   "nameKeywords": [
+    "propane",
+    "fuel",
+    "buc-ee's",
+    "exxon",
+    "valero",
+    "texaco"
+   ],
+   "groups": []
+  },
+  {
+   "id": "hardware",
+   "label": "Hardware & building supplies",
+   "terms": [
+    "hardware",
+    "hardware store",
+    "lumber",
+    "building supplies",
+    "feed store",
+    "feed"
+   ],
+   "categories": [
+    "Lumber / Building Supplies",
+    "Building Supplies / Sales / Installation"
+   ],
+   "nameKeywords": [
+    "hardware",
+    "lumber",
+    "feed store"
+   ],
+   "groups": []
+  },
+  {
+   "id": "shipping",
+   "label": "Shipping & mail",
+   "terms": [
+    "shipping",
+    "ups",
+    "fedex",
+    "post office",
+    "mail",
+    "notary",
+    "printing",
+    "copies"
+   ],
+   "categories": [
+    "Mailing / Shipping Services",
+    "Notary Services",
+    "Printing Services / Promotional Items"
+   ],
+   "nameKeywords": [
+    "postal",
+    "notary",
+    "print"
+   ],
+   "groups": []
+  },
+  {
+   "id": "hvac",
+   "label": "Heating & AC",
+   "terms": [
+    "hvac",
+    "ac",
+    "a/c",
+    "a c",
+    "ac repair",
+    "air conditioning",
+    "air conditioner",
+    "ac service",
+    "heating",
+    "heater",
+    "furnace",
+    "heat pump",
+    "cooling",
+    "heating and air"
+   ],
+   "categories": [
+    "Air Conditioning / Heating",
+    "Heating and air"
+   ],
+   "nameKeywords": [
+    "heating",
+    "air conditioning",
+    "cooling",
+    "heat",
+    "hvac",
+    "a/c"
+   ],
+   "groups": []
+  },
+  {
+   "id": "plumber",
+   "label": "Plumbers",
+   "terms": [
+    "plumber",
+    "plumbers",
+    "plumbing",
+    "leak",
+    "water heater",
+    "drain",
+    "clogged",
+    "sewer",
+    "septic"
+   ],
+   "categories": [
+    "Plumbing Services"
+   ],
+   "nameKeywords": [
+    "plumb",
+    "plumbing",
+    "plumber",
+    "septic"
+   ],
+   "groups": []
+  },
+  {
+   "id": "electrician",
+   "label": "Electricians",
+   "terms": [
+    "electrician",
+    "electricians",
+    "electrical",
+    "electric",
+    "wiring",
+    "generator",
+    "generators"
+   ],
+   "categories": [
+    "Electrical Contractors / Electrician"
+   ],
+   "nameKeywords": [
+    "electric",
+    "electrical"
+   ],
+   "groups": []
+  },
+  {
+   "id": "roofer",
+   "label": "Roofers",
+   "terms": [
+    "roofer",
+    "roofers",
+    "roofing",
+    "roof",
+    "roof repair",
+    "solar",
+    "gutters"
+   ],
+   "categories": [
+    "Roofing Contractors / Solar"
+   ],
+   "nameKeywords": [
+    "roofing",
+    "roof",
+    "solar"
+   ],
+   "groups": []
+  },
+  {
+   "id": "handyman",
+   "label": "Handyman & repairs",
+   "terms": [
+    "handyman",
+    "repairs",
+    "home repair",
+    "appliance repair",
+    "drywall",
+    "carpenter",
+    "fence",
+    "fencing"
+   ],
+   "categories": [
+    "Handyman Services",
+    "Glass Repair / Service",
+    "Fencing Companies",
+    "Appliance Repairs"
+   ],
+   "nameKeywords": [
+    "handyman",
+    "repair",
+    "fence",
+    "glass"
+   ],
+   "groups": []
+  },
+  {
+   "id": "painter",
+   "label": "Painters",
+   "terms": [
+    "painter",
+    "painters",
+    "painting",
+    "paint"
+   ],
+   "categories": [
+    "Painters"
+   ],
+   "nameKeywords": [
+    "paint",
+    "painter",
+    "painting"
+   ],
+   "groups": []
+  },
+  {
+   "id": "flooring",
+   "label": "Flooring",
+   "terms": [
+    "flooring",
+    "floors",
+    "tile",
+    "carpet"
+   ],
+   "categories": [
+    "Floor Coverings / Tile"
+   ],
+   "nameKeywords": [
+    "floor",
+    "floors",
+    "tile"
+   ],
+   "groups": []
+  },
+  {
+   "id": "landscaping",
+   "label": "Lawn & landscaping",
+   "terms": [
+    "landscaping",
+    "landscaper",
+    "lawn",
+    "lawn care",
+    "lawn mowing",
+    "mowing",
+    "yard",
+    "irrigation",
+    "sprinkler",
+    "tree service",
+    "tree trimming",
+    "tree removal",
+    "stump",
+    "stump grinding"
+   ],
+   "categories": [
+    "Landscape / Irrigation / Sprinkler Systems",
+    "Landscaping",
+    "Tree Service / Stump Removal"
+   ],
+   "nameKeywords": [
+    "landscap",
+    "lawn",
+    "lawncare",
+    "irrigation",
+    "tree",
+    "stump",
+    "grass"
+   ],
+   "groups": []
+  },
+  {
+   "id": "pest",
+   "label": "Pest control",
+   "terms": [
+    "pest",
+    "pest control",
+    "exterminator",
+    "bugs",
+    "termite",
+    "termites",
+    "roaches",
+    "ants",
+    "rodents"
+   ],
+   "categories": [
+    "Pest / Termite Services"
+   ],
+   "nameKeywords": [
+    "pest",
+    "termite"
+   ],
+   "groups": []
+  },
+  {
+   "id": "cleaning",
+   "label": "Cleaning",
+   "terms": [
+    "cleaning",
+    "cleaners",
+    "house cleaning",
+    "maid",
+    "maids",
+    "janitorial",
+    "pressure washing",
+    "power washing",
+    "window cleaning",
+    "carpet cleaning",
+    "water damage",
+    "restoration",
+    "dry cleaning"
+   ],
+   "categories": [
+    "Cleaning Services / Restoration Services",
+    "Pressure Washing",
+    "Window Cleaning"
+   ],
+   "nameKeywords": [
+    "clean",
+    "cleaners",
+    "maids",
+    "steam",
+    "servpro"
+   ],
+   "groups": []
+  },
+  {
+   "id": "pool",
+   "label": "Pools",
+   "terms": [
+    "pool",
+    "pools",
+    "pool service",
+    "hot tub",
+    "spa repair"
+   ],
+   "categories": [
+    "Swimming Pool Installation / Maintenance"
+   ],
+   "nameKeywords": [
+    "pool",
+    "pools"
+   ],
+   "groups": []
+  },
+  {
+   "id": "locksmith",
+   "label": "Locksmiths",
+   "terms": [
+    "locksmith",
+    "lockout",
+    "locked out",
+    "keys"
+   ],
+   "categories": [
+    "Locksmiths"
+   ],
+   "nameKeywords": [
+    "lock"
+   ],
+   "groups": []
+  },
+  {
+   "id": "movers",
+   "label": "Movers & storage",
+   "terms": [
+    "movers",
+    "moving",
+    "storage",
+    "storage unit",
+    "self storage",
+    "sheds",
+    "portable buildings"
+   ],
+   "categories": [
+    "Moving Companies",
+    "Storage Facilities / Storage Solutions",
+    "Portable Buildings"
+   ],
+   "nameKeywords": [
+    "moving",
+    "movers",
+    "storage",
+    "shelters"
+   ],
+   "groups": []
+  },
+  {
+   "id": "contractor",
+   "label": "Contractors & builders",
+   "terms": [
+    "contractor",
+    "contractors",
+    "builder",
+    "builders",
+    "home builder",
+    "remodel",
+    "remodeling",
+    "construction",
+    "excavation",
+    "dirt work",
+    "concrete",
+    "foundation",
+    "welding"
+   ],
+   "categories": [
+    "Construction / Contractors",
+    "Home Building / Remodeling / Design",
+    "Custom home builder",
+    "Construction Management",
+    "Concrete Construction / Products",
+    "Dirt Work / Excavation / Demolition",
+    "Welding & Repair"
+   ],
+   "nameKeywords": [
+    "construction",
+    "contractors",
+    "homes",
+    "builders",
+    "excavation",
+    "concrete"
+   ],
+   "groups": []
+  },
+  {
+   "id": "hair",
+   "label": "Hair & barbers",
+   "terms": [
+    "haircut",
+    "haircuts",
+    "hair",
+    "hair salon",
+    "salon",
+    "barber",
+    "barbers",
+    "barbershop",
+    "barber shop",
+    "stylist",
+    "fade",
+    "color"
+   ],
+   "categories": [
+    "Hair Salons / Barber Shops"
+   ],
+   "nameKeywords": [
+    "hair",
+    "salon",
+    "barber",
+    "cuts",
+    "kut",
+    "style house",
+    "beauty"
+   ],
+   "groups": []
+  },
+  {
+   "id": "nails",
+   "label": "Nails",
+   "terms": [
+    "nails",
+    "nail salon",
+    "manicure",
+    "pedicure",
+    "lashes",
+    "brows",
+    "waxing"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "nail",
+    "nails",
+    "lashes",
+    "brows"
+   ],
+   "groups": []
+  },
+  {
+   "id": "spa",
+   "label": "Spas, massage & beauty",
+   "terms": [
+    "spa",
+    "day spa",
+    "massage",
+    "facial",
+    "tanning",
+    "med spa",
+    "botox",
+    "tattoo",
+    "tattoos",
+    "beauty"
+   ],
+   "categories": [
+    "Spa Services",
+    "Med Spa",
+    "Beauty & Personal Care"
+   ],
+   "nameKeywords": [
+    "spa",
+    "massage",
+    "tan",
+    "aesthetic",
+    "tattoo",
+    "tattoos"
+   ],
+   "groups": []
+  },
+  {
+   "id": "vet",
+   "label": "Vets",
+   "terms": [
+    "vet",
+    "vets",
+    "veterinarian",
+    "veterinarians",
+    "veterinary",
+    "animal hospital",
+    "animal clinic",
+    "pet doctor"
+   ],
+   "categories": [
+    "Veterinarians"
+   ],
+   "nameKeywords": [
+    "veterinary",
+    "veterinarian",
+    "animal hospital",
+    "pet center"
+   ],
+   "groups": []
+  },
+  {
+   "id": "pets",
+   "label": "Pet care",
+   "terms": [
+    "pet",
+    "pets",
+    "dog",
+    "dogs",
+    "cat",
+    "cats",
+    "grooming",
+    "groomer",
+    "boarding",
+    "kennel",
+    "dog training",
+    "pet sitting"
+   ],
+   "categories": [
+    "Pet Services",
+    "Veterinarians"
+   ],
+   "nameKeywords": [
+    "pet",
+    "paws",
+    "dog",
+    "boarding"
+   ],
+   "groups": []
+  },
+  {
+   "id": "dentist",
+   "label": "Dentists",
+   "terms": [
+    "dentist",
+    "dentists",
+    "dental",
+    "teeth",
+    "orthodontist",
+    "braces"
+   ],
+   "categories": [
+    "Dental Care"
+   ],
+   "nameKeywords": [
+    "dental",
+    "dentistry",
+    "dentist",
+    "mydental",
+    "orthodont"
+   ],
+   "groups": []
+  },
+  {
+   "id": "doctor",
+   "label": "Doctors & clinics",
+   "terms": [
+    "doctor",
+    "doctors",
+    "dr",
+    "physician",
+    "clinic",
+    "clinics",
+    "family doctor",
+    "primary care",
+    "pediatrician",
+    "medical"
+   ],
+   "categories": [
+    "Health Care Clinics",
+    "Physicians / Surgeons",
+    "Dermatology",
+    "Pain Management",
+    "Cancer Oncology / Services / Research"
+   ],
+   "nameKeywords": [
+    "clinic",
+    "medical",
+    "health center",
+    "primary care",
+    "m.d.",
+    "physicians",
+    "doctors"
+   ],
+   "groups": []
+  },
+  {
+   "id": "urgent",
+   "label": "Urgent care & ER",
+   "terms": [
+    "urgent care",
+    "er",
+    "emergency",
+    "emergency room",
+    "hospital",
+    "hospitals",
+    "ambulance",
+    "walk in clinic"
+   ],
+   "categories": [
+    "Emergency Centers",
+    "Hospitals",
+    "Ambulance Service"
+   ],
+   "nameKeywords": [
+    "urgent care",
+    "emergency room",
+    "er",
+    "urgent"
+   ],
+   "groups": []
+  },
+  {
+   "id": "eye",
+   "label": "Eye & hearing",
+   "terms": [
+    "eye doctor",
+    "optometrist",
+    "glasses",
+    "contacts",
+    "eyes",
+    "vision",
+    "hearing",
+    "hearing aids"
+   ],
+   "categories": [
+    "Vision Care",
+    "Hearing Aids / Hearing Care"
+   ],
+   "nameKeywords": [
+    "vision",
+    "eye",
+    "optical",
+    "hearing"
+   ],
+   "groups": []
+  },
+  {
+   "id": "chiro",
+   "label": "Chiropractic & therapy",
+   "terms": [
+    "chiropractor",
+    "chiropractic",
+    "back pain",
+    "physical therapy",
+    "pt",
+    "rehab"
+   ],
+   "categories": [
+    "Chiropractors",
+    "Physical Therapy / Rehabilitation"
+   ],
+   "nameKeywords": [
+    "chiropractic",
+    "therapy",
+    "rehab",
+    "airrosti"
+   ],
+   "groups": []
+  },
+  {
+   "id": "counseling",
+   "label": "Counseling & mental health",
+   "terms": [
+    "counseling",
+    "counselor",
+    "therapist",
+    "therapy",
+    "mental health",
+    "psychiatrist",
+    "psychologist",
+    "recovery",
+    "rehab center"
+   ],
+   "categories": [
+    "Counseling Services",
+    "Psychiatrist"
+   ],
+   "nameKeywords": [
+    "counseling",
+    "psychiatry",
+    "therapy",
+    "recovery"
+   ],
+   "groups": []
+  },
+  {
+   "id": "senior",
+   "label": "Senior & home care",
+   "terms": [
+    "senior living",
+    "assisted living",
+    "nursing home",
+    "memory care",
+    "home health",
+    "home care",
+    "hospice",
+    "caregiver"
+   ],
+   "categories": [
+    "Nursing Homes / Assisted Living / Memory Care",
+    "Senior Living",
+    "Home Health Care Providers",
+    "Hospice Services"
+   ],
+   "nameKeywords": [
+    "home care",
+    "hospice",
+    "nursing",
+    "rehabilitation center",
+    "senior"
+   ],
+   "groups": []
+  },
+  {
+   "id": "gym",
+   "label": "Gyms & fitness",
+   "terms": [
+    "gym",
+    "gyms",
+    "fitness",
+    "workout",
+    "personal trainer",
+    "crossfit",
+    "yoga",
+    "pilates",
+    "martial arts",
+    "karate",
+    "jiu jitsu",
+    "bjj",
+    "dance",
+    "gymnastics"
+   ],
+   "categories": [
+    "Fitness / Training Centers",
+    "Yoga Studios",
+    "Gymnastics / Dance Centers"
+   ],
+   "nameKeywords": [
+    "fitness",
+    "gym",
+    "pilates",
+    "yoga",
+    "karate",
+    "taekwondo",
+    "strength",
+    "airlock",
+    "hotworx"
+   ],
+   "groups": []
+  },
+  {
+   "id": "lawyer",
+   "label": "Lawyers",
+   "terms": [
+    "lawyer",
+    "lawyers",
+    "attorney",
+    "attorneys",
+    "law firm",
+    "legal",
+    "divorce",
+    "probate",
+    "dui"
+   ],
+   "categories": [
+    "Attorneys / Lawyers"
+   ],
+   "nameKeywords": [
+    "law",
+    "lawyer",
+    "attorney"
+   ],
+   "groups": []
+  },
+  {
+   "id": "mechanic",
+   "label": "Auto repair",
+   "terms": [
+    "mechanic",
+    "mechanics",
+    "auto repair",
+    "car repair",
+    "auto shop",
+    "brakes",
+    "transmission",
+    "engine",
+    "check engine",
+    "alignment",
+    "auto parts",
+    "car parts"
+   ],
+   "categories": [
+    "Auto Repairs / Service",
+    "Oil Change / Lube",
+    "Tires & Wheels"
+   ],
+   "nameKeywords": [
+    "auto repair",
+    "automotive",
+    "car care",
+    "meineke",
+    "auto parts",
+    "fleet",
+    "rv service"
+   ],
+   "groups": []
+  },
+  {
+   "id": "oilchange",
+   "label": "Oil change & tires",
+   "terms": [
+    "oil change",
+    "oil",
+    "lube",
+    "tires",
+    "tire",
+    "tire shop",
+    "flat tire",
+    "inspection",
+    "state inspection"
+   ],
+   "categories": [
+    "Oil Change / Lube",
+    "Tires & Wheels"
+   ],
+   "nameKeywords": [
+    "lube",
+    "oil",
+    "tire",
+    "meineke"
+   ],
+   "groups": []
+  },
+  {
+   "id": "carwash",
+   "label": "Car washes",
+   "terms": [
+    "car wash",
+    "carwash",
+    "detailing",
+    "detail"
+   ],
+   "categories": [
+    "Car Washes"
+   ],
+   "nameKeywords": [
+    "car wash",
+    "detailing",
+    "wash"
+   ],
+   "groups": []
+  },
+  {
+   "id": "towing",
+   "label": "Towing",
+   "terms": [
+    "tow",
+    "towing",
+    "tow truck",
+    "wrecker",
+    "roadside"
+   ],
+   "categories": [
+    "Towing Companies"
+   ],
+   "nameKeywords": [
+    "towing",
+    "wrecker"
+   ],
+   "groups": []
+  },
+  {
+   "id": "dealer",
+   "label": "Car dealers",
+   "terms": [
+    "car dealer",
+    "dealership",
+    "dealer",
+    "new cars",
+    "used cars",
+    "truck dealer",
+    "ford",
+    "chevy",
+    "chevrolet",
+    "toyota",
+    "dodge",
+    "jeep",
+    "ram",
+    "gmc",
+    "buick",
+    "golf cart",
+    "golf carts"
+   ],
+   "categories": [
+    "Automobile Dealerships",
+    "Toyota dealer",
+    "Recreational Equipment / Golf Cart Sales / Rentals"
+   ],
+   "nameKeywords": [
+    "chevrolet",
+    "ford",
+    "toyota",
+    "dodge",
+    "jeep",
+    "chrysler",
+    "gmc",
+    "buick",
+    "golf cart"
+   ],
+   "groups": []
+  },
+  {
+   "id": "bank",
+   "label": "Banks & credit unions",
+   "terms": [
+    "bank",
+    "banks",
+    "credit union",
+    "atm",
+    "checking",
+    "loan",
+    "loans"
+   ],
+   "categories": [
+    "Banks",
+    "Credit Unions",
+    "Loan Companies"
+   ],
+   "nameKeywords": [
+    "bank",
+    "credit union",
+    "federal credit"
+   ],
+   "groups": []
+  },
+  {
+   "id": "insurance",
+   "label": "Insurance",
+   "terms": [
+    "insurance",
+    "insurance agent",
+    "car insurance",
+    "home insurance",
+    "health insurance",
+    "allstate",
+    "state farm",
+    "farm bureau"
+   ],
+   "categories": [
+    "Insurance Services"
+   ],
+   "nameKeywords": [
+    "insurance",
+    "allstate",
+    "state farm",
+    "agency"
+   ],
+   "groups": []
+  },
+  {
+   "id": "tax",
+   "label": "Accountants & tax",
+   "terms": [
+    "tax",
+    "taxes",
+    "tax prep",
+    "tax preparation",
+    "accountant",
+    "accountants",
+    "cpa",
+    "bookkeeping",
+    "bookkeeper",
+    "payroll"
+   ],
+   "categories": [
+    "Accountants / Certified Public Accountants",
+    "Bookkeeping Services / Tax Services",
+    "Tax Preparation",
+    "Payroll Services"
+   ],
+   "nameKeywords": [
+    "cpa",
+    "accounting",
+    "tax",
+    "bookkeeping"
+   ],
+   "groups": []
+  },
+  {
+   "id": "financial",
+   "label": "Financial advisors",
+   "terms": [
+    "financial advisor",
+    "financial planner",
+    "investments",
+    "retirement",
+    "wealth"
+   ],
+   "categories": [
+    "Financial Services"
+   ],
+   "nameKeywords": [
+    "edward jones",
+    "wealth",
+    "financial"
+   ],
+   "groups": []
+  },
+  {
+   "id": "realtor",
+   "label": "Realtors",
+   "terms": [
+    "realtor",
+    "realtors",
+    "real estate",
+    "real estate agent",
+    "agent",
+    "homes for sale",
+    "buy a house",
+    "sell my house",
+    "broker"
+   ],
+   "categories": [
+    "Realtors",
+    "Real Estate Brokers"
+   ],
+   "nameKeywords": [
+    "realty",
+    "realtor",
+    "real estate",
+    "realtors"
+   ],
+   "groups": []
+  },
+  {
+   "id": "rentals",
+   "label": "Apartments & rentals",
+   "terms": [
+    "apartment",
+    "apartments",
+    "rent",
+    "rentals",
+    "for rent",
+    "property management",
+    "leasing"
+   ],
+   "categories": [
+    "Apartments",
+    "Property Management / Leasing",
+    "Commercial Rentals / Offices / Warehouses"
+   ],
+   "nameKeywords": [
+    "apartments",
+    "leasing",
+    "property management"
+   ],
+   "groups": []
+  },
+  {
+   "id": "mortgage",
+   "label": "Mortgages & title",
+   "terms": [
+    "mortgage",
+    "home loan",
+    "refinance",
+    "title company",
+    "closing"
+   ],
+   "categories": [
+    "Mortgage / Loan Companies",
+    "Title Companies"
+   ],
+   "nameKeywords": [
+    "mortgage",
+    "lending",
+    "title"
+   ],
+   "groups": []
+  },
+  {
+   "id": "hotel",
+   "label": "Places to stay",
+   "terms": [
+    "hotel",
+    "hotels",
+    "motel",
+    "motels",
+    "lodging",
+    "inn",
+    "resort",
+    "stay",
+    "place to stay",
+    "bed and breakfast",
+    "b&b",
+    "airbnb",
+    "cabin",
+    "cabins",
+    "vacation rental"
+   ],
+   "categories": [
+    "Hotels / Motels / Resorts",
+    "Vacation Rentals / Meeting Space"
+   ],
+   "nameKeywords": [
+    "hotel",
+    "inn",
+    "suites",
+    "resort",
+    "lodge",
+    "cabins",
+    "cottage"
+   ],
+   "groups": []
+  },
+  {
+   "id": "rv",
+   "label": "RV parks & camping",
+   "terms": [
+    "rv",
+    "rv park",
+    "rv parks",
+    "camping",
+    "campground",
+    "campgrounds"
+   ],
+   "categories": [
+    "RV Parks"
+   ],
+   "nameKeywords": [
+    "rv"
+   ],
+   "groups": []
+  },
+  {
+   "id": "fun",
+   "label": "Things to do",
+   "terms": [
+    "things to do",
+    "fun",
+    "family fun",
+    "kids activities",
+    "entertainment",
+    "activities",
+    "bowling",
+    "skating",
+    "zipline",
+    "zip line",
+    "golf",
+    "museum",
+    "museums",
+    "art gallery",
+    "tours",
+    "river",
+    "kayak",
+    "tubing"
+   ],
+   "categories": [
+    "Family Entertainment / Recreation",
+    "Golf Courses",
+    "Museums",
+    "Art Galleries",
+    "Tourism"
+   ],
+   "nameKeywords": [
+    "museum",
+    "golf",
+    "skate",
+    "zip",
+    "adventures",
+    "speedway",
+    "faire",
+    "bingo"
+   ],
+   "groups": []
+  },
+  {
+   "id": "venue",
+   "label": "Event venues & party rentals",
+   "terms": [
+    "venue",
+    "event venue",
+    "wedding venue",
+    "wedding",
+    "event space",
+    "meeting space",
+    "party rental",
+    "party rentals",
+    "bounce house",
+    "photo booth",
+    "tickets"
+   ],
+   "categories": [
+    "Event / Wedding Facility",
+    "Conference / Event Services / Meeting Facilities",
+    "Party Rentals / Supplies",
+    "Event Tickets",
+    "Vacation Rentals / Meeting Space"
+   ],
+   "nameKeywords": [
+    "venue",
+    "events",
+    "party",
+    "photo booth",
+    "ballroom"
+   ],
+   "groups": []
+  },
+  {
+   "id": "photographer",
+   "label": "Photographers",
+   "terms": [
+    "photographer",
+    "photographers",
+    "photography",
+    "photos",
+    "videographer"
+   ],
+   "categories": [
+    "Photographers",
+    "Marketing / Video Production"
+   ],
+   "nameKeywords": [
+    "photography",
+    "photo",
+    "productions"
+   ],
+   "groups": []
+  },
+  {
+   "id": "shopping",
+   "label": "Shops & boutiques",
+   "terms": [
+    "shop",
+    "shops",
+    "shopping",
+    "store",
+    "stores",
+    "boutique",
+    "boutiques",
+    "gifts",
+    "gift shop",
+    "antiques",
+    "antique",
+    "thrift",
+    "resale",
+    "clothing",
+    "clothes",
+    "boots",
+    "western wear",
+    "jewelry",
+    "furniture",
+    "books",
+    "bookstore"
+   ],
+   "categories": [
+    "Retail / Specialty shops / Antiques",
+    "Western Wear",
+    "Apparel / Screen Printing",
+    "Jewelry / Repair",
+    "Gold / Silver"
+   ],
+   "nameKeywords": [
+    "boutique",
+    "gifts",
+    "antiques",
+    "emporium",
+    "books",
+    "jewelry",
+    "furniture",
+    "outfitter",
+    "mercantile",
+    "boot"
+   ],
+   "groups": []
+  },
+  {
+   "id": "florist",
+   "label": "Florists & nurseries",
+   "terms": [
+    "florist",
+    "flowers",
+    "flower shop",
+    "nursery",
+    "plants",
+    "garden center"
+   ],
+   "categories": [
+    "Florist / Nurseries",
+    "Flower farm"
+   ],
+   "nameKeywords": [
+    "flower shop",
+    "flowers",
+    "flower farm",
+    "flower farms",
+    "florist",
+    "floral",
+    "nursery"
+   ],
+   "groups": []
+  },
+  {
+   "id": "guns",
+   "label": "Guns & ammo",
+   "terms": [
+    "gun",
+    "guns",
+    "gun store",
+    "firearms",
+    "ammo",
+    "ammunition",
+    "range",
+    "shooting"
+   ],
+   "categories": [
+    "Firearms / Optics / Ammo"
+   ],
+   "nameKeywords": [
+    "firearms",
+    "guns",
+    "crosshairs",
+    "ordnance"
+   ],
+   "groups": []
+  },
+  {
+   "id": "vape",
+   "label": "Vape & CBD",
+   "terms": [
+    "vape",
+    "vapes",
+    "smoke shop",
+    "cbd",
+    "kratom"
+   ],
+   "categories": [
+    "CBD Products"
+   ],
+   "nameKeywords": [
+    "vape",
+    "cbd",
+    "smoke"
+   ],
+   "groups": []
+  },
+  {
+   "id": "church",
+   "label": "Churches",
+   "terms": [
+    "church",
+    "churches",
+    "worship",
+    "mass",
+    "catholic",
+    "baptist",
+    "methodist",
+    "lutheran",
+    "episcopal",
+    "non denominational",
+    "nondenominational",
+    "bible church",
+    "chapel"
+   ],
+   "categories": [
+    "Churches / Support Groups"
+   ],
+   "nameKeywords": [
+    "church",
+    "chapel",
+    "fellowship",
+    "ministries",
+    "assembly",
+    "baptist",
+    "lutheran",
+    "methodist",
+    "episcopal",
+    "catholic",
+    "bible"
+   ],
+   "groups": []
+  },
+  {
+   "id": "daycare",
+   "label": "Daycare & preschool",
+   "terms": [
+    "daycare",
+    "day care",
+    "childcare",
+    "child care",
+    "preschool",
+    "pre-k",
+    "pre k",
+    "montessori",
+    "after school"
+   ],
+   "categories": [
+    "Day Cares",
+    "Education / Pre-Schools",
+    "Education / Private / Pre-Schools"
+   ],
+   "nameKeywords": [
+    "child development",
+    "learning",
+    "montessori",
+    "head start",
+    "preschool"
+   ],
+   "groups": []
+  },
+  {
+   "id": "school",
+   "label": "Schools",
+   "terms": [
+    "school",
+    "schools",
+    "isd",
+    "school district",
+    "charter school",
+    "private school",
+    "college",
+    "community college",
+    "tutoring",
+    "classes",
+    "art classes",
+    "certification"
+   ],
+   "categories": [
+    "Education / Public School Districts",
+    "Education / Charter-Schools",
+    "Education / Private / Pre-Schools",
+    "Education / Colleges",
+    "Education / Certifications",
+    "Art Education"
+   ],
+   "nameKeywords": [
+    "school",
+    "isd",
+    "academy",
+    "college",
+    "learning"
+   ],
+   "groups": []
+  },
+  {
+   "id": "library",
+   "label": "Libraries",
+   "terms": [
+    "library",
+    "libraries"
+   ],
+   "categories": [
+    "Libraries"
+   ],
+   "nameKeywords": [
+    "library"
+   ],
+   "groups": []
+  },
+  {
+   "id": "funeral",
+   "label": "Funeral homes",
+   "terms": [
+    "funeral",
+    "funeral home",
+    "cremation",
+    "mortuary",
+    "cemetery"
+   ],
+   "categories": [
+    "Funeral Homes"
+   ],
+   "nameKeywords": [
+    "funeral",
+    "memorial"
+   ],
+   "groups": []
+  },
+  {
+   "id": "government",
+   "label": "Government",
+   "terms": [
+    "city hall",
+    "county",
+    "government",
+    "courthouse",
+    "permits",
+    "utility",
+    "utilities",
+    "water bill",
+    "electric co-op",
+    "trash",
+    "garbage"
+   ],
+   "categories": [
+    "Government",
+    "Utilities",
+    "Waste / Management"
+   ],
+   "nameKeywords": [
+    "city of",
+    "county",
+    "co-op",
+    "utility"
+   ],
+   "groups": []
+  },
+  {
+   "id": "nonprofit",
+   "label": "Nonprofits & volunteering",
+   "terms": [
+    "nonprofit",
+    "non profit",
+    "nonprofits",
+    "charity",
+    "charities",
+    "volunteer",
+    "volunteering",
+    "food pantry",
+    "food bank",
+    "donate",
+    "civic",
+    "club",
+    "clubs"
+   ],
+   "categories": [
+    "Non-Profits",
+    "Civic Organizations"
+   ],
+   "nameKeywords": [
+    "foundation",
+    "society",
+    "rescue",
+    "club",
+    "pantry"
+   ],
+   "groups": []
+  },
+  {
+   "id": "veterans",
+   "label": "Veterans groups",
+   "terms": [
+    "veterans",
+    "veteran",
+    "vfw",
+    "american legion",
+    "legion",
+    "military"
+   ],
+   "categories": [],
+   "nameKeywords": [
+    "veterans",
+    "veteran",
+    "legion",
+    "vfw",
+    "leathernecks",
+    "troops"
+   ],
+   "groups": []
+  },
+  {
+   "id": "it",
+   "label": "Computer & IT",
+   "terms": [
+    "computer repair",
+    "computer",
+    "it",
+    "tech support",
+    "web design",
+    "website",
+    "internet",
+    "wifi",
+    "phone repair"
+   ],
+   "categories": [
+    "Computer Services / IT / Web Design",
+    "Internet Services"
+   ],
+   "nameKeywords": [
+    "it",
+    "tech",
+    "computer",
+    "wifi",
+    "web",
+    "code"
+   ],
+   "groups": []
+  },
+  {
+   "id": "marketing",
+   "label": "Marketing & printing",
+   "terms": [
+    "marketing",
+    "advertising",
+    "signs",
+    "sign",
+    "printing",
+    "screen printing",
+    "t-shirts",
+    "video production",
+    "social media"
+   ],
+   "categories": [
+    "Advertising / Marketing",
+    "Marketing / Video Production",
+    "Media / Advertising",
+    "Social Media Management",
+    "Printing Services / Promotional Items",
+    "Apparel / Screen Printing"
+   ],
+   "nameKeywords": [
+    "marketing",
+    "advertising",
+    "media",
+    "print"
+   ],
+   "groups": []
+  },
+  {
+   "id": "jobs",
+   "label": "Jobs & staffing",
+   "terms": [
+    "jobs",
+    "staffing",
+    "employment",
+    "temp agency",
+    "hiring"
+   ],
+   "categories": [
+    "Employment Services"
+   ],
+   "nameKeywords": [
+    "staffing",
+    "personnel",
+    "employment"
+   ],
+   "groups": []
+  },
+  {
+   "id": "transport",
+   "label": "Transportation",
+   "terms": [
+    "limo",
+    "charter bus",
+    "shuttle",
+    "taxi",
+    "ride",
+    "rides",
+    "airport shuttle"
+   ],
+   "categories": [
+    "Transportation Services / Charter Bus"
+   ],
+   "nameKeywords": [
+    "charter",
+    "rides",
+    "bus"
+   ],
+   "groups": []
+  }
+ ],
+ "termIndex": {
+  "tacos": [
+   "mexican"
+  ],
+  "taco": [
+   "mexican"
+  ],
+  "mexican": [
+   "mexican"
+  ],
+  "mexican food": [
+   "mexican"
+  ],
+  "tex mex": [
+   "mexican"
+  ],
+  "tex-mex": [
+   "mexican"
+  ],
+  "texmex": [
+   "mexican"
+  ],
+  "taqueria": [
+   "mexican"
+  ],
+  "burrito": [
+   "mexican"
+  ],
+  "burritos": [
+   "mexican"
+  ],
+  "enchiladas": [
+   "mexican"
+  ],
+  "fajitas": [
+   "mexican"
+  ],
+  "nachos": [
+   "mexican"
+  ],
+  "tamales": [
+   "mexican"
+  ],
+  "mariscos": [
+   "mexican"
+  ],
+  "bbq": [
+   "bbq"
+  ],
+  "barbecue": [
+   "bbq"
+  ],
+  "barbeque": [
+   "bbq"
+  ],
+  "bar-b-q": [
+   "bbq"
+  ],
+  "brisket": [
+   "bbq"
+  ],
+  "smokehouse": [
+   "bbq"
+  ],
+  "ribs": [
+   "bbq"
+  ],
+  "pizza": [
+   "pizza"
+  ],
+  "pizzeria": [
+   "pizza"
+  ],
+  "pizzas": [
+   "pizza"
+  ],
+  "italian": [
+   "italian"
+  ],
+  "pasta": [
+   "italian"
+  ],
+  "spaghetti": [
+   "italian"
+  ],
+  "burger": [
+   "burgers"
+  ],
+  "burgers": [
+   "burgers"
+  ],
+  "hamburger": [
+   "burgers"
+  ],
+  "fast food": [
+   "burgers"
+  ],
+  "drive thru": [
+   "burgers"
+  ],
+  "drive-thru": [
+   "burgers"
+  ],
+  "fries": [
+   "burgers"
+  ],
+  "chicken": [
+   "chicken"
+  ],
+  "wings": [
+   "chicken"
+  ],
+  "tenders": [
+   "chicken"
+  ],
+  "steak": [
+   "steak"
+  ],
+  "steakhouse": [
+   "steak"
+  ],
+  "steaks": [
+   "steak"
+  ],
+  "chophouse": [
+   "steak"
+  ],
+  "chop house": [
+   "steak"
+  ],
+  "chinese": [
+   "asian"
+  ],
+  "asian": [
+   "asian"
+  ],
+  "sushi": [
+   "asian"
+  ],
+  "thai": [
+   "asian"
+  ],
+  "indian": [
+   "asian"
+  ],
+  "curry": [
+   "asian"
+  ],
+  "pho": [
+   "asian"
+  ],
+  "hibachi": [
+   "asian"
+  ],
+  "seafood": [
+   "seafood"
+  ],
+  "fish": [
+   "seafood"
+  ],
+  "shrimp": [
+   "seafood"
+  ],
+  "crawfish": [
+   "seafood"
+  ],
+  "oysters": [
+   "seafood"
+  ],
+  "breakfast": [
+   "breakfast"
+  ],
+  "brunch": [
+   "breakfast"
+  ],
+  "pancakes": [
+   "breakfast"
+  ],
+  "diner": [
+   "breakfast"
+  ],
+  "kolaches": [
+   "breakfast"
+  ],
+  "kolache": [
+   "breakfast"
+  ],
+  "donuts": [
+   "breakfast"
+  ],
+  "doughnuts": [
+   "breakfast"
+  ],
+  "coffee": [
+   "coffee"
+  ],
+  "espresso": [
+   "coffee"
+  ],
+  "latte": [
+   "coffee"
+  ],
+  "cafe": [
+   "coffee"
+  ],
+  "café": [
+   "coffee"
+  ],
+  "coffee shop": [
+   "coffee"
+  ],
+  "tea": [
+   "coffee"
+  ],
+  "boba": [
+   "coffee"
+  ],
+  "bakery": [
+   "dessert"
+  ],
+  "bakeries": [
+   "dessert"
+  ],
+  "cake": [
+   "dessert"
+  ],
+  "cakes": [
+   "dessert"
+  ],
+  "cupcakes": [
+   "dessert"
+  ],
+  "cookies": [
+   "dessert"
+  ],
+  "dessert": [
+   "dessert"
+  ],
+  "desserts": [
+   "dessert"
+  ],
+  "sweets": [
+   "dessert"
+  ],
+  "ice cream": [
+   "dessert"
+  ],
+  "snow cone": [
+   "dessert"
+  ],
+  "snowcones": [
+   "dessert"
+  ],
+  "shaved ice": [
+   "dessert"
+  ],
+  "italian ice": [
+   "dessert"
+  ],
+  "bar": [
+   "drinks"
+  ],
+  "bars": [
+   "drinks"
+  ],
+  "beer": [
+   "drinks"
+  ],
+  "brewery": [
+   "drinks"
+  ],
+  "breweries": [
+   "drinks"
+  ],
+  "brewpub": [
+   "drinks"
+  ],
+  "wine": [
+   "drinks"
+  ],
+  "winery": [
+   "drinks"
+  ],
+  "vineyard": [
+   "drinks"
+  ],
+  "cocktails": [
+   "drinks"
+  ],
+  "drinks": [
+   "drinks"
+  ],
+  "happy hour": [
+   "drinks"
+  ],
+  "distillery": [
+   "drinks"
+  ],
+  "whiskey": [
+   "drinks"
+  ],
+  "liquor": [
+   "drinks"
+  ],
+  "liquor store": [
+   "drinks"
+  ],
+  "pub": [
+   "drinks"
+  ],
+  "restaurant": [
+   "restaurant"
+  ],
+  "restaurants": [
+   "restaurant"
+  ],
+  "dining": [
+   "restaurant"
+  ],
+  "dine": [
+   "restaurant"
+  ],
+  "dinner": [
+   "restaurant"
+  ],
+  "lunch": [
+   "restaurant"
+  ],
+  "sit down": [
+   "restaurant"
+  ],
+  "takeout": [
+   "restaurant"
+  ],
+  "take out": [
+   "restaurant"
+  ],
+  "food truck": [
+   "restaurant"
+  ],
+  "food trucks": [
+   "restaurant"
+  ],
+  "food": [
+   "food"
+  ],
+  "eat": [
+   "food"
+  ],
+  "eats": [
+   "food"
+  ],
+  "places to eat": [
+   "food"
+  ],
+  "where to eat": [
+   "food"
+  ],
+  "hungry": [
+   "food"
+  ],
+  "delivery": [
+   "food"
+  ],
+  "catering": [
+   "food"
+  ],
+  "caterer": [
+   "food"
+  ],
+  "grub": [
+   "food"
+  ],
+  "grocery": [
+   "grocery"
+  ],
+  "groceries": [
+   "grocery"
+  ],
+  "grocery store": [
+   "grocery"
+  ],
+  "supermarket": [
+   "grocery"
+  ],
+  "heb": [
+   "grocery"
+  ],
+  "h-e-b": [
+   "grocery"
+  ],
+  "h.e.b.": [
+   "grocery"
+  ],
+  "walmart": [
+   "grocery"
+  ],
+  "market": [
+   "grocery"
+  ],
+  "pharmacy": [
+   "pharmacy"
+  ],
+  "pharmacies": [
+   "pharmacy"
+  ],
+  "drugstore": [
+   "pharmacy"
+  ],
+  "drug store": [
+   "pharmacy"
+  ],
+  "prescriptions": [
+   "pharmacy"
+  ],
+  "rx": [
+   "pharmacy"
+  ],
+  "cvs": [
+   "pharmacy"
+  ],
+  "walgreens": [
+   "pharmacy"
+  ],
+  "gas": [
+   "gas"
+  ],
+  "gas station": [
+   "gas"
+  ],
+  "fuel": [
+   "gas"
+  ],
+  "diesel": [
+   "gas"
+  ],
+  "propane": [
+   "gas"
+  ],
+  "buc-ees": [
+   "gas"
+  ],
+  "buc-ee's": [
+   "gas"
+  ],
+  "hardware": [
+   "hardware"
+  ],
+  "hardware store": [
+   "hardware"
+  ],
+  "lumber": [
+   "hardware"
+  ],
+  "building supplies": [
+   "hardware"
+  ],
+  "feed store": [
+   "hardware"
+  ],
+  "feed": [
+   "hardware"
+  ],
+  "shipping": [
+   "shipping"
+  ],
+  "ups": [
+   "shipping"
+  ],
+  "fedex": [
+   "shipping"
+  ],
+  "post office": [
+   "shipping"
+  ],
+  "mail": [
+   "shipping"
+  ],
+  "notary": [
+   "shipping"
+  ],
+  "printing": [
+   "shipping",
+   "marketing"
+  ],
+  "copies": [
+   "shipping"
+  ],
+  "hvac": [
+   "hvac"
+  ],
+  "ac": [
+   "hvac"
+  ],
+  "a/c": [
+   "hvac"
+  ],
+  "a c": [
+   "hvac"
+  ],
+  "ac repair": [
+   "hvac"
+  ],
+  "air conditioning": [
+   "hvac"
+  ],
+  "air conditioner": [
+   "hvac"
+  ],
+  "ac service": [
+   "hvac"
+  ],
+  "heating": [
+   "hvac"
+  ],
+  "heater": [
+   "hvac"
+  ],
+  "furnace": [
+   "hvac"
+  ],
+  "heat pump": [
+   "hvac"
+  ],
+  "cooling": [
+   "hvac"
+  ],
+  "heating and air": [
+   "hvac"
+  ],
+  "plumber": [
+   "plumber"
+  ],
+  "plumbers": [
+   "plumber"
+  ],
+  "plumbing": [
+   "plumber"
+  ],
+  "leak": [
+   "plumber"
+  ],
+  "water heater": [
+   "plumber"
+  ],
+  "drain": [
+   "plumber"
+  ],
+  "clogged": [
+   "plumber"
+  ],
+  "sewer": [
+   "plumber"
+  ],
+  "septic": [
+   "plumber"
+  ],
+  "electrician": [
+   "electrician"
+  ],
+  "electricians": [
+   "electrician"
+  ],
+  "electrical": [
+   "electrician"
+  ],
+  "electric": [
+   "electrician"
+  ],
+  "wiring": [
+   "electrician"
+  ],
+  "generator": [
+   "electrician"
+  ],
+  "generators": [
+   "electrician"
+  ],
+  "roofer": [
+   "roofer"
+  ],
+  "roofers": [
+   "roofer"
+  ],
+  "roofing": [
+   "roofer"
+  ],
+  "roof": [
+   "roofer"
+  ],
+  "roof repair": [
+   "roofer"
+  ],
+  "solar": [
+   "roofer"
+  ],
+  "gutters": [
+   "roofer"
+  ],
+  "handyman": [
+   "handyman"
+  ],
+  "repairs": [
+   "handyman"
+  ],
+  "home repair": [
+   "handyman"
+  ],
+  "appliance repair": [
+   "handyman"
+  ],
+  "drywall": [
+   "handyman"
+  ],
+  "carpenter": [
+   "handyman"
+  ],
+  "fence": [
+   "handyman"
+  ],
+  "fencing": [
+   "handyman"
+  ],
+  "painter": [
+   "painter"
+  ],
+  "painters": [
+   "painter"
+  ],
+  "painting": [
+   "painter"
+  ],
+  "paint": [
+   "painter"
+  ],
+  "flooring": [
+   "flooring"
+  ],
+  "floors": [
+   "flooring"
+  ],
+  "tile": [
+   "flooring"
+  ],
+  "carpet": [
+   "flooring"
+  ],
+  "landscaping": [
+   "landscaping"
+  ],
+  "landscaper": [
+   "landscaping"
+  ],
+  "lawn": [
+   "landscaping"
+  ],
+  "lawn care": [
+   "landscaping"
+  ],
+  "lawn mowing": [
+   "landscaping"
+  ],
+  "mowing": [
+   "landscaping"
+  ],
+  "yard": [
+   "landscaping"
+  ],
+  "irrigation": [
+   "landscaping"
+  ],
+  "sprinkler": [
+   "landscaping"
+  ],
+  "tree service": [
+   "landscaping"
+  ],
+  "tree trimming": [
+   "landscaping"
+  ],
+  "tree removal": [
+   "landscaping"
+  ],
+  "stump": [
+   "landscaping"
+  ],
+  "stump grinding": [
+   "landscaping"
+  ],
+  "pest": [
+   "pest"
+  ],
+  "pest control": [
+   "pest"
+  ],
+  "exterminator": [
+   "pest"
+  ],
+  "bugs": [
+   "pest"
+  ],
+  "termite": [
+   "pest"
+  ],
+  "termites": [
+   "pest"
+  ],
+  "roaches": [
+   "pest"
+  ],
+  "ants": [
+   "pest"
+  ],
+  "rodents": [
+   "pest"
+  ],
+  "cleaning": [
+   "cleaning"
+  ],
+  "cleaners": [
+   "cleaning"
+  ],
+  "house cleaning": [
+   "cleaning"
+  ],
+  "maid": [
+   "cleaning"
+  ],
+  "maids": [
+   "cleaning"
+  ],
+  "janitorial": [
+   "cleaning"
+  ],
+  "pressure washing": [
+   "cleaning"
+  ],
+  "power washing": [
+   "cleaning"
+  ],
+  "window cleaning": [
+   "cleaning"
+  ],
+  "carpet cleaning": [
+   "cleaning"
+  ],
+  "water damage": [
+   "cleaning"
+  ],
+  "restoration": [
+   "cleaning"
+  ],
+  "dry cleaning": [
+   "cleaning"
+  ],
+  "pool": [
+   "pool"
+  ],
+  "pools": [
+   "pool"
+  ],
+  "pool service": [
+   "pool"
+  ],
+  "hot tub": [
+   "pool"
+  ],
+  "spa repair": [
+   "pool"
+  ],
+  "locksmith": [
+   "locksmith"
+  ],
+  "lockout": [
+   "locksmith"
+  ],
+  "locked out": [
+   "locksmith"
+  ],
+  "keys": [
+   "locksmith"
+  ],
+  "movers": [
+   "movers"
+  ],
+  "moving": [
+   "movers"
+  ],
+  "storage": [
+   "movers"
+  ],
+  "storage unit": [
+   "movers"
+  ],
+  "self storage": [
+   "movers"
+  ],
+  "sheds": [
+   "movers"
+  ],
+  "portable buildings": [
+   "movers"
+  ],
+  "contractor": [
+   "contractor"
+  ],
+  "contractors": [
+   "contractor"
+  ],
+  "builder": [
+   "contractor"
+  ],
+  "builders": [
+   "contractor"
+  ],
+  "home builder": [
+   "contractor"
+  ],
+  "remodel": [
+   "contractor"
+  ],
+  "remodeling": [
+   "contractor"
+  ],
+  "construction": [
+   "contractor"
+  ],
+  "excavation": [
+   "contractor"
+  ],
+  "dirt work": [
+   "contractor"
+  ],
+  "concrete": [
+   "contractor"
+  ],
+  "foundation": [
+   "contractor"
+  ],
+  "welding": [
+   "contractor"
+  ],
+  "haircut": [
+   "hair"
+  ],
+  "haircuts": [
+   "hair"
+  ],
+  "hair": [
+   "hair"
+  ],
+  "hair salon": [
+   "hair"
+  ],
+  "salon": [
+   "hair"
+  ],
+  "barber": [
+   "hair"
+  ],
+  "barbers": [
+   "hair"
+  ],
+  "barbershop": [
+   "hair"
+  ],
+  "barber shop": [
+   "hair"
+  ],
+  "stylist": [
+   "hair"
+  ],
+  "fade": [
+   "hair"
+  ],
+  "color": [
+   "hair"
+  ],
+  "nails": [
+   "nails"
+  ],
+  "nail salon": [
+   "nails"
+  ],
+  "manicure": [
+   "nails"
+  ],
+  "pedicure": [
+   "nails"
+  ],
+  "lashes": [
+   "nails"
+  ],
+  "brows": [
+   "nails"
+  ],
+  "waxing": [
+   "nails"
+  ],
+  "spa": [
+   "spa"
+  ],
+  "day spa": [
+   "spa"
+  ],
+  "massage": [
+   "spa"
+  ],
+  "facial": [
+   "spa"
+  ],
+  "tanning": [
+   "spa"
+  ],
+  "med spa": [
+   "spa"
+  ],
+  "botox": [
+   "spa"
+  ],
+  "tattoo": [
+   "spa"
+  ],
+  "tattoos": [
+   "spa"
+  ],
+  "beauty": [
+   "spa"
+  ],
+  "vet": [
+   "vet"
+  ],
+  "vets": [
+   "vet"
+  ],
+  "veterinarian": [
+   "vet"
+  ],
+  "veterinarians": [
+   "vet"
+  ],
+  "veterinary": [
+   "vet"
+  ],
+  "animal hospital": [
+   "vet"
+  ],
+  "animal clinic": [
+   "vet"
+  ],
+  "pet doctor": [
+   "vet"
+  ],
+  "pet": [
+   "pets"
+  ],
+  "pets": [
+   "pets"
+  ],
+  "dog": [
+   "pets"
+  ],
+  "dogs": [
+   "pets"
+  ],
+  "cat": [
+   "pets"
+  ],
+  "cats": [
+   "pets"
+  ],
+  "grooming": [
+   "pets"
+  ],
+  "groomer": [
+   "pets"
+  ],
+  "boarding": [
+   "pets"
+  ],
+  "kennel": [
+   "pets"
+  ],
+  "dog training": [
+   "pets"
+  ],
+  "pet sitting": [
+   "pets"
+  ],
+  "dentist": [
+   "dentist"
+  ],
+  "dentists": [
+   "dentist"
+  ],
+  "dental": [
+   "dentist"
+  ],
+  "teeth": [
+   "dentist"
+  ],
+  "orthodontist": [
+   "dentist"
+  ],
+  "braces": [
+   "dentist"
+  ],
+  "doctor": [
+   "doctor"
+  ],
+  "doctors": [
+   "doctor"
+  ],
+  "dr": [
+   "doctor"
+  ],
+  "physician": [
+   "doctor"
+  ],
+  "clinic": [
+   "doctor"
+  ],
+  "clinics": [
+   "doctor"
+  ],
+  "family doctor": [
+   "doctor"
+  ],
+  "primary care": [
+   "doctor"
+  ],
+  "pediatrician": [
+   "doctor"
+  ],
+  "medical": [
+   "doctor"
+  ],
+  "urgent care": [
+   "urgent"
+  ],
+  "er": [
+   "urgent"
+  ],
+  "emergency": [
+   "urgent"
+  ],
+  "emergency room": [
+   "urgent"
+  ],
+  "hospital": [
+   "urgent"
+  ],
+  "hospitals": [
+   "urgent"
+  ],
+  "ambulance": [
+   "urgent"
+  ],
+  "walk in clinic": [
+   "urgent"
+  ],
+  "eye doctor": [
+   "eye"
+  ],
+  "optometrist": [
+   "eye"
+  ],
+  "glasses": [
+   "eye"
+  ],
+  "contacts": [
+   "eye"
+  ],
+  "eyes": [
+   "eye"
+  ],
+  "vision": [
+   "eye"
+  ],
+  "hearing": [
+   "eye"
+  ],
+  "hearing aids": [
+   "eye"
+  ],
+  "chiropractor": [
+   "chiro"
+  ],
+  "chiropractic": [
+   "chiro"
+  ],
+  "back pain": [
+   "chiro"
+  ],
+  "physical therapy": [
+   "chiro"
+  ],
+  "pt": [
+   "chiro"
+  ],
+  "rehab": [
+   "chiro"
+  ],
+  "counseling": [
+   "counseling"
+  ],
+  "counselor": [
+   "counseling"
+  ],
+  "therapist": [
+   "counseling"
+  ],
+  "therapy": [
+   "counseling"
+  ],
+  "mental health": [
+   "counseling"
+  ],
+  "psychiatrist": [
+   "counseling"
+  ],
+  "psychologist": [
+   "counseling"
+  ],
+  "recovery": [
+   "counseling"
+  ],
+  "rehab center": [
+   "counseling"
+  ],
+  "senior living": [
+   "senior"
+  ],
+  "assisted living": [
+   "senior"
+  ],
+  "nursing home": [
+   "senior"
+  ],
+  "memory care": [
+   "senior"
+  ],
+  "home health": [
+   "senior"
+  ],
+  "home care": [
+   "senior"
+  ],
+  "hospice": [
+   "senior"
+  ],
+  "caregiver": [
+   "senior"
+  ],
+  "gym": [
+   "gym"
+  ],
+  "gyms": [
+   "gym"
+  ],
+  "fitness": [
+   "gym"
+  ],
+  "workout": [
+   "gym"
+  ],
+  "personal trainer": [
+   "gym"
+  ],
+  "crossfit": [
+   "gym"
+  ],
+  "yoga": [
+   "gym"
+  ],
+  "pilates": [
+   "gym"
+  ],
+  "martial arts": [
+   "gym"
+  ],
+  "karate": [
+   "gym"
+  ],
+  "jiu jitsu": [
+   "gym"
+  ],
+  "bjj": [
+   "gym"
+  ],
+  "dance": [
+   "gym"
+  ],
+  "gymnastics": [
+   "gym"
+  ],
+  "lawyer": [
+   "lawyer"
+  ],
+  "lawyers": [
+   "lawyer"
+  ],
+  "attorney": [
+   "lawyer"
+  ],
+  "attorneys": [
+   "lawyer"
+  ],
+  "law firm": [
+   "lawyer"
+  ],
+  "legal": [
+   "lawyer"
+  ],
+  "divorce": [
+   "lawyer"
+  ],
+  "probate": [
+   "lawyer"
+  ],
+  "dui": [
+   "lawyer"
+  ],
+  "mechanic": [
+   "mechanic"
+  ],
+  "mechanics": [
+   "mechanic"
+  ],
+  "auto repair": [
+   "mechanic"
+  ],
+  "car repair": [
+   "mechanic"
+  ],
+  "auto shop": [
+   "mechanic"
+  ],
+  "brakes": [
+   "mechanic"
+  ],
+  "transmission": [
+   "mechanic"
+  ],
+  "engine": [
+   "mechanic"
+  ],
+  "check engine": [
+   "mechanic"
+  ],
+  "alignment": [
+   "mechanic"
+  ],
+  "auto parts": [
+   "mechanic"
+  ],
+  "car parts": [
+   "mechanic"
+  ],
+  "oil change": [
+   "oilchange"
+  ],
+  "oil": [
+   "oilchange"
+  ],
+  "lube": [
+   "oilchange"
+  ],
+  "tires": [
+   "oilchange"
+  ],
+  "tire": [
+   "oilchange"
+  ],
+  "tire shop": [
+   "oilchange"
+  ],
+  "flat tire": [
+   "oilchange"
+  ],
+  "inspection": [
+   "oilchange"
+  ],
+  "state inspection": [
+   "oilchange"
+  ],
+  "car wash": [
+   "carwash"
+  ],
+  "carwash": [
+   "carwash"
+  ],
+  "detailing": [
+   "carwash"
+  ],
+  "detail": [
+   "carwash"
+  ],
+  "tow": [
+   "towing"
+  ],
+  "towing": [
+   "towing"
+  ],
+  "tow truck": [
+   "towing"
+  ],
+  "wrecker": [
+   "towing"
+  ],
+  "roadside": [
+   "towing"
+  ],
+  "car dealer": [
+   "dealer"
+  ],
+  "dealership": [
+   "dealer"
+  ],
+  "dealer": [
+   "dealer"
+  ],
+  "new cars": [
+   "dealer"
+  ],
+  "used cars": [
+   "dealer"
+  ],
+  "truck dealer": [
+   "dealer"
+  ],
+  "ford": [
+   "dealer"
+  ],
+  "chevy": [
+   "dealer"
+  ],
+  "chevrolet": [
+   "dealer"
+  ],
+  "toyota": [
+   "dealer"
+  ],
+  "dodge": [
+   "dealer"
+  ],
+  "jeep": [
+   "dealer"
+  ],
+  "ram": [
+   "dealer"
+  ],
+  "gmc": [
+   "dealer"
+  ],
+  "buick": [
+   "dealer"
+  ],
+  "golf cart": [
+   "dealer"
+  ],
+  "golf carts": [
+   "dealer"
+  ],
+  "bank": [
+   "bank"
+  ],
+  "banks": [
+   "bank"
+  ],
+  "credit union": [
+   "bank"
+  ],
+  "atm": [
+   "bank"
+  ],
+  "checking": [
+   "bank"
+  ],
+  "loan": [
+   "bank"
+  ],
+  "loans": [
+   "bank"
+  ],
+  "insurance": [
+   "insurance"
+  ],
+  "insurance agent": [
+   "insurance"
+  ],
+  "car insurance": [
+   "insurance"
+  ],
+  "home insurance": [
+   "insurance"
+  ],
+  "health insurance": [
+   "insurance"
+  ],
+  "allstate": [
+   "insurance"
+  ],
+  "state farm": [
+   "insurance"
+  ],
+  "farm bureau": [
+   "insurance"
+  ],
+  "tax": [
+   "tax"
+  ],
+  "taxes": [
+   "tax"
+  ],
+  "tax prep": [
+   "tax"
+  ],
+  "tax preparation": [
+   "tax"
+  ],
+  "accountant": [
+   "tax"
+  ],
+  "accountants": [
+   "tax"
+  ],
+  "cpa": [
+   "tax"
+  ],
+  "bookkeeping": [
+   "tax"
+  ],
+  "bookkeeper": [
+   "tax"
+  ],
+  "payroll": [
+   "tax"
+  ],
+  "financial advisor": [
+   "financial"
+  ],
+  "financial planner": [
+   "financial"
+  ],
+  "investments": [
+   "financial"
+  ],
+  "retirement": [
+   "financial"
+  ],
+  "wealth": [
+   "financial"
+  ],
+  "realtor": [
+   "realtor"
+  ],
+  "realtors": [
+   "realtor"
+  ],
+  "real estate": [
+   "realtor"
+  ],
+  "real estate agent": [
+   "realtor"
+  ],
+  "agent": [
+   "realtor"
+  ],
+  "homes for sale": [
+   "realtor"
+  ],
+  "buy a house": [
+   "realtor"
+  ],
+  "sell my house": [
+   "realtor"
+  ],
+  "broker": [
+   "realtor"
+  ],
+  "apartment": [
+   "rentals"
+  ],
+  "apartments": [
+   "rentals"
+  ],
+  "rent": [
+   "rentals"
+  ],
+  "rentals": [
+   "rentals"
+  ],
+  "for rent": [
+   "rentals"
+  ],
+  "property management": [
+   "rentals"
+  ],
+  "leasing": [
+   "rentals"
+  ],
+  "mortgage": [
+   "mortgage"
+  ],
+  "home loan": [
+   "mortgage"
+  ],
+  "refinance": [
+   "mortgage"
+  ],
+  "title company": [
+   "mortgage"
+  ],
+  "closing": [
+   "mortgage"
+  ],
+  "hotel": [
+   "hotel"
+  ],
+  "hotels": [
+   "hotel"
+  ],
+  "motel": [
+   "hotel"
+  ],
+  "motels": [
+   "hotel"
+  ],
+  "lodging": [
+   "hotel"
+  ],
+  "inn": [
+   "hotel"
+  ],
+  "resort": [
+   "hotel"
+  ],
+  "stay": [
+   "hotel"
+  ],
+  "place to stay": [
+   "hotel"
+  ],
+  "bed and breakfast": [
+   "hotel"
+  ],
+  "b&b": [
+   "hotel"
+  ],
+  "airbnb": [
+   "hotel"
+  ],
+  "cabin": [
+   "hotel"
+  ],
+  "cabins": [
+   "hotel"
+  ],
+  "vacation rental": [
+   "hotel"
+  ],
+  "rv": [
+   "rv"
+  ],
+  "rv park": [
+   "rv"
+  ],
+  "rv parks": [
+   "rv"
+  ],
+  "camping": [
+   "rv"
+  ],
+  "campground": [
+   "rv"
+  ],
+  "campgrounds": [
+   "rv"
+  ],
+  "things to do": [
+   "fun"
+  ],
+  "fun": [
+   "fun"
+  ],
+  "family fun": [
+   "fun"
+  ],
+  "kids activities": [
+   "fun"
+  ],
+  "entertainment": [
+   "fun"
+  ],
+  "activities": [
+   "fun"
+  ],
+  "bowling": [
+   "fun"
+  ],
+  "skating": [
+   "fun"
+  ],
+  "zipline": [
+   "fun"
+  ],
+  "zip line": [
+   "fun"
+  ],
+  "golf": [
+   "fun"
+  ],
+  "museum": [
+   "fun"
+  ],
+  "museums": [
+   "fun"
+  ],
+  "art gallery": [
+   "fun"
+  ],
+  "tours": [
+   "fun"
+  ],
+  "river": [
+   "fun"
+  ],
+  "kayak": [
+   "fun"
+  ],
+  "tubing": [
+   "fun"
+  ],
+  "venue": [
+   "venue"
+  ],
+  "event venue": [
+   "venue"
+  ],
+  "wedding venue": [
+   "venue"
+  ],
+  "wedding": [
+   "venue"
+  ],
+  "event space": [
+   "venue"
+  ],
+  "meeting space": [
+   "venue"
+  ],
+  "party rental": [
+   "venue"
+  ],
+  "party rentals": [
+   "venue"
+  ],
+  "bounce house": [
+   "venue"
+  ],
+  "photo booth": [
+   "venue"
+  ],
+  "tickets": [
+   "venue"
+  ],
+  "photographer": [
+   "photographer"
+  ],
+  "photographers": [
+   "photographer"
+  ],
+  "photography": [
+   "photographer"
+  ],
+  "photos": [
+   "photographer"
+  ],
+  "videographer": [
+   "photographer"
+  ],
+  "shop": [
+   "shopping"
+  ],
+  "shops": [
+   "shopping"
+  ],
+  "shopping": [
+   "shopping"
+  ],
+  "store": [
+   "shopping"
+  ],
+  "stores": [
+   "shopping"
+  ],
+  "boutique": [
+   "shopping"
+  ],
+  "boutiques": [
+   "shopping"
+  ],
+  "gifts": [
+   "shopping"
+  ],
+  "gift shop": [
+   "shopping"
+  ],
+  "antiques": [
+   "shopping"
+  ],
+  "antique": [
+   "shopping"
+  ],
+  "thrift": [
+   "shopping"
+  ],
+  "resale": [
+   "shopping"
+  ],
+  "clothing": [
+   "shopping"
+  ],
+  "clothes": [
+   "shopping"
+  ],
+  "boots": [
+   "shopping"
+  ],
+  "western wear": [
+   "shopping"
+  ],
+  "jewelry": [
+   "shopping"
+  ],
+  "furniture": [
+   "shopping"
+  ],
+  "books": [
+   "shopping"
+  ],
+  "bookstore": [
+   "shopping"
+  ],
+  "florist": [
+   "florist"
+  ],
+  "flowers": [
+   "florist"
+  ],
+  "flower shop": [
+   "florist"
+  ],
+  "nursery": [
+   "florist"
+  ],
+  "plants": [
+   "florist"
+  ],
+  "garden center": [
+   "florist"
+  ],
+  "gun": [
+   "guns"
+  ],
+  "guns": [
+   "guns"
+  ],
+  "gun store": [
+   "guns"
+  ],
+  "firearms": [
+   "guns"
+  ],
+  "ammo": [
+   "guns"
+  ],
+  "ammunition": [
+   "guns"
+  ],
+  "range": [
+   "guns"
+  ],
+  "shooting": [
+   "guns"
+  ],
+  "vape": [
+   "vape"
+  ],
+  "vapes": [
+   "vape"
+  ],
+  "smoke shop": [
+   "vape"
+  ],
+  "cbd": [
+   "vape"
+  ],
+  "kratom": [
+   "vape"
+  ],
+  "church": [
+   "church"
+  ],
+  "churches": [
+   "church"
+  ],
+  "worship": [
+   "church"
+  ],
+  "mass": [
+   "church"
+  ],
+  "catholic": [
+   "church"
+  ],
+  "baptist": [
+   "church"
+  ],
+  "methodist": [
+   "church"
+  ],
+  "lutheran": [
+   "church"
+  ],
+  "episcopal": [
+   "church"
+  ],
+  "non denominational": [
+   "church"
+  ],
+  "nondenominational": [
+   "church"
+  ],
+  "bible church": [
+   "church"
+  ],
+  "chapel": [
+   "church"
+  ],
+  "daycare": [
+   "daycare"
+  ],
+  "day care": [
+   "daycare"
+  ],
+  "childcare": [
+   "daycare"
+  ],
+  "child care": [
+   "daycare"
+  ],
+  "preschool": [
+   "daycare"
+  ],
+  "pre-k": [
+   "daycare"
+  ],
+  "pre k": [
+   "daycare"
+  ],
+  "montessori": [
+   "daycare"
+  ],
+  "after school": [
+   "daycare"
+  ],
+  "school": [
+   "school"
+  ],
+  "schools": [
+   "school"
+  ],
+  "isd": [
+   "school"
+  ],
+  "school district": [
+   "school"
+  ],
+  "charter school": [
+   "school"
+  ],
+  "private school": [
+   "school"
+  ],
+  "college": [
+   "school"
+  ],
+  "community college": [
+   "school"
+  ],
+  "tutoring": [
+   "school"
+  ],
+  "classes": [
+   "school"
+  ],
+  "art classes": [
+   "school"
+  ],
+  "certification": [
+   "school"
+  ],
+  "library": [
+   "library"
+  ],
+  "libraries": [
+   "library"
+  ],
+  "funeral": [
+   "funeral"
+  ],
+  "funeral home": [
+   "funeral"
+  ],
+  "cremation": [
+   "funeral"
+  ],
+  "mortuary": [
+   "funeral"
+  ],
+  "cemetery": [
+   "funeral"
+  ],
+  "city hall": [
+   "government"
+  ],
+  "county": [
+   "government"
+  ],
+  "government": [
+   "government"
+  ],
+  "courthouse": [
+   "government"
+  ],
+  "permits": [
+   "government"
+  ],
+  "utility": [
+   "government"
+  ],
+  "utilities": [
+   "government"
+  ],
+  "water bill": [
+   "government"
+  ],
+  "electric co-op": [
+   "government"
+  ],
+  "trash": [
+   "government"
+  ],
+  "garbage": [
+   "government"
+  ],
+  "nonprofit": [
+   "nonprofit"
+  ],
+  "non profit": [
+   "nonprofit"
+  ],
+  "nonprofits": [
+   "nonprofit"
+  ],
+  "charity": [
+   "nonprofit"
+  ],
+  "charities": [
+   "nonprofit"
+  ],
+  "volunteer": [
+   "nonprofit"
+  ],
+  "volunteering": [
+   "nonprofit"
+  ],
+  "food pantry": [
+   "nonprofit"
+  ],
+  "food bank": [
+   "nonprofit"
+  ],
+  "donate": [
+   "nonprofit"
+  ],
+  "civic": [
+   "nonprofit"
+  ],
+  "club": [
+   "nonprofit"
+  ],
+  "clubs": [
+   "nonprofit"
+  ],
+  "veterans": [
+   "veterans"
+  ],
+  "veteran": [
+   "veterans"
+  ],
+  "vfw": [
+   "veterans"
+  ],
+  "american legion": [
+   "veterans"
+  ],
+  "legion": [
+   "veterans"
+  ],
+  "military": [
+   "veterans"
+  ],
+  "computer repair": [
+   "it"
+  ],
+  "computer": [
+   "it"
+  ],
+  "it": [
+   "it"
+  ],
+  "tech support": [
+   "it"
+  ],
+  "web design": [
+   "it"
+  ],
+  "website": [
+   "it"
+  ],
+  "internet": [
+   "it"
+  ],
+  "wifi": [
+   "it"
+  ],
+  "phone repair": [
+   "it"
+  ],
+  "marketing": [
+   "marketing"
+  ],
+  "advertising": [
+   "marketing"
+  ],
+  "signs": [
+   "marketing"
+  ],
+  "sign": [
+   "marketing"
+  ],
+  "screen printing": [
+   "marketing"
+  ],
+  "t-shirts": [
+   "marketing"
+  ],
+  "video production": [
+   "marketing"
+  ],
+  "social media": [
+   "marketing"
+  ],
+  "jobs": [
+   "jobs"
+  ],
+  "staffing": [
+   "jobs"
+  ],
+  "employment": [
+   "jobs"
+  ],
+  "temp agency": [
+   "jobs"
+  ],
+  "hiring": [
+   "jobs"
+  ],
+  "limo": [
+   "transport"
+  ],
+  "charter bus": [
+   "transport"
+  ],
+  "shuttle": [
+   "transport"
+  ],
+  "taxi": [
+   "transport"
+  ],
+  "ride": [
+   "transport"
+  ],
+  "rides": [
+   "transport"
+  ],
+  "airport shuttle": [
+   "transport"
+  ]
+ }
+}

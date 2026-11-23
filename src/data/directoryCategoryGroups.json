@@ -1,0 +1,1463 @@
+{
+ "version": 1,
+ "generated": "2026-11-22",
+ "source": "rawGroups in src/data/directoryCategories.ts (origin/main 757ab92) + every category label on the live /directory index (960 rows)",
+ "howToUse": "Look up normalizeCategoryLabel(row.category) in `labels`. Unknown labels fall back to 'business' (and should be added here). Grid shows groups with grid:true in `order`; 'business' is reachable from the filter sheet and search only. `icon` is an existing key in src/data/categoryIcons.ts; `emoji` is only for mockups.",
+ "groups": [
+  {
+   "id": "food-drink",
+   "label": "Food & Drink",
+   "short": "Food & Drink",
+   "icon": "food",
+   "emoji": "🍽️",
+   "grid": true,
+   "order": 1,
+   "liveCount": 81
+  },
+  {
+   "id": "home-repair",
+   "label": "Home Repair & Services",
+   "short": "Home Repair",
+   "icon": "home",
+   "emoji": "🔧",
+   "grid": true,
+   "order": 2,
+   "liveCount": 79
+  },
+  {
+   "id": "builders",
+   "label": "Builders & Contractors",
+   "short": "Builders",
+   "icon": "build",
+   "emoji": "🏗️",
+   "grid": true,
+   "order": 3,
+   "liveCount": 76
+  },
+  {
+   "id": "health",
+   "label": "Health & Medical",
+   "short": "Health",
+   "icon": "health",
+   "emoji": "🩺",
+   "grid": true,
+   "order": 4,
+   "liveCount": 95
+  },
+  {
+   "id": "beauty-fitness",
+   "label": "Beauty & Fitness",
+   "short": "Beauty & Fitness",
+   "icon": "beauty",
+   "emoji": "💇",
+   "grid": true,
+   "order": 5,
+   "liveCount": 31
+  },
+  {
+   "id": "auto",
+   "label": "Auto",
+   "short": "Auto",
+   "icon": "auto",
+   "emoji": "🚗",
+   "grid": true,
+   "order": 6,
+   "liveCount": 22
+  },
+  {
+   "id": "shopping",
+   "label": "Shopping",
+   "short": "Shopping",
+   "icon": "store",
+   "emoji": "🛍️",
+   "grid": true,
+   "order": 7,
+   "liveCount": 67
+  },
+  {
+   "id": "money-legal",
+   "label": "Money, Legal & Insurance",
+   "short": "Money & Legal",
+   "icon": "law",
+   "emoji": "⚖️",
+   "grid": true,
+   "order": 8,
+   "liveCount": 66
+  },
+  {
+   "id": "real-estate",
+   "label": "Real Estate & Housing",
+   "short": "Real Estate",
+   "icon": "realty",
+   "emoji": "🏠",
+   "grid": true,
+   "order": 9,
+   "liveCount": 67
+  },
+  {
+   "id": "stay",
+   "label": "Places to Stay",
+   "short": "Places to Stay",
+   "icon": "hotel",
+   "emoji": "🛏️",
+   "grid": true,
+   "order": 10,
+   "liveCount": 29
+  },
+  {
+   "id": "things-to-do",
+   "label": "Things to Do",
+   "short": "Things to Do",
+   "icon": "play",
+   "emoji": "🌲",
+   "grid": true,
+   "order": 11,
+   "liveCount": 38
+  },
+  {
+   "id": "community",
+   "label": "Churches, Schools & Community",
+   "short": "Community",
+   "icon": "church",
+   "emoji": "⛪",
+   "grid": true,
+   "order": 12,
+   "liveCount": 157
+  },
+  {
+   "id": "business",
+   "label": "Business & Industry",
+   "short": "Business",
+   "icon": "work",
+   "emoji": "💼",
+   "grid": false,
+   "order": 13,
+   "liveCount": 152
+  }
+ ],
+ "labels": {
+  "accountants / certified public accountants": {
+   "display": "Accountants / Certified Public Accountants",
+   "group": "money-legal",
+   "subgroup": "Accounting & tax",
+   "liveCount": 11,
+   "currentGroup": "Professional Services"
+  },
+  "advertising / marketing": {
+   "display": "Advertising / Marketing",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 8,
+   "currentGroup": "Professional Services"
+  },
+  "agriculture": {
+   "display": "Agriculture",
+   "group": "shopping",
+   "subgroup": "Garden & farm",
+   "liveCount": 9,
+   "currentGroup": "Agriculture"
+  },
+  "air conditioning / heating": {
+   "display": "Air Conditioning / Heating",
+   "group": "home-repair",
+   "subgroup": "Heating & AC",
+   "liveCount": 7,
+   "currentGroup": "Home Services"
+  },
+  "alterations": {
+   "display": "Alterations",
+   "group": "beauty-fitness",
+   "subgroup": "Alterations",
+   "liveCount": 1,
+   "currentGroup": "Beauty & Personal Care"
+  },
+  "ambulance service": {
+   "display": "Ambulance Service",
+   "group": "health",
+   "subgroup": "Urgent care & hospitals",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "apartments": {
+   "display": "Apartments",
+   "group": "real-estate",
+   "subgroup": "Apartments & rentals",
+   "liveCount": 6,
+   "currentGroup": "Real Estate"
+  },
+  "apparel / screen printing": {
+   "display": "Apparel / Screen Printing",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 4,
+   "currentGroup": "Shops & Retail"
+  },
+  "appliance repairs": {
+   "display": "appliance repairs",
+   "group": "home-repair",
+   "subgroup": "Heating & AC",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "architectural firms / design": {
+   "display": "Architectural Firms / Design",
+   "group": "builders",
+   "subgroup": "Engineers, architects & surveyors",
+   "liveCount": 2,
+   "currentGroup": "Construction & Trades"
+  },
+  "art education": {
+   "display": "Art Education",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 2,
+   "currentGroup": "Education & Childcare"
+  },
+  "art galleries": {
+   "display": "Art Galleries",
+   "group": "things-to-do",
+   "subgroup": "Museums & galleries",
+   "liveCount": 3,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "attorneys / lawyers": {
+   "display": "Attorneys / Lawyers",
+   "group": "money-legal",
+   "subgroup": "Lawyers",
+   "liveCount": 11,
+   "currentGroup": "Professional Services"
+  },
+  "auto": {
+   "display": "Auto",
+   "group": "auto",
+   "subgroup": "Dealers",
+   "liveCount": 1,
+   "currentGroup": "Auto"
+  },
+  "auto repairs / service": {
+   "display": "Auto Repairs / Service",
+   "group": "auto",
+   "subgroup": "Repair & service",
+   "liveCount": 5,
+   "currentGroup": "Auto"
+  },
+  "automobile dealerships": {
+   "display": "Automobile Dealerships",
+   "group": "auto",
+   "subgroup": "Dealers",
+   "liveCount": 4,
+   "currentGroup": "Auto"
+  },
+  "bakeries / baked goods": {
+   "display": "Bakeries / Baked Goods",
+   "group": "food-drink",
+   "subgroup": "Coffee & sweets",
+   "liveCount": 4,
+   "currentGroup": "Food & Drink"
+  },
+  "banks": {
+   "display": "Banks",
+   "group": "money-legal",
+   "subgroup": "Banks & credit unions",
+   "liveCount": 12,
+   "currentGroup": "Professional Services"
+  },
+  "beauty & personal care": {
+   "display": "Beauty & Personal Care",
+   "group": "beauty-fitness",
+   "subgroup": "Spas & med spas",
+   "liveCount": 1,
+   "currentGroup": "Beauty & Personal Care"
+  },
+  "bookkeeping services / tax services": {
+   "display": "Bookkeeping Services / Tax Services",
+   "group": "money-legal",
+   "subgroup": "Accounting & tax",
+   "liveCount": 2,
+   "currentGroup": "Professional Services"
+  },
+  "brewery and restaurant": {
+   "display": "Brewery and restaurant",
+   "group": "food-drink",
+   "subgroup": "Restaurants",
+   "liveCount": 1,
+   "currentGroup": "Food & Drink"
+  },
+  "building supplies / sales / installation": {
+   "display": "Building Supplies / Sales / Installation",
+   "group": "builders",
+   "subgroup": "Building supplies",
+   "liveCount": 4,
+   "currentGroup": "Construction & Trades"
+  },
+  "business services / assistance / consulting": {
+   "display": "Business Services / Assistance / Consulting",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 11,
+   "currentGroup": "Professional Services"
+  },
+  "cancer oncology / services / research": {
+   "display": "Cancer Oncology / Services / Research",
+   "group": "health",
+   "subgroup": "Doctors & clinics",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "car washes": {
+   "display": "Car Washes",
+   "group": "auto",
+   "subgroup": "Car washes",
+   "liveCount": 4,
+   "currentGroup": "Auto"
+  },
+  "catering": {
+   "display": "Catering",
+   "group": "food-drink",
+   "subgroup": "Catering",
+   "liveCount": 6,
+   "currentGroup": "Food & Drink"
+  },
+  "cbd products": {
+   "display": "CBD Products",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 2,
+   "currentGroup": "Shops & Retail"
+  },
+  "chamber member": {
+   "display": "Chamber member",
+   "group": "community",
+   "subgroup": "Nonprofits & civic groups",
+   "liveCount": 3,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "chamber of commerce": {
+   "display": "Chamber of Commerce",
+   "group": "community",
+   "subgroup": "Government & chambers",
+   "liveCount": 3,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "chiropractors": {
+   "display": "Chiropractors",
+   "group": "health",
+   "subgroup": "Chiropractic & therapy",
+   "liveCount": 7,
+   "currentGroup": "Health & Wellness"
+  },
+  "churches / support groups": {
+   "display": "Churches / Support Groups",
+   "group": "community",
+   "subgroup": "Churches",
+   "liveCount": 29,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "cigar lounges": {
+   "display": "Cigar Lounges",
+   "group": "food-drink",
+   "subgroup": "Bars, breweries & wine",
+   "liveCount": 1,
+   "currentGroup": "Food & Drink"
+  },
+  "civic organizations": {
+   "display": "Civic Organizations",
+   "group": "community",
+   "subgroup": "Nonprofits & civic groups",
+   "liveCount": 28,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "cleaning services / restoration services": {
+   "display": "Cleaning Services / Restoration Services",
+   "group": "home-repair",
+   "subgroup": "Cleaning",
+   "liveCount": 5,
+   "currentGroup": "Home Services"
+  },
+  "coffee / beverage shops": {
+   "display": "Coffee / Beverage Shops",
+   "group": "food-drink",
+   "subgroup": "Coffee & sweets",
+   "liveCount": 5,
+   "currentGroup": "Food & Drink"
+  },
+  "commercial rentals / offices / warehouses": {
+   "display": "Commercial Rentals / Offices / Warehouses",
+   "group": "real-estate",
+   "subgroup": "Apartments & rentals",
+   "liveCount": 1,
+   "currentGroup": "Real Estate"
+  },
+  "computer services / it / web design": {
+   "display": "Computer Services / IT / Web Design",
+   "group": "business",
+   "subgroup": "IT & internet",
+   "liveCount": 11,
+   "currentGroup": "Professional Services"
+  },
+  "concrete construction / products": {
+   "display": "Concrete Construction / Products",
+   "group": "builders",
+   "subgroup": "Contractors",
+   "liveCount": 2,
+   "currentGroup": "Construction & Trades"
+  },
+  "conference / event services / meeting facilities": {
+   "display": "Conference / Event Services / Meeting Facilities",
+   "group": "things-to-do",
+   "subgroup": "Event venues & rentals",
+   "liveCount": 2,
+   "currentGroup": "Lodging"
+  },
+  "construction / contractors": {
+   "display": "Construction / Contractors",
+   "group": "builders",
+   "subgroup": "Contractors",
+   "liveCount": 15,
+   "currentGroup": "Construction & Trades"
+  },
+  "construction management": {
+   "display": "Construction Management",
+   "group": "builders",
+   "subgroup": "Contractors",
+   "liveCount": 4,
+   "currentGroup": "Construction & Trades"
+  },
+  "counseling services": {
+   "display": "Counseling Services",
+   "group": "health",
+   "subgroup": "Mental health",
+   "liveCount": 3,
+   "currentGroup": "Health & Wellness"
+  },
+  "credit unions": {
+   "display": "Credit Unions",
+   "group": "money-legal",
+   "subgroup": "Banks & credit unions",
+   "liveCount": 4,
+   "currentGroup": "Professional Services"
+  },
+  "custom home builder": {
+   "display": "Custom home builder",
+   "group": "builders",
+   "subgroup": "Home builders & remodeling",
+   "liveCount": 1,
+   "currentGroup": "Construction & Trades"
+  },
+  "data centers": {
+   "display": "Data Centers",
+   "group": "business",
+   "subgroup": "IT & internet",
+   "liveCount": 1,
+   "currentGroup": "Industrial & Utilities"
+  },
+  "day cares": {
+   "display": "Day Cares",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 2,
+   "currentGroup": "Education & Childcare"
+  },
+  "dental care": {
+   "display": "Dental Care",
+   "group": "health",
+   "subgroup": "Dentists",
+   "liveCount": 13,
+   "currentGroup": "Health & Wellness"
+  },
+  "dermatology": {
+   "display": "Dermatology",
+   "group": "health",
+   "subgroup": "Doctors & clinics",
+   "liveCount": 1,
+   "currentGroup": "Health & Wellness"
+  },
+  "dirt work / excavation / demolition": {
+   "display": "Dirt Work / Excavation / Demolition",
+   "group": "builders",
+   "subgroup": "Contractors",
+   "liveCount": 4,
+   "currentGroup": "Construction & Trades"
+  },
+  "distilleries": {
+   "display": "Distilleries",
+   "group": "food-drink",
+   "subgroup": "Bars, breweries & wine",
+   "liveCount": 1,
+   "currentGroup": "Food & Drink"
+  },
+  "drone service": {
+   "display": "Drone Service",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 1,
+   "currentGroup": "Professional Services"
+  },
+  "economic development": {
+   "display": "Economic Development",
+   "group": "community",
+   "subgroup": "Government & chambers",
+   "liveCount": 2,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "education / certifications": {
+   "display": "Education / Certifications",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 2,
+   "currentGroup": "Education & Childcare"
+  },
+  "education / charter-schools": {
+   "display": "Education / Charter-Schools",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 1,
+   "currentGroup": "Education & Childcare"
+  },
+  "education / colleges": {
+   "display": "Education / Colleges",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 3,
+   "currentGroup": "Education & Childcare"
+  },
+  "education / pre-schools": {
+   "display": "Education / Pre-Schools",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 1,
+   "currentGroup": "Education & Childcare"
+  },
+  "education / private / pre-schools": {
+   "display": "Education / Private / Pre-Schools",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 3,
+   "currentGroup": "Education & Childcare"
+  },
+  "education / public school districts": {
+   "display": "Education / Public School Districts",
+   "group": "community",
+   "subgroup": "Schools & childcare",
+   "liveCount": 5,
+   "currentGroup": "Education & Childcare"
+  },
+  "electrical": {
+   "display": "electrical",
+   "group": "home-repair",
+   "subgroup": "Electricians",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "electrical contractors / electrician": {
+   "display": "Electrical Contractors / Electrician",
+   "group": "home-repair",
+   "subgroup": "Electricians",
+   "liveCount": 8,
+   "currentGroup": "Home Services"
+  },
+  "emergency centers": {
+   "display": "Emergency Centers",
+   "group": "health",
+   "subgroup": "Urgent care & hospitals",
+   "liveCount": 3,
+   "currentGroup": "Health & Wellness"
+  },
+  "employment services": {
+   "display": "Employment Services",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 4,
+   "currentGroup": "Professional Services"
+  },
+  "engineering": {
+   "display": "Engineering",
+   "group": "builders",
+   "subgroup": "Engineers, architects & surveyors",
+   "liveCount": 5,
+   "currentGroup": "Construction & Trades"
+  },
+  "event / wedding facility": {
+   "display": "Event / Wedding Facility",
+   "group": "things-to-do",
+   "subgroup": "Event venues & rentals",
+   "liveCount": 2,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "event tickets": {
+   "display": "Event Tickets",
+   "group": "things-to-do",
+   "subgroup": "Family fun & recreation",
+   "liveCount": 1,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "family entertainment / recreation": {
+   "display": "Family Entertainment / Recreation",
+   "group": "things-to-do",
+   "subgroup": "Family fun & recreation",
+   "liveCount": 21,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "farm equipment / supplies": {
+   "display": "Farm Equipment / Supplies",
+   "group": "shopping",
+   "subgroup": "Garden & farm",
+   "liveCount": 5,
+   "currentGroup": "Agriculture"
+  },
+  "farmer's market / produce": {
+   "display": "Farmer's Market / Produce",
+   "group": "shopping",
+   "subgroup": "Garden & farm",
+   "liveCount": 3,
+   "currentGroup": "Agriculture"
+  },
+  "fencing companies": {
+   "display": "fencing companies",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "financial services": {
+   "display": "Financial Services",
+   "group": "money-legal",
+   "subgroup": "Financial advisors & loans",
+   "liveCount": 7,
+   "currentGroup": "Professional Services"
+  },
+  "firearms / optics / ammo": {
+   "display": "Firearms / Optics / Ammo",
+   "group": "shopping",
+   "subgroup": "Guns & outdoor",
+   "liveCount": 2,
+   "currentGroup": "Shops & Retail"
+  },
+  "fitness / training centers": {
+   "display": "Fitness / Training Centers",
+   "group": "beauty-fitness",
+   "subgroup": "Gyms & fitness",
+   "liveCount": 13,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "floor coverings / tile": {
+   "display": "Floor Coverings / Tile",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 3,
+   "currentGroup": "Home Services"
+  },
+  "florist / nurseries": {
+   "display": "Florist / Nurseries",
+   "group": "shopping",
+   "subgroup": "Garden & farm",
+   "liveCount": 6,
+   "currentGroup": "Shops & Retail"
+  },
+  "flower farm": {
+   "display": "Flower farm",
+   "group": "shopping",
+   "subgroup": "Garden & farm",
+   "liveCount": 1,
+   "currentGroup": "Agriculture"
+  },
+  "food service / support services": {
+   "display": "Food Service / Support Services",
+   "group": "food-drink",
+   "subgroup": "Catering",
+   "liveCount": 3,
+   "currentGroup": "Food & Drink"
+  },
+  "food trucks": {
+   "display": "Food Trucks",
+   "group": "food-drink",
+   "subgroup": "Restaurants",
+   "liveCount": 4,
+   "currentGroup": "Food & Drink"
+  },
+  "friends of the chamber": {
+   "display": "friends of the chamber",
+   "group": "community",
+   "subgroup": "Nonprofits & civic groups",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "funeral homes": {
+   "display": "Funeral Homes",
+   "group": "community",
+   "subgroup": "Funeral homes",
+   "liveCount": 3,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "glass repair / service": {
+   "display": "Glass Repair / Service",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "gold / silver": {
+   "display": "gold / silver",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "golf courses": {
+   "display": "Golf Courses",
+   "group": "things-to-do",
+   "subgroup": "Family fun & recreation",
+   "liveCount": 2,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "government": {
+   "display": "Government",
+   "group": "community",
+   "subgroup": "Government & chambers",
+   "liveCount": 17,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "gymnastics / dance centers": {
+   "display": "Gymnastics / Dance Centers",
+   "group": "beauty-fitness",
+   "subgroup": "Gyms & fitness",
+   "liveCount": 2,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "hair salons / barber shops": {
+   "display": "Hair Salons / Barber Shops",
+   "group": "beauty-fitness",
+   "subgroup": "Hair & barbers",
+   "liveCount": 10,
+   "currentGroup": "Beauty & Personal Care"
+  },
+  "handyman services": {
+   "display": "Handyman Services",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 2,
+   "currentGroup": "Home Services"
+  },
+  "health / wellness": {
+   "display": "Health / Wellness",
+   "group": "health",
+   "subgroup": "Wellness",
+   "liveCount": 15,
+   "currentGroup": "Health & Wellness"
+  },
+  "health care clinics": {
+   "display": "Health Care Clinics",
+   "group": "health",
+   "subgroup": "Doctors & clinics",
+   "liveCount": 13,
+   "currentGroup": "Health & Wellness"
+  },
+  "hearing aids / hearing care": {
+   "display": "Hearing Aids / Hearing Care",
+   "group": "health",
+   "subgroup": "Eye & hearing",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "heating and air": {
+   "display": "Heating and air",
+   "group": "home-repair",
+   "subgroup": "Heating & AC",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "home building / remodeling / design": {
+   "display": "Home Building / Remodeling / Design",
+   "group": "builders",
+   "subgroup": "Home builders & remodeling",
+   "liveCount": 19,
+   "currentGroup": "Construction & Trades"
+  },
+  "home health care providers": {
+   "display": "Home Health Care Providers",
+   "group": "health",
+   "subgroup": "Senior & home care",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "homeowner / property owner assn.": {
+   "display": "Homeowner / Property Owner Assn.",
+   "group": "real-estate",
+   "subgroup": "Developers & HOAs",
+   "liveCount": 2,
+   "currentGroup": "Real Estate"
+  },
+  "hospice services": {
+   "display": "Hospice Services",
+   "group": "health",
+   "subgroup": "Senior & home care",
+   "liveCount": 3,
+   "currentGroup": "Health & Wellness"
+  },
+  "hospitals": {
+   "display": "Hospitals",
+   "group": "health",
+   "subgroup": "Urgent care & hospitals",
+   "liveCount": 1,
+   "currentGroup": "Health & Wellness"
+  },
+  "hotels / motels / resorts": {
+   "display": "Hotels / Motels / Resorts",
+   "group": "stay",
+   "subgroup": "Hotels",
+   "liveCount": 16,
+   "currentGroup": "Lodging"
+  },
+  "insurance services": {
+   "display": "Insurance Services",
+   "group": "money-legal",
+   "subgroup": "Insurance",
+   "liveCount": 15,
+   "currentGroup": "Professional Services"
+  },
+  "interior design / staging": {
+   "display": "Interior Design / Staging",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 2,
+   "currentGroup": "Home Services"
+  },
+  "internet services": {
+   "display": "Internet Services",
+   "group": "business",
+   "subgroup": "IT & internet",
+   "liveCount": 1,
+   "currentGroup": "Professional Services"
+  },
+  "jewelry / repair": {
+   "display": "Jewelry / Repair",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 1,
+   "currentGroup": "Shops & Retail"
+  },
+  "landscape / irrigation / sprinkler systems": {
+   "display": "Landscape / Irrigation / Sprinkler Systems",
+   "group": "home-repair",
+   "subgroup": "Lawn, landscaping & trees",
+   "liveCount": 11,
+   "currentGroup": "Home Services"
+  },
+  "landscaping": {
+   "display": "Landscaping",
+   "group": "home-repair",
+   "subgroup": "Lawn, landscaping & trees",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "libraries": {
+   "display": "Libraries",
+   "group": "community",
+   "subgroup": "Libraries",
+   "liveCount": 3,
+   "currentGroup": "Education & Childcare"
+  },
+  "liquor stores / distributors": {
+   "display": "Liquor Stores / Distributors",
+   "group": "food-drink",
+   "subgroup": "Bars, breweries & wine",
+   "liveCount": 1,
+   "currentGroup": "Food & Drink"
+  },
+  "loan companies": {
+   "display": "loan companies",
+   "group": "money-legal",
+   "subgroup": "Financial advisors & loans",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "locksmiths": {
+   "display": "Locksmiths",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "lounges / bar": {
+   "display": "Lounges / Bar",
+   "group": "food-drink",
+   "subgroup": "Bars, breweries & wine",
+   "liveCount": 1,
+   "currentGroup": "Food & Drink"
+  },
+  "lumber / building supplies": {
+   "display": "Lumber / Building Supplies",
+   "group": "builders",
+   "subgroup": "Building supplies",
+   "liveCount": 4,
+   "currentGroup": "Construction & Trades"
+  },
+  "mailing / shipping services": {
+   "display": "Mailing / Shipping Services",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 2,
+   "currentGroup": "Professional Services"
+  },
+  "manufacturing / industrial": {
+   "display": "Manufacturing / Industrial",
+   "group": "business",
+   "subgroup": "Industry & utilities",
+   "liveCount": 14,
+   "currentGroup": "Industrial & Utilities"
+  },
+  "marketing / video production": {
+   "display": "Marketing / Video Production",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 5,
+   "currentGroup": "Professional Services"
+  },
+  "med spa": {
+   "display": "Med Spa",
+   "group": "beauty-fitness",
+   "subgroup": "Spas & med spas",
+   "liveCount": 1,
+   "currentGroup": "Beauty & Personal Care"
+  },
+  "media / advertising": {
+   "display": "Media / Advertising",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 2,
+   "currentGroup": "Professional Services"
+  },
+  "medical equipment / supplies / service": {
+   "display": "Medical Equipment / Supplies / Service",
+   "group": "health",
+   "subgroup": "Pharmacy & medical supply",
+   "liveCount": 1,
+   "currentGroup": "Health & Wellness"
+  },
+  "mobile home sales": {
+   "display": "Mobile Home Sales",
+   "group": "shopping",
+   "subgroup": "Home & office",
+   "liveCount": 1,
+   "currentGroup": "Shops & Retail"
+  },
+  "mortgage / loan companies": {
+   "display": "Mortgage / Loan Companies",
+   "group": "real-estate",
+   "subgroup": "Mortgages & title",
+   "liveCount": 4,
+   "currentGroup": "Real Estate"
+  },
+  "moving companies": {
+   "display": "Moving Companies",
+   "group": "home-repair",
+   "subgroup": "Moving & storage",
+   "liveCount": 2,
+   "currentGroup": "Professional Services"
+  },
+  "museums": {
+   "display": "Museums",
+   "group": "things-to-do",
+   "subgroup": "Museums & galleries",
+   "liveCount": 4,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "non-profits": {
+   "display": "Non-Profits",
+   "group": "community",
+   "subgroup": "Nonprofits & civic groups",
+   "liveCount": 47,
+   "currentGroup": "Community & Nonprofit"
+  },
+  "notary services": {
+   "display": "Notary Services",
+   "group": "money-legal",
+   "subgroup": "Financial advisors & loans",
+   "liveCount": 2,
+   "currentGroup": "Professional Services"
+  },
+  "nursing homes / assisted living / memory care": {
+   "display": "Nursing Homes / Assisted Living / Memory Care",
+   "group": "health",
+   "subgroup": "Senior & home care",
+   "liveCount": 5,
+   "currentGroup": "Health & Wellness"
+  },
+  "office supplies / office equipment": {
+   "display": "Office Supplies / Office Equipment",
+   "group": "shopping",
+   "subgroup": "Home & office",
+   "liveCount": 2,
+   "currentGroup": "Shops & Retail"
+  },
+  "oil change / lube": {
+   "display": "Oil Change / Lube",
+   "group": "auto",
+   "subgroup": "Repair & service",
+   "liveCount": 1,
+   "currentGroup": "Auto"
+  },
+  "other": {
+   "display": "Other",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 57,
+   "currentGroup": "Professional Services"
+  },
+  "pain management": {
+   "display": "Pain Management",
+   "group": "health",
+   "subgroup": "Doctors & clinics",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "painters": {
+   "display": "Painters",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 5,
+   "currentGroup": "Home Services"
+  },
+  "party rentals / supplies": {
+   "display": "Party Rentals / Supplies",
+   "group": "things-to-do",
+   "subgroup": "Event venues & rentals",
+   "liveCount": 2,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "payroll services": {
+   "display": "Payroll Services",
+   "group": "money-legal",
+   "subgroup": "Accounting & tax",
+   "liveCount": 1,
+   "currentGroup": "Professional Services"
+  },
+  "pest / termite services": {
+   "display": "Pest / Termite Services",
+   "group": "home-repair",
+   "subgroup": "Pest control",
+   "liveCount": 4,
+   "currentGroup": "Home Services"
+  },
+  "pet services": {
+   "display": "Pet Services",
+   "group": "health",
+   "subgroup": "Vets & pet care",
+   "liveCount": 5,
+   "currentGroup": "Health & Wellness"
+  },
+  "pharmacies": {
+   "display": "Pharmacies",
+   "group": "health",
+   "subgroup": "Pharmacy & medical supply",
+   "liveCount": 1,
+   "currentGroup": "Health & Wellness"
+  },
+  "photographers": {
+   "display": "Photographers",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 3,
+   "currentGroup": "Professional Services"
+  },
+  "physical therapy / rehabilitation": {
+   "display": "Physical Therapy / Rehabilitation",
+   "group": "health",
+   "subgroup": "Chiropractic & therapy",
+   "liveCount": 4,
+   "currentGroup": "Health & Wellness"
+  },
+  "physicians / surgeons": {
+   "display": "Physicians / Surgeons",
+   "group": "health",
+   "subgroup": "Doctors & clinics",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "pipeline construction": {
+   "display": "Pipeline Construction",
+   "group": "builders",
+   "subgroup": "Contractors",
+   "liveCount": 1,
+   "currentGroup": "Construction & Trades"
+  },
+  "plumbing": {
+   "display": "plumbing",
+   "group": "home-repair",
+   "subgroup": "Plumbing",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "plumbing services": {
+   "display": "Plumbing Services",
+   "group": "home-repair",
+   "subgroup": "Plumbing",
+   "liveCount": 10,
+   "currentGroup": "Home Services"
+  },
+  "portable buildings": {
+   "display": "Portable Buildings",
+   "group": "home-repair",
+   "subgroup": "Moving & storage",
+   "liveCount": 2,
+   "currentGroup": "Construction & Trades"
+  },
+  "portable toilets": {
+   "display": "Portable Toilets",
+   "group": "builders",
+   "subgroup": "Contractors",
+   "liveCount": 3,
+   "currentGroup": "Construction & Trades"
+  },
+  "pressure washing": {
+   "display": "Pressure Washing",
+   "group": "home-repair",
+   "subgroup": "Cleaning",
+   "liveCount": 2,
+   "currentGroup": "Home Services"
+  },
+  "printing services / promotional items": {
+   "display": "Printing Services / Promotional Items",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 7,
+   "currentGroup": "Professional Services"
+  },
+  "professional services": {
+   "display": "professional services",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "propane sales / supplies": {
+   "display": "Propane Sales / Supplies",
+   "group": "shopping",
+   "subgroup": "Home & office",
+   "liveCount": 1,
+   "currentGroup": "Industrial & Utilities"
+  },
+  "property management / leasing": {
+   "display": "Property Management / Leasing",
+   "group": "real-estate",
+   "subgroup": "Apartments & rentals",
+   "liveCount": 1,
+   "currentGroup": "Real Estate"
+  },
+  "psychiatrist": {
+   "display": "Psychiatrist",
+   "group": "health",
+   "subgroup": "Mental health",
+   "liveCount": 1,
+   "currentGroup": "Health & Wellness"
+  },
+  "publishers / publications": {
+   "display": "Publishers / Publications",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 5,
+   "currentGroup": "Professional Services"
+  },
+  "rain water harvesting": {
+   "display": "Rain Water Harvesting",
+   "group": "home-repair",
+   "subgroup": "Pools, water & septic",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "real estate brokers": {
+   "display": "Real Estate Brokers",
+   "group": "real-estate",
+   "subgroup": "Realtors",
+   "liveCount": 4,
+   "currentGroup": "Real Estate"
+  },
+  "real estate development": {
+   "display": "Real Estate Development",
+   "group": "real-estate",
+   "subgroup": "Developers & HOAs",
+   "liveCount": 4,
+   "currentGroup": "Real Estate"
+  },
+  "real estate investment / management": {
+   "display": "Real Estate Investment / Management",
+   "group": "real-estate",
+   "subgroup": "Developers & HOAs",
+   "liveCount": 3,
+   "currentGroup": "Real Estate"
+  },
+  "realtors": {
+   "display": "Realtors",
+   "group": "real-estate",
+   "subgroup": "Realtors",
+   "liveCount": 38,
+   "currentGroup": "Real Estate"
+  },
+  "recreational equipment / golf cart sales / rentals": {
+   "display": "Recreational Equipment / Golf Cart Sales / Rentals",
+   "group": "shopping",
+   "subgroup": "Guns & outdoor",
+   "liveCount": 2,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "rendering company": {
+   "display": "rendering company",
+   "group": "business",
+   "subgroup": "Industry & utilities",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "restaurant": {
+   "display": "restaurant",
+   "group": "food-drink",
+   "subgroup": "Restaurants",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "restaurants": {
+   "display": "Restaurants",
+   "group": "food-drink",
+   "subgroup": "Restaurants",
+   "liveCount": 49,
+   "currentGroup": "Food & Drink"
+  },
+  "retail": {
+   "display": "retail",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "retail / specialty shops / antiques": {
+   "display": "Retail / Specialty shops / Antiques",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 28,
+   "currentGroup": "Shops & Retail"
+  },
+  "roofing": {
+   "display": "roofing",
+   "group": "builders",
+   "subgroup": "Roofing & solar",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "roofing contractors / solar": {
+   "display": "Roofing Contractors / Solar",
+   "group": "builders",
+   "subgroup": "Roofing & solar",
+   "liveCount": 10,
+   "currentGroup": "Construction & Trades"
+  },
+  "rv parks": {
+   "display": "RV Parks",
+   "group": "stay",
+   "subgroup": "RV parks",
+   "liveCount": 7,
+   "currentGroup": "Lodging"
+  },
+  "rv parts / mobile home parts": {
+   "display": "RV Parts / Mobile Home Parts",
+   "group": "auto",
+   "subgroup": "Repair & service",
+   "liveCount": 1,
+   "currentGroup": "Auto"
+  },
+  "security / investigations / safety education": {
+   "display": "Security / Investigations / Safety Education",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 1,
+   "currentGroup": "Professional Services"
+  },
+  "senior living": {
+   "display": "Senior Living",
+   "group": "health",
+   "subgroup": "Senior & home care",
+   "liveCount": 1,
+   "currentGroup": "Health & Wellness"
+  },
+  "social media management": {
+   "display": "Social Media Management",
+   "group": "business",
+   "subgroup": "Marketing & media",
+   "liveCount": 1,
+   "currentGroup": "Professional Services"
+  },
+  "spa services": {
+   "display": "Spa Services",
+   "group": "beauty-fitness",
+   "subgroup": "Spas & med spas",
+   "liveCount": 2,
+   "currentGroup": "Beauty & Personal Care"
+  },
+  "storage facilities / storage solutions": {
+   "display": "Storage Facilities / Storage Solutions",
+   "group": "home-repair",
+   "subgroup": "Moving & storage",
+   "liveCount": 6,
+   "currentGroup": "Industrial & Utilities"
+  },
+  "surveyors": {
+   "display": "Surveyors",
+   "group": "builders",
+   "subgroup": "Engineers, architects & surveyors",
+   "liveCount": 2,
+   "currentGroup": "Construction & Trades"
+  },
+  "swimming pool installation / maintenance": {
+   "display": "Swimming Pool Installation / Maintenance",
+   "group": "home-repair",
+   "subgroup": "Pools, water & septic",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "tax preparation": {
+   "display": "Tax Preparation",
+   "group": "money-legal",
+   "subgroup": "Accounting & tax",
+   "liveCount": 1,
+   "currentGroup": "Professional Services"
+  },
+  "tires & wheels": {
+   "display": "Tires & Wheels",
+   "group": "auto",
+   "subgroup": "Repair & service",
+   "liveCount": 1,
+   "currentGroup": "Auto"
+  },
+  "title companies": {
+   "display": "Title Companies",
+   "group": "real-estate",
+   "subgroup": "Mortgages & title",
+   "liveCount": 4,
+   "currentGroup": "Real Estate"
+  },
+  "tourism": {
+   "display": "Tourism",
+   "group": "things-to-do",
+   "subgroup": "Family fun & recreation",
+   "liveCount": 1,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "towing companies": {
+   "display": "Towing Companies",
+   "group": "auto",
+   "subgroup": "Towing",
+   "liveCount": 4,
+   "currentGroup": "Auto"
+  },
+  "toyota dealer": {
+   "display": "Toyota dealer",
+   "group": "auto",
+   "subgroup": "Dealers",
+   "liveCount": 1,
+   "currentGroup": "Auto"
+  },
+  "transportation services / charter bus": {
+   "display": "Transportation Services / Charter Bus",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 6,
+   "currentGroup": "Professional Services"
+  },
+  "travel agencies": {
+   "display": "Travel Agencies",
+   "group": "business",
+   "subgroup": "Business services",
+   "liveCount": 3,
+   "currentGroup": "Professional Services"
+  },
+  "tree service / stump removal": {
+   "display": "Tree Service / Stump Removal",
+   "group": "home-repair",
+   "subgroup": "Lawn, landscaping & trees",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "utilities": {
+   "display": "Utilities",
+   "group": "business",
+   "subgroup": "Industry & utilities",
+   "liveCount": 8,
+   "currentGroup": "Industrial & Utilities"
+  },
+  "vacation rentals / meeting space": {
+   "display": "Vacation Rentals / Meeting Space",
+   "group": "stay",
+   "subgroup": "Cabins & vacation rentals",
+   "liveCount": 6,
+   "currentGroup": "Lodging"
+  },
+  "veterinarians": {
+   "display": "Veterinarians",
+   "group": "health",
+   "subgroup": "Vets & pet care",
+   "liveCount": 2,
+   "currentGroup": "Health & Wellness"
+  },
+  "vision care": {
+   "display": "Vision Care",
+   "group": "health",
+   "subgroup": "Eye & hearing",
+   "liveCount": 4,
+   "currentGroup": "Health & Wellness"
+  },
+  "waste / management": {
+   "display": "Waste / Management",
+   "group": "business",
+   "subgroup": "Industry & utilities",
+   "liveCount": 1,
+   "currentGroup": "Industrial & Utilities"
+  },
+  "water treatment": {
+   "display": "Water Treatment",
+   "group": "home-repair",
+   "subgroup": "Pools, water & septic",
+   "liveCount": 2,
+   "currentGroup": "Home Services"
+  },
+  "welding & repair": {
+   "display": "welding & repair",
+   "group": "home-repair",
+   "subgroup": "Handyman & repairs",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "western wear": {
+   "display": "western wear",
+   "group": "shopping",
+   "subgroup": "Shops & boutiques",
+   "liveCount": 0,
+   "currentGroup": null
+  },
+  "window cleaning": {
+   "display": "Window Cleaning",
+   "group": "home-repair",
+   "subgroup": "Cleaning",
+   "liveCount": 1,
+   "currentGroup": "Home Services"
+  },
+  "wineries / wine shops / breweries": {
+   "display": "Wineries / Wine Shops / Breweries",
+   "group": "food-drink",
+   "subgroup": "Bars, breweries & wine",
+   "liveCount": 5,
+   "currentGroup": "Food & Drink"
+  },
+  "yoga studios": {
+   "display": "Yoga Studios",
+   "group": "beauty-fitness",
+   "subgroup": "Gyms & fitness",
+   "liveCount": 1,
+   "currentGroup": "Recreation & Outdoors"
+  },
+  "youth / education services organization": {
+   "display": "Youth / Education Services Organization",
+   "group": "community",
+   "subgroup": "Nonprofits & civic groups",
+   "liveCount": 3,
+   "currentGroup": "Education & Childcare"
+  }
+ }
+}

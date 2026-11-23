@@ -2,8 +2,29 @@
 import EventCredit from './EventCredit.astro';
 import SocialIcons from './SocialIcons.astro';
 import { facebookGroupReason } from '../data/site';
+
+interface Props {
+  slim?: boolean;
+}
+
+const { slim = false } = Astro.props;
 ---
 
+{slim ? (
+  <footer class="site-footer slim-footer">
+    <div class="footer-grid">
+      <p class="legal">Bastropia</p>
+      <nav class="slim-footer-links" aria-label="Footer">
+        <a href="/">Front page</a>
+        <a href="/news">News</a>
+        <a href="/events">Events</a>
+        <a href="/directory">Directory</a>
+        <a href="/directory/submit">List a business</a>
+        <a href="/contact">Contact</a>
+      </nav>
+    </div>
+  </footer>
+) : (
 <footer class="site-footer">
   <div class="footer-grid">
     <div class="footer-brand">
@@ -67,3 +88,4 @@ import { facebookGroupReason } from '../data/site';
     <p class="fine">Bastropia is a community site. It is not Bastrop County, a city, or an emergency service. Confirm bans, closures, and meeting times on the official pages linked here.</p>
   </div>
 </footer>
+)}

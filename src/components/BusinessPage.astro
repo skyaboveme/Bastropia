@@ -44,7 +44,7 @@ const style = [
         )}
       </div>
     </div>
-    <img class="biz-hero-photo" src={business.hero.src} alt={business.hero.alt} width={business.hero.width} height={business.hero.height} style={business.hero.objectPosition ? `object-position: ${business.hero.objectPosition}` : undefined} />
+    <img class="biz-hero-photo" src={business.hero.src} alt={business.hero.alt} width={business.hero.width} height={business.hero.height} decoding="async" style={business.hero.objectPosition ? `object-position: ${business.hero.objectPosition}` : undefined} />
   </header>
 
   <ul class="biz-points wrap">
@@ -157,6 +157,37 @@ const style = [
     </div>
   </section>
 </article>
+<div class="listing-sticky" data-listing-sticky hidden>
+  {business.phoneHref && <a class="button" href={business.phoneHref}>Call</a>}
+  {business.mapsUrl && <a class="button button-ghost" href={business.mapsUrl} target="_blank" rel="noopener noreferrer">Directions</a>}
+</div>
+<script is:inline>
+  (function () {
+    var bar = document.querySelector('[data-listing-sticky]');
+    if (!bar || !window.matchMedia('(max-width: 800px)').matches) return;
+    var onScroll = function () { bar.hidden = window.scrollY < window.innerHeight; };
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
+<style>
+  .listing-sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+    background: #fff;
+    border-top: 1px solid var(--line);
+  }
+  .listing-sticky[hidden] { display: none; }
+  .listing-sticky .button { min-height: 52px; }
+</style>
 
 <style>
   .biz {
