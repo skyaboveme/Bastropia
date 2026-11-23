@@ -63,6 +63,18 @@ jobs:
             exit 1
           fi
           npx wrangler deploy
+      - name: Seed the social feed
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: aa96f50b9174b128d2cbe8f6db54b940
+          SOCIAL_FEED_OUT: /tmp/social-feed.json
+        run: |
+          npx wrangler kv key get social:feed --remote --binding SESSION > /tmp/social-feed-prev.json || true
+          SOCIAL_FEED_PREV=/tmp/social-feed-prev.json node --experimental-strip-types scripts/seed-social-feed.ts
+          if [ -f /tmp/social-feed.json ]; then
+            npx wrangler kv key put social:feed --remote --binding SESSION --path /tmp/social-feed.json
+          fi
       - name: Ping IndexNow
         if: success()
         continue-on-error: true

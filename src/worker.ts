@@ -2,6 +2,7 @@ import { handle } from '@astrojs/cloudflare/handler';
 import { runAlertWatch } from './lib/alertWatch';
 import { refreshDailyVideo } from './lib/dailyVideo';
 import { refreshBccEvents, runWithEventsSource, type EventsSourceMode } from './lib/eventSource';
+import { refreshSocialFeed } from './lib/socialFeed';
 import type { SessionKv } from './lib/sessionKv';
 import {
   HOME_FRESH_SECONDS,
@@ -169,6 +170,11 @@ export default {
     ctx.waitUntil(
       refreshDailyVideo().catch((error) => {
         console.error('daily video refresh failed', error);
+      }),
+    );
+    ctx.waitUntil(
+      refreshSocialFeed().catch((error) => {
+        console.error('social feed refresh failed', error);
       }),
     );
     ctx.waitUntil(
