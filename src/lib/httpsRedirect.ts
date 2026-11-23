@@ -33,10 +33,14 @@ export function requestIsHttp(request: Request): boolean {
   return visitorScheme(request.headers.get('cf-visitor')) === 'http';
 }
 
+function isLocalDevHost(hostname: string) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+}
+
 /**
  * 301 to https://bastropia.com with the same path and query.
  * HTTP (URL, X-Forwarded-Proto, or cf-visitor) and www both land on the apex.
- * Returns null when the request is already the HTTPS apex.
+ * Returns null when the request is already the HTTPS apex, or when it is local dev.
  * HSTS is added only on a redirect that is itself served over HTTPS.
  */
 export function canonicalRedirect(request: Request): Response | null {
@@ -46,6 +50,7 @@ export function canonicalRedirect(request: Request): Response | null {
   } catch {
     return null;
   }
+  if (isLocalDevHost(url.hostname)) return null;
   const http = requestIsHttp(request);
   if (!http && url.hostname !== WWW_HOST) return null;
   const headers = new Headers({
