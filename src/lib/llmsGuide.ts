@@ -17,6 +17,7 @@ const pages: { path: string; label: string; note: string }[] = [
   { path: '/guides', label: 'County guides', note: 'Evergreen guides to moving, parks and the river, burn bans, county government, and Elgin, Smithville, and Paige.' },
   { path: '/development', label: 'Development tracker', note: 'Data centers, annexations, restaurants, industry, expansions, and new retail under watch in Bastrop County' },
   { path: '/eats', label: 'Eats', note: 'Happy hours and specials for today and tomorrow, posted on each restaurant or bar’s own site. Confirm before you go.' },
+  { path: '/heb-specials', label: 'H-E-B Weekly Specials in Bastrop', note: 'This week’s prices from the H-E-B weekly ad for Bastrop H-E-B Plus! store 582 at 104 Hasler Blvd. Bastropia is not affiliated with H-E-B. Confirm the price at the store.' },
   { path: '/churches', label: 'Churches', note: 'Bastrop County church directory. Worship times checked November 22, 2026 are listed first. Congregations with no posted schedule are named at the bottom. Confirm before you go.' },
   { path: '/new-here', label: 'New resident guide', note: 'Utilities, trash day, tax dates, and which commissioner covers your road' },
   { path: '/tips', label: 'Send a tip or photo', note: 'Neighbor tips and photos for the site and the Facebook group' },

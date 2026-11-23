@@ -43,6 +43,7 @@ const hubs: Entry[] = [
   { path: '/now', priority: '0.8' },
   { path: '/metrics', priority: '0.8' },
   { path: '/cattle', priority: '0.8' },
+  { path: '/heb-specials', priority: '0.7' },
   { path: '/government', priority: '0.8' },
   { path: '/government/court-decisions', priority: '0.7' },
   { path: '/new-here', priority: '0.8' },

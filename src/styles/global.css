@@ -718,7 +718,7 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 .filter-row { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
 .filter-row span { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); width: 4.2rem; }
 .chip { text-decoration: none; padding: 0.28rem 0.6rem; border: 1px solid var(--line); background: white; font: inherit; font-size: 0.92rem; color: inherit; cursor: pointer; }
-.chip[aria-current="true"], .chip:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+.chip[aria-current="true"], .chip[aria-pressed="true"], .chip:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
 
 .search { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.4rem; max-width: 36rem; border-bottom: 1.5px solid var(--ink); padding-bottom: 0.35rem; }
 .search input, .field input, .field select, .field textarea { width: 100%; border: 1px solid var(--line); background: white; color: var(--ink); padding: 0.7rem 0.75rem; }
@@ -1566,4 +1566,86 @@ body.bar-page { --sticky-offset: 60px; }
 @media (min-width: 980px) {
   /* Wide enough that a row holds four cards, and no more. */
   .stat-grid { grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr)); }
+}
+
+.heb-page { padding-bottom: 2.5rem; }
+.heb-trending h2, .heb-list-title, .heb-teaser h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.heb-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0.2rem 0 0.7rem;
+  margin: 0.35rem 0 0.2rem;
+}
+.heb-scroll .heb-card { flex: 0 0 min(78%, 16.5rem); scroll-snap-align: start; }
+.heb-banner {
+  border-top: 3px solid var(--pine);
+  background: var(--paper-2);
+  padding: 0.85rem 1rem;
+  margin: 0.4rem 0 1rem;
+}
+.heb-banner strong { display: block; font-family: var(--serif); font-size: 1.35rem; font-weight: 600; }
+.heb-banner p { margin: 0.35rem 0 0; }
+.heb-note { color: var(--ink-soft); font-size: 0.92rem; }
+.heb-note a, .heb-missing a, .heb-see { color: var(--river-deep); font-weight: 650; }
+.heb-count { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 0.88rem; }
+.heb-empty { margin: 0.8rem 0; }
+.heb-list-title { margin-top: 1.1rem; }
+.heb-grid { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
+.heb-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  border: 1px solid var(--line);
+  background: var(--card, white);
+}
+.heb-card[hidden], [data-heb-card][hidden] { display: none; }
+.heb-card img, .heb-photo-fallback {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: white;
+  display: block;
+}
+.heb-photo-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+  font-size: 1.4rem;
+}
+.heb-card-body { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; padding: 0.7rem 0.8rem 0.85rem; }
+.heb-card h3 { font-size: 1.15rem; margin: 0; line-height: 1.25; }
+.heb-price { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; margin: 0.15rem 0 0; line-height: 1.15; }
+.heb-price.is-story {
+  font-family: var(--sans, inherit);
+  font-size: 0.95rem;
+  font-weight: 650;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.heb-reg { margin: 0; color: var(--ink-soft); text-decoration: line-through; font-size: 0.88rem; }
+.heb-story { margin: 0; color: var(--ink-soft); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.heb-see { margin-top: auto; padding-top: 0.55rem; }
+.heb-missing { border: 1px solid var(--line); background: var(--card, white); padding: 1.15rem 1.1rem; max-width: 38rem; }
+.heb-missing h2 { margin-top: 0.2rem; }
+.heb-teaser { margin: 1.6rem auto; }
+.heb-teaser-head { display: flex; justify-content: space-between; align-items: end; gap: 1rem; }
+.heb-teaser-head .kicker { margin-bottom: 0; }
+.heb-teaser-head h2 { margin: 0; }
+.heb-teaser-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.7rem; }
+@media (min-width: 720px) {
+  .heb-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 900px) {
+  .heb-scroll { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; }
+  .heb-scroll .heb-card { flex: none; }
+  .heb-teaser-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .heb-grid { grid-template-columns: 1fr 1fr 1fr; }
 }

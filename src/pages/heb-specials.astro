@@ -1,0 +1,147 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import HebDealCard from '../components/HebDealCard.astro';
+import { HEB_WEEKLY_AD } from '../data/heb';
+import { offsiteAttrs } from '../lib/links';
+import {
+  formatValidRange,
+  hebCategories,
+  readHebWeekly,
+  trendingItems,
+  type HebItem,
+  type HebWeeklyRecord,
+} from '../lib/hebWeekly';
+
+let record: HebWeeklyRecord | null = null;
+try {
+  record = await readHebWeekly();
+} catch (error) {
+  console.error('heb specials failed', error);
+}
+
+const items = record?.items ?? [];
+const trending = trendingItems(items, 8, record?.highlights ?? []);
+const categories = hebCategories(items);
+const dates = record ? formatValidRange(record.validFrom, record.validTo) : '';
+const adUrl = record?.adUrl || HEB_WEEKLY_AD;
+const storeLine = record
+  ? `${record.storeName} · ${record.address}, ${record.city} ${record.postalCode} · Store ${record.storeCode}`
+  : 'Bastrop H-E-B Plus! · 104 Hasler Blvd, Bastrop 78602 · Store 582';
+const description = record
+  ? `This week’s H-E-B specials for store ${record.storeCode} at ${record.address}, Bastrop. Prices come from H-E-B’s weekly ad. Bastropia isn’t affiliated with H-E-B.`
+  : 'H-E-B weekly specials for the Bastrop store. Bastropia isn’t affiliated with H-E-B. Open the weekly ad on heb.com.';
+
+function searchText(item: HebItem) {
+  return `${item.name} ${item.saleStory} ${item.categories.join(' ')}`.toLowerCase();
+}
+---
+
+<BaseLayout title="H-E-B Weekly Specials in Bastrop" description={description}>
+  <PageHead
+    kicker="Bastrop store"
+    title="H-E-B Weekly Specials in Bastrop"
+    lede="Prices from the H-E-B weekly ad for the Bastrop store. Bastropia isn’t affiliated with H-E-B."
+  />
+
+  <div class="wrap heb-page" data-heb-page>
+    {items.length === 0 ? (
+      <article class="heb-missing">
+        <p class="kicker">Weekly ad</p>
+        <h2>This week’s specials aren’t loaded yet</h2>
+        <p>
+          Bastropia isn’t affiliated with H-E-B. Prices for the Bastrop store, 104 Hasler Blvd (store 582), are posted on H-E-B’s weekly ad.
+        </p>
+        <a href={HEB_WEEKLY_AD} {...offsiteAttrs(HEB_WEEKLY_AD)}>Open the H-E-B weekly ad</a>
+      </article>
+    ) : (
+      <>
+        <section class="heb-trending" aria-labelledby="heb-trending-title">
+          <h2 id="heb-trending-title">Trending this week</h2>
+          <div class="heb-scroll">
+            {trending.map((item) => <HebDealCard item={item} />)}
+          </div>
+        </section>
+
+        <div class="heb-banner">
+          {dates && <strong>{dates}</strong>}
+          <p>{storeLine}</p>
+          <p class="heb-note">
+            Bastropia isn’t affiliated with H-E-B. These prices come from H-E-B’s weekly ad for this store. Confirm the price at the shelf.
+            {' '}
+            <a href={adUrl} {...offsiteAttrs(adUrl)}>Open this ad on H-E-B</a>.
+          </p>
+        </div>
+
+        <div class="filters">
+          <div class="filter-row">
+            <span>Aisle</span>
+            <button type="button" class="chip" data-heb-cat="" aria-pressed="true">All</button>
+            {categories.map((category) => (
+              <button type="button" class="chip" data-heb-cat={category} aria-pressed="false">{category}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="search" role="search">
+          <label class="sr" for="heb-q">Search specials</label>
+          <input id="heb-q" type="search" placeholder="Search this week’s ad" autocomplete="off" enterkeyhint="search" />
+        </div>
+        <p class="heb-count" data-heb-count aria-live="polite">{items.length} {items.length === 1 ? 'special' : 'specials'}</p>
+        <p class="heb-empty" data-heb-empty hidden>No specials match that search.</p>
+        <noscript>
+          <p class="heb-note">The aisle filters and search need JavaScript. Every special is still listed below.</p>
+        </noscript>
+
+        <h2 class="heb-list-title">This week’s ad</h2>
+        <div class="heb-grid">
+          {items.map((item) => (
+            <div data-heb-card data-cats={item.categories.join('|')} data-search={searchText(item)}>
+              <HebDealCard item={item} />
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  const page = document.querySelector('[data-heb-page]');
+  if (page instanceof HTMLElement) {
+    const input = page.querySelector('#heb-q');
+    const count = page.querySelector('[data-heb-count]');
+    const empty = page.querySelector('[data-heb-empty]');
+    const chips = [...page.querySelectorAll('[data-heb-cat]')];
+    const cards = [...page.querySelectorAll('[data-heb-card]')];
+    let category = '';
+
+    const apply = () => {
+      const query = input instanceof HTMLInputElement ? input.value.trim().toLowerCase() : '';
+      let shown = 0;
+      for (const card of cards) {
+        if (!(card instanceof HTMLElement)) continue;
+        const cats = (card.dataset.cats || '').split('|');
+        const ok = (!category || cats.includes(category)) && (!query || (card.dataset.search || '').includes(query));
+        card.hidden = !ok;
+        if (ok) shown += 1;
+      }
+      if (count) count.textContent = `${shown} ${shown === 1 ? 'special' : 'specials'}`;
+      if (empty instanceof HTMLElement) empty.hidden = shown !== 0;
+    };
+
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        if (!(chip instanceof HTMLButtonElement)) return;
+        category = chip.dataset.hebCat || '';
+        for (const other of chips) {
+          if (other instanceof HTMLButtonElement) other.setAttribute('aria-pressed', other === chip ? 'true' : 'false');
+        }
+        apply();
+      });
+    }
+    input?.addEventListener('input', apply);
+  }
+</script>
