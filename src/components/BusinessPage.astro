@@ -9,8 +9,9 @@ const { business } = Astro.props;
 
 function photo(src: string) {
   if (/-480\.webp$/i.test(src)) {
+    const mid = src.replace(/-480\.webp$/i, '-720.webp');
     const sharp = src.replace(/-480\.webp$/i, '-960.webp');
-    return { src, srcset: `${src} 480w, ${sharp} 960w`, sizes: '(max-width: 900px) 100vw, 640px' };
+    return { src, srcset: `${src} 480w, ${mid} 720w, ${sharp} 960w`, sizes: '(max-width: 900px) 100vw, 640px' };
   }
   const webp = src.replace(/\.jpe?g$/i, '.webp');
   const small = webp.replace(/\.webp$/i, '-720.webp');

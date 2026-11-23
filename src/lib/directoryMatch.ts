@@ -4,7 +4,7 @@
  */
 import synonymsFile from '../data/directorySynonyms.json' with { type: 'json' };
 import groupsFile from '../data/directoryCategoryGroups.json' with { type: 'json' };
-import { directoryLabelInfo } from './directoryGroups.ts';
+import { directoryLabelInfo, groupShort } from './directoryGroups.ts';
 
 export type MatchRow = {
   n: string;
@@ -161,6 +161,8 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
     return prepared.nameNorm.includes(` ${normalizeDirectoryText(town)} `);
   }
 
+  const broadGroups = new Set(['shopping', 'business', 'community', 'things-to-do']);
+
   function conceptGroup(id: string) {
     const concept = concepts.get(id);
     if (!concept) return '';
@@ -168,6 +170,28 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
     if (listed[0]) return listed[0];
     const category = concept.categories?.[0];
     return category ? directoryLabelInfo(category).group : '';
+  }
+
+  function conceptAdTitle(id: string) {
+    const concept = concepts.get(id);
+    if (!concept) return '';
+    if (id === 'florist') return 'Florists';
+    const group = conceptGroup(id);
+    if (group && !broadGroups.has(group)) return groupShort(group);
+    const clause = String(concept.label || '').split('&')[0].trim();
+    return clause || (group ? groupShort(group) : '');
+  }
+
+  function pickAdConcept(units: QueryUnit[], text: string) {
+    const found: { id: string; term: string }[] = [];
+    for (const unit of units) {
+      if (unit.kind !== 'concept') continue;
+      for (const id of unit.ids || []) found.push({ id, term: unit.text });
+    }
+    if (!found.length) return '';
+    if (found.some((item) => item.id === 'florist') && /\b(florist|flowers|flower|nursery|plants)\b/.test(text)) return 'florist';
+    found.sort((a, b) => b.term.length - a.term.length || text.lastIndexOf(b.term) - text.lastIndexOf(a.term));
+    return found[0].id;
   }
 
   function unitOk(prepared: Prepared, unit: QueryUnit) {
@@ -198,7 +222,7 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
     return concept?.label || '';
   }
 
-  return { parse, search, prep, conceptLabel, conceptGroup, concepts };
+  return { parse, search, prep, conceptLabel, conceptGroup, conceptAdTitle, pickAdConcept, concepts };
 }
 
 let shared: ReturnType<typeof buildDirectoryMatcher> | undefined;

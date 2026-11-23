@@ -19,6 +19,8 @@ export type DirectoryAdContext = {
   concepts?: string[];
   /** Typed search with the town removed. */
   text?: string;
+  /** Placeholder title when the group name is too broad. */
+  label?: string;
 };
 
 export type DirectoryPromo = {
@@ -175,7 +177,7 @@ export function promoFromSlot(slot: DirectoryAdSlot): DirectoryPromo {
 
 export function houseDirectoryPromo(kind: 'featured' | 'spotlight' | 'infeed', ctx: DirectoryAdContext): DirectoryPromo {
   const place = townOf(ctx) ? ` in ${townOf(ctx)}` : '';
-  const group = ctx.category ? groupLabel(ctx.category) : '';
+  const group = ctx.label || (ctx.category ? groupLabel(ctx.category) : '');
   if (kind === 'spotlight') {
     const price = directoryProductById('spotlight');
     return {
