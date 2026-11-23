@@ -34,6 +34,8 @@ export type DirectoryEntry = {
   hours?: string;
   dailySpecial?: string;
   logo?: string;
+  lat?: number;
+  lng?: number;
 };
 
 type ChamberRecord = {
@@ -140,6 +142,8 @@ function partnerEntry(business: Business): DirectoryEntry {
     partnerSlug: business.slug,
     hours: business.hours || undefined,
     logo: logoThumb(business.logo?.src),
+    lat: business.geo?.latitude,
+    lng: business.geo?.longitude,
   };
 }
 

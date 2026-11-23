@@ -47,7 +47,8 @@ for (const page of pages) {
   }
   const paths = html.match(/\/_astro\/[A-Za-z0-9._-]+\.(?:css|js|mjs|woff2)/g) || html.match(/\/_astro\/[A-Za-z0-9._-]+/g) || [];
   const styles = paths.filter((assetPath) => assetPath.endsWith('.css'));
-  if (styles.length) console.log(`keep-astro-assets: ${page} css ${styles.join(' ')}`);
+  const scripts = paths.filter((assetPath) => assetPath.endsWith('.js'));
+  if (styles.length || scripts.length) console.log(`keep-astro-assets: ${page} css ${styles.join(' ') || '(none)'} js ${scripts.join(' ') || '(none)'}`);
   for (const assetPath of paths) {
     if (seen.has(assetPath)) continue;
     seen.add(assetPath);

@@ -6,6 +6,7 @@ import { directoryToday, directoryTrackId, listingIsFeatured, pickDirectorySlot,
 import { outboundLabel } from './maps.ts';
 import { directoryLabelInfo, categoryMatchesGroup, groupShort, subgroupsForGroup, directoryGridGroups, directoryMoreGroups } from './directoryGroups.ts';
 import { directoryOpenPill } from './directoryHours.ts';
+import { directoryTownCenter, nearestPlace } from './directoryPlaces.ts';
 import {
   compareDirectoryAz,
   directoryMatcher,
@@ -153,6 +154,8 @@ export function entryToIndexRow(entry: DirectoryEntry, today = directoryToday())
   const featured = listingIsFeatured(entry, today);
   const partner = entry.source === 'partner';
   const advertiser = advertiserById.get(entry.id);
+  const exact = typeof entry.lat === 'number' && typeof entry.lng === 'number' ? { lat: entry.lat, lng: entry.lng } : null;
+  const center = exact || directoryTownCenter(entry.town || '');
   return {
     id: entry.id,
     n: entry.name,
@@ -176,6 +179,8 @@ export function entryToIndexRow(entry: DirectoryEntry, today = directoryToday())
     cc: advertiser?.cc.length ? advertiser.cc : undefined,
     ds: advertiser?.ds || undefined,
     de: advertiser?.de || undefined,
+    lat: center?.lat,
+    lng: center?.lng,
   };
 }
 
@@ -305,13 +310,33 @@ function miles(row: DirectoryIndexRow, origin: { lat: number; lng: number }) {
   return 3958.8 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function compareNearest(a: DirectoryIndexRow, b: DirectoryIndexRow, origin: { lat: number; lng: number }) {
+  const left = miles(a, origin);
+  const right = miles(b, origin);
+  if (left !== right) return left - right;
+  return compareDirectoryAz(a.n, b.n);
+}
+
 export function directoryAdContext(query: string, town: string, category: string): DirectoryAdContext {
   const parsed = directoryMatcher().parse(query);
   const concepts = parsed.units.filter((unit) => unit.kind === 'concept').flatMap((unit) => unit.ids || []);
   const townName = town && town !== 'Countywide' ? town : parsed.town;
+  let group = category || directoryMatcher().conceptGroup(concepts[0] || '');
+  if (!group) {
+    const text = parsed.text;
+    for (const record of advertiserById.values()) {
+      const hit = record.kw.some((keyword) => text === keyword || text.startsWith(`${keyword} `));
+      if (!hit) continue;
+      for (const id of record.cc) {
+        group = directoryMatcher().conceptGroup(id);
+        if (group) break;
+      }
+      if (group) break;
+    }
+  }
   return {
     town: townName,
-    category: category || directoryMatcher().conceptGroup(concepts[0] || ''),
+    category: group,
     concepts,
     text: parsed.text,
   };
@@ -393,8 +418,11 @@ export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQ
   const countywide = state.town && state.town !== 'Countywide' ? found.countywide : [];
   const today = directoryToday();
   const sortAz = state.sort === 'az' || (!state.q && state.sort !== 'near' && !found.units.length);
-  if (state.sort === 'near' && origin) {
-    matches.sort((a, b) => miles(a, origin) - miles(b, origin) || compareDirectoryAz(a.n, b.n));
+  const pinTown = state.town === 'Countywide' ? '' : found.town || state.town;
+  if (state.sort === 'near') {
+    const place = nearestPlace(pinTown, origin);
+    matches.sort((a, b) => compareNearest(a, b, place));
+    countywide.sort((a, b) => compareNearest(a, b, place));
   } else if (sortAz) {
     matches.sort((a, b) => compareDirectoryAz(a.n, b.n));
     countywide.sort((a, b) => compareDirectoryAz(a.n, b.n));
@@ -404,12 +432,11 @@ export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQ
     const rankedCounty = rankDirectoryRows(countywide, found.units);
     countywide.splice(0, countywide.length, ...rankedCounty);
   }
-  const featured = pinDirectoryFeatured(matches, today);
-  const pinTown = state.town === 'Countywide' ? '' : found.town || state.town;
+  const featured = state.sort === 'near' ? matches : pinDirectoryFeatured(matches, today);
   const advertiserPins = directoryAdvertiserPins(scoped, featured, found.units, found.text, pinTown, today, { sort: state.sort, slots: slots || directoryAdSlots });
   const pinIds = new Set(advertiserPins.map((row) => row.id));
   const pinned = [...advertiserPins, ...featured.filter((row) => !pinIds.has(row.id))];
-  const pinnedCounty = pinDirectoryFeatured(countywide, today);
+  const pinnedCounty = state.sort === 'near' ? countywide : pinDirectoryFeatured(countywide, today);
   return {
     matches: pinned,
     countywide: pinnedCounty,
