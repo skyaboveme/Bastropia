@@ -293,7 +293,7 @@ async function fetchSource(source: SocialSource, cookie: string, fetchImpl: type
   try {
     const page = await fetchFacebook(source.href, cookie, fetchImpl);
     if (!page.html) return { result: { sourceId: source.id, ok: false, posts: [] }, cookie: page.cookie };
-    const posts = parsePublicPosts(page.html, source.href).map((post) => ({
+    const posts = parsePublicPosts(page.html, source.href).slice(0, 1).map((post) => ({
       id: `${source.id}:${post.id}`,
       sourceId: source.id,
       sourceName: source.name,
