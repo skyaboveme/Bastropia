@@ -586,8 +586,8 @@ main { padding-bottom: 3rem; }
 .status-line span { color: var(--ink-soft); font-size: 0.9rem; }
 .heb-rotator { --heb-copy: 9.15rem; margin: 0 0 0.85rem; }
 .heb-rotator-card { display: block; color: inherit; text-decoration: none; }
-.heb-rotator-stack { position: relative; display: block; }
-.heb-rotator-stack::before { content: ""; display: block; aspect-ratio: 4 / 3; margin-bottom: var(--heb-copy); }
+.heb-rotator-stack { position: relative; display: block; padding-bottom: var(--heb-copy); }
+.heb-rotator-stack::before { content: ""; display: block; aspect-ratio: 4 / 3; }
 .heb-rotator-slide {
   position: absolute;
   inset: 0;
