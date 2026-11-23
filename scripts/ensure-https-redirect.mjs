@@ -148,15 +148,18 @@ async function installRule(id) {
 function curlHead(url) {
   try {
     const output = execFileSync('curl', ['-sI', '--http1.1', '--max-time', '20', url], { encoding: 'utf8' });
-    const status = Number(output.match(/^HTTP\/\S+\s+(\d+)/m)?.[1] || 0);
-    const location = output.match(/^location:\s*(.*)$/im)?.[1]?.trim() || '';
-    return { status, location };
+    return parseHead(output);
   } catch (error) {
     const output = `${error.stdout || ''}`;
-    const status = Number(output.match(/^HTTP\/\S+\s+(\d+)/m)?.[1] || 0);
-    const location = output.match(/^location:\s*(.*)$/im)?.[1]?.trim() || '';
-    return { status, location, error: error instanceof Error ? error.message : String(error) };
+    return { ...parseHead(output), error: error instanceof Error ? error.message : String(error) };
   }
+}
+
+function parseHead(output) {
+  const status = Number(output.match(/^HTTP\/\S+\s+(\d+)/m)?.[1] || 0);
+  const location = output.match(/^location:\s*(.*)$/im)?.[1]?.trim() || '';
+  const server = output.match(/^server:\s*(.*)$/im)?.[1]?.trim() || '';
+  return { status, location, server };
 }
 
 async function liveOk() {
@@ -166,13 +169,13 @@ async function liveOk() {
     ['http://bastropia.com/news', `${APEX}/news`],
     ['http://bastropia.com/events?x=1', `${APEX}/events?x=1`],
   ];
-  for (let attempt = 1; attempt <= 4; attempt += 1) {
+  for (let attempt = 1; attempt <= 8; attempt += 1) {
     const results = [];
     let good = true;
     for (const [url, location] of checks) {
       try {
         const result = await curlHead(url);
-        results.push(`${result.status} ${url} -> ${result.location}${result.error ? ` (${result.error})` : ''}`);
+        results.push(`${result.status} ${result.server} ${url} -> ${result.location}${result.error ? ` (${result.error})` : ''}`);
         if (result.status !== 301 || result.location !== location) good = false;
       } catch (error) {
         results.push(`error ${url} ${error instanceof Error ? error.message : error}`);
@@ -181,7 +184,7 @@ async function liveOk() {
     }
     console.log(`Live check ${attempt}:\n${results.join('\n')}`);
     if (good) return true;
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
   return false;
 }
@@ -198,20 +201,28 @@ console.log(
 
 const installed = await installRule(id);
 if (!installed) {
-  if (before.readable && before.value !== 'on') await writeAlwaysHttps(id, 'on');
+  console.log('The redirect rule is not in place. The Worker redirect is the one that can change the host.');
+}
+
+// Always Use HTTPS keeps the original host, so http://www stops at https://www
+// and the Worker never runs. Turn it off, then put it back if the live check
+// is not a one-hop 301 to the apex.
+if (before.readable && before.value === 'on') {
+  const turnedOff = await writeAlwaysHttps(id, 'off');
+  if (!turnedOff) {
+    console.log('Could not turn Always Use HTTPS off. http://www keeps its host on the first hop.');
+    process.exit(0);
+  }
+  const ok = await liveOk();
+  if (!ok) {
+    console.log('Live HTTP redirect did not land on the apex. Restoring Always Use HTTPS.');
+    await writeAlwaysHttps(id, 'on');
+  }
   process.exit(0);
 }
 
-if (before.readable && before.value === 'on') {
-  const turnedOff = await writeAlwaysHttps(id, 'off');
-  if (turnedOff) {
-    const ok = await liveOk();
-    if (!ok) {
-      console.log('Live HTTP redirect did not land on the apex. Restoring Always Use HTTPS.');
-      await writeAlwaysHttps(id, 'on');
-    }
-  }
-} else if (before.readable && before.value !== 'on') {
-  const ok = await liveOk();
-  if (!ok) await writeAlwaysHttps(id, 'on');
+const ok = await liveOk();
+if (!ok && before.readable) {
+  console.log('Live HTTP redirect missed the apex. Turning Always Use HTTPS on.');
+  await writeAlwaysHttps(id, 'on');
 }
