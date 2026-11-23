@@ -116,6 +116,12 @@ function partnerTown(business: Business): string | null {
   return null;
 }
 
+function logoThumb(src: string | undefined) {
+  if (!src) return src;
+  const thumb = src.replace(/\.(png|jpe?g|webp|svg)$/i, '-96.webp');
+  return thumb === src ? src : thumb;
+}
+
 function partnerEntry(business: Business): DirectoryEntry {
   return {
     id: `partner:${business.slug}`,
@@ -133,7 +139,7 @@ function partnerEntry(business: Business): DirectoryEntry {
     source: 'partner',
     partnerSlug: business.slug,
     hours: business.hours || undefined,
-    logo: business.logo?.src || undefined,
+    logo: logoThumb(business.logo?.src),
   };
 }
 

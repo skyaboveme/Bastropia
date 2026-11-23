@@ -21,6 +21,7 @@ type Concept = {
   categories: string[];
   groups?: string[];
   nameKeywords: string[];
+  excludeCategories?: string[];
 };
 
 type SynFile = {
@@ -75,6 +76,7 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
         cats: new Set(concept.categories.map((item) => item.toLowerCase())),
         groups: new Set(concept.groups || []),
         kws: concept.nameKeywords.map((item) => normalizeDirectoryText(item)).filter(Boolean),
+        excl: new Set((concept.excludeCategories || []).map((item) => item.toLowerCase())),
       },
     ]),
   );
@@ -157,8 +159,11 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
 
   function unitOk(prepared: Prepared, unit: QueryUnit) {
     if (unit.kind === 'word') return wordHit(prepared.all, unit.text);
-    for (const id of unit.ids || []) {
-      const concept = concepts.get(id);
+    const live = (unit.ids || [])
+      .map((id) => concepts.get(id))
+      .filter((concept) => concept && !concept.excl.has(prepared.cat));
+    if (!live.length) return false;
+    for (const concept of live) {
       if (!concept) continue;
       if (concept.cats.has(prepared.cat) || concept.groups.has(prepared.group) || concept.kws.some((keyword) => kwHit(prepared, keyword))) return true;
     }

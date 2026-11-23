@@ -348,17 +348,16 @@ export function buildDirectoryView(
   const total = filtered.matches.length;
   const from = total ? 1 : 0;
   const to = shown.length;
+  const headingText = !active
+    ? 'All businesses'
+    : fellBack
+      ? phrase
+        ? `No ${lowerFirst(noun)} listed in ${townName} yet`
+        : `No matches for “${state.q}” in ${townName} yet`
+      : heading(total, phrase, townName);
   return {
-    heading: !active
-      ? 'All businesses'
-      : fellBack
-        ? phrase
-          ? `No ${lowerFirst(noun)} listed in ${townName} yet`
-          : `No matches for “${state.q}” in ${townName} yet`
-        : heading(total, phrase, townName),
-    live: active
-      ? heading(total, phrase, filtered.town && state.town !== 'Countywide' ? filtered.town : '')
-      : `${rows.length} businesses in Bastrop County`,
+    heading: headingText,
+    live: active ? headingText : `${rows.length} businesses in Bastrop County`,
     range: total > to ? `Showing ${from}–${to} of ${total}` : '',
     mode: active ? 'results' : 'browse',
     input: filtered.text || '',

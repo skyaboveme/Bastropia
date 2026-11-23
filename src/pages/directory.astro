@@ -186,10 +186,10 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
             <div class="dir-partners">
               <h2 class="dir-kicker">Partners</h2>
               <ul>
-                {partners.map((entry) => (
+                {partners.map((entry, index) => (
                   <li>
                     <a href={entry.href}>
-                      {entry.logo ? <img src={entry.logo} alt="" width="36" height="36" loading="lazy" decoding="async" /> : null}
+                      {entry.logo ? <img src={entry.logo} alt="" width="96" height="96" loading={index > 1 ? 'lazy' : 'eager'} decoding="async" /> : null}
                       <strong>{entry.name}</strong>
                       <span class="badge badge-partner">Partner</span>
                     </a>

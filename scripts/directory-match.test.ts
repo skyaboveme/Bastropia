@@ -75,6 +75,11 @@ test('legacy category slugs still match the new groups', () => {
   assert.deepEqual(filterDirectory({ category: 'food-drink', town: 'Countywide' }, entries).map((entry) => entry.name), ['County Lunch']);
 });
 
+test('mechanic does not match a plumbing company named Mechanical', () => {
+  const rows = [{ n: 'TCS Mechanical, LLC', c: 'Plumbing Services' }];
+  assert.equal(matcher.search(rows, 'mechanic').length, 0);
+});
+
 test('open pill reads a weekly schedule and ignores junk', () => {
   const wednesday = new Date('2026-11-18T18:00:00-06:00');
   const monday = new Date('2026-11-16T18:00:00-06:00');
@@ -94,6 +99,10 @@ test('live index counts match the reference matcher', () => {
   const vet = matcher.search(rows, 'vet');
   assert.equal(vet.length, 2);
   assert.ok(vet.every((row) => !/veteran/i.test(row.n)));
+  const mechanic = matcher.search(rows, 'mechanic');
+  assert.ok(mechanic.length > 0);
+  assert.ok(mechanic.every((row) => row.n !== 'TCS Mechanical, LLC'));
+  assert.ok(mechanic.every((row) => !/plumb/i.test(row.c)));
   const eat = matcher.search(rows, 'eat');
   assert.ok(eat.every((row) => !/heating/i.test(`${row.n} ${row.c}`)));
   const elgin = matcher.search(rows, 'plumber elgin');
