@@ -21,33 +21,37 @@ try {
 {slides.length > 0 && (
   <section class="heb-rotator" data-heb-rotator aria-roledescription="carousel" aria-label="H-E-B weekly specials">
     <a class="heb-rotator-card" href="/heb-specials">
-      {slides.map((item, index) => (
-        <span
-          class:list={['heb-rotator-slide', index === 0 && 'is-on']}
-          data-heb-slide
-          aria-hidden={index === 0 ? 'false' : 'true'}
-        >
-          {item.image ? (
-            <img
-              src={item.image}
-              alt=""
-              width="640"
-              height="480"
-              loading={index === 0 ? 'eager' : 'lazy'}
-              decoding="async"
-              fetchpriority={index === 0 ? 'low' : undefined}
-            />
-          ) : (
-            <span class="heb-rotator-fallback" aria-hidden="true"></span>
-          )}
-          <span class="heb-rotator-copy">
-            <span class="heb-rotator-kicker">H-E-B Weekly Specials</span>
-            <strong>{item.name}</strong>
-            <span class="heb-rotator-deal">{priceLabel(item)}</span>
-            {validThru && <span class="heb-rotator-when">{validThru}</span>}
+      <span class="heb-rotator-stack">
+        {slides.map((item, index) => (
+          <span
+            class:list={['heb-rotator-slide', index === 0 && 'is-on']}
+            data-heb-slide
+            aria-hidden={index === 0 ? 'false' : 'true'}
+          >
+            <span class="heb-rotator-photo">
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt=""
+                  width="640"
+                  height="480"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchpriority={index === 0 ? 'low' : undefined}
+                />
+              ) : (
+                <span class="heb-rotator-fallback" aria-hidden="true">H-E-B</span>
+              )}
+            </span>
+            <span class="heb-rotator-copy">
+              <span class="heb-rotator-kicker">H-E-B Weekly Specials</span>
+              <strong>{item.name}</strong>
+              <span class="heb-rotator-deal">{priceLabel(item)}</span>
+              {validThru && <span class="heb-rotator-when">{validThru}</span>}
+            </span>
           </span>
-        </span>
-      ))}
+        ))}
+      </span>
     </a>
     {slides.length > 1 && (
       <div class="heb-rotator-dots">

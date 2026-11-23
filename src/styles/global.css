@@ -584,65 +584,82 @@ main { padding-bottom: 3rem; }
 .status-line strong.is-ok { color: var(--ok); }
 .status-line strong.is-stop { color: var(--stop); }
 .status-line span { color: var(--ink-soft); font-size: 0.9rem; }
-.heb-rotator {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  margin: 0 0 0.85rem;
-  background: var(--pine-deep);
-  overflow: hidden;
-}
-.heb-rotator-card { position: absolute; inset: 0; display: block; color: #f4efe6; text-decoration: none; }
-.heb-rotator-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; }
-.heb-rotator-slide.is-on { opacity: 1; z-index: 1; }
-.heb-rotator-slide img,
-.heb-rotator-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.heb-rotator-copy {
+.heb-rotator { --heb-copy: 9.15rem; margin: 0 0 0.85rem; }
+.heb-rotator-card { display: block; color: inherit; text-decoration: none; }
+.heb-rotator-stack { position: relative; display: block; }
+.heb-rotator-stack::before { content: ""; display: block; aspect-ratio: 4 / 3; margin-bottom: var(--heb-copy); }
+.heb-rotator-slide {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.heb-rotator-slide.is-on { opacity: 1; z-index: 1; }
+.heb-rotator-photo {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
-  gap: 0.12rem;
-  padding: 2.5rem 0.75rem 1.65rem;
-  background: linear-gradient(to top, rgba(8, 20, 16, 0.94) 0%, rgba(8, 20, 16, 0.62) 48%, transparent 100%);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.heb-rotator-photo img,
+.heb-rotator-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+.heb-rotator-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+}
+.heb-rotator-copy {
+  flex: 0 0 var(--heb-copy);
+  height: var(--heb-copy);
+  display: grid;
+  align-content: start;
+  gap: 0.15rem;
+  padding: 0.5rem 0.05rem 0;
+  overflow: hidden;
+  color: var(--ink);
 }
 .heb-rotator-kicker {
   font-size: 0.68rem;
   font-weight: 750;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--sun);
+  color: var(--river-deep);
 }
 .heb-rotator-copy strong {
   font-family: var(--serif);
   font-weight: 600;
-  font-size: 1.12rem;
-  line-height: 1.15;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  height: 2.52rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.heb-rotator-card:hover strong { text-decoration: underline; text-underline-offset: 0.08em; }
 .heb-rotator-deal {
-  font-size: 0.9rem;
-  font-weight: 650;
-  line-height: 1.25;
+  font-size: 0.88rem;
+  font-weight: 550;
+  line-height: 1.3;
+  height: 3.43rem;
+  color: var(--ink);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.heb-rotator-when { font-size: 0.75rem; font-weight: 650; color: #e7efe9; }
-.heb-rotator-dots {
-  position: absolute;
-  z-index: 2;
-  left: 0;
-  right: 0;
-  bottom: 0.05rem;
-  display: flex;
-  justify-content: center;
-}
+.heb-rotator-when { font-size: 0.78rem; color: var(--ink-soft); }
+.heb-rotator-dots { display: flex; justify-content: center; margin-top: 0.15rem; }
 .heb-rotator-dots button {
   width: 1.15rem;
   height: 1.15rem;
@@ -654,16 +671,13 @@ main { padding-bottom: 3rem; }
 .heb-rotator-dots button::after {
   content: "";
   display: block;
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 0.42rem;
+  height: 0.42rem;
   margin: 0.35rem auto 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--line);
 }
-.heb-rotator-dots button[aria-current="true"]::after { background: #fff; }
-@media (max-width: 760px) {
-  .heb-rotator { aspect-ratio: 16 / 10; }
-}
+.heb-rotator-dots button[aria-current="true"]::after { background: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   .heb-rotator-slide { transition: none; }
 }
