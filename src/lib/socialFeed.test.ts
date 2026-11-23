@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { directoryShelves } from '../data/facebookDirectory.ts';
-import { socialSources } from '../data/socialSources.ts';
+import { pluginPages, pluginSrc, socialSources } from '../data/socialSources.ts';
 import { describeListing, directoryCards } from './directoryListing.ts';
 import { collectSocialFeed, mergeSourcePosts, newestPerSource, parsePublicPosts, parseSocialFeed, relativeTime, type StoredPost } from './socialFeed.ts';
 
@@ -126,6 +126,18 @@ test('collect stops after a block streak and does not call the rest', async () =
   assert.equal(facebookCalls, 5);
   assert.equal(fresh.posts.length, 2);
   assert.equal(fresh.posts.filter((post) => post.sourceId === sources[0].id).length, 1);
+});
+
+test('timeline plugins are pages whose embed shows posts', () => {
+  assert.deepEqual(pluginPages.map((page) => page.href), [
+    'https://www.facebook.com/CityofElginTX',
+    'https://www.facebook.com/smithvilletx',
+    'https://www.facebook.com/BastropCountyOEM',
+  ]);
+  const src = new URL(pluginSrc(pluginPages[0].href));
+  assert.equal(src.searchParams.get('tabs'), 'timeline');
+  assert.equal(src.searchParams.get('small_header'), 'false');
+  assert.equal(src.searchParams.get('hide_cover'), 'false');
 });
 
 test('directory cards keep every shelf item', () => {
