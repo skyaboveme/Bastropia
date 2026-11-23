@@ -3,10 +3,10 @@
  *  when the county page and the Texas A&M Forest Service layer agree. */
 export const burnBan = {
   inEffect: false,
-  checked: '2026-11-22',
+  checked: '2026-11-23',
   headline: 'No burn ban is listed',
   summary:
-    'The Bastrop County outdoor burning page says there is no burn ban in effect. The Texas A&M Forest Service burn-ban layer also lists Bastrop County as No. Checked November 22, 2026. That can change the same day.',
+    'The Bastrop County outdoor burning page says there is no burn ban in effect. The Texas A&M Forest Service burn-ban layer also lists Bastrop County as No. Checked November 23, 2026. That can change the same day.',
   sourceUrl: 'https://www.bastropcounty.gov/page/em.outdoor_burning',
   sourceLabel: 'Bastrop County outdoor burning',
   oemUrl: 'https://www.bastropcounty.gov/page/em.home',
