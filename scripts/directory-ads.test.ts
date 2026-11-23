@@ -110,26 +110,45 @@ test('spotlight prefers the town and category, and expired slots stay off', () =
   assert.match(promo.line, /String Prairie/);
   assert.equal(promo.title, 'Heating & AC in Elgin');
   const house = resolveDirectorySpotlight({ town: 'Paige' }, '2026-11-23', []);
-  assert.equal(house.id, 'house-spotlight');
-  assert.equal(house.label, 'Advertise');
-  assert.match(house.line, /\$99/);
+  assert.equal(house, null);
+  const placeholder = houseDirectoryPromo('spotlight', { town: 'Paige' });
+  assert.equal(placeholder.id, 'house-spotlight');
+  assert.equal(placeholder.label, 'Advertise');
+  assert.match(placeholder.line, /\$99/);
 });
 
 test('in-feed follows every ten results and a short list still gets one', () => {
   const cards = (count: number) => Array.from({ length: count }, (_, index) => ({ id: String(index), badges: index === 0 ? ['Featured'] : [] }));
   const full = composeDirectoryFeed(cards(24), { category: 'food-drink' }, '2026-11-23', slots);
   const ads = full.filter((item) => item.kind === 'ad');
-  assert.equal(ads.length, 2);
-  assert.equal(full[10].kind, 'ad');
-  assert.equal(full[21].kind, 'ad');
-  if (full[10].kind === 'ad') assert.equal(full[10].ad.id, 'infeed-food');
+  assert.equal(ads.length, 3);
+  assert.equal(full[3].kind, 'ad');
+  if (full[3].kind === 'ad') assert.equal(full[3].ad.id, 'house-spotlight');
+  assert.equal(full[11].kind, 'ad');
+  if (full[11].kind === 'ad') assert.equal(full[11].ad.id, 'infeed-food');
   const short = composeDirectoryFeed(cards(4).map((card) => ({ ...card, badges: [] })), {}, '2026-11-23', []);
-  assert.equal(short[0].kind, 'ad');
-  if (short[0].kind === 'ad') assert.equal(short[0].ad.title, 'Your business here');
+  assert.equal(short[0].kind, 'card');
+  assert.equal(short[3].kind, 'ad');
+  if (short[3].kind === 'ad') assert.match(short[3].ad.line, /Spotlight/);
+  assert.equal(short[4].kind, 'ad');
+  if (short[4].kind === 'ad') assert.equal(short[4].ad.title, 'Your business here');
   assert.equal(short.at(-1)?.kind, 'ad');
   if (short.at(-1)?.kind === 'ad') assert.match(short.at(-1)!.ad.title, /Advertise on Bastropia/);
   const house = houseDirectoryPromo('infeed', {});
   assert.equal(house.placement, 'directory-infeed');
+});
+
+test('unsold ads stay after the third result and a paid spotlight stays above', () => {
+  const paid = resolveDirectorySpotlight({ town: 'Elgin', category: 'home-repair' }, '2026-11-23', slots);
+  assert.equal(paid?.id, 'spotlight-hvac-elgin');
+  const cards = Array.from({ length: 4 }, (_, index) => ({ id: String(index), badges: [] as string[] }));
+  const withPaid = composeDirectoryFeed(cards, { town: 'Elgin', category: 'home-repair' }, '2026-11-23', slots);
+  assert.ok(withPaid.slice(0, 3).every((item) => item.kind === 'card'));
+  assert.ok(withPaid.every((item) => item.kind === 'card' || item.ad.id !== 'house-spotlight'));
+  const featured = composeDirectoryFeed([{ id: 'pin', badges: ['Featured'] }, ...cards.slice(1)], {}, '2026-11-23', []);
+  assert.equal(featured[0].kind, 'card');
+  if (featured[0].kind === 'card') assert.deepEqual(featured[0].card.badges, ['Featured']);
+  assert.ok(featured.every((item) => item.kind === 'card' || item.ad.id !== 'house-featured'));
 });
 
 test('a file match can feature a partner before the D1 column exists', () => {

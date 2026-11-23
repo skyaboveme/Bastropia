@@ -64,6 +64,9 @@ const todayKey = directoryToday();
 const adContext = { town, category };
 const spotlight = filtered ? resolveDirectorySpotlight(adContext, todayKey) : null;
 const feed = composeDirectoryFeed(view.matches, adContext, todayKey);
+const countyFeed = view.matches.length === 0
+  ? composeDirectoryFeed(view.countywide, adContext, todayKey)
+  : view.countywide.map((card) => ({ kind: 'card' as const, card }));
 const partners = all.filter((entry) => entry.source === 'partner');
 const featuredProduct = directoryProductById('featured');
 const featuredRate = featuredProduct?.price ? money(featuredProduct.price) : '';
@@ -182,25 +185,6 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
         </div>
 
         <section class="dir-browse" aria-label="Browse">
-          {partners.length > 0 && (
-            <div class="dir-partners">
-              <h2 class="dir-kicker">Partners</h2>
-              <ul>
-                {partners.map((entry, index) => (
-                  <li>
-                    <a href={entry.href}>
-                      {entry.logo ? <img src={entry.logo} alt="" width="96" height="96" loading={index > 1 ? 'lazy' : 'eager'} decoding="async" /> : null}
-                      <strong>{entry.name}</strong>
-                      <span class="badge badge-partner">Partner</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <p class="dir-claim">
-            Is this your business? <a href={directoryInquireHref('featured')}>Claim it / Get Featured{featuredRate ? ` · ${featuredRate}/mo` : ''}</a>
-          </p>
           <div class="dir-towns" role="radiogroup" aria-label="Town">
             <a href={href({ town: '' })} aria-checked={!town ? 'true' : 'false'} role="radio">All towns</a>
             {towns.map((name) => (
@@ -224,6 +208,25 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
               <a href={href({ q: fill, town: '', category: '', sub: '' })} data-fill={fill}>{label}</a>
             ))}
           </div>
+          {partners.length > 0 && (
+            <div class="dir-partners">
+              <h2 class="dir-kicker">Partners</h2>
+              <ul>
+                {partners.map((entry, index) => (
+                  <li>
+                    <a href={entry.href}>
+                      {entry.logo ? <img src={entry.logo} alt="" width="96" height="96" loading="lazy" decoding="async" /> : null}
+                      <strong>{entry.name}</strong>
+                      <span class="badge badge-partner">Partner</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <p class="dir-claim">
+            Is this your business? <a href={directoryInquireHref('featured')}>Claim it / Get Featured{featuredRate ? ` · ${featuredRate}/mo` : ''}</a>
+          </p>
           <p class="dir-own"><span>Own a business here?</span> <a href="/directory/submit">List it free</a></p>
         </section>
 
@@ -281,7 +284,7 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
                   <a class="dir-more" href={href({ wide: true })}>Show listings with no street address</a>
                 ) : (
                   <ul class="biz-list">
-                    {view.countywide.map((card) => <DirectoryCard card={card} />)}
+                    {countyFeed.map((item) => item.kind === 'ad' ? <DirectoryPromo ad={item.ad} variant="card" /> : <DirectoryCard card={item.card} />)}
                   </ul>
                 )}
               </>
