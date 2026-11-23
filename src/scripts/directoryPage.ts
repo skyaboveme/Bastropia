@@ -863,6 +863,22 @@ export function bootDirectory() {
       if (ready) paint();
     });
   });
+  function requestOrigin() {
+    return new Promise<Origin>((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
+        () => resolve(null),
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+      );
+    });
+  }
+
+  async function ensureOrigin() {
+    if (state.sort !== 'near' || origin) return;
+    origin = await requestOrigin();
+  }
+
   window.addEventListener('popstate', () => {
     const params = new URLSearchParams(location.search);
     pinnedTown = params.get('town') || '';
@@ -878,8 +894,11 @@ export function bootDirectory() {
     drafting = false;
     limit = directoryPageSize();
     root!.dataset.mode = state.q || state.town || state.category ? 'results' : 'browse';
-    if (ready) paint();
-    else void loadIndex();
+    void (async () => {
+      if (state.sort === 'near') await ensureOrigin();
+      if (ready) paint();
+      else await loadIndex();
+    })();
   });
   sheet?.querySelector('[data-sheet-apply]')?.addEventListener('click', async () => {
     pinnedTown = sheetDraft.town;
@@ -889,16 +908,7 @@ export function bootDirectory() {
     }
     syncInputFromQuery(input!.value);
     state = { ...state, ...sheetDraft, q: state.q, town: pinnedTown || state.town, wide: false };
-    if (state.sort === 'near' && !origin) {
-      origin = await new Promise<Origin>((resolve) => {
-        if (!navigator.geolocation) return resolve(null);
-        navigator.geolocation.getCurrentPosition(
-          (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
-          () => resolve(null),
-          { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
-        );
-      });
-    }
+    if (state.sort === 'near') await ensureOrigin();
     limit = directoryPageSize();
     writeUrl('commit');
     root!.dataset.mode = state.q || state.town || state.category ? 'results' : 'browse';
@@ -941,9 +951,13 @@ export function bootDirectory() {
   });
 
   watchAds(root);
-  if (state.q || state.town || state.category) void loadIndex();
-  else {
-    const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
-    if (idle) idle(() => void loadIndex());
-  }
+  void (async () => {
+    if (state.sort === 'near') await ensureOrigin();
+    if (state.q || state.town || state.category) await loadIndex();
+    else {
+      const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+      if (idle) idle(() => void loadIndex());
+      else await loadIndex();
+    }
+  })();
 }

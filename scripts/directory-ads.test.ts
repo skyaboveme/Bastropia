@@ -221,6 +221,33 @@ test('advertiser keywords pin the partner and guards pin nobody', () => {
   assert.ok(dropped.every((row) => row.n !== 'String Prairie Heating & Air'));
 });
 
+test('nearest sorts by distance and does not pin', () => {
+  const rows = directoryEntries.map((entry) => entryToIndexRow(entry, '2026-11-23'));
+  rows.push({
+    id: 'elgin-air',
+    n: 'Elgin Air',
+    c: 'Heating and air',
+    t: 'Elgin',
+    h: '/elgin-air',
+    lat: 30.3499,
+    lng: -97.3705,
+    r: 3,
+  });
+  const blank = { q: 'hvac', town: '', category: '', sub: '', sort: 'near' as const, wide: false };
+  const bastrop = filterDirectoryRows(rows, blank, { lat: 30.1105, lng: -97.3153 });
+  const elgin = filterDirectoryRows(rows, blank, { lat: 30.3499, lng: -97.3705 });
+  assert.notEqual(bastrop.matches[0]?.n, 'String Prairie Heating & Air');
+  assert.notEqual(bastrop.matches[0]?.n, 'Elgin Air');
+  assert.equal(elgin.matches[0]?.n, 'Elgin Air');
+  const ordered = bastrop.matches;
+  const firstMissing = ordered.findIndex((row) => typeof row.lat !== 'number');
+  if (firstMissing >= 0) assert.ok(ordered.slice(firstMissing).every((row) => typeof row.lat !== 'number'));
+  assert.equal(directoryAdvertiserPins(rows, bastrop.matches, bastrop.units, bastrop.text, bastrop.town, '2026-11-23', { sort: 'near' }).length, 0);
+  const untitled = directoryAdContext('custom homes', '', '');
+  assert.equal(untitled.category, 'builders');
+  assert.equal(houseDirectoryPromo('spotlight', untitled).title, 'Builders');
+});
+
 test('a file match can feature a partner before the D1 column exists', () => {
   const entry = { id: 'partner:StringPrairieHeatingandAir', name: 'String Prairie Heating & Air', href: '/StringPrairieHeatingandAir', tier: '' };
   assert.equal(listingIsFeatured(entry, '2026-11-23'), false);
