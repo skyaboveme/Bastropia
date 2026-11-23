@@ -39,5 +39,7 @@ jobs:
         run: node --experimental-strip-types --test scripts/directory-ads.test.ts scripts/directory-match.test.ts
       - name: HTTPS redirect tests
         run: node --experimental-strip-types --test src/lib/httpsRedirect.test.ts
+      - name: H-E-B weekly tests
+        run: node --experimental-strip-types --test src/lib/hebWeekly.test.ts
       - name: SEO check
         run: node scripts/seo-check.mjs

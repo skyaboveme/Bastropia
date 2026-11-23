@@ -39,7 +39,7 @@
     { "pattern": "www.bastropia.com", "custom_domain": true }
   ],
   "triggers": {
-    "crons": ["*/15 * * * *"]
+    "crons": ["*/15 * * * *", "20 12 * * *"]
   },
   "vars": {
     "EVENTS_SOURCE": "bcc"

@@ -81,6 +81,17 @@ jobs:
           if [ -f /tmp/social-feed.json ]; then
             npx wrangler kv key put social:feed --remote --binding SESSION --path /tmp/social-feed.json
           fi
+      - name: Seed H-E-B weekly specials
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: aa96f50b9174b128d2cbe8f6db54b940
+          HEB_WEEKLY_OUT: /tmp/heb-weekly.json
+        run: |
+          node --experimental-strip-types scripts/seed-heb-weekly.ts
+          if [ -f /tmp/heb-weekly.json ]; then
+            npx wrangler kv key put heb:weekly --remote --binding SESSION --path /tmp/heb-weekly.json
+          fi
       - name: Ping IndexNow
         if: success()
         continue-on-error: true

@@ -1,0 +1,31 @@
+---
+/**
+ * Drop-in teaser for a server-rendered page. Not on the homepage yet.
+ * Reads the daily KV copy and shows the top trending specials.
+ */
+import HebDealCard from './HebDealCard.astro';
+import { readHebWeekly, trendingItems, type HebItem } from '../lib/hebWeekly';
+
+let items: HebItem[] = [];
+try {
+  const record = await readHebWeekly();
+  items = trendingItems(record?.items ?? [], 4, record?.highlights ?? []);
+} catch (error) {
+  console.error('heb teaser failed', error);
+}
+---
+
+{items.length > 0 && (
+  <section class="wrap heb-teaser" aria-labelledby="heb-teaser-title">
+    <div class="heb-teaser-head">
+      <div>
+        <p class="kicker">Bastrop store</p>
+        <h2 id="heb-teaser-title">This week at H-E-B</h2>
+      </div>
+      <a href="/heb-specials">All weekly specials</a>
+    </div>
+    <div class="heb-teaser-row">
+      {items.map((item) => <HebDealCard item={item} compact />)}
+    </div>
+  </section>
+)}

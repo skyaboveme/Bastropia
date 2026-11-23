@@ -1,0 +1,31 @@
+---
+import { offsiteAttrs } from '../lib/links';
+import { priceLabel, regularLabel, type HebItem } from '../lib/hebWeekly';
+
+interface Props {
+  item: HebItem;
+  compact?: boolean;
+}
+
+const { item, compact = false } = Astro.props;
+const price = priceLabel(item);
+const regular = regularLabel(item);
+const story = item.price == null ? '' : item.saleStory;
+const category = item.categories[0] ?? '';
+---
+
+<article class:list={['heb-card', compact && 'is-compact']}>
+  {item.image ? (
+    <img src={item.image} alt="" width="400" height="300" loading="lazy" decoding="async" />
+  ) : (
+    <div class="heb-photo-fallback" aria-hidden="true">H-E-B</div>
+  )}
+  <div class="heb-card-body">
+    {category && category !== 'Other' && <p class="kicker">{category}</p>}
+    <h3>{item.name}</h3>
+    <p class:list={['heb-price', item.price == null && 'is-story']}>{price}</p>
+    {regular && <p class="heb-reg">Reg. {regular}</p>}
+    {story && !compact && <p class="heb-story">{story}</p>}
+    <a class="heb-see" href={item.href} {...offsiteAttrs(item.href)}>See at H-E-B</a>
+  </div>
+</article>

@@ -2,6 +2,7 @@ import { handle } from '@astrojs/cloudflare/handler';
 import { runAlertWatch } from './lib/alertWatch';
 import { refreshDailyVideo } from './lib/dailyVideo';
 import { refreshBccEvents, runWithEventsSource, type EventsSourceMode } from './lib/eventSource';
+import { HEB_CRON, refreshHebWeekly } from './lib/hebWeekly';
 import { refreshSocialFeed } from './lib/socialFeed';
 import type { SessionKv } from './lib/sessionKv';
 import {
@@ -161,7 +162,15 @@ export default {
     return runWithEventsSource(eventsMode(env), () => render(request, env, ctx));
   },
 
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    if (controller.cron === HEB_CRON) {
+      ctx.waitUntil(
+        refreshHebWeekly().catch((error) => {
+          console.error('heb weekly refresh failed', error);
+        }),
+      );
+      return;
+    }
     ctx.waitUntil(
       runAlertWatch().catch((error) => {
         console.error('alert watch failed', error);
