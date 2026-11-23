@@ -58,6 +58,11 @@ function hydrate(raw: Partial<DirectoryIndexRow>): DirectoryIndexRow {
     lg: raw.lg || '',
     lat: raw.lat,
     lng: raw.lng,
+    sv: raw.sv,
+    kw: raw.kw,
+    cc: raw.cc,
+    ds: raw.ds,
+    de: raw.de,
   };
 }
 
