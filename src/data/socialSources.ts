@@ -54,22 +54,27 @@ export const laneFilters = [
   { id: 'community', label: 'Community' },
 ] as const;
 
-/** Timelines embedded when a scrape comes back empty. Lazy-loaded on the page. */
+/**
+ * Page Plugin timelines that actually paint posts.
+ * facebook.com/bastropia and facebook.com/bastroptx return a header and an
+ * empty body (the timeline call 404s, and a tall logo is cropped by
+ * small_header). These three return the timeline in a logged-out embed.
+ */
 export const pluginPages = [
-  { name: 'Bastropia', href: 'https://www.facebook.com/bastropia' },
-  { name: 'City of Bastrop', href: 'https://www.facebook.com/bastroptx' },
-  { name: 'Bastrop County OEM', href: 'https://www.facebook.com/BastropCountyOEM' },
+  { name: 'City of Elgin', href: 'https://www.facebook.com/CityofElginTX', sourceId: 'city-elgin' },
+  { name: 'City of Smithville', href: 'https://www.facebook.com/smithvilletx', sourceId: 'city-smithville' },
+  { name: 'Bastrop County OEM', href: 'https://www.facebook.com/BastropCountyOEM', sourceId: 'county-oem' },
 ];
 
 export function pluginSrc(href: string) {
   const url = new URL('https://www.facebook.com/plugins/page.php');
   url.searchParams.set('href', href);
   url.searchParams.set('tabs', 'timeline');
-  url.searchParams.set('width', '340');
-  url.searchParams.set('height', '480');
-  url.searchParams.set('small_header', 'true');
+  url.searchParams.set('width', '500');
+  url.searchParams.set('height', '560');
+  url.searchParams.set('small_header', 'false');
   url.searchParams.set('adapt_container_width', 'true');
-  url.searchParams.set('hide_cover', 'true');
+  url.searchParams.set('hide_cover', 'false');
   url.searchParams.set('show_facepile', 'false');
   return url.toString();
 }
