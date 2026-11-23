@@ -191,9 +191,10 @@ export function houseDirectoryPromo(kind: 'featured' | 'spotlight' | 'infeed', c
   };
 }
 
+/** A paying spotlight tile, or nothing. House placeholders stay in the result list. */
 export function resolveDirectorySpotlight(ctx: DirectoryAdContext, today: string, slots?: DirectoryAdSlot[]) {
   const slot = pickDirectorySlot('spotlight', ctx, today, slots);
-  return slot ? promoFromSlot(slot) : houseDirectoryPromo('spotlight', ctx);
+  return slot ? promoFromSlot(slot) : null;
 }
 
 export function composeDirectoryFeed<T extends { badges: string[] }>(
@@ -202,18 +203,26 @@ export function composeDirectoryFeed<T extends { badges: string[] }>(
   today: string,
   slots?: DirectoryAdSlot[],
 ): DirectoryFeedItem<T>[] {
-  const items: DirectoryFeedItem<T>[] = [];
-  if (cards.length && !cards.some((card) => card.badges.includes('Featured'))) {
-    items.push({ kind: 'ad', ad: houseDirectoryPromo('featured', ctx) });
-  }
+  const houses: DirectoryPromo[] = [];
+  if (!pickDirectorySlot('spotlight', ctx, today, slots)) houses.push(houseDirectoryPromo('spotlight', ctx));
+  if (cards.length && !cards.some((card) => card.badges.includes('Featured'))) houses.push(houseDirectoryPromo('featured', ctx));
   const slot = pickDirectorySlot('infeed', ctx, today, slots);
   const infeed = slot ? promoFromSlot(slot) : houseDirectoryPromo('infeed', ctx);
+  const items: DirectoryFeedItem<T>[] = [];
   let organic = 0;
+  let placed = false;
+  const placeHouses = () => {
+    if (placed || !houses.length) return;
+    placed = true;
+    for (const ad of houses) items.push({ kind: 'ad', ad });
+  };
   for (const card of cards) {
     items.push({ kind: 'card', card });
     organic += 1;
+    if (organic === directoryAdLimits.houseAfter) placeHouses();
     if (organic % directoryAdLimits.infeedEvery === 0) items.push({ kind: 'ad', ad: infeed });
   }
+  if (organic > 0 && organic < directoryAdLimits.houseAfter) placeHouses();
   if (organic > 0 && organic < directoryAdLimits.infeedEvery) items.push({ kind: 'ad', ad: infeed });
   return items;
 }

@@ -487,9 +487,11 @@ export function bootDirectory() {
     const spotlightHost = document.getElementById('directory-spotlight');
     if (spotlightHost) {
       spotlightHost.replaceChildren();
-      if (view.mode === 'results') spotlightHost.append(renderPromo(resolveDirectorySpotlight({ town: state.town, category: state.category }, directoryToday()), 'tile'));
+      const spotlight = view.mode === 'results' ? resolveDirectorySpotlight({ town: state.town, category: state.category }, directoryToday()) : null;
+      if (spotlight) spotlightHost.append(renderPromo(spotlight, 'tile'));
     }
-    const feed = composeDirectoryFeed(view.matches, { town: state.town, category: state.category }, directoryToday());
+    const adContext = { town: state.town, category: state.category };
+    const feed = composeDirectoryFeed(view.matches, adContext, directoryToday());
     if (feed.length) {
       const list = document.createElement('ul');
       list.className = 'biz-list';
@@ -538,7 +540,10 @@ export function bootDirectory() {
         } else {
           const list = document.createElement('ul');
           list.className = 'biz-list';
-          for (const card of view.countywide) list.append(renderCard(card));
+          const countyFeed = view.matches.length === 0
+            ? composeDirectoryFeed(view.countywide, adContext, directoryToday())
+            : view.countywide.map((card) => ({ kind: 'card' as const, card }));
+          for (const item of countyFeed) list.append(item.kind === 'ad' ? renderPromo(item.ad, 'card') : renderCard(item.card));
           countyHost.append(list);
         }
       }

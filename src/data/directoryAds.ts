@@ -66,6 +66,8 @@ export const directoryAdLimits = {
   featuredPerResults: 3,
   /** A native ad card after this many organic results. */
   infeedEvery: 10,
+  /** Unsold house ads start after this many results, never above them. */
+  houseAfter: 3,
 } as const;
 
 export type DirectoryAdSlot = {
