@@ -125,132 +125,140 @@ const statusText = forecast
     </div>
   </div>
 
-  <div class:list={['header-stage', 'has-hero', path === '/directory' && 'is-directory-page']}>
-    <div
-      class:list={['header-hero', hero.heroClass]}
-      data-header-hero={hero.rest.length > 0 ? 'true' : undefined}
-      aria-hidden="true"
-    >
-      <img
-        class="is-on"
-        src={hero.visible.src}
-        alt=""
-        width={hero.visible.width}
-        height={hero.visible.height}
-        decoding="async"
-        fetchpriority="high"
-        sizes="100vw"
-      />
-      {hero.rest.map((image) => (
+  <div class="header-stage">
+    <div class="brand-band">
+      <div
+        class:list={['header-hero', hero.heroClass]}
+        data-header-hero={hero.rest.length > 0 ? 'true' : undefined}
+        aria-hidden="true"
+      >
         <img
-          src={image.src}
+          class="is-on"
+          src={hero.visible.src}
           alt=""
-          width={image.width}
-          height={image.height}
-          decoding="async"
-          fetchpriority="low"
-          loading="lazy"
-          sizes="100vw"
-        />
-      ))}
-    </div>
-  <div class="masthead">
-    <a class="ear ear-left" href={`/weather?town=${encodeURIComponent(weatherTown)}`}>
-      <span class="ear-label">Right now</span>
-      <strong>{forecast ? `${forecast.temp}°` : 'Weather'}</strong>
-      <span class="ear-sub">{forecast ? `${weatherLabel(forecast.code)} in ${weatherTown}` : 'County forecast'}</span>
-    </a>
-    <a class="brand" href="/">
-      <picture>
-        <source srcset="/brand/logo-masthead.webp" type="image/webp" />
-        <img
-          src="/brand/logo-masthead.png"
-          alt="Bastropia"
-          width="440"
-          height="470"
+          width={hero.visible.width}
+          height={hero.visible.height}
           decoding="async"
           fetchpriority="high"
+          sizes="100vw"
         />
-      </picture>
-    </a>
-    <a class="ear ear-right" href="/burn-ban" aria-label={burn.aria}>
-      <span class="ear-label">Burn ban</span>
-      <strong class:list={['burn-word', `is-${burn.tone}`]}>
-        <BurnMark banned={burnBan.inEffect && !burn.stale} />
-        <span>{burn.status}</span>
-      </strong>
-      <span class:list={['ear-sub', { 'is-stale': burn.stale }]}>{burn.sub}</span>
-    </a>
+        {hero.rest.map((image) => (
+          <img
+            src={image.src}
+            alt=""
+            width={image.width}
+            height={image.height}
+            decoding="async"
+            fetchpriority="low"
+            loading="lazy"
+            sizes="100vw"
+          />
+        ))}
+      </div>
+      <div class="brand-row">
+        <a class="brand" href="/">
+          <span class="brand-mark">
+            <picture>
+              <source srcset="/brand/logo-masthead.webp" type="image/webp" />
+              <img src="/brand/logo-masthead.png" alt="" width="440" height="470" decoding="async" />
+            </picture>
+          </span>
+          <span class="brand-name">Bastropia</span>
+        </a>
+      </div>
+    </div>
 
-  </div>
-
-  <div class="county-strip" id="county-strip">
-    <a href="https://waterdata.usgs.gov/monitoring-location/08159200/">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 10.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0M3 14.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0M3 18.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0"/></svg>
-        <span class="strip-name">Colorado River</span>
-        <strong data-now="river">—</strong>
-      </span>
-      <em data-now="river-detail">Bastrop gauge</em>
-    </a>
-    <a href="https://www.tceq.texas.gov/cgi-bin/compliance/monops/daily_summary.pl?cams=1612">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 8.5c2.2 0 3.3 1.7 5.5 1.7S12.3 8.5 14.5 8.5 17.8 10.2 20 10.2M3.5 13c2.2 0 3.3 1.7 5.5 1.7S12.3 13 14.5 13s3.3 1.7 5.5 1.7M3.5 17.5c2.2 0 3.3 1.7 5.5 1.7S12.3 17.5 14.5 17.5s3.3 1.7 5.5 1.7"/></svg>
-        <span class="strip-name">Air</span>
-        <strong data-now="air">—</strong>
-      </span>
-      <em data-now="air-detail">Bastrop</em>
-    </a>
-    <a href="/roads">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m12 3.5 8.5 17h-17L12 3.5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4.5M12 17.5v.2"/></svg>
-        <span class="strip-name">SH 71</span>
-        <strong data-now="sh71">—</strong>
-      </span>
-      <em data-now="sh71-detail">Construction</em>
-    </a>
-    <a href="/roads">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m12 3.5 8.5 17h-17L12 3.5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4.5M12 17.5v.2"/></svg>
-        <span class="strip-name">US 290</span>
-        <strong data-now="us290">—</strong>
-      </span>
-      <em data-now="us290-detail">Construction</em>
-    </a>
-    <a href="/schools">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3.5 9.5 8.5-3 8.5 3-8.5 3-8.5-3Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 11.2v4.1c0 .7 2.2 2.2 5 2.2s5-1.5 5-2.2v-4.1M20.5 9.5v6"/></svg>
-        <span class="strip-name">Schools</span>
-        <strong data-now="schools">—</strong>
-      </span>
-      <em data-now="schools-detail">Four districts</em>
-    </a>
-    <a href="https://www.bluebonnet.coop/outages">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M13 3.5 6.5 13h5l-1 7.5L18 10.5h-5L13 3.5Z"/></svg>
-        <span class="strip-name">Power</span>
-        <strong data-now="power">—</strong>
-      </span>
-      <em data-now="power-detail">Bluebonnet</em>
-    </a>
-    <a href="https://www.ams.usda.gov/mnreports/ams_1955.pdf">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4.8 15.2c.2-2.4 2-4.3 4.4-4.5.3-1.6 1.7-2.8 3.4-2.6 1.4.2 2.5 1.2 2.9 2.4 1.9.3 3.3 1.8 3.3 3.6 0 2-1.5 3.4-3.5 3.4H8.3c-2 0-3.5-1.4-3.5-3.3Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.2 11.2 7 8.4M15.2 10.8l1.3-2.6"/></svg>
-        <span class="strip-name">Beef</span>
-        <strong data-now="beef">—</strong>
-      </span>
-      <em data-now="beef-detail">Texas auctions</em>
-    </a>
-    <a href="/weather">
-      <span class="strip-line">
-        <svg class="strip-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3.2C12 3.2 7.2 9 7.2 12.4a4.8 4.8 0 0 0 9.6 0C16.8 9 12 3.2 12 3.2Z"/></svg>
-        <span class="strip-name">Rain</span>
-        <strong data-now="rain">—</strong>
-      </span>
-      <em data-now="rain-detail">Last 7 days</em>
-    </a>
-  </div>
-  <p class="strip-also" data-now="also" hidden></p>
+    <section class="now-board" id="county-strip" aria-label="Right now in Bastrop County">
+      <ul class="now-grid">
+        <li>
+          <a class="now-card is-lead" href={`/weather?town=${encodeURIComponent(weatherTown)}`}>
+            <strong class="now-value">{forecast ? `${forecast.temp}°` : 'Weather'}</strong>
+            <span class="now-label">Right now</span>
+            <span class="now-detail">{forecast ? `${weatherLabel(forecast.code)} in ${weatherTown}` : 'County forecast'}</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M6.1 6.1l1.4 1.4M16.5 16.5l1.4 1.4M17.9 6.1l-1.4 1.4M7.5 16.5 6.1 17.9"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class:list={['now-card', burn.tone === 'stop' && 'is-alert', burn.tone === 'stale' && 'is-stale']} href="/burn-ban" aria-label={burn.aria}>
+            <strong class:list={['now-value', 'is-phrase', 'burn-word', `is-${burn.tone}`]}>{burn.status}</strong>
+            <span class="now-label">Burn ban</span>
+            <span class:list={['now-detail', { 'is-stale': burn.stale }]}>{burn.sub}</span>
+            <BurnMark banned={burnBan.inEffect && !burn.stale} />
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="https://waterdata.usgs.gov/monitoring-location/08159200/">
+            <strong class="now-value" data-now="river">—</strong>
+            <span class="now-label">Colorado River</span>
+            <span class="now-detail" data-now="river-detail">Bastrop gauge</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 10.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0M3 14.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0M3 18.5c1.6 1.4 3.4 1.4 5 0s3.4-1.4 5 0 3.4 1.4 5 0"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="https://www.tceq.texas.gov/cgi-bin/compliance/monops/daily_summary.pl?cams=1612">
+            <strong class="now-value" data-now="air">—</strong>
+            <span class="now-label">Air</span>
+            <span class="now-detail" data-now="air-detail">Bastrop</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 8.5c2.2 0 3.3 1.7 5.5 1.7S12.3 8.5 14.5 8.5 17.8 10.2 20 10.2M3.5 13c2.2 0 3.3 1.7 5.5 1.7S12.3 13 14.5 13s3.3 1.7 5.5 1.7M3.5 17.5c2.2 0 3.3 1.7 5.5 1.7S12.3 17.5 14.5 17.5s3.3 1.7 5.5 1.7"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="/roads">
+            <strong class="now-value" data-now="sh71">—</strong>
+            <span class="now-label">SH 71</span>
+            <span class="now-detail" data-now="sh71-detail">Construction</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m12 3.5 8.5 17h-17L12 3.5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4.5M12 17.5v.2"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="/roads">
+            <strong class="now-value" data-now="us290">—</strong>
+            <span class="now-label">US 290</span>
+            <span class="now-detail" data-now="us290-detail">Construction</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m12 3.5 8.5 17h-17L12 3.5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4.5M12 17.5v.2"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="/schools">
+            <strong class="now-value" data-now="schools">—</strong>
+            <span class="now-label">Schools</span>
+            <span class="now-detail" data-now="schools-detail">Four districts</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3.5 9.5 8.5-3 8.5 3-8.5 3-8.5-3Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 11.2v4.1c0 .7 2.2 2.2 5 2.2s5-1.5 5-2.2v-4.1M20.5 9.5v6"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="https://www.bluebonnet.coop/outages">
+            <strong class="now-value" data-now="power">—</strong>
+            <span class="now-label">Power</span>
+            <span class="now-detail" data-now="power-detail">Bluebonnet</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M13 3.5 6.5 13h5l-1 7.5L18 10.5h-5L13 3.5Z"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="https://www.ams.usda.gov/mnreports/ams_1955.pdf">
+            <strong class="now-value" data-now="beef">—</strong>
+            <span class="now-label">Beef</span>
+            <span class="now-detail" data-now="beef-detail">Texas auctions</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4.8 15.2c.2-2.4 2-4.3 4.4-4.5.3-1.6 1.7-2.8 3.4-2.6 1.4.2 2.5 1.2 2.9 2.4 1.9.3 3.3 1.8 3.3 3.6 0 2-1.5 3.4-3.5 3.4H8.3c-2 0-3.5-1.4-3.5-3.3Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.2 11.2 7 8.4M15.2 10.8l1.3-2.6"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="now-card" href="/weather">
+            <strong class="now-value" data-now="rain">—</strong>
+            <span class="now-label">Rain</span>
+            <span class="now-detail" data-now="rain-detail">Last 7 days</span>
+            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3.2C12 3.2 7.2 9 7.2 12.4a4.8 4.8 0 0 0 9.6 0C16.8 9 12 3.2 12 3.2Z"/></svg>
+          </a>
+        </li>
+      </ul>
+      <details class="now-chip" hidden>
+        <summary>
+          <span class="now-chip-kicker">Road alert</span>
+          <span class="now-chip-text" data-now="also"></span>
+          <span class="now-chip-chevron" aria-hidden="true"></span>
+        </summary>
+      </details>
+    </section>
   </div>
   <script is:inline>
     fetch('/api/now')
@@ -258,7 +266,17 @@ const statusText = forecast
       .then((data) => {
         const set = (key, value) => {
           const node = document.querySelector(`[data-now="${key}"]`);
-          if (node && value) node.textContent = value;
+          if (!node || !value) return;
+          node.textContent = value;
+          if (node.classList.contains('now-value')) node.classList.toggle('is-phrase', value.length > 8);
+          if (node.classList.contains('now-detail')) node.title = value;
+        };
+        const mark = (key, label) => {
+          const node = document.querySelector(`[data-now="${key}"]`);
+          const link = node && node.closest('a');
+          if (!link || !label) return;
+          const quiet = label === 'Normal day' || label === 'None reported' || label === 'None listed' || label === 'No burn ban';
+          link.classList.toggle('is-alert', !quiet);
         };
         if (data.river) {
           set('river', data.river.label);
@@ -277,20 +295,18 @@ const statusText = forecast
         if (sh) {
           set('sh71', sh.label);
           set('sh71-detail', sh.label === 'None listed' ? 'No alert filed' : sh.detail);
+          mark('sh71', sh.label);
         }
         if (us) {
           set('us290', us.label);
           set('us290-detail', us.label === 'None listed' ? 'No alert filed' : us.detail);
+          mark('us290', us.label);
         }
         const fill = (key, line) => {
           if (!line) return;
           set(key, line.label);
           set(`${key}-detail`, line.detail);
-          const node = document.querySelector(`[data-now="${key}"]`);
-          const link = node && node.closest('a');
-          if (!link) return;
-          const quiet = line.label === 'Normal day' || line.label === 'None reported' || line.label === 'None listed';
-          link.classList.toggle('is-alert', !quiet);
+          mark(key, line.label);
         };
         fill('schools', data.schools);
         fill('power', data.power);
@@ -303,8 +319,9 @@ const statusText = forecast
         }
         const also = document.querySelector('[data-now="also"]');
         if (also && data.others && data.others.length) {
-          also.hidden = false;
           also.textContent = data.others.map((alert) => `${alert.route}: ${alert.detail}`).join(' ');
+          const chip = also.closest('.now-chip');
+          if (chip) chip.hidden = false;
         }
       })
       .catch(() => {});
