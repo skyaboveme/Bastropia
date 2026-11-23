@@ -51,6 +51,14 @@ const saved = Astro.url.searchParams.get('saved');
             <label class="field"><span>Page address</span><input name="slug" value={business.slug} /></label>
             <label class="field"><span>Category</span><input name="category" required value={business.category} /></label>
             <label class="field">
+              <span>Directory tier</span>
+              <select name="tier">
+                <option value="" selected={!business.tier}>Free</option>
+                <option value="featured" selected={business.tier === 'featured'}>Featured</option>
+                <option value="spotlight" selected={business.tier === 'spotlight'}>Spotlight badge</option>
+              </select>
+            </label>
+            <label class="field">
               <span>Town</span>
               <select name="city" required>
                 {towns.map((city) => <option value={city} selected={city === business.city}>{city}</option>)}

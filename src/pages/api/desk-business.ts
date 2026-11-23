@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { deskAuthorized } from '../../lib/auth';
-import { insertBusiness, readLogoFile, setAccount, storeLogo, updateBusiness } from '../../lib/businessDb';
+import { insertBusiness, readLogoFile, setAccount, setBusinessTier, storeLogo, updateBusiness } from '../../lib/businessDb';
 
 export const prerender = false;
 
@@ -25,6 +25,7 @@ function fields(form: FormData) {
     banner_url: String(form.get('banner_url') || ''),
     banner_placement: String(form.get('banner_placement') || ''),
     details: String(form.get('details') || ''),
+    tier: String(form.get('tier') || ''),
   };
 }
 
@@ -38,7 +39,9 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
     const logo = await readLogoFile(form.get('logo'));
     const removeLogo = form.get('remove_logo') === 'yes';
     if (action === 'create') {
-      const row = await insertBusiness({ ...fields(form), status: 'live' });
+      const { tier, ...listing } = fields(form);
+      const row = await insertBusiness({ ...listing, status: 'live' });
+      await setBusinessTier(row.id, tier);
       if (logo) await storeLogo(row.id, logo);
       const username = String(form.get('username') || '');
       const password = String(form.get('password') || '');
@@ -46,8 +49,10 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       return bounce(`/desk/businesses/${row.id}?saved=1`);
     }
     if (action === 'save' || action === 'approve') {
-      const row = await updateBusiness(existingId, { ...fields(form), status: 'live' });
+      const { tier, ...listing } = fields(form);
+      const row = await updateBusiness(existingId, { ...listing, status: 'live' });
       if (!row) return bounce(`${back}?error=save`);
+      await setBusinessTier(row.id, tier);
       if (logo || removeLogo) await storeLogo(existingId, logo, removeLogo && !logo);
       const username = String(form.get('username') || '');
       const password = String(form.get('password') || '');

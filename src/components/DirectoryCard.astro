@@ -11,15 +11,22 @@ const more = card.actions.find((action) => action.label === 'More');
 const slots = card.actions.filter((action) => action.label !== 'More' && action.kind !== 'share');
 ---
 
-<li class="biz-row">
+<li
+  class:list={['biz-row', card.badges.includes('Featured') && 'is-featured', card.badges.includes('Partner') && 'is-partner']}
+  data-dir-ad={card.track ? '' : undefined}
+  data-ad-id={card.track || undefined}
+  data-ad-placement={card.track ? 'directory-featured' : undefined}
+>
   <a class="biz-hit" href={card.href} aria-label={card.name} target={card.external ? '_blank' : undefined} rel={card.external ? 'noopener noreferrer' : undefined}>
     <span class:list={['biz-mark', card.logo && 'has-logo']} aria-hidden="true">
-      {card.logo ? <img class="biz-logo" src={card.logo} alt="" decoding="async" /> : <CategoryIcon icon={card.icon} />}
+      {card.logo ? <img class="biz-logo" src={card.logo} alt="" decoding="async" loading="lazy" /> : <CategoryIcon icon={card.icon} />}
     </span>
     <span class="biz-copy">
       <span class="biz-name">
         {card.name}
-        {card.badge && <span class:list={['badge', card.badge === 'Featured' && 'badge-featured', card.badge === 'Spotlight' && 'badge-spotlight']}>{card.badge}</span>}
+        {card.badges.map((badge) => (
+          <span class:list={['badge', badge === 'Featured' && 'badge-featured', badge === 'Spotlight' && 'badge-spotlight', badge === 'Partner' && 'badge-partner']}>{badge}</span>
+        ))}
       </span>
       <span class="biz-line">
         {card.trade} · {card.placeLabel}
@@ -27,6 +34,7 @@ const slots = card.actions.filter((action) => action.label !== 'More' && action.
         {card.open && <span class:list={['biz-open', card.open === 'Closed' && 'is-closed']}>{card.open}</span>}
       </span>
       {card.address && <span class="biz-addr">{card.address}</span>}
+      {card.blurb && <span class="biz-blurb">{card.blurb}</span>}
     </span>
   </a>
   {slots.length > 0 && (

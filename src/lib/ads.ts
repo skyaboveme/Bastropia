@@ -5,7 +5,8 @@ import { eventBanners } from '../data/eventBanners';
 import { homeBanners } from '../data/homeBanners';
 import { weekendBanners } from '../data/weekendBanners';
 import { activeBanners } from './bannerSchedule';
-import { bannersForPlacement } from './businessDb';
+import { directoryAdSlots } from '../data/directoryAds';
+import { bannersForPlacement, getBusiness } from './businessDb';
 import { httpUrl } from './intake';
 import { eventKey } from './time';
 
@@ -458,6 +459,38 @@ async function knownAd(id: string) {
   const item = (await readCatalog()).find((ad) => ad.id === id);
   if (!item) return null;
   return { id, name: item.name, href: item.href, placements: item.placements, active: item.active };
+}
+
+const directoryPlacements = new Set(['directory-featured', 'directory-spotlight', 'directory-infeed']);
+
+function knownDirectoryId(id: string) {
+  if (id.startsWith('house-') || id.startsWith('partner-')) return true;
+  if (directoryAdSlots.some((slot) => slot.id === id)) return true;
+  return /^biz[a-z0-9]+$/.test(id);
+}
+
+/** Directory slot impressions and clicks, stored with the same ad:stat keys as banners. */
+export async function recordDirectoryStat(id: string, placement: string, kind: 'impressions' | 'clicks') {
+  try {
+    if (!directoryPlacements.has(placement) || !safeId(id) || !knownDirectoryId(id)) return false;
+    if (id.startsWith('biz')) {
+      const business = await getBusiness(id);
+      if (!business || business.status !== 'live') return false;
+    }
+    const kv = store();
+    if (!kv) return false;
+    const key = `ad:stat:${id}:${placement}:${eventKey(new Date())}`;
+    const current = (await kv.get(key, 'json')) as { impressions?: number; clicks?: number } | null;
+    const next = {
+      impressions: Number(current?.impressions) || 0,
+      clicks: Number(current?.clicks) || 0,
+    };
+    next[kind] += 1;
+    await kv.put(key, JSON.stringify(next));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function recordStat(id: string, placement: string, kind: 'impressions' | 'clicks') {

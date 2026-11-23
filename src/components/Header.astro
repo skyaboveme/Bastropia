@@ -81,7 +81,13 @@ const statusText = forecast
 {compact ? (
   <header class="compact-head">
     <div class="compact-bar">
-      <a class="compact-brand" href="/">Bastropia</a>
+      <a class="compact-brand" href="/">
+        <picture>
+          <source srcset="/brand/logo-masthead.webp" type="image/webp" />
+          <img src="/brand/logo-masthead.png" alt="" width="37" height="40" decoding="async" />
+        </picture>
+        <span>Bastropia</span>
+      </a>
       <a class="compact-status" href={statusHref}>{statusText}</a>
       <button class="menu compact-menu" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">☰</button>
     </div>

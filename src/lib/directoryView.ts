@@ -1,5 +1,6 @@
 import type { DirectoryEntry } from '../data/directory.ts';
 import { categoryIcon } from '../data/categoryIcons.ts';
+import { directoryToday, directoryTrackId, listingIsFeatured, pinDirectoryFeatured } from './directoryAds.ts';
 import { outboundLabel } from './maps.ts';
 import { directoryLabelInfo, categoryMatchesGroup, groupShort, subgroupsForGroup, directoryGridGroups, directoryMoreGroups } from './directoryGroups.ts';
 import { directoryOpenPill } from './directoryHours.ts';
@@ -23,6 +24,9 @@ export type DirectoryIndexRow = MatchRow & {
   hr?: string;
   r?: number;
   b?: string;
+  /** 1 when the row is a partner page. */
+  k?: number;
+  su?: string;
   lg?: string;
   lat?: number;
   lng?: number;
@@ -42,7 +46,10 @@ export type DirectoryCard = {
   name: string;
   href: string;
   external: boolean;
-  badge: string;
+  badges: string[];
+  blurb: string;
+  /** Set on Featured cards so the impression beacon has an id. */
+  track: string;
   icon: string;
   logo: string;
   trade: string;
@@ -90,14 +97,6 @@ export type DirectoryView = {
 
 const PAGE = 24;
 
-function badgeOf(entry: { tier?: string; source?: string; b?: string }) {
-  if (entry.b) return entry.b;
-  if (entry.tier === 'featured') return 'Featured';
-  if (entry.tier === 'spotlight') return 'Spotlight';
-  if (entry.source === 'partner') return 'Partner';
-  return '';
-}
-
 function rankOf(entry: { tier?: string; source?: string; r?: number }) {
   if (typeof entry.r === 'number') return entry.r;
   if (entry.tier === 'featured') return 0;
@@ -106,10 +105,20 @@ function rankOf(entry: { tier?: string; source?: string; r?: number }) {
   return 3;
 }
 
-export function entryToIndexRow(entry: DirectoryEntry): DirectoryIndexRow {
+function clipLine(value: string, max = 90) {
+  const text = value.replace(/\s+/g, ' ').trim();
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  const word = cut.replace(/\s+\S*$/, '');
+  return `${word || cut}…`;
+}
+
+export function entryToIndexRow(entry: DirectoryEntry, today = directoryToday()): DirectoryIndexRow {
   const siteIsFacebook = outboundLabel(entry.website) === 'Facebook';
   const website = !siteIsFacebook ? entry.website || '' : '';
   const facebook = entry.facebook || (siteIsFacebook ? entry.website || '' : '');
+  const featured = listingIsFeatured(entry, today);
+  const partner = entry.source === 'partner';
   return {
     id: entry.id,
     n: entry.name,
@@ -123,8 +132,10 @@ export function entryToIndexRow(entry: DirectoryEntry): DirectoryIndexRow {
     fb: facebook,
     maps: entry.mapsUrl || '',
     hr: entry.hours || '',
-    r: rankOf(entry),
-    b: badgeOf(entry),
+    r: featured ? 0 : rankOf(entry),
+    b: featured ? 'Featured' : entry.tier === 'spotlight' ? 'Spotlight' : '',
+    k: partner ? 1 : 0,
+    su: partner && entry.summary ? clipLine(entry.summary) : '',
     lg: entry.logo || '',
   };
 }
@@ -194,12 +205,17 @@ export function toDirectoryCard(row: DirectoryIndexRow, now = new Date()): Direc
   const address = addressLine(row);
   const town = row.t || '';
   const { actions, menu } = cardActions(row);
+  const badges: string[] = [];
+  if (row.b === 'Featured' || row.b === 'Spotlight') badges.push(row.b);
+  if (row.k || row.b === 'Partner' || row.b === 'Partner page') badges.push('Partner');
   return {
     id: row.id,
     name: row.n,
     href: row.h,
     external: /^https?:/i.test(row.h),
-    badge: row.b === 'Partner page' ? 'Partner' : row.b || '',
+    badges,
+    blurb: row.k && row.su ? row.su : '',
+    track: badges.includes('Featured') ? directoryTrackId(row.id) : '',
     icon: categoryIcon(row.c),
     logo: row.lg || '',
     trade: info.subgroup || info.display || row.c,
@@ -264,6 +280,7 @@ export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQ
     });
   }
   const countywide = state.town && state.town !== 'Countywide' ? found.countywide : [];
+  const today = directoryToday();
   const sortAz = state.sort === 'az' || (!state.q && state.sort !== 'near' && !found.units.length);
   if (state.sort === 'near' && origin) {
     matches.sort((a, b) => miles(a, origin) - miles(b, origin) || compareDirectoryAz(a.n, b.n));
@@ -276,7 +293,15 @@ export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQ
     const rankedCounty = rankDirectoryRows(countywide, found.units);
     countywide.splice(0, countywide.length, ...rankedCounty);
   }
-  return { matches, countywide, town: found.town || (state.town === 'Countywide' ? '' : state.town), units: found.units, text: found.text };
+  const pinned = pinDirectoryFeatured(matches, today);
+  const pinnedCounty = pinDirectoryFeatured(countywide, today);
+  return {
+    matches: pinned,
+    countywide: pinnedCounty,
+    town: found.town || (state.town === 'Countywide' ? '' : state.town),
+    units: found.units,
+    text: found.text,
+  };
 }
 
 export function buildDirectoryView(
@@ -373,6 +398,8 @@ export function indexPayload(rows: DirectoryIndexRow[]) {
     if (row.maps) next.maps = row.maps;
     if (row.hr) next.hr = row.hr;
     if (row.b) next.b = row.b;
+    if (row.k) next.k = row.k;
+    if (row.su) next.su = row.su;
     if (row.lg) next.lg = row.lg;
     if (typeof row.lat === 'number') next.lat = row.lat;
     if (typeof row.lng === 'number') next.lng = row.lng;
