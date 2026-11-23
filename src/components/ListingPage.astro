@@ -4,6 +4,7 @@ import { directoryBusiness, listingSummary } from '../lib/schema';
 import { logoSrc, type Biz, type BizEvent, type BizSpecial } from '../lib/businessDb';
 import { mapsSearchUrl, outboundLabel } from '../lib/maps';
 import { loadDirectoryEntries } from '../lib/directoryFeed';
+import { directoryInquireHref } from '../lib/directoryAds';
 import { directoryLabelInfo } from '../lib/directoryGroups';
 
 interface Props {
@@ -127,8 +128,8 @@ const related = (await loadDirectoryEntries())
         </ul>
       </section>
     )}
-    <p class="listing-own">Own this business? <a href="/business">Update this listing</a></p>
-    <p class="listing-upsell"><a href="/advertise">A partner page</a> is the paid option when you want the full treatment.</p>
+    <p class="listing-own">Is this your business? <a href={directoryInquireHref('featured', business.name)}>Claim it / Get Featured</a></p>
+    <p class="listing-upsell"><a href="/business">Update this listing</a> if you already have a login. <a href={directoryInquireHref('partner', business.name)}>A partner page</a> is quoted on request.</p>
   </article>
   <div class="listing-sticky" data-listing-sticky hidden>
     {phoneDigits && <a class="button" href={`/go/biz/${business.id}?to=phone`}>Call</a>}

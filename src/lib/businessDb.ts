@@ -348,6 +348,20 @@ export async function updateBusiness(
   return next;
 }
 
+/** Writes businesses.tier. Returns false when the column is not on this database yet. */
+export async function setBusinessTier(businessId: string, tier: string) {
+  const db = database();
+  if (!db || !businessId) return false;
+  const value = tier === 'featured' || tier === 'spotlight' ? tier : '';
+  try {
+    await db.prepare('UPDATE businesses SET tier = ? WHERE id = ?').bind(value, businessId).run();
+    return true;
+  } catch (error) {
+    if (missingColumn(error)) return false;
+    throw error;
+  }
+}
+
 export async function getBusiness(idOrSlug: string) {
   const db = database();
   if (!db) return null;

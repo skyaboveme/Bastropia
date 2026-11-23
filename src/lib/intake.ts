@@ -1,5 +1,6 @@
 import { alertTopics } from '../data/alerts';
 import { placementById, tierById, type ListingTierId, type PlacementId } from '../data/commerce';
+import { directoryFoundingNote, directoryProductByPlacement } from './directoryAds';
 import { sessionKv } from './sessionKv';
 import { addDays, addMonths } from './time';
 import type { Tier } from '../data/taxonomy';
@@ -179,8 +180,10 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
 
   if (type === 'ad') {
     if (input.terms !== 'yes') return { ok: false as const, error: 'terms' };
-    const placement = placementById(clean(input.placement, 40));
-    if (!placement) return { ok: false as const, error: 'placement' };
+    const requested = clean(input.placement, 40);
+    const directoryProduct = directoryProductByPlacement(requested);
+    const placement = directoryProduct ? null : placementById(requested);
+    if (!directoryProduct && !placement) return { ok: false as const, error: 'placement' };
     const count = Math.min(12, Math.max(1, Number(input.count) || 0));
     if (!count) return { ok: false as const, error: 'count' };
     const start = clean(input.start, 10);
@@ -189,12 +192,15 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
     const line = clean(input.line, 90);
     const href = httpUrl(clean(input.website, 300));
     if (!business || !line || !href) return { ok: false as const, error: 'details' };
-    const unit = placement.unit;
+    const unit = directoryProduct ? 'month' : placement!.unit;
     const unitLabel = count === 1 ? unit : `${unit}s`;
-    total = placement.rate * count;
+    const rate = directoryProduct ? directoryProduct.price ?? 0 : placement!.rate;
+    total = rate * count;
+    const placementId = directoryProduct ? directoryProduct.placement : placement!.id;
+    const placementName = directoryProduct ? directoryProduct.name : placement!.name;
     Object.assign(fields, {
-      placement: placement.id,
-      placementName: placement.name,
+      placement: placementId,
+      placementName,
       count: String(count),
       unit,
       start,
@@ -206,7 +212,14 @@ export function buildRecord(input: Record<string, string>, id: string, now = new
       contact: clean(input.contact, 80),
       notes: clean(input.notes, 1200),
     });
-    summary = `${placement.name} for ${count} ${unitLabel}, starting ${start}`;
+    if (directoryProduct) {
+      fields.directoryProduct = directoryProduct.id;
+      const founding = directoryFoundingNote(directoryProduct);
+      if (founding) fields.founding = founding;
+    }
+    summary = directoryProduct?.price == null && directoryProduct
+      ? `${directoryProduct.name} quote for ${business}`
+      : `${placementName} for ${count} ${unitLabel}, starting ${start}`;
   }
 
   if (type === 'upgrade') {

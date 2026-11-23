@@ -5,17 +5,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import FormError from '../components/FormError.astro';
 import { placements } from '../data/commerce';
+import { directoryFounding, directoryProducts } from '../data/directoryAds';
+import { directoryFoundingNote } from '../lib/directoryAds';
 import { money } from '../lib/format';
 import { addDays, eventKey } from '../lib/time';
 
 const selected = Astro.url.searchParams.get('placement');
+const productId = Astro.url.searchParams.get('product') || '';
+const businessName = (Astro.url.searchParams.get('business') || '').trim().slice(0, 80);
+const directoryPick = directoryProducts.find((item) => item.id === productId && item.placement);
 const start = addDays(eventKey(new Date()), 7);
-const offers = Object.fromEntries(
-  placements.map((item) => [item.id, { rate: item.rate, unit: item.unit, name: item.name, page: item.page }]),
-);
+const offers = Object.fromEntries([
+  ...placements.map((item) => [item.id, { rate: item.rate, unit: item.unit, name: item.name, page: item.page, quote: false }]),
+  ...directoryProducts
+    .filter((item) => item.placement)
+    .map((item) => [item.placement, { rate: item.price ?? 0, unit: 'month', name: item.name, page: 'Directory', quote: item.price == null }]),
+]);
 const pageSponsors = placements.filter((item) => item.id !== 'home-banner');
 const siteBanner = placements.find((item) => item.id === 'home-banner') ?? placements[0];
-const initial = placements.find((item) => item.id === selected) ?? siteBanner;
+const initial = directoryPick
+  ? { id: directoryPick.placement, rate: directoryPick.price ?? 0, unit: 'month' as const, name: directoryPick.name, page: 'Directory' }
+  : placements.find((item) => item.id === selected) ?? siteBanner;
 const defaultRate = initial.rate;
 const today = eventKey(new Date());
 const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(
@@ -95,22 +105,46 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
       <div class="section-head">
         <div>
           <p class="kicker">Reserve a spot</p>
-          <h2>Two ways to show up</h2>
+          <h2>Where you can show up</h2>
         </div>
       </div>
-      <p class="ad-book-lede">A page sponsor is the large banner on one page. The run-of-site banner is the short strip in the body of the section pages. Tell us which one you want and when to start. We confirm the dates are open and send the invoice.</p>
+      <p class="ad-book-lede">The directory has Featured listings, a Spotlight tile, and partner pages. A page sponsor is the large banner on one page. The run-of-site banner is the short strip in the body of the section pages. Tell us which one you want and when to start. We confirm the dates are open and send the invoice.</p>
       <FormError />
       <form id="ad-form" class="form" action="/api/intake" method="post">
         <input type="hidden" name="type" value="ad" />
         <input type="hidden" name="from" value="/advertise" />
         <input class="hp" type="text" name="bastro_hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <fieldset class="ad-offer" id="directory">
+          <legend>Directory</legend>
+          <p>
+            Listings on the business directory. The first {directoryFounding.slots} businesses can lock the founding rate for {directoryFounding.months} months.
+            Nothing is charged on this form. The desk confirms the dates and sends an invoice.
+          </p>
+          <div class="place-grid ad-places">
+            {directoryProducts.map((product) => product.placement ? (
+              <label class="choice">
+                <input type="radio" name="placement" value={product.placement} required checked={directoryPick?.id === product.id} />
+                <p class="kicker">{product.price == null ? 'Quote' : `${money(product.price)} / month`}</p>
+                <h3>{product.name}</h3>
+                <p class="meta">{product.summary}</p>
+                {directoryFoundingNote(product) && <p class="ad-place-detail">{directoryFoundingNote(product)}</p>}
+              </label>
+            ) : (
+              <a class="choice" href="/directory/submit">
+                <p class="kicker">Free</p>
+                <h3>{product.name}</h3>
+                <p class="meta">{product.summary}</p>
+              </a>
+            ))}
+          </div>
+        </fieldset>
         <fieldset class="ad-offer">
           <legend>Page sponsors</legend>
           <p>The large banner. On a desktop it runs up to 1000 pixels wide. On a phone it is full width. One advertiser owns the period. Most are billed by the month. This weekend is billed per weekend. If two reserve the same page, they share a short rotation.</p>
           <div class="place-grid ad-places">
             {pageSponsors.map((placement) => (
               <label class="choice">
-                <input type="radio" name="placement" value={placement.id} required checked={selected === placement.id} />
+                <input type="radio" name="placement" value={placement.id} required checked={!directoryPick && selected === placement.id} />
                 <p class="kicker">{placement.page} · {money(placement.rate)} / {placement.unit}</p>
                 <h3>{placement.name}</h3>
                 <p class="meta">{placement.where}</p>
@@ -122,9 +156,9 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
         <fieldset class="ad-offer">
           <legend>Run of site</legend>
           <p>The same 1200×500 image, shown shorter. On a desktop the strip is about 544 pixels wide and centered. On a phone it is full width. It sits in the body of the section pages, after the opening, not under the title.</p>
-          <div class="place-grid ad-places">
+          <div class="place-grid ad-places is-single">
             <label class="choice">
-              <input type="radio" name="placement" value={siteBanner.id} required checked={selected ? selected === siteBanner.id : true} />
+              <input type="radio" name="placement" value={siteBanner.id} required checked={!directoryPick && (selected ? selected === siteBanner.id : true)} />
               <p class="kicker">{siteBanner.page} · {money(siteBanner.rate)} / {siteBanner.unit}</p>
               <h3>{siteBanner.name}</h3>
               <p class="meta">{siteBanner.where}</p>
@@ -159,7 +193,7 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
               <div class="fields">
                 <label class="field">
                   <span>Business name</span>
-                  <input name="business" required maxlength="80" autocomplete="organization" />
+                  <input name="business" required maxlength="80" autocomplete="organization" value={businessName} />
                 </label>
                 <label class="field">
                   <span>Contact name</span>
@@ -188,7 +222,7 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
                     <span>Line for the invoice</span>
                     <span id="ad-line-count" class="field-count">0 of 90</span>
                   </span>
-                  <input name="line" required maxlength="90" placeholder="Main Street Produce, November" aria-describedby="ad-line-hint" />
+                  <input name="line" required maxlength="90" placeholder="Main Street Produce, November" aria-describedby="ad-line-hint" value={directoryPick ? `${directoryPick.name} on the directory` : ''} />
                   <small id="ad-line-hint">Shown on the invoice, not printed on the banner.</small>
                 </label>
                 <label class="field wide">
@@ -298,7 +332,8 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
     color: var(--ink-soft);
   }
   .ad-places { grid-template-columns: repeat(3, 1fr); }
-  .ad-offer + .ad-offer .ad-places { grid-template-columns: minmax(0, 36rem); }
+  .ad-places.is-single { grid-template-columns: minmax(0, 36rem); }
+  .ad-places a.choice { color: inherit; text-decoration: none; display: block; }
   .ad-places .choice h3 {
     font-family: var(--serif);
     font-size: 1.55rem;
@@ -474,7 +509,7 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
   const update = () => {
     if (!(form instanceof HTMLFormElement) || !total) return;
     const data = new FormData(form);
-    const offer = offers[String(data.get('placement'))] || { rate: 0, unit: 'month', name: 'Placement', page: '' };
+    const offer = offers[String(data.get('placement'))] || { rate: 0, unit: 'month', name: 'Placement', page: '', quote: false };
     const count = Math.min(12, Math.max(1, Number(data.get('count')) || 1));
     const unitName = offer.unit === 'weekend' ? 'weekend' : 'month';
     const unitLabel = count === 1 ? unitName : `${unitName}s`;
@@ -482,12 +517,17 @@ const startLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
     if (hint) hint.textContent = offer.unit === 'weekend' ? 'Billed once for each weekend. 1 to 12.' : 'Billed once for each month. 1 to 12.';
     if (nameEl) nameEl.textContent = offer.name;
     if (pageEl) pageEl.textContent = offer.page;
-    if (mathEl) mathEl.textContent = `${money.format(offer.rate)} × ${count} ${unitLabel}`;
+    if (offer.quote) {
+      if (mathEl) mathEl.textContent = 'Quoted on request';
+      total.textContent = 'Quote';
+    } else {
+      if (mathEl) mathEl.textContent = `${money.format(offer.rate)} × ${count} ${unitLabel}`;
+      total.textContent = money.format(offer.rate * count);
+    }
     if (whenEl) {
       const label = prettyDate(String(data.get('start') || ''));
       whenEl.textContent = label ? `Starts ${label}` : '';
     }
-    total.textContent = money.format(offer.rate * count);
     const line = form.querySelector('input[name="line"]');
     if (line instanceof HTMLInputElement && lineCount) {
       lineCount.textContent = `${line.value.length} of 90`;

@@ -1,0 +1,42 @@
+---
+import type { DirectoryPromo } from '../lib/directoryAds';
+
+interface Props {
+  ad: DirectoryPromo;
+  variant: 'card' | 'tile';
+}
+
+const { ad, variant } = Astro.props;
+const paid = ad.label === 'Sponsored' || ad.label === 'Partner';
+---
+
+{variant === 'tile' ? (
+  <aside class="dir-spot" aria-label={ad.label} data-dir-ad data-ad-id={ad.id} data-ad-placement={ad.placement}>
+    <a href={ad.href} rel={paid ? 'sponsored noopener' : undefined}>
+      {ad.logo ? <img src={ad.logo} alt="" width="40" height="40" loading="lazy" decoding="async" /> : <span class="dir-spot-mark" aria-hidden="true">Ad</span>}
+      <span>
+        <span class:list={['badge', ad.label === 'Advertise' && 'badge-advertise', ad.label === 'Partner' && 'badge-partner']}>{ad.label}</span>
+        <strong>{ad.title}</strong>
+        <span class="biz-line">{ad.line}</span>
+      </span>
+    </a>
+  </aside>
+) : (
+  <li class="biz-row biz-ad" data-dir-ad data-ad-id={ad.id} data-ad-placement={ad.placement}>
+    <a class="biz-hit" href={ad.href} rel={paid ? 'sponsored noopener' : undefined}>
+      <span class:list={['biz-mark', ad.logo && 'has-logo']} aria-hidden="true">
+        {ad.logo ? <img class="biz-logo" src={ad.logo} alt="" loading="lazy" decoding="async" /> : <span class="dir-ad-mark">Ad</span>}
+      </span>
+      <span class="biz-copy">
+        <span class="biz-name">
+          {ad.title}
+          <span class:list={['badge', ad.label === 'Advertise' && 'badge-advertise', ad.label === 'Partner' && 'badge-partner']}>{ad.label}</span>
+        </span>
+        <span class="biz-line">{ad.line}</span>
+      </span>
+    </a>
+    <div class="biz-actions biz-actions-ad">
+      <a class="dir-btn is-call" href={ad.href}>{ad.cta}</a>
+    </div>
+  </li>
+)}

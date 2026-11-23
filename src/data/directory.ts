@@ -133,6 +133,7 @@ function partnerEntry(business: Business): DirectoryEntry {
     source: 'partner',
     partnerSlug: business.slug,
     hours: business.hours || undefined,
+    logo: business.logo?.src || undefined,
   };
 }
 

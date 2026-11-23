@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { recordStat } from '../../lib/ads';
+import { recordDirectoryStat, recordStat } from '../../lib/ads';
 import { recordBannerView } from '../../lib/businessDb';
 
 export const prerender = false;
@@ -12,7 +12,11 @@ export const POST: APIRoute = async ({ request, url }) => {
   const form = await request.formData();
   const id = String(form.get('id') || '');
   const placement = String(form.get('placement') || '');
-  const counted = await recordStat(id, placement, 'impressions');
-  if (!counted) await recordBannerView(id, placement);
+  const kind = form.get('kind') === 'clicks' ? 'clicks' : 'impressions';
+  const counted = kind === 'impressions' ? await recordStat(id, placement, 'impressions') : false;
+  if (!counted) {
+    const directory = await recordDirectoryStat(id, placement, kind);
+    if (!directory && kind === 'impressions') await recordBannerView(id, placement);
+  }
   return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
 };

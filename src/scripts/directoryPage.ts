@@ -1,4 +1,5 @@
 import { categoryIconSvg } from '../data/categoryIcons.ts';
+import { composeDirectoryFeed, directoryToday, resolveDirectorySpotlight, type DirectoryPromo } from '../lib/directoryAds.ts';
 import { directoryGridGroups, directoryGroupById, directoryGroupList, directoryMoreGroups, subgroupsForGroup } from '../lib/directoryGroups.ts';
 import { directoryMatcher } from '../lib/directoryMatch.ts';
 import {
@@ -51,6 +52,8 @@ function hydrate(raw: Partial<DirectoryIndexRow>): DirectoryIndexRow {
     hr: raw.hr || '',
     r: raw.r ?? 3,
     b: raw.b || '',
+    k: raw.k ? 1 : 0,
+    su: raw.su || '',
     lg: raw.lg || '',
     lat: raw.lat,
     lng: raw.lng,
@@ -99,10 +102,10 @@ function renderCard(card: DirectoryCard) {
   const name = document.createElement('span');
   name.className = 'biz-name';
   name.textContent = card.name;
-  if (card.badge) {
+  for (const label of card.badges) {
     const badge = document.createElement('span');
-    badge.className = card.badge === 'Featured' ? 'badge badge-featured' : card.badge === 'Spotlight' ? 'badge badge-spotlight' : 'badge';
-    badge.textContent = card.badge === 'Partner page' ? 'Partner' : card.badge;
+    badge.className = label === 'Featured' ? 'badge badge-featured' : label === 'Spotlight' ? 'badge badge-spotlight' : label === 'Partner' ? 'badge badge-partner' : 'badge';
+    badge.textContent = label;
     name.append(badge);
   }
   const meta = document.createElement('span');
@@ -127,7 +130,20 @@ function renderCard(card: DirectoryCard) {
     address.textContent = card.address;
     copy.append(address);
   }
+  if (card.blurb) {
+    const blurb = document.createElement('span');
+    blurb.className = 'biz-blurb';
+    blurb.textContent = card.blurb;
+    copy.append(blurb);
+  }
   hit.append(copy);
+  if (card.badges.includes('Featured')) item.classList.add('is-featured');
+  if (card.badges.includes('Partner')) item.classList.add('is-partner');
+  if (card.track) {
+    item.dataset.dirAd = '';
+    item.dataset.adId = card.track;
+    item.dataset.adPlacement = 'directory-featured';
+  }
   const actions = document.createElement('div');
   actions.className = 'biz-actions';
   const visible = card.actions.filter((action) => action.kind !== 'share' || action.label !== 'More');
@@ -191,6 +207,131 @@ function renderCard(card: DirectoryCard) {
   }
   item.append(hit, actions);
   return item;
+}
+
+function renderPromo(ad: DirectoryPromo, variant: 'card' | 'tile') {
+  const paid = ad.label === 'Sponsored' || ad.label === 'Partner';
+  const badgeClass = ad.label === 'Advertise' ? 'badge badge-advertise' : ad.label === 'Partner' ? 'badge badge-partner' : 'badge';
+  if (variant === 'tile') {
+    const aside = document.createElement('aside');
+    aside.className = 'dir-spot';
+    aside.setAttribute('aria-label', ad.label);
+    aside.dataset.dirAd = '';
+    aside.dataset.adId = ad.id;
+    aside.dataset.adPlacement = ad.placement;
+    const anchor = document.createElement('a');
+    anchor.href = ad.href;
+    if (paid) anchor.rel = 'sponsored noopener';
+    if (ad.logo) {
+      const image = document.createElement('img');
+      image.src = ad.logo;
+      image.alt = '';
+      image.width = 40;
+      image.height = 40;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      anchor.append(image);
+    } else {
+      const mark = document.createElement('span');
+      mark.className = 'dir-spot-mark';
+      mark.setAttribute('aria-hidden', 'true');
+      mark.textContent = 'Ad';
+      anchor.append(mark);
+    }
+    const copy = document.createElement('span');
+    const badge = document.createElement('span');
+    badge.className = badgeClass;
+    badge.textContent = ad.label;
+    const title = document.createElement('strong');
+    title.textContent = ad.title;
+    const line = document.createElement('span');
+    line.className = 'biz-line';
+    line.textContent = ad.line;
+    copy.append(badge, title, line);
+    anchor.append(copy);
+    aside.append(anchor);
+    return aside;
+  }
+  const item = document.createElement('li');
+  item.className = 'biz-row biz-ad';
+  item.dataset.dirAd = '';
+  item.dataset.adId = ad.id;
+  item.dataset.adPlacement = ad.placement;
+  const hit = document.createElement('a');
+  hit.className = 'biz-hit';
+  hit.href = ad.href;
+  if (paid) hit.rel = 'sponsored noopener';
+  const mark = document.createElement('span');
+  mark.className = ad.logo ? 'biz-mark has-logo' : 'biz-mark';
+  mark.setAttribute('aria-hidden', 'true');
+  if (ad.logo) {
+    const image = document.createElement('img');
+    image.className = 'biz-logo';
+    image.alt = '';
+    image.src = ad.logo;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    mark.append(image);
+  } else {
+    const letter = document.createElement('span');
+    letter.className = 'dir-ad-mark';
+    letter.textContent = 'Ad';
+    mark.append(letter);
+  }
+  const copy = document.createElement('span');
+  copy.className = 'biz-copy';
+  const name = document.createElement('span');
+  name.className = 'biz-name';
+  name.append(document.createTextNode(ad.title));
+  const badge = document.createElement('span');
+  badge.className = badgeClass;
+  badge.textContent = ad.label;
+  name.append(badge);
+  const line = document.createElement('span');
+  line.className = 'biz-line';
+  line.textContent = ad.line;
+  copy.append(name, line);
+  hit.append(mark, copy);
+  const actions = document.createElement('div');
+  actions.className = 'biz-actions biz-actions-ad';
+  const cta = document.createElement('a');
+  cta.className = 'dir-btn is-call';
+  cta.href = ad.href;
+  cta.textContent = ad.cta;
+  actions.append(cta);
+  item.append(hit, actions);
+  return item;
+}
+
+const seenAds = new Set<string>();
+
+function pingAd(node: HTMLElement, kind: 'impressions' | 'clicks') {
+  const id = node.dataset.adId;
+  const placement = node.dataset.adPlacement;
+  if (!id || !placement) return;
+  const key = `${kind}|${id}|${placement}`;
+  if (seenAds.has(key)) return;
+  seenAds.add(key);
+  const body = new URLSearchParams({ id, placement, kind: kind === 'clicks' ? 'clicks' : 'impressions' });
+  if (navigator.sendBeacon) navigator.sendBeacon('/api/ad-stat', body);
+  else fetch('/api/ad-stat', { method: 'POST', body, keepalive: true }).catch(() => undefined);
+}
+
+function watchAds(scope: ParentNode) {
+  const nodes = [...scope.querySelectorAll<HTMLElement>('[data-dir-ad]')];
+  if (!nodes.length) return;
+  if (!('IntersectionObserver' in window)) {
+    nodes.forEach((node) => pingAd(node, 'impressions'));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      pingAd(entry.target as HTMLElement, 'impressions');
+      observer.unobserve(entry.target);
+    }
+  }, { threshold: 0.5 });
+  nodes.forEach((node) => observer.observe(node));
 }
 
 export function bootDirectory() {
@@ -343,10 +484,16 @@ export function bootDirectory() {
       emptyHost.hidden = true;
       emptyHost.replaceChildren();
     }
-    if (view.matches.length) {
+    const spotlightHost = document.getElementById('directory-spotlight');
+    if (spotlightHost) {
+      spotlightHost.replaceChildren();
+      if (view.mode === 'results') spotlightHost.append(renderPromo(resolveDirectorySpotlight({ town: state.town, category: state.category }, directoryToday()), 'tile'));
+    }
+    const feed = composeDirectoryFeed(view.matches, { town: state.town, category: state.category }, directoryToday());
+    if (feed.length) {
       const list = document.createElement('ul');
       list.className = 'biz-list';
-      for (const card of view.matches) list.append(renderCard(card));
+      for (const item of feed) list.append(item.kind === 'ad' ? renderPromo(item.ad, 'card') : renderCard(item.card));
       listHost!.append(list);
     }
     if (countyHost) {
@@ -411,6 +558,7 @@ export function bootDirectory() {
       target?.setAttribute('tabindex', '-1');
       target?.focus();
     }
+    watchAds(root!);
   }
 
   function hrefOf(next: DirectoryQueryState, pageNumber = 1) {
@@ -566,6 +714,8 @@ export function bootDirectory() {
 
   document.addEventListener('click', (event) => {
     const target = event.target as HTMLElement | null;
+    const ad = target?.closest<HTMLElement>('[data-dir-ad]');
+    if (ad && target?.closest('a')) pingAd(ad, 'clicks');
     const share = target?.closest<HTMLElement>('[data-share]');
     if (!share) return;
     event.preventDefault();
@@ -778,6 +928,7 @@ export function bootDirectory() {
     input?.focus();
   });
 
+  watchAds(root);
   if (state.q || state.town || state.category) void loadIndex();
   else {
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
