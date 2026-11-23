@@ -1,0 +1,35 @@
+name: Cattle data
+
+on:
+  schedule:
+    # 14:40 UTC is 8:40 AM CST and 9:40 AM CDT, Monday.
+    - cron: '40 14 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read USDA, ERS, and BLS
+        run: node scripts/refresh-cattle.mjs
+      - name: Commit the figures
+        run: |
+          git add src/data/cattle.json
+          if git diff --cached --quiet; then
+            echo "Cattle figures already match this run."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh cattle and beef figures"
+          git push

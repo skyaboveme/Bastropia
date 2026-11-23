@@ -1,0 +1,593 @@
+---
+import CattleChart from '../components/CattleChart.astro';
+import PageHead from '../components/PageHead.astro';
+import cattle from '../data/cattle.json' with { type: 'json' };
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { axisLabel, formatDollars, formatExactHead, formatHead, formatPrice, formatWeek, monthLabel, sharePercent, shortDate } from '../lib/cattle';
+import { offsiteAttrs } from '../lib/links';
+import { faqPage } from '../lib/schema';
+
+const updated = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/Chicago',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+}).format(new Date(cattle.generatedAt));
+
+const january = cattle.january;
+const census = cattle.census.levels;
+const feed = cattle.onFeed.points.at(-1)!;
+const slaughter = cattle.slaughter!;
+const cutout = cattle.prices.cutout!;
+const fed = cattle.prices.fedSteer!;
+const feeder = cattle.prices.texasFeeder!;
+const ground = cattle.prices.groundBeef!;
+const retail = cattle.prices.retail!;
+const receipts = cattle.receipts!;
+const consumption = cattle.consumption!;
+
+const blank = 'Not published';
+const januaryHref = january.sourceUrl;
+const censusHref = cattle.census.sources.texasTable;
+const usCensusHref = cattle.census.sources.usInventory;
+const usSalesHref = cattle.census.sources.usSales;
+
+const txShareCattle = sharePercent(january.tx.all, january.us.all)!;
+const txShareBeef = sharePercent(january.tx.beef, january.us.beef)!;
+const countyShare = sharePercent(census.bastrop.inventory.head, census.tx.inventory.head)!;
+const countyBeefShare = sharePercent(census.bastrop.beefCows.head, census.tx.beefCows.head)!;
+const txCensusShare = sharePercent(census.tx.inventory.head, census.us.inventory.head)!;
+
+const receiptYear = receipts.tx.at(-1)!;
+const receiptUs = receipts.us.find((row) => row.year === receiptYear.year)!;
+const receiptForecast = receipts.us.find((row) => row.forecast);
+
+const rows: { label: string; period: string; href: string; source: string; us: string; tx: string; bastrop: string; share: string }[] = [
+  {
+    label: 'All cattle and calves',
+    period: `January 1, ${january.inventoryYear}`,
+    href: januaryHref,
+    source: 'NASS Cattle',
+    us: formatExactHead(january.us.all),
+    tx: formatExactHead(january.tx.all),
+    bastrop: blank,
+    share: `Texas is ${txShareCattle} of the U.S.`,
+  },
+  {
+    label: 'Beef cows',
+    period: `January 1, ${january.inventoryYear}`,
+    href: januaryHref,
+    source: 'NASS Cattle',
+    us: formatExactHead(january.us.beef),
+    tx: formatExactHead(january.tx.beef),
+    bastrop: blank,
+    share: `Texas is ${txShareBeef} of the U.S.`,
+  },
+  {
+    label: 'Milk cows',
+    period: `January 1, ${january.inventoryYear}`,
+    href: januaryHref,
+    source: 'NASS Cattle',
+    us: formatExactHead(january.us.milk),
+    tx: formatExactHead(january.tx.milk),
+    bastrop: blank,
+    share: `Texas is ${sharePercent(january.tx.milk, january.us.milk)} of the U.S.`,
+  },
+  {
+    label: 'Calf crop',
+    period: String(january.calfYear),
+    href: januaryHref,
+    source: 'NASS Cattle',
+    us: formatExactHead(january.us.calf),
+    tx: formatExactHead(january.tx.calf),
+    bastrop: blank,
+    share: `Texas is ${sharePercent(january.tx.calf, january.us.calf)} of the U.S.`,
+  },
+  {
+    label: 'Cattle on feed, all feedlots',
+    period: `January 1, ${january.inventoryYear}`,
+    href: januaryHref,
+    source: 'NASS Cattle',
+    us: formatExactHead(january.us.onFeed),
+    tx: formatExactHead(january.tx.onFeed),
+    bastrop: blank,
+    share: `Texas is ${sharePercent(january.tx.onFeed, january.us.onFeed)} of the U.S.`,
+  },
+  {
+    label: 'Cattle on feed, 1,000-head feedlots',
+    period: monthLabel(feed.date).replace(' ', ' 1, '),
+    href: cattle.onFeed.sourceUrl,
+    source: 'NASS Cattle on Feed',
+    us: formatExactHead(feed.us),
+    tx: formatExactHead(feed.tx),
+    bastrop: blank,
+    share: `Texas is ${sharePercent(feed.tx, feed.us)} of the U.S.`,
+  },
+  {
+    label: 'Commercial cattle slaughter',
+    period: slaughter.label,
+    href: slaughter.sourceUrl,
+    source: 'NASS Livestock Slaughter',
+    us: formatExactHead(slaughter.usHead),
+    tx: formatExactHead(slaughter.txHead),
+    bastrop: blank,
+    share: `Texas is ${sharePercent(slaughter.txHead, slaughter.usHead)} of the U.S.`,
+  },
+  {
+    label: 'Commercial beef production',
+    period: slaughter.label,
+    href: slaughter.sourceUrl,
+    source: 'NASS Livestock Slaughter',
+    us: `${formatExactHead(slaughter.usBeefPounds)} lb`,
+    tx: blank,
+    bastrop: blank,
+    share: 'Pounds are published for the U.S. only.',
+  },
+  {
+    label: 'All cattle and calves',
+    period: 'December 31, 2022',
+    href: censusHref,
+    source: 'Census of Agriculture',
+    us: formatExactHead(census.us.inventory.head),
+    tx: formatExactHead(census.tx.inventory.head),
+    bastrop: formatExactHead(census.bastrop.inventory.head),
+    share: `Texas is ${txCensusShare} of the U.S. Bastrop County is ${countyShare} of Texas.`,
+  },
+  {
+    label: 'Farms with cattle',
+    period: 'December 31, 2022',
+    href: censusHref,
+    source: 'Census of Agriculture',
+    us: formatExactHead(census.us.inventory.farms),
+    tx: formatExactHead(census.tx.inventory.farms),
+    bastrop: formatExactHead(census.bastrop.inventory.farms),
+    share: `Bastrop County is ${sharePercent(census.bastrop.inventory.farms, census.tx.inventory.farms)} of Texas farms with cattle.`,
+  },
+  {
+    label: 'Beef cows',
+    period: 'December 31, 2022',
+    href: censusHref,
+    source: 'Census of Agriculture',
+    us: formatExactHead(census.us.beefCows.head),
+    tx: formatExactHead(census.tx.beefCows.head),
+    bastrop: formatExactHead(census.bastrop.beefCows.head),
+    share: `Bastrop County is ${countyBeefShare} of Texas beef cows.`,
+  },
+  {
+    label: 'Milk cows',
+    period: 'December 31, 2022',
+    href: censusHref,
+    source: 'Census of Agriculture',
+    us: formatExactHead(census.us.milkCows.head),
+    tx: formatExactHead(census.tx.milkCows.head),
+    bastrop: formatExactHead(census.bastrop.milkCows.head),
+    share: `Bastrop County is ${sharePercent(census.bastrop.milkCows.head, census.tx.milkCows.head)} of Texas milk cows.`,
+  },
+  {
+    label: 'Cattle and calves sold',
+    period: '2022 census year',
+    href: usSalesHref,
+    source: 'Census of Agriculture',
+    us: formatDollars(census.us.sales.dollars),
+    tx: formatDollars(census.tx.sales.dollars),
+    bastrop: formatDollars(census.bastrop.sales.dollars),
+    share: `Texas is ${sharePercent(census.tx.sales.dollars, census.us.sales.dollars)} of U.S. sales. Bastrop County is ${sharePercent(census.bastrop.sales.dollars, census.tx.sales.dollars)} of Texas.`,
+  },
+  {
+    label: 'Cash receipts, cattle and calves',
+    period: String(receiptYear.year),
+    href: receipts.sourceUrl,
+    source: 'ERS farm income',
+    us: formatDollars(receiptUs.dollars),
+    tx: formatDollars(receiptYear.dollars),
+    bastrop: blank,
+    share: `Texas is ${sharePercent(receiptYear.dollars, receiptUs.dollars)} of U.S. receipts.`,
+  },
+];
+
+const faqs = [
+  {
+    q: 'How many cattle are in Bastrop County?',
+    a: `The 2022 Census of Agriculture counted ${formatExactHead(census.bastrop.inventory.head)} cattle and calves in Bastrop County on December 31, 2022, on ${formatExactHead(census.bastrop.inventory.farms)} farms. Beef cows were ${formatExactHead(census.bastrop.beefCows.head)}. That inventory was ${countyShare} of the Texas census total. NASS does not publish a newer annual cattle inventory for the county.`,
+  },
+  {
+    q: 'How many cattle are in Texas compared with the United States?',
+    a: `On January 1, ${january.inventoryYear}, Texas had ${formatExactHead(january.tx.all)} cattle and calves and the United States had ${formatExactHead(january.us.all)}. Texas was ${txShareCattle} of the U.S. herd and ${txShareBeef} of U.S. beef cows.`,
+  },
+  {
+    q: 'What do feeder steers sell for in Texas?',
+    a: `For the week of ${formatWeek(feeder.week!)}, USDA reported medium and large 1 steers weighing ${feeder.range.replace('-', '–')} pounds at an average ${formatPrice(feeder.price)} per hundredweight. That class covered ${formatExactHead(feeder.head)} head in the Texas weekly auction summary.`,
+  },
+  {
+    q: 'How often is this page updated?',
+    a: `Prices, cattle on feed, and slaughter are refreshed from the public USDA and BLS files by a weekly GitHub Action, which commits src/data/cattle.json. Census of Agriculture figures stay as published for 2022 and 2017. This copy was checked ${updated}.`,
+  },
+];
+
+const oneDecimal = (value: number) => value.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const dollars = (value: number) => `$${value.toFixed(0)}`;
+---
+
+<BaseLayout
+  title="Beef & Cattle: USA, Texas and Bastrop County"
+  description="Cattle inventory, beef cows, auction prices, slaughter, and Bastrop County’s share of Texas. Every figure is dated and linked to USDA or BLS."
+  extra={[
+    faqPage('/cattle', faqs),
+    {
+      '@type': 'Dataset',
+      '@id': 'https://bastropia.com/cattle#dataset',
+      name: 'Beef and cattle metrics for the United States, Texas, and Bastrop County',
+      description: 'Inventory, beef and milk cows, calf crop, cattle on feed, slaughter, beef production, census sales, cash receipts, and cattle prices. Census figures are December 31, 2022. Survey and price figures refresh weekly.',
+      url: 'https://bastropia.com/cattle',
+      creator: { '@type': 'Organization', name: 'Bastropia', url: 'https://bastropia.com/' },
+      temporalCoverage: '2016/2026',
+      isBasedOn: [januaryHref, censusHref, usCensusHref, cattle.onFeed.sourceUrl, slaughter.sourceUrl, cutout.sourceUrl, fed.sourceUrl, feeder.sourceUrl, ground.sourceUrl, receipts.sourceUrl],
+      variableMeasured: ['Cattle inventory', 'Beef cows', 'Milk cows', 'Calf crop', 'Cattle on feed', 'Commercial cattle slaughter', 'Beef production', 'Cash receipts', 'Feeder steer price', 'Fed steer price', 'Boxed beef cutout'],
+    },
+  ]}
+>
+  <PageHead
+    kicker="Beef and cattle"
+    title="Beef & Cattle: USA, Texas and Bastrop County"
+    lede={`Inventory, cows, prices, and slaughter for the United States, Texas, and Bastrop County. Survey numbers are January 1, ${january.inventoryYear}. County inventory is the 2022 Census of Agriculture. Checked ${updated}.`}
+  />
+
+  <div class="wrap cattle-page">
+    <p class="meta cattle-updated">Last updated {updated}. A weekly job rewrites the price, on-feed, and slaughter figures. Census counts stay on the 2022 and 2017 publications.</p>
+
+    <section class="story-glance" aria-labelledby="glance-us">
+      <h2 id="glance-us">United States at a glance</h2>
+      <ul class="stat-grid">
+        <li class="stat-card">
+          <p class="stat-card-value">{formatHead(january.us.all)}</p>
+          <p class="stat-card-label">All cattle and calves</p>
+          <p class="stat-card-note"><span class="stat-card-context">{formatExactHead(january.us.all)} head on January 1, {january.inventoryYear}.</span><a class="stat-card-source" href={januaryHref} {...offsiteAttrs(januaryHref)}>USDA NASS Cattle</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatHead(january.us.beef)}</p>
+          <p class="stat-card-label">Beef cows</p>
+          <p class="stat-card-note"><span class="stat-card-context">{formatExactHead(january.us.beef)} head. Milk cows were {formatExactHead(january.us.milk)}.</span><a class="stat-card-source" href={januaryHref} {...offsiteAttrs(januaryHref)}>USDA NASS Cattle</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatPrice(fed.latest.price)}</p>
+          <p class="stat-card-label">Fed steers, per cwt</p>
+          <p class="stat-card-note"><span class="stat-card-context">Week of {shortDate(fed.latest.date)}. Live FOB, over 80% Choice, {formatExactHead(fed.latest.head)} head, average {formatExactHead(fed.latest.weight)} lb.</span><a class="stat-card-source" href={fed.sourceUrl} {...offsiteAttrs(fed.sourceUrl)}>USDA AMS 5-area</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatPrice(cutout.latest.choice)}</p>
+          <p class="stat-card-label">Choice boxed beef</p>
+          <p class="stat-card-note"><span class="stat-card-context">{shortDate(cutout.latest.date)}. Select was {formatPrice(cutout.latest.select)}. Dollars per cwt.</span><a class="stat-card-source" href={cutout.sourceUrl} {...offsiteAttrs(cutout.sourceUrl)}>USDA AMS cutout</a></p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="story-glance" aria-labelledby="glance-tx">
+      <h2 id="glance-tx">Texas at a glance</h2>
+      <ul class="stat-grid">
+        <li class="stat-card">
+          <p class="stat-card-value">{formatHead(january.tx.all)}</p>
+          <p class="stat-card-label">All cattle and calves</p>
+          <p class="stat-card-note"><span class="stat-card-context">{formatExactHead(january.tx.all)} head on January 1, {january.inventoryYear}. {txShareCattle} of the U.S. herd.</span><a class="stat-card-source" href={januaryHref} {...offsiteAttrs(januaryHref)}>USDA NASS Cattle</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatHead(january.tx.beef)}</p>
+          <p class="stat-card-label">Beef cows</p>
+          <p class="stat-card-note"><span class="stat-card-context">{formatExactHead(january.tx.beef)} head. {txShareBeef} of U.S. beef cows. Milk cows were {formatExactHead(january.tx.milk)}.</span><a class="stat-card-source" href={januaryHref} {...offsiteAttrs(januaryHref)}>USDA NASS Cattle</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatPrice(feeder.price)}</p>
+          <p class="stat-card-label">Feeder steers, per cwt</p>
+          <p class="stat-card-note"><span class="stat-card-context">Week of {formatWeek(feeder.week!)}. Medium and large 1, {feeder.range.replace('-', '–')} lb, {formatExactHead(feeder.head)} head.</span><a class="stat-card-source" href={feeder.sourceUrl} {...offsiteAttrs(feeder.sourceUrl)}>USDA AMS Texas auctions</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatHead(feed.tx)}</p>
+          <p class="stat-card-label">Cattle on feed</p>
+          <p class="stat-card-note"><span class="stat-card-context">{formatExactHead(feed.tx)} head on {monthLabel(feed.date).replace(' ', ' 1, ')}, in feedlots with 1,000 head or more. {sharePercent(feed.tx, feed.us)} of the U.S.</span><a class="stat-card-source" href={cattle.onFeed.sourceUrl} {...offsiteAttrs(cattle.onFeed.sourceUrl)}>USDA NASS Cattle on Feed</a></p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="story-glance" aria-labelledby="glance-county">
+      <h2 id="glance-county">Bastrop County at a glance</h2>
+      <ul class="stat-grid">
+        <li class="stat-card">
+          <p class="stat-card-value">{formatExactHead(census.bastrop.inventory.head)}</p>
+          <p class="stat-card-label">All cattle and calves</p>
+          <p class="stat-card-note"><span class="stat-card-context">December 31, 2022. {countyShare} of the Texas census inventory. In 2017 the county had {formatExactHead(census.bastrop.inventory2017.head)}.</span><a class="stat-card-source" href={cattle.census.sources.bastropProfile} {...offsiteAttrs(cattle.census.sources.bastropProfile)}>Census county profile</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatExactHead(census.bastrop.beefCows.head)}</p>
+          <p class="stat-card-label">Beef cows</p>
+          <p class="stat-card-note"><span class="stat-card-context">{formatExactHead(census.bastrop.beefCows.farms)} farms. {countyBeefShare} of Texas beef cows. Milk cows were {formatExactHead(census.bastrop.milkCows.head)} on {formatExactHead(census.bastrop.milkCows.farms)} farms.</span><a class="stat-card-source" href={censusHref} {...offsiteAttrs(censusHref)}>Census Table 11</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatExactHead(census.bastrop.inventory.farms)}</p>
+          <p class="stat-card-label">Farms with cattle</p>
+          <p class="stat-card-note"><span class="stat-card-context">Down from {formatExactHead(census.bastrop.inventory2017.farms)} farms in 2017. {formatExactHead(census.bastrop.sales.farms)} farms sold cattle in 2022.</span><a class="stat-card-source" href={censusHref} {...offsiteAttrs(censusHref)}>Census Table 11</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatDollars(census.bastrop.sales.dollars)}</p>
+          <p class="stat-card-label">Cattle and calves sold</p>
+          <p class="stat-card-note"><span class="stat-card-context">2022 census sales, {formatExactHead(census.bastrop.sales.head)} head. {sharePercent(census.bastrop.sales.dollars, census.tx.sales.dollars)} of Texas cattle sales.</span><a class="stat-card-source" href={censusHref} {...offsiteAttrs(censusHref)}>Census Table 11</a></p>
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="compare-title">
+      <div class="cattle-head">
+        <p class="kicker">Same row, same period</p>
+        <h2 id="compare-title">United States, Texas, Bastrop County</h2>
+      </div>
+      <p class="cattle-note">A county cell says “Not published” when that series is not issued for Bastrop County. Shares use only the two places in that row, so a January survey is not divided into a census count.</p>
+      <div class="cattle-scroll">
+        <table class="cattle-table">
+          <thead>
+            <tr>
+              <th>Measure</th>
+              <th>United States</th>
+              <th>Texas</th>
+              <th>Bastrop County</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr>
+                <th scope="row">
+                  {row.label}
+                  <span>{row.period}. <a href={row.href} {...offsiteAttrs(row.href)}>{row.source}</a></span>
+                </th>
+                <td>{row.us}</td>
+                <td>{row.tx}</td>
+                <td>{row.bastrop}</td>
+                <td>{row.share}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="cattle-note">The July 24, 2026 Cattle report, which has no state table, put U.S. cattle at {formatExactHead(cattle.july!.usAll)} on July 1 and revised the 2025 U.S. calf crop to {formatExactHead(cattle.july!.calfRevisedPrior)}. Its preliminary 2026 U.S. calf crop is {formatExactHead(cattle.july!.calfPreliminary)}. The calf-crop share above stays on the January report, because that is the release with a Texas number. <a href={cattle.july!.sourceUrl} {...offsiteAttrs(cattle.july!.sourceUrl)}>July Cattle report</a>.</p>
+    </section>
+
+    <section aria-labelledby="charts-title">
+      <div class="cattle-head">
+        <p class="kicker">Trends</p>
+        <h2 id="charts-title">Inventory, feedlots, and prices</h2>
+      </div>
+      <div class="cattle-charts">
+        <CattleChart
+          title={`January 1 inventory, ${january.series[0].year}–${january.inventoryYear}`}
+          labels={january.series.map((point) => String(point.year))}
+          panels={[
+            { lines: [{ name: 'United States, million head', color: '#17604a', values: january.series.map((point) => point.usAll / 1_000_000) }] },
+            { lines: [{ name: 'Texas, million head', color: '#0a7590', values: january.series.map((point) => point.txAll / 1_000_000) }] },
+          ]}
+          format={oneDecimal}
+          axisFormat={oneDecimal}
+          sourceHref={januaryHref}
+          sourceLabel="NASS January Cattle reports"
+        />
+        <CattleChart
+          title="Cattle on feed, 1,000-head lots"
+          labels={cattle.onFeed.points.map((point) => axisLabel(point.date))}
+          panels={[
+            { lines: [{ name: 'United States, million head', color: '#17604a', values: cattle.onFeed.points.map((point) => point.us / 1_000_000) }] },
+            { lines: [{ name: 'Texas, million head', color: '#0a7590', values: cattle.onFeed.points.map((point) => point.tx / 1_000_000) }] },
+          ]}
+          format={oneDecimal}
+          axisFormat={oneDecimal}
+          sourceHref={cattle.onFeed.sourceUrl}
+          sourceLabel="NASS Cattle on Feed"
+        />
+        <CattleChart
+          title="Boxed beef cutout, dollars per cwt"
+          labels={cutout.monthly.map((point) => axisLabel(point.date))}
+          panels={[{
+            lines: [
+              { name: 'Choice', color: '#17604a', values: cutout.monthly.map((point) => point.choice) },
+              { name: 'Select', color: '#b45309', values: cutout.monthly.map((point) => point.select) },
+            ],
+          }]}
+          format={(value) => formatPrice(value)}
+          axisFormat={dollars}
+          sourceHref={cutout.sourceUrl}
+          sourceLabel="AMS boxed beef cutout"
+        />
+        <CattleChart
+          title="Retail beef, dollars per pound"
+          labels={retail.choiceMonthly.filter((point) => ground.monthly.some((row) => row.date === point.date)).map((point) => axisLabel(point.date))}
+          panels={[{
+            lines: [
+              {
+                name: 'Choice beef retail value',
+                color: '#17604a',
+                values: retail.choiceMonthly.filter((point) => ground.monthly.some((row) => row.date === point.date)).map((point) => point.cents / 100),
+              },
+              {
+                name: 'Ground beef, BLS average',
+                color: '#b45309',
+                values: retail.choiceMonthly.filter((point) => ground.monthly.some((row) => row.date === point.date)).map((point) => ground.monthly.find((row) => row.date === point.date)!.value),
+              },
+            ],
+          }]}
+          format={(value) => formatPrice(value)}
+          axisFormat={(value) => `$${value.toFixed(2)}`}
+          sourceHref={retail.sourceUrl}
+          sourceLabel="ERS retail values and BLS"
+        />
+      </div>
+      <p class="cattle-note">Each inventory chart has its own scale, so the Texas line can show its own change. The January text archive used here runs from {january.series[0].year}. Fed steers, live FOB and over 80% Choice, were {formatPrice(fed.latest.price)} per cwt in the week of {shortDate(fed.latest.date)}. <a href={fed.sourceUrl} {...offsiteAttrs(fed.sourceUrl)}>5-area weekly report</a>.</p>
+    </section>
+
+    <section aria-labelledby="size-title">
+      <div class="cattle-head">
+        <p class="kicker">December 31, 2022</p>
+        <h2 id="size-title">Herd size</h2>
+      </div>
+      <p class="cattle-note">Farms and head by inventory class. The U.S. “500 or more” row adds the finer bands in Table 12. Those bands are listed under the table.</p>
+      <div class="cattle-scroll">
+        <table class="cattle-table">
+          <thead>
+            <tr>
+              <th>Head on the farm</th>
+              <th>U.S. farms</th>
+              <th>U.S. head</th>
+              <th>Texas farms</th>
+              <th>Texas head</th>
+              <th>Bastrop farms</th>
+              <th>Bastrop head</th>
+            </tr>
+          </thead>
+          <tbody>
+            {census.bastrop.size.map((band, index) => (
+              <tr>
+                <th scope="row">{band.band}</th>
+                <td>{formatExactHead(census.us.size[index].farms)}</td>
+                <td>{formatExactHead(census.us.size[index].head)}</td>
+                <td>{formatExactHead(census.tx.size[index].farms)}</td>
+                <td>{formatExactHead(census.tx.size[index].head)}</td>
+                <td>{formatExactHead(band.farms)}</td>
+                <td>{formatExactHead(band.head)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="cattle-note">U.S. herds of 500 head or more, from <a href={usCensusHref} {...offsiteAttrs(usCensusHref)}>Table 12</a>:
+        {census.us.largeBands.map((band) => ` ${band.band}: ${formatExactHead(band.farms)} farms, ${formatExactHead(band.head)} head.`)}
+      </p>
+      <h3 class="cattle-sub">Bastrop County beef cows by herd size, 2022</h3>
+      <div class="cattle-scroll">
+        <table class="cattle-table">
+          <thead>
+            <tr>
+              <th>Beef cows</th>
+              <th>Farms</th>
+              <th>Head</th>
+            </tr>
+          </thead>
+          <tbody>
+            {census.bastrop.beefCowSize.map((band) => (
+              <tr>
+                <th scope="row">{band.band}</th>
+                <td>{formatExactHead(band.farms)}</td>
+                <td>{formatExactHead(band.head)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="money-title">
+      <div class="cattle-head">
+        <p class="kicker">Sales and the grocery store</p>
+        <h2 id="money-title">Receipts, retail price, and beef per person</h2>
+      </div>
+      <ul class="stat-grid">
+        <li class="stat-card">
+          <p class="stat-card-value">{formatDollars(receiptUs.dollars)}</p>
+          <p class="stat-card-label">U.S. cash receipts, {receiptYear.year}</p>
+          <p class="stat-card-note"><span class="stat-card-context">Cattle and calves. Texas was {formatDollars(receiptYear.dollars)}, {sharePercent(receiptYear.dollars, receiptUs.dollars)} of the U.S.{receiptForecast ? ` The ${receiptForecast.year} U.S. figure in this release is a forecast, ${formatDollars(receiptForecast.dollars)}.` : ''}</span><a class="stat-card-source" href={receipts.sourceUrl} {...offsiteAttrs(receipts.sourceUrl)}>USDA ERS farm income</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatPrice(retail.choice.cents / 100)}</p>
+          <p class="stat-card-label">Choice beef retail value</p>
+          <p class="stat-card-note"><span class="stat-card-context">{monthLabel(retail.choice.date)}. {retail.choice.cents} cents per pound. All-fresh beef was {retail.allFresh.cents} cents.</span><a class="stat-card-source" href={retail.sourceUrl} {...offsiteAttrs(retail.sourceUrl)}>USDA ERS meat price spreads</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{formatPrice(ground.latest.value, 3)}</p>
+          <p class="stat-card-label">Ground beef, per pound</p>
+          <p class="stat-card-note"><span class="stat-card-context">{ground.latest.label}. U.S. city average, series {ground.seriesId}.</span><a class="stat-card-source" href={ground.sourceUrl} {...offsiteAttrs(ground.sourceUrl)}>BLS average price</a></p>
+        </li>
+        <li class="stat-card">
+          <p class="stat-card-value">{consumption.latest.pounds.toFixed(1)} lb</p>
+          <p class="stat-card-label">Beef available per person</p>
+          <p class="stat-card-note"><span class="stat-card-context">{consumption.latest.year}, retail weight. This is food availability, the supply per person, not pounds eaten after waste. The ERS red-meat file ends in {consumption.latest.year}.</span><a class="stat-card-source" href={consumption.sourceUrl} {...offsiteAttrs(consumption.sourceUrl)}>USDA ERS food availability</a></p>
+        </li>
+      </ul>
+      <p class="cattle-note">January–{slaughter.label.split(' ')[0]} {slaughter.label.split(' ')[1]} commercial beef production was {formatExactHead(slaughter.usBeefYtdPounds)} pounds, and commercial cattle slaughter was {formatExactHead(slaughter.usHeadYtd)} head. October alone was {formatExactHead(slaughter.usBeefPounds)} pounds and {formatExactHead(slaughter.usHead)} head. <a href={slaughter.sourceUrl} {...offsiteAttrs(slaughter.sourceUrl)}>Livestock Slaughter</a>.</p>
+    </section>
+
+    <section aria-labelledby="local-title">
+      <div class="cattle-head">
+        <p class="kicker">In the county</p>
+        <h2 id="local-title">Extension and the local show</h2>
+      </div>
+      <p class="cattle-note">Texas A&M AgriLife Extension in Bastrop County is the local office for agriculture questions, including livestock. The office lists 15 American Legion Drive, Suite 109, Bastrop, phone 512-581-7186, and bastrop-tx@tamu.edu. The <a href="https://bastrop.agrilife.org/bals/" {...offsiteAttrs('https://bastrop.agrilife.org/bals/')}>Bastrop Area Livestock Show</a> is the county youth show, held at the show barn on American Legion Drive. It is not a weekly commercial auction.</p>
+      <p class="cattle-note">Prices on this page for Texas feeder cattle come from the statewide USDA auction summary, not from one barn. A current weekly sale barn inside Bastrop County could not be confirmed from a market site that resolved. <a href="https://bastrop.agrilife.org/" {...offsiteAttrs('https://bastrop.agrilife.org/')}>Bastrop County AgriLife</a> · <a href="https://agrilifeextension.tamu.edu/counties/bastrop-county/" {...offsiteAttrs('https://agrilifeextension.tamu.edu/counties/bastrop-county/')}>AgriLife county page</a> · <a href={feeder.sourceUrl} {...offsiteAttrs(feeder.sourceUrl)}>Texas weekly auction summary</a>.</p>
+    </section>
+
+    <section aria-labelledby="missing-title">
+      <div class="cattle-head">
+        <p class="kicker">Left off on purpose</p>
+        <h2 id="missing-title">Figures this page does not have</h2>
+      </div>
+      <ul class="cattle-missing">
+        <li>No annual cattle inventory for Bastrop County after the 2022 census. The public NASS report files read here do not include a later county estimate.</li>
+        <li>The national feeder and stocker text summary ended April 13, 2026. The replacement is the <a href="https://mymarketnews.ams.usda.gov/National_Feeder_Stocker_Dashboard" {...offsiteAttrs('https://mymarketnews.ams.usda.gov/National_Feeder_Stocker_Dashboard')}>AMS dashboard</a>, which did not return a file. The national cash cattle price on this page is the 5-area fed steer price.</li>
+        <li>Texas beef production in pounds is not split out in the monthly slaughter report. Texas commercial cattle slaughter, in head, is.</li>
+        <li>No Bastrop County slaughter, beef production, or monthly cattle-on-feed series. Those are not published at county level.</li>
+        <li>The January text reports on release.nass.usda.gov that this chart reads begin in {january.series[0].year}.</li>
+      </ul>
+    </section>
+
+    <section class="cattle-faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      {faqs.map((faq) => (
+        <details>
+          <summary>{faq.q}</summary>
+          <p>{faq.a}</p>
+        </details>
+      ))}
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .cattle-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.6rem;
+    padding-bottom: 2.5rem;
+  }
+  .cattle-updated { max-width: 46rem; }
+  .cattle-page .story-glance { margin: 0; }
+  .cattle-head { margin-bottom: 0.7rem; }
+  .cattle-head h2 { margin-top: 0.15rem; }
+  .cattle-sub {
+    margin: 1.1rem 0 0.55rem;
+    font-size: 1.25rem;
+  }
+  .cattle-note { max-width: 48rem; margin-top: 0.75rem; }
+  .cattle-note a, .cattle-missing a, .stat-card-source { color: var(--river-deep); }
+  .stat-card-source { font-weight: 650; }
+  .cattle-scroll { max-width: 100%; overflow-x: auto; border-top: 3px solid var(--pine); }
+  .cattle-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; min-width: 44rem; }
+  .cattle-table th, .cattle-table td {
+    text-align: right;
+    vertical-align: top;
+    padding: 0.6rem 0.75rem 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .cattle-table th:first-child, .cattle-table td:first-child { text-align: left; }
+  .cattle-table thead th {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--river-deep);
+  }
+  .cattle-table tbody th span { display: block; margin-top: 0.2rem; font-weight: 450; font-size: 0.84rem; letter-spacing: 0; text-transform: none; color: var(--ink-soft); }
+  .cattle-table tbody th span a { color: var(--river-deep); font-weight: 650; }
+  .cattle-charts { display: grid; gap: 0.8rem; }
+  .cattle-missing { list-style: disc; padding-left: 1.2rem; display: grid; gap: 0.45rem; max-width: 46rem; }
+  .cattle-missing li { line-height: 1.45; }
+  .cattle-faq { display: grid; gap: 0.45rem; max-width: 46rem; }
+  .cattle-faq h2 { margin-bottom: 0.3rem; }
+  .cattle-faq details { background: var(--card); border: 1px solid var(--line); border-top: 4px solid var(--pine); padding: 0.7rem 0.85rem; }
+  .cattle-faq summary { cursor: pointer; font-weight: 650; }
+  .cattle-faq p { margin-top: 0.45rem; }
+  @media (min-width: 900px) {
+    .cattle-charts { grid-template-columns: 1fr 1fr; }
+  }
+</style>
