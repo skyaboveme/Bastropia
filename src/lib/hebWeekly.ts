@@ -338,6 +338,14 @@ export function regularLabel(item: HebItem) {
   return `$${item.regularPrice.toFixed(2)}`;
 }
 
+/** Short end date for the sidebar card, such as "Valid thru Nov 26". */
+export function formatValidThru(to: string) {
+  const end = calendarDay(to);
+  if (!end) return '';
+  const format = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
+  return `Valid thru ${format.format(end)}`;
+}
+
 export function formatValidRange(from: string, to: string) {
   const start = calendarDay(from);
   const end = calendarDay(to);

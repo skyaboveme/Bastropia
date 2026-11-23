@@ -1,0 +1,104 @@
+---
+/**
+ * Sidebar card of the top trending H-E-B deals. Renders nothing when the
+ * daily KV copy is missing, so the rail stays as it was.
+ */
+import { formatValidThru, priceLabel, readHebWeekly, trendingItems, type HebItem } from '../lib/hebWeekly';
+
+let slides: HebItem[] = [];
+let validThru = '';
+try {
+  const record = await readHebWeekly();
+  if (record?.items.length) {
+    slides = trendingItems(record.items, 8, record.highlights);
+    validThru = formatValidThru(record.validTo);
+  }
+} catch (error) {
+  console.error('heb rotator failed', error);
+}
+---
+
+{slides.length > 0 && (
+  <section class="heb-rotator" data-heb-rotator aria-roledescription="carousel" aria-label="H-E-B weekly specials">
+    <a class="heb-rotator-card" href="/heb-specials">
+      {slides.map((item, index) => (
+        <span
+          class:list={['heb-rotator-slide', index === 0 && 'is-on']}
+          data-heb-slide
+          aria-hidden={index === 0 ? 'false' : 'true'}
+        >
+          {item.image ? (
+            <img
+              src={item.image}
+              alt=""
+              width="640"
+              height="480"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              fetchpriority={index === 0 ? 'low' : undefined}
+            />
+          ) : (
+            <span class="heb-rotator-fallback" aria-hidden="true"></span>
+          )}
+          <span class="heb-rotator-copy">
+            <span class="heb-rotator-kicker">H-E-B Weekly Specials</span>
+            <strong>{item.name}</strong>
+            <span class="heb-rotator-deal">{priceLabel(item)}</span>
+            {validThru && <span class="heb-rotator-when">{validThru}</span>}
+          </span>
+        </span>
+      ))}
+    </a>
+    {slides.length > 1 && (
+      <div class="heb-rotator-dots">
+        {slides.map((item, index) => (
+          <button type="button" data-heb-dot aria-label={`Show ${item.name}`} aria-current={index === 0 ? 'true' : undefined}></button>
+        ))}
+      </div>
+    )}
+    <script is:inline>
+      (function () {
+        const root = document.currentScript && document.currentScript.parentElement;
+        if (!root) return;
+        const slides = [...root.querySelectorAll('[data-heb-slide]')];
+        const dots = [...root.querySelectorAll('[data-heb-dot]')];
+        if (slides.length < 2) return;
+        let index = 0;
+        let timer = 0;
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const show = (next) => {
+          index = (next + slides.length) % slides.length;
+          slides.forEach((slide, slideIndex) => {
+            const on = slideIndex === index;
+            slide.classList.toggle('is-on', on);
+            slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+          });
+          dots.forEach((dot, dotIndex) => {
+            if (dotIndex === index) dot.setAttribute('aria-current', 'true');
+            else dot.removeAttribute('aria-current');
+          });
+        };
+        const stop = () => window.clearInterval(timer);
+        const start = () => {
+          stop();
+          if (reduce) return;
+          timer = window.setInterval(() => show(index + 1), 4000);
+        };
+        dots.forEach((dot, dotIndex) => {
+          dot.addEventListener('click', (event) => {
+            event.preventDefault();
+            show(dotIndex);
+            start();
+          });
+        });
+        root.addEventListener('mouseenter', stop);
+        root.addEventListener('mouseleave', start);
+        root.addEventListener('focusin', stop);
+        root.addEventListener('focusout', (event) => {
+          if (!root.contains(event.relatedTarget)) start();
+        });
+        start();
+      })();
+    </script>
+  </section>
+)}
