@@ -1,4 +1,10 @@
-.dir { padding: 0.35rem 0 1rem; }
+.dir { padding: 0.35rem 16px 1rem; }
+@media (max-width: 379px) {
+  .dir { padding-inline: 12px; }
+}
+@media (min-width: 1024px) {
+  .dir { max-width: 1200px; margin-inline: auto; }
+}
 .dir-intro h1 { margin: 0; font-size: 1.55rem; line-height: 1.1; }
 .dir-intro p { margin: 0.15rem 0 0; color: var(--ink-soft); font-size: 0.875rem; }
 .dir-dock { background: var(--paper); padding: 0.45rem 0 0.35rem; }
@@ -28,7 +34,7 @@
 }
 .looking-bar input:focus { outline: none; }
 .looking-bar input::-webkit-search-cancel-button { display: none; }
-.looking-clear, .dir-chip, .dir-chip-x, .dir-towns a, .dir-popular a, .dir-grid a, .dir-own a, .dir-btn, .biz-more summary, .dir-more, .dir-fab, .dir-side a, .dir-extra summary, .dir-extra a, .dir-missing a, .dir-apply, .dir-sheet-head button, .dir-cat, .dir-sheet-sort button, .dir-suggest, #directory-empty a {
+.looking-clear, .dir-chip, .dir-chip > button, .dir-x, .dir-towns a, .dir-popular a, .dir-grid a, .dir-own a, .dir-btn, .biz-more summary, .dir-more, .dir-fab, .dir-side a, .dir-extra summary, .dir-extra a, .dir-missing a, .dir-apply, .dir-sheet-head button, .dir-cat, .dir-sheet-sort button, .dir-suggest, .dir-see, #directory-empty a {
   min-width: 44px;
   min-height: 44px;
 }
@@ -48,8 +54,27 @@
   overflow-x: auto;
   padding: 0.35rem 0;
 }
-.dir-chip-pair { display: inline-flex; align-items: center; gap: 0.15rem; flex: none; }
-.dir-chip, .dir-towns a, .dir-popular a, .dir-sheet-sort button, .dir-suggest {
+.dir-chip { display: inline-flex; align-items: stretch; flex: none; padding: 0; overflow: hidden; }
+.dir-chip > button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  padding: 0 0.85rem;
+  cursor: pointer;
+}
+.dir-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+.dir-x[hidden] { display: none; }
+.dir-chip, .dir-towns a, .dir-popular a, .dir-sheet-sort button, .dir-suggest, .dir-see {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -69,18 +94,15 @@
   border-color: var(--pine);
   color: #f4efe6;
 }
-.dir-chip-x {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
+.dir-see {
+  margin-left: 0.35rem;
+  border: 1.5px solid var(--line);
   border-radius: 999px;
-  background: var(--pine);
-  color: #f4efe6;
+  background: #fff;
+  color: var(--river-deep);
+  font-weight: 700;
   text-decoration: none;
-  font-size: 1.2rem;
 }
-.dir-chip-x[hidden] { display: none; }
 .dir-kicker {
   margin: 0.7rem 0 0.35rem;
   font-family: var(--sans);
@@ -121,6 +143,17 @@
   font-size: 0.95rem;
 }
 .dir-own a, .dir-missing a, #directory-empty a { color: var(--river-deep); font-weight: 700; }
+#directory-empty a {
+  display: inline-flex;
+  align-items: center;
+  margin: 0.2rem 0.35rem 0.2rem 0;
+  padding: 0 0.85rem;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  text-decoration: none;
+}
+.dir:has(#directory-empty:not([hidden])) .dir-missing { display: none; }
 .dir[data-mode="results"] .dir-intro,
 .dir[data-mode="results"] .dir-browse,
 .dir[data-mode="browse"] .dir-extra { display: none; }
@@ -129,7 +162,7 @@
 .dir-results h2 { margin: 0.2rem 0; font-size: 1.35rem; line-height: 1.15; }
 .dir-range { margin: 0 0 0.35rem; color: var(--ink-soft); font-size: 0.875rem; }
 .biz-list { list-style: none; display: grid; gap: 0.5rem; margin: 0.35rem 0 0; padding: 0; }
-.biz-row { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.biz-row { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
 .biz-hit {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
@@ -153,7 +186,7 @@
 .biz-copy { min-width: 0; display: grid; }
 .biz-name {
   font-family: var(--serif);
-  font-size: 1.125rem;
+  font-size: 17px;
   font-weight: 600;
   line-height: 1.15;
   display: -webkit-box;
@@ -191,7 +224,7 @@
   font-weight: 700;
 }
 .biz-open.is-closed { background: var(--paper-2); color: var(--ink-soft); }
-.biz-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.biz-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
 .biz-actions:has(.biz-more) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; }
 .dir-btn, .biz-more summary {
   display: inline-flex;

@@ -111,13 +111,13 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/string-prairie/og.jpg',
     shareAlt: 'String Prairie Heating & Air logo over a green field, with the phone number 512-924-9744',
     hero: {
-      src: '/images/businesses/string-prairie/team.jpg',
+      src: '/images/businesses/string-prairie/team.webp',
       alt: 'A String Prairie Heating & Air technician beside the company service truck in a pasture',
       width: 1200,
       height: 1600,
     },
     portrait: {
-      src: '/images/businesses/string-prairie/repair.jpg',
+      src: '/images/businesses/string-prairie/repair.webp',
       alt: 'Ron Hammons servicing an outdoor air conditioner at a house',
       width: 1200,
       height: 1600,
@@ -160,13 +160,13 @@ export const businesses: Business[] = [
     areaNote: 'Bastrop County, including Highway 71 and acreage off FM 20.',
     gallery: [
       {
-        src: '/images/businesses/string-prairie/van.jpg',
+        src: '/images/businesses/string-prairie/van.webp',
         alt: 'White String Prairie Heating & Air service truck parked in a field',
         width: 1200,
         height: 1600,
       },
       {
-        src: '/images/businesses/string-prairie/attic.jpg',
+        src: '/images/businesses/string-prairie/attic.webp',
         alt: 'Technician beside an air handler and ductwork in an attic',
         width: 1200,
         height: 1600,
@@ -242,13 +242,13 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/barron/house.jpg',
     shareAlt: 'A light-colored Barron Homes house with a dark shingle roof, set in a field',
     hero: {
-      src: '/images/businesses/barron/house.jpg',
+      src: '/images/businesses/barron/house.webp',
       alt: 'A single-story custom house with a timber entry, photographed across a field of dry grass',
       width: 1600,
       height: 1066,
     },
     portrait: {
-      src: '/images/businesses/barron/hero.jpg',
+      src: '/images/businesses/barron/hero.webp',
       alt: 'Two men from Barron Homes standing in a grassy field',
       width: 1200,
       height: 1573,
@@ -272,19 +272,19 @@ export const businesses: Business[] = [
     areaNote: 'Custom homes in Bastrop, Lee, and Fayette counties.',
     gallery: [
       {
-        src: '/images/businesses/barron/build.jpg',
+        src: '/images/businesses/barron/build.webp',
         alt: 'Covered porch with a stone fireplace, wood ceiling, and dark metal roof',
         width: 1200,
         height: 800,
       },
       {
-        src: '/images/businesses/barron/kitchen.jpg',
+        src: '/images/businesses/barron/kitchen.webp',
         alt: 'Kitchen with a marble island, white cabinets, and a stainless range',
         width: 1600,
         height: 1044,
       },
       {
-        src: '/images/businesses/barron/pool.jpg',
+        src: '/images/businesses/barron/pool.webp',
         alt: 'Wood house with a covered outdoor room and a freeform swimming pool',
         width: 1600,
         height: 1069,
@@ -363,13 +363,13 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/barefoot/og.jpg',
     shareAlt: 'Flower market shop at Barefoot Flower Farms, with a red door, a welcome sign, and potted flowers',
     hero: {
-      src: '/images/businesses/barefoot/shop.jpg',
+      src: '/images/businesses/barefoot/shop.webp',
       alt: 'Flower market shop with a red door, a wooden welcome sign, and potted flowers out front',
       width: 1200,
       height: 1600,
     },
     portrait: {
-      src: '/images/businesses/barefoot/rows.jpg',
+      src: '/images/businesses/barefoot/rows.webp',
       alt: 'Rows of potted flowers and seedlings in the outdoor nursery',
       width: 1000,
       height: 1249,
@@ -415,19 +415,19 @@ export const businesses: Business[] = [
     areaNote: 'Two stops in Rosanky. Local delivery runs within 15 miles of the farm, on orders over $50.',
     gallery: [
       {
-        src: '/images/businesses/barefoot/bouquet.jpg',
+        src: '/images/businesses/barefoot/bouquet.webp',
         alt: 'Yellow ranunculus bouquet wrapped with a Barefoot Flower Farm card',
         width: 1200,
         height: 1600,
       },
       {
-        src: '/images/businesses/barefoot/nursery.jpg',
+        src: '/images/businesses/barefoot/nursery.webp',
         alt: 'Trays of pink, purple, and orange petunias at the outdoor nursery',
         width: 1600,
         height: 1200,
       },
       {
-        src: '/images/businesses/barefoot/wedding.jpg',
+        src: '/images/businesses/barefoot/wedding.webp',
         alt: 'Garden-style bridal bouquets with roses, baby’s breath, and wildflowers',
         width: 1080,
         height: 1350,
@@ -515,7 +515,7 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/lost-pines/og.jpg',
     shareAlt: 'Showroom at Lost Pines Toyota, with a white Toyota and the dealership sign',
     hero: {
-      src: '/images/businesses/lost-pines/showroom.jpg',
+      src: '/images/businesses/lost-pines/showroom.webp',
       alt: 'Lost Pines Toyota showroom, with a white Toyota in front of the dealership sign',
       width: 1600,
       height: 512,
@@ -602,13 +602,13 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/rosa-tex/og.jpg',
     shareAlt: 'A person in a RosaTex Landscaping shirt mowing a striped lawn',
     hero: {
-      src: '/images/businesses/rosa-tex/mower.jpg',
+      src: '/images/businesses/rosa-tex/mower.webp',
       alt: 'A person in a RosaTex Landscaping shirt mowing a striped lawn',
       width: 1536,
       height: 1024,
     },
     portrait: {
-      src: '/images/businesses/rosa-tex/lawn.jpg',
+      src: '/images/businesses/rosa-tex/lawn.webp',
       alt: 'A striped lawn beside a metal-roof house, trees, and a fence',
       width: 640,
       height: 640,
@@ -743,7 +743,7 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/602/history.jpg',
     shareAlt: 'Pink stone building on Main Street signed 602 Brewing Company and Beer Garden',
     hero: {
-      src: '/images/businesses/602/history.jpg',
+      src: '/images/businesses/602/history.webp',
       alt: 'Pink stone building on Main Street with signs for 602 Brewing Company and the beer garden',
       width: 768,
       height: 768,
@@ -788,25 +788,25 @@ export const businesses: Business[] = [
     galleryTitle: 'From the kitchen',
     gallery: [
       {
-        src: '/images/businesses/602/hero.jpg',
+        src: '/images/businesses/602/hero.webp',
         alt: 'Bacon and blue cheese burger with fries and a side salad',
         width: 1920,
         height: 1200,
       },
       {
-        src: '/images/businesses/602/shrimp.jpg',
+        src: '/images/businesses/602/shrimp.webp',
         alt: 'Crispy fried shrimp with parsley and a dark dipping sauce',
         width: 960,
         height: 960,
       },
       {
-        src: '/images/businesses/602/chicken.jpg',
+        src: '/images/businesses/602/chicken.webp',
         alt: 'Fried chicken steak in gravy with mashed potatoes',
         width: 960,
         height: 960,
       },
       {
-        src: '/images/businesses/602/burger.jpg',
+        src: '/images/businesses/602/burger.webp',
         alt: 'Bacon mushroom burger with fries, ketchup, mayonnaise, and gravy',
         width: 960,
         height: 960,

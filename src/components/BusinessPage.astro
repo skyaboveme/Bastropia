@@ -6,6 +6,12 @@ interface Props {
 }
 
 const { business } = Astro.props;
+
+function photo(src: string) {
+  const webp = src.replace(/\.jpe?g$/i, '.webp');
+  const small = webp.replace(/\.webp$/i, '-720.webp');
+  return { src: webp, srcset: `${small} 720w, ${webp} 1200w`, sizes: '(max-width: 900px) 100vw, 640px' };
+}
 const style = [
   `--biz:${business.accent}`,
   `--biz-2:${business.accent2}`,
@@ -44,7 +50,7 @@ const style = [
         )}
       </div>
     </div>
-    <img class="biz-hero-photo" src={business.hero.src} alt={business.hero.alt} width={business.hero.width} height={business.hero.height} decoding="async" style={business.hero.objectPosition ? `object-position: ${business.hero.objectPosition}` : undefined} />
+    <img class="biz-hero-photo" src={photo(business.hero.src).src} srcset={photo(business.hero.src).srcset} sizes={photo(business.hero.src).sizes} alt={business.hero.alt} width={business.hero.width} height={business.hero.height} decoding="async" fetchpriority="high" style={business.hero.objectPosition ? `object-position: ${business.hero.objectPosition}` : undefined} />
   </header>
 
   <ul class="biz-points wrap">
@@ -99,7 +105,7 @@ const style = [
       </dl>
     </div>
     {business.portrait && (
-      <img src={business.portrait.src} alt={business.portrait.alt} width={business.portrait.width} height={business.portrait.height} />
+      <img src={photo(business.portrait.src).src} srcset={photo(business.portrait.src).srcset} sizes={photo(business.portrait.src).sizes} alt={business.portrait.alt} width={business.portrait.width} height={business.portrait.height} loading="lazy" decoding="async" />
     )}
   </section>
 
@@ -109,7 +115,7 @@ const style = [
       <ul class="biz-gallery">
         {business.gallery.map((image) => (
           <li>
-            <img src={image.src} alt={image.alt} width={image.width} height={image.height} />
+            <img src={photo(image.src).src} srcset={photo(image.src).srcset} sizes="(max-width: 900px) 100vw, 480px" alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />
           </li>
         ))}
       </ul>
@@ -164,8 +170,12 @@ const style = [
 <script is:inline>
   (function () {
     var bar = document.querySelector('[data-listing-sticky]');
+    var actions = document.querySelector('.biz-hero .biz-actions');
     if (!bar || !window.matchMedia('(max-width: 800px)').matches) return;
-    var onScroll = function () { bar.hidden = window.scrollY < window.innerHeight; };
+    var onScroll = function () {
+      var past = actions ? actions.getBoundingClientRect().bottom < 8 : window.scrollY > 160;
+      bar.hidden = !past;
+    };
     document.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   })();
@@ -342,7 +352,7 @@ const style = [
     object-fit: cover;
     max-height: 36rem;
   }
-  .biz-partner a, .biz-more a, .biz-source a { color: var(--biz); font-weight: 700; }
+  .biz-partner a, .biz-more a, .biz-source a { color: var(--biz); font-weight: 700; display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
   .biz-facts { margin-top: 1.1rem; }
   .biz-facts div {
     display: grid;
@@ -425,8 +435,10 @@ const style = [
 
   @media (max-width: 900px) {
     .biz-hero, .biz-split, .biz-services, .biz-steps, .biz-quotes { grid-template-columns: 1fr; }
-    .biz-hero-copy { gap: 0.4rem; padding: 1rem 1.1rem 1.1rem; }
-    .biz-logo { width: min(100%, 180px); max-height: 4.4rem; height: auto; object-fit: contain; object-position: left center; padding: 0.25rem 0.45rem; }
+    .biz-hero { align-content: start; }
+    .biz-hero-copy { align-content: start; gap: 0.2rem; padding: 0.35rem 1rem 0.8rem; }
+    .biz-logo { width: auto; max-height: 1.75rem; height: auto; object-fit: contain; object-position: left center; padding: 0; }
+    .biz-kicker { margin: 0; line-height: 1.1; }
     .biz-hero h1 { font-size: 2.15rem; }
     .biz-tag { font-size: 1.15rem; }
     .biz-lede { font-size: 1rem; }

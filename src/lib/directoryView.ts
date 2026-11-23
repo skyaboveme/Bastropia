@@ -1,7 +1,7 @@
 import type { DirectoryEntry } from '../data/directory.ts';
 import { categoryIcon } from '../data/categoryIcons.ts';
 import { outboundLabel } from './maps.ts';
-import { directoryLabelInfo, categoryMatchesGroup, groupLabel, subgroupsForGroup, directoryGridGroups, directoryMoreGroups } from './directoryGroups.ts';
+import { directoryLabelInfo, categoryMatchesGroup, groupShort, subgroupsForGroup, directoryGridGroups, directoryMoreGroups } from './directoryGroups.ts';
 import { directoryOpenPill } from './directoryHours.ts';
 import {
   compareDirectoryAz,
@@ -77,6 +77,8 @@ export type DirectoryView = {
   total: number;
   countywide: DirectoryCard[];
   countywideTotal: number;
+  /** Town filter matched nothing, so no-address rows are shown instead. */
+  fallback: null | { detail: string; seeAll: string };
   empty: null | {
     query: string;
     town: string;
@@ -220,8 +222,13 @@ function headingPhrase(query: string, category: string) {
     return phrase;
   }
   if (parsed.text) return parsed.text;
-  if (category) return groupLabel(category) || category;
+  if (category) return groupShort(category) || category;
   return '';
+}
+
+function lowerFirst(value: string) {
+  if (!value) return value;
+  return value.charAt(0).toLowerCase() + value.slice(1);
 }
 
 function heading(count: number, phrase: string, town: string) {
@@ -282,10 +289,20 @@ export function buildDirectoryView(
   const active = Boolean(state.q || state.town || state.category || state.sub);
   const limit = options.limit || Math.max(1, options.page || 1) * PAGE;
   const phrase = headingPhrase(filtered.text || state.q, state.category);
-  const categoryName = groupLabel(state.category) || state.category;
+  const categoryName = groupShort(state.category) || state.category;
   const shown = filtered.matches.slice(0, limit);
   const countyShown = state.wide || filtered.matches.length === 0 ? filtered.countywide.slice(0, PAGE) : [];
   const cards = (list: DirectoryIndexRow[]) => list.map((row) => toDirectoryCard(row, now));
+  const townName = state.town === 'Countywide' ? '' : filtered.town || state.town;
+  const fellBack = active && filtered.matches.length === 0 && filtered.countywide.length > 0 && Boolean(townName);
+  const noun = phrase || 'businesses';
+  const allCount = fellBack ? filterDirectoryRows(rows, { ...state, town: '' }, options.origin).matches.length : 0;
+  const fallback = fellBack
+    ? {
+        detail: `${filtered.countywide.length} ${filtered.countywide.length === 1 ? 'works' : 'work'} countywide (no street address on file)`,
+        seeAll: `See all ${allCount} ${lowerFirst(noun)} in Bastrop County`,
+      }
+    : null;
   let empty: DirectoryView['empty'] = null;
   if (active && filtered.matches.length === 0 && filtered.countywide.length === 0) {
     const dropped = state.town ? filterDirectoryRows(rows, { ...state, town: '' }).matches.length : 0;
@@ -300,14 +317,20 @@ export function buildDirectoryView(
         count: rows.filter((row) => categoryMatchesGroup(row.c, group.id)).length,
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 4);
+      .slice(0, 3);
     empty = { query: state.q, town: state.town, countyCount: dropped, suggestion, groups };
   }
   const total = filtered.matches.length;
   const from = total ? 1 : 0;
   const to = shown.length;
   return {
-    heading: active ? heading(total, phrase, filtered.town && state.town !== 'Countywide' ? filtered.town : state.town === 'Countywide' ? '' : '') : 'All businesses',
+    heading: !active
+      ? 'All businesses'
+      : fellBack
+        ? phrase
+          ? `No ${lowerFirst(noun)} listed in ${townName} yet`
+          : `No matches for “${state.q}” in ${townName} yet`
+        : heading(total, phrase, townName),
     live: active
       ? heading(total, phrase, filtered.town && state.town !== 'Countywide' ? filtered.town : '')
       : `${rows.length} businesses in Bastrop County`,
@@ -321,6 +344,7 @@ export function buildDirectoryView(
     total,
     countywide: cards(countyShown),
     countywideTotal: filtered.countywide.length,
+    fallback,
     empty,
   };
 }
