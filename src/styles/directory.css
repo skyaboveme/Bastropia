@@ -405,6 +405,7 @@ body.dir-searching .compact-head { display: none; }
   .dir-side a { display: flex; align-items: center; min-height: 44px; padding: 0 0.4rem; border-radius: 8px; text-decoration: none; }
   .dir-filters, .dir-towns { display: none; }
   .dir[data-mode="browse"] .dir-results { display: block; }
+  .dir-partners ul { flex-wrap: wrap; overflow: visible; }
 }
 @media (min-width: 1280px) {
   .biz-list { grid-template-columns: 1fr 1fr; }
