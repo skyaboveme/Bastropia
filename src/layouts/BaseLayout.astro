@@ -23,8 +23,10 @@ interface Props {
   authorPath?: string;
   section?: string;
   extra?: Record<string, unknown>[];
-  /** Slim 56px bar for the directory, listings, and the submit form. */
+  /** Dark compact bar. Directory pages use stickyBar instead. */
   compactHeader?: boolean;
+  /** The shared slim bar (logo, News, Events, Newsletter), visible at once. */
+  stickyBar?: boolean;
 }
 
 const {
@@ -42,6 +44,7 @@ const {
   section,
   extra = [],
   compactHeader = false,
+  stickyBar = false,
 } = Astro.props;
 const fullTitle = title === siteName ? `${siteName} — Everything happening in Bastrop County` : `${title} · ${siteName}`;
 const requestPath = Astro.url.pathname.length > 1 && Astro.url.pathname.endsWith('/') ? Astro.url.pathname.slice(0, -1) : Astro.url.pathname;
@@ -125,7 +128,7 @@ const robots = noindex
     <meta name="geo.placename" content="Bastrop County" />
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content={themeColor} />
-    {!compactHeader && <link rel="preload" as="image" href={hero.visible.src} fetchpriority="high" />}
+    {!compactHeader && !stickyBar && <link rel="preload" as="image" href={hero.visible.src} fetchpriority="high" />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -167,14 +170,14 @@ const robots = noindex
     </script>
     <slot name="head" />
   </head>
-  <body class={compactHeader ? 'compact-page' : undefined}>
+  <body class={compactHeader ? 'compact-page' : stickyBar ? 'bar-page' : undefined}>
     <a class="skip" href="#main">Skip to content</a>
-    <Header compact={compactHeader} />
+    <Header compact={compactHeader} pinnedBar={stickyBar} />
     <main id="main">
       <slot />
     </main>
-    <Footer slim={compactHeader} />
-    {!noindex && !compactHeader && !directoryRoute && <InstallPrompt />}
+    <Footer slim={compactHeader || stickyBar} />
+    {!noindex && !compactHeader && !stickyBar && !directoryRoute && <InstallPrompt />}
     <script is:inline>
       (function () {
         function offsite(href) {

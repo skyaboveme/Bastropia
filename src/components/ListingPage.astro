@@ -34,7 +34,7 @@ const related = (await loadDirectoryEntries())
   .slice(0, 5);
 ---
 
-<BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]} compactHeader>
+<BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]} stickyBar>
   <article class="wrap listing-page">
     <header class="page-head listing-head">
       <p class="listing-back"><a id="listing-back" href={`/directory?category=${encodeURIComponent(publicGroup.slug)}${business.city ? `&town=${encodeURIComponent(business.city)}` : ''}`}>‹ {publicGroup.label}{business.city ? ` in ${business.city}` : ''}</a></p>

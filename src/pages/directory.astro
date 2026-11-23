@@ -94,7 +94,7 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
   canonicalPath={canonicalPath}
   noindex={Boolean(q) || page > 1}
   nofollow={false}
-  compactHeader
+  stickyBar
 >
   <div
     class="dir"
@@ -132,11 +132,6 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
       </aside>
 
       <div class="dir-main">
-        <header class="dir-intro">
-          <h1>Find a local business</h1>
-          <p>{rows.length} businesses across Bastrop County</p>
-        </header>
-
         <div class="dir-dock" id="directory-dock">
           <form class="looking" method="get" action="/directory" role="search">
             <label class="sr" for="q">Search businesses</label>
@@ -183,6 +178,11 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
           </div>
           <div id="directory-recent" class="dir-recent" hidden></div>
         </div>
+
+        <header class="dir-intro">
+          <h1>Find a local business</h1>
+          <p>{rows.length} businesses across Bastrop County</p>
+        </header>
 
         <section class="dir-browse" aria-label="Browse">
           <div class="dir-towns" role="radiogroup" aria-label="Town">
