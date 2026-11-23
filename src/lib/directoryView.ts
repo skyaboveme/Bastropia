@@ -321,7 +321,9 @@ export function directoryAdContext(query: string, town: string, category: string
   const parsed = directoryMatcher().parse(query);
   const concepts = parsed.units.filter((unit) => unit.kind === 'concept').flatMap((unit) => unit.ids || []);
   const townName = town && town !== 'Countywide' ? town : parsed.town;
-  let group = category || directoryMatcher().conceptGroup(concepts[0] || '');
+  const chosen = category ? '' : directoryMatcher().pickAdConcept(parsed.units, parsed.text);
+  let group = category || (chosen ? directoryMatcher().conceptGroup(chosen) : '');
+  let label = !category && chosen ? directoryMatcher().conceptAdTitle(chosen) : '';
   if (!group) {
     const text = parsed.text;
     for (const record of advertiserById.values()) {
@@ -339,6 +341,7 @@ export function directoryAdContext(query: string, town: string, category: string
     category: group,
     concepts,
     text: parsed.text,
+    label,
   };
 }
 

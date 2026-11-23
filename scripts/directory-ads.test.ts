@@ -246,6 +246,12 @@ test('nearest sorts by distance and does not pin', () => {
   const untitled = directoryAdContext('custom homes', '', '');
   assert.equal(untitled.category, 'builders');
   assert.equal(houseDirectoryPromo('spotlight', untitled).title, 'Builders');
+  assert.equal(houseDirectoryPromo('spotlight', directoryAdContext('wedding flowers', '', '')).title, 'Florists');
+  assert.equal(houseDirectoryPromo('spotlight', directoryAdContext('florist', '', '')).title, 'Florists');
+  assert.equal(houseDirectoryPromo('spotlight', directoryAdContext('flowers', '', '')).title, 'Florists');
+  assert.equal(houseDirectoryPromo('spotlight', directoryAdContext('hvac', '', '')).title, 'Home Repair');
+  assert.notEqual(houseDirectoryPromo('spotlight', directoryAdContext('photographer', '', '')).title, 'Business');
+  assert.notEqual(houseDirectoryPromo('spotlight', directoryAdContext('wedding', '', '')).title, 'Things to Do');
 });
 
 test('a file match can feature a partner before the D1 column exists', () => {
