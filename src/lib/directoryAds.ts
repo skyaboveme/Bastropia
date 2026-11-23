@@ -8,12 +8,17 @@ import {
   type DirectoryProduct,
 } from '../data/directoryAds.ts';
 import { groupLabel } from './directoryGroups.ts';
+import { normalizeDirectoryText } from './directoryMatch.ts';
 import { money } from './format.ts';
 import { eventKey } from './time.ts';
 
 export type DirectoryAdContext = {
   town?: string;
   category?: string;
+  /** Concept ids parsed from the typed search. */
+  concepts?: string[];
+  /** Typed search with the town removed. */
+  text?: string;
 };
 
 export type DirectoryPromo = {
@@ -115,9 +120,27 @@ function townOf(ctx: DirectoryAdContext) {
 function specificity(slot: DirectoryAdSlot, ctx: DirectoryAdContext) {
   const town = townOf(ctx);
   const category = ctx.category || '';
+  const concepts = new Set(ctx.concepts || []);
+  const text = normalizeDirectoryText(ctx.text || '');
   if (slot.towns?.length && !slot.towns.includes(town)) return 0;
-  if (slot.categories?.length && !slot.categories.includes(category)) return 0;
-  return 1 + (slot.towns?.length ? 2 : 0) + (slot.categories?.length ? 1 : 0);
+  const conceptHit = Boolean(slot.concepts?.some((id) => concepts.has(id)));
+  const keywordHit = Boolean(
+    slot.keywords?.some((keyword) => {
+      const key = normalizeDirectoryText(keyword);
+      return text === key || text.startsWith(`${key} `);
+    }),
+  );
+  const conceptTarget = Boolean(slot.concepts?.length || slot.keywords?.length);
+  if (conceptTarget && !conceptHit && !keywordHit) return 0;
+  if (slot.categories?.length && !slot.categories.includes(category) && !conceptHit && !keywordHit) return 0;
+  const hasTown = Boolean(slot.towns?.length);
+  const hasCategory = Boolean(slot.categories?.length);
+  if ((conceptHit || keywordHit) && hasTown) return 5;
+  if (conceptHit || keywordHit) return 4;
+  if (hasCategory && hasTown) return 3;
+  if (hasTown) return 2;
+  if (hasCategory) return 1;
+  return 0.5;
 }
 
 export function pickDirectorySlot(

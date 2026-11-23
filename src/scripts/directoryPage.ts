@@ -4,6 +4,7 @@ import { directoryGridGroups, directoryGroupById, directoryGroupList, directoryM
 import { directoryMatcher } from '../lib/directoryMatch.ts';
 import {
   buildDirectoryView,
+  directoryAdContext,
   directoryPageSize,
   filterDirectoryRows,
   type DirectoryCard,
@@ -487,10 +488,11 @@ export function bootDirectory() {
     const spotlightHost = document.getElementById('directory-spotlight');
     if (spotlightHost) {
       spotlightHost.replaceChildren();
-      const spotlight = view.mode === 'results' ? resolveDirectorySpotlight({ town: state.town, category: state.category }, directoryToday()) : null;
+      const adContextForSpot = directoryAdContext(state.q, state.town, state.category);
+      const spotlight = view.mode === 'results' ? resolveDirectorySpotlight(adContextForSpot, directoryToday()) : null;
       if (spotlight) spotlightHost.append(renderPromo(spotlight, 'tile'));
     }
-    const adContext = { town: state.town, category: state.category };
+    const adContext = directoryAdContext(state.q, state.town, state.category);
     const feed = composeDirectoryFeed(view.matches, adContext, directoryToday());
     if (feed.length) {
       const list = document.createElement('ul');

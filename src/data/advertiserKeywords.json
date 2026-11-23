@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "generated": "2026-11-22T21:30:00-06:00",
+  "source": "Partner pages in src/data/businesses.ts at afc5bc4 (areas and services lists). directoryAdSlots and directoryFeatured are empty, and the live index has no D1 tier='featured' rows, so partners are the only advertisers today.",
+  "rules": {
+    "pinMax": 3,
+    "rotate": "by America/Chicago date, as rotateFair()",
+    "eligible": "row is a partner (k=1), Featured (b='Featured'), or listed here with an active start/end",
+    "match": "advertiser is pinned when the row matches organically OR a query concept id is in `concepts` OR the query (towns removed, normalized) equals or starts with a `keywords` phrase",
+    "town": "a town filter passes when row.t equals the town OR the town is in `serves`",
+    "spotlight": "a paid Spotlight slot may target `concepts`; without a URL category, the page infers the ad category from the query's concept",
+    "dates": "start/end are inclusive America/Chicago YYYY-MM-DD; empty means active while the partner page is live. The desk should fill real contract dates."
+  },
+  "advertisers": [
+    {
+      "id": "partner:StringPrairieHeatingandAir",
+      "name": "String Prairie Heating & Air",
+      "product": "partner",
+      "start": "",
+      "end": "",
+      "concepts": [
+        "hvac"
+      ],
+      "keywords": [
+        "hvac",
+        "ac repair",
+        "air conditioning",
+        "heating",
+        "furnace",
+        "heat pump",
+        "ductwork",
+        "thermostat",
+        "indoor air quality",
+        "ac installation"
+      ],
+      "serves": [
+        "Bastrop",
+        "Rosanky",
+        "Smithville",
+        "Paige",
+        "Red Rock",
+        "Cedar Creek",
+        "McDade"
+      ]
+    },
+    {
+      "id": "partner:BarronHomes",
+      "name": "Barron Homes",
+      "product": "partner",
+      "start": "",
+      "end": "",
+      "concepts": [
+        "contractor"
+      ],
+      "keywords": [
+        "home builder",
+        "custom home",
+        "custom homes",
+        "custom home builder",
+        "builder",
+        "new home",
+        "new construction",
+        "build a house"
+      ],
+      "serves": [
+        "Bastrop",
+        "Elgin",
+        "Smithville",
+        "Cedar Creek",
+        "McDade",
+        "Paige",
+        "Red Rock",
+        "Rosanky",
+        "Dale",
+        "Wyldwood",
+        "Camp Swift"
+      ]
+    },
+    {
+      "id": "partner:BarefootFlowerFarms",
+      "name": "Barefoot Flower Farms",
+      "product": "partner",
+      "start": "",
+      "end": "",
+      "concepts": [
+        "florist"
+      ],
+      "keywords": [
+        "florist",
+        "flowers",
+        "flower farm",
+        "fresh cut flowers",
+        "wedding flowers",
+        "event flowers",
+        "floral design",
+        "nursery",
+        "plants",
+        "native plants",
+        "succulents",
+        "u-pick"
+      ],
+      "serves": [
+        "Rosanky",
+        "Bastrop",
+        "Smithville"
+      ]
+    },
+    {
+      "id": "partner:LostPinesToyota",
+      "name": "Lost Pines Toyota",
+      "product": "partner",
+      "start": "",
+      "end": "",
+      "concepts": [
+        "dealer"
+      ],
+      "keywords": [
+        "toyota",
+        "car dealer",
+        "dealership",
+        "new cars",
+        "used cars",
+        "certified pre-owned",
+        "trucks",
+        "suv",
+        "hybrid",
+        "toyota service",
+        "oil change",
+        "auto repair"
+      ],
+      "serves": [
+        "Bastrop",
+        "Elgin"
+      ]
+    },
+    {
+      "id": "partner:RosaTexLandscaping",
+      "name": "RosaTex Landscaping",
+      "product": "partner",
+      "start": "",
+      "end": "",
+      "concepts": [
+        "landscaping"
+      ],
+      "keywords": [
+        "landscaping",
+        "lawn care",
+        "mowing",
+        "tree trimming",
+        "tree removal",
+        "brush clearing",
+        "yaupon clearing",
+        "storm cleanup",
+        "junk hauling",
+        "yard cleanup"
+      ],
+      "serves": [
+        "Rosanky",
+        "Bastrop",
+        "Smithville",
+        "Red Rock",
+        "Dale",
+        "Cedar Creek"
+      ]
+    },
+    {
+      "id": "partner:602Brewing",
+      "name": "602 Brewing Company",
+      "product": "partner",
+      "start": "",
+      "end": "",
+      "concepts": [
+        "burgers",
+        "drinks",
+        "restaurant"
+      ],
+      "keywords": [
+        "brewery",
+        "beer",
+        "brewpub",
+        "burgers",
+        "burger",
+        "live music",
+        "cocktails",
+        "mediterranean",
+        "lebanese",
+        "shrimp and grits"
+      ],
+      "serves": [
+        "Bastrop"
+      ]
+    }
+  ]
+}

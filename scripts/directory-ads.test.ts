@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { directoryFounding, directoryProducts, type DirectoryAdSlot } from '../src/data/directoryAds.ts';
+import { directoryEntries } from '../src/data/directory.ts';
 import {
   composeDirectoryFeed,
   directoryInquireHref,
@@ -12,6 +13,7 @@ import {
   resolveDirectorySpotlight,
   rotateFair,
 } from '../src/lib/directoryAds.ts';
+import { directoryAdContext, directoryAdvertiserPins, entryToIndexRow, filterDirectoryRows, toDirectoryCard } from '../src/lib/directoryView.ts';
 
 const slots: DirectoryAdSlot[] = [
   {
@@ -149,6 +151,74 @@ test('unsold ads stay after the third result and a paid spotlight stays above', 
   assert.equal(featured[0].kind, 'card');
   if (featured[0].kind === 'card') assert.deepEqual(featured[0].card.badges, ['Featured']);
   assert.ok(featured.every((item) => item.kind === 'card' || item.ad.id !== 'house-featured'));
+});
+
+const keywordCases: [string, string][] = [
+  ['String Prairie Heating & Air', 'hvac'],
+  ['String Prairie Heating & Air', 'ac repair'],
+  ['String Prairie Heating & Air', 'heating'],
+  ['String Prairie Heating & Air', 'furnace'],
+  ['String Prairie Heating & Air', 'hvac smithville'],
+  ['Barron Homes', 'home builder'],
+  ['Barron Homes', 'custom homes'],
+  ['Barron Homes', 'builder'],
+  ['Barron Homes', 'contractor'],
+  ['Barron Homes', 'home builder bastrop'],
+  ['Barefoot Flower Farms', 'florist'],
+  ['Barefoot Flower Farms', 'flowers'],
+  ['Barefoot Flower Farms', 'nursery'],
+  ['Barefoot Flower Farms', 'wedding flowers'],
+  ['Barefoot Flower Farms', 'florist bastrop'],
+  ['Lost Pines Toyota', 'car dealer'],
+  ['Lost Pines Toyota', 'toyota'],
+  ['Lost Pines Toyota', 'used cars'],
+  ['Lost Pines Toyota', 'auto repair'],
+  ['Lost Pines Toyota', 'car dealer elgin'],
+  ['RosaTex Landscaping', 'landscaping'],
+  ['RosaTex Landscaping', 'lawn care'],
+  ['RosaTex Landscaping', 'mowing'],
+  ['RosaTex Landscaping', 'tree trimming'],
+  ['RosaTex Landscaping', 'landscaping bastrop'],
+  ['602 Brewing Company', 'brewery'],
+  ['602 Brewing Company', 'burgers'],
+  ['602 Brewing Company', 'restaurant'],
+  ['602 Brewing Company', 'beer'],
+  ['602 Brewing Company', 'restaurants bastrop'],
+];
+
+test('advertiser keywords pin the partner and guards pin nobody', () => {
+  const rows = directoryEntries.map((entry) => entryToIndexRow(entry, '2026-11-23'));
+  const blank = { town: '', category: '', sub: '', sort: '' as const, wide: false };
+  for (const [name, query] of keywordCases) {
+    const found = filterDirectoryRows(rows, { ...blank, q: query });
+    const pins = directoryAdvertiserPins(rows, found.matches, found.units, found.text, found.town, '2026-11-23');
+    assert.ok(pins.some((row) => row.n === name), `${query} should pin ${name}`);
+    assert.ok(found.matches.slice(0, pins.length).some((row) => row.n === name), `${query} should lead with ${name}`);
+  }
+  for (const query of ['plumber', 'dentist', 'tacos', 'vet', 'church', 'bank', 'pizza', 'coffee']) {
+    const found = filterDirectoryRows(rows, { ...blank, q: query });
+    const pins = directoryAdvertiserPins(rows, found.matches, found.units, found.text, found.town, '2026-11-23');
+    assert.equal(pins.length, 0, `${query} pinned ${pins.map((row) => row.n).join(', ')}`);
+  }
+  const smithville = filterDirectoryRows(rows, { ...blank, q: 'hvac smithville' });
+  assert.equal(smithville.matches[0]?.n, 'String Prairie Heating & Air');
+  assert.equal(toDirectoryCard(smithville.matches[0], new Date('2026-11-23T18:00:00Z'), smithville.town).placeLabel, 'Serves Smithville');
+  const hvacSlot = {
+    id: 'hvac-elgin',
+    kind: 'spotlight' as const,
+    name: 'String Prairie Heating & Air',
+    line: 'Heating & AC in Elgin',
+    href: '/StringPrairieHeatingandAir',
+    concepts: ['hvac'],
+    towns: ['Elgin'],
+    start: '2026-11-01',
+    end: '2026-12-31',
+  };
+  assert.equal(pickDirectorySlot('spotlight', directoryAdContext('ac repair elgin', '', ''), '2026-11-23', [hvacSlot])?.id, 'hvac-elgin');
+  assert.equal(pickDirectorySlot('spotlight', directoryAdContext('plumber elgin', '', ''), '2026-11-23', [hvacSlot]), null);
+  const elgin = filterDirectoryRows(rows, { ...blank, q: 'ac repair elgin' });
+  const dropped = directoryAdvertiserPins(rows, elgin.matches, elgin.units, elgin.text, elgin.town, '2026-11-23', { slots: [hvacSlot] });
+  assert.ok(dropped.every((row) => row.n !== 'String Prairie Heating & Air'));
 });
 
 test('a file match can feature a partner before the D1 column exists', () => {

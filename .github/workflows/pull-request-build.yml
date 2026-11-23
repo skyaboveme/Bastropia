@@ -35,5 +35,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Directory tests
+        run: node --experimental-strip-types --test scripts/directory-ads.test.ts scripts/directory-match.test.ts
       - name: SEO check
         run: node scripts/seo-check.mjs

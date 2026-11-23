@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const origin = process.env.KEEP_ASSETS_ORIGIN || 'https://bastropia.com';
-const pages = (process.env.KEEP_ASSETS_PAGES || '/,/directory,/news').split(',').map((item) => item.trim()).filter(Boolean);
+const pages = (process.env.KEEP_ASSETS_PAGES || '/,/directory,/directory/submit,/news,/BarronHomes').split(',').map((item) => item.trim()).filter(Boolean);
 const dist = process.env.KEEP_ASSETS_DIST || join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 
 async function exists(path) {
@@ -45,7 +45,9 @@ for (const page of pages) {
     console.log(`keep-astro-assets: could not read ${page} (${error instanceof Error ? error.message : error})`);
     continue;
   }
-  const paths = html.match(/\/_astro\/[A-Za-z0-9._-]+/g) || [];
+  const paths = html.match(/\/_astro\/[A-Za-z0-9._-]+\.(?:css|js|mjs|woff2)/g) || html.match(/\/_astro\/[A-Za-z0-9._-]+/g) || [];
+  const styles = paths.filter((assetPath) => assetPath.endsWith('.css'));
+  if (styles.length) console.log(`keep-astro-assets: ${page} css ${styles.join(' ')}`);
   for (const assetPath of paths) {
     if (seen.has(assetPath)) continue;
     seen.add(assetPath);
