@@ -11,7 +11,7 @@ import { directoryCards } from '../lib/directoryListing';
 import { eventHref, listEvents } from '../lib/eventSource';
 import { capOrganizer, filterEvents } from '../lib/events';
 import { offsiteAttrs } from '../lib/links';
-import { readSocialFeed, relativeTime, type SocialFeedRecord, type StoredPost } from '../lib/socialFeed';
+import { newestPerSource, readSocialFeed, relativeTime, type SocialFeedRecord, type StoredPost } from '../lib/socialFeed';
 import { formatMedium, whenLabel } from '../lib/time';
 
 const now = new Date();
@@ -24,7 +24,7 @@ try {
   console.error('groups feed failed', error);
 }
 
-const posts = [...(feed?.posts ?? [])].sort((a, b) => Date.parse(b.published) - Date.parse(a.published));
+const posts = newestPerSource(feed?.posts ?? []);
 const videos = feed?.videos ?? [];
 const updated = feed ? relativeTime(feed.fetchedAt, nowMs) : '';
 

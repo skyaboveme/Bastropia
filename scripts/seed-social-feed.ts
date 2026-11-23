@@ -5,7 +5,7 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { collectSocialFeed, mergeSourcePosts, parseSocialFeed } from '../src/lib/socialFeed.ts';
+import { collectSocialFeed, mergeSourcePosts, newestPerSource, parseSocialFeed } from '../src/lib/socialFeed.ts';
 
 function readPrevious(path: string | undefined) {
   if (!path || !existsSync(path)) return null;
@@ -31,7 +31,7 @@ if (!anyPage && !anyVideo) {
 const now = Date.now();
 const record = {
   fetchedAt: new Date(now).toISOString(),
-  posts: anyPage ? mergeSourcePosts(previous?.posts ?? [], fresh.results, now) : previous?.posts ?? [],
+  posts: anyPage ? mergeSourcePosts(previous?.posts ?? [], fresh.results, now) : newestPerSource(previous?.posts ?? []),
   videos: anyVideo ? fresh.videos : previous?.videos ?? [],
 };
 mkdirSync(dirname(out), { recursive: true });

@@ -245,10 +245,16 @@ export function mergeSourcePosts(previous: StoredPost[], results: SourceFetch[],
   posts.sort((a, b) => Date.parse(b.published) - Date.parse(a.published));
   const seen = new Set<string>();
   return posts.filter((post) => {
-    if (seen.has(post.id)) return false;
-    seen.add(post.id);
+    const key = post.sourceId || post.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   }).slice(0, MAX_POSTS);
+}
+
+/** Newest post from each page. Logged-out HTML sometimes repeats one story. */
+export function newestPerSource(posts: StoredPost[]) {
+  return mergeSourcePosts(posts, [], Date.now());
 }
 
 function cookiePairs(response: Response, previous: string) {
@@ -422,7 +428,9 @@ export async function refreshSocialFeed(): Promise<SocialFeedRecord | null> {
   try {
     const fresh = await collectSocialFeed();
     const anyPage = fresh.results.some((result) => result.ok);
-    const posts = anyPage ? mergeSourcePosts(previous?.posts ?? [], fresh.results, Date.now()) : previous?.posts ?? [];
+    const posts = anyPage
+      ? mergeSourcePosts(previous?.posts ?? [], fresh.results, Date.now())
+      : newestPerSource(previous?.posts ?? []);
     const videos = fresh.videos.length ? fresh.videos : previous?.videos ?? [];
     if (!anyPage && !fresh.videos.length) {
       console.error('social feed refresh kept the previous copy');
