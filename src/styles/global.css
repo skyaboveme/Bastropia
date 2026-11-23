@@ -897,26 +897,73 @@ h1 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); }
 }
 .newsletter-later:hover { color: #fff; }
 
+html.install-open,
+html.install-open body { overflow: hidden; }
 .install-pop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    max(1rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  background: rgba(16, 24, 20, 0.66);
+}
+.install-pop[hidden],
+.install-pop [hidden] { display: none !important; }
+.install-card {
   position: relative;
+  width: min(28rem, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
   border: 0;
   padding: 1.7rem 1.5rem 1.3rem;
-  width: min(28rem, calc(100vw - 2rem));
   background: var(--pine-deep);
   color: #f4efe6;
 }
-.install-pop::backdrop { background: rgba(16, 24, 20, 0.66); }
+.install-dismiss {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #f4efe6;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
 .install-pop .kicker { color: var(--river); }
-.install-pop h2 { color: var(--sun); font-size: clamp(1.6rem, 4vw, 2.1rem); margin-top: 0.35rem; }
+.install-pop h2 { color: var(--sun); font-size: clamp(1.6rem, 4vw, 2.1rem); margin-top: 0.35rem; padding-right: 2rem; }
 .install-pop .dek { color: #cfe0d7; margin-top: 0.55rem; }
-.install-pop .button { width: 100%; margin-top: 1rem; }
+.install-pop .button { width: 100%; margin-top: 1rem; min-height: 44px; }
+.install-pop .newsletter-later { min-height: 44px; padding: 0.45rem 0.8rem; }
 .install-steps {
   margin: 0.9rem 0 0;
-  padding-left: 1.15rem;
+  padding-left: 1.25rem;
   color: #cfe0d7;
   line-height: 1.5;
+  list-style: decimal;
 }
-.install-steps li { margin: 0.35rem 0; }
+.install-steps li { margin: 0.45rem 0; }
+.install-share {
+  display: inline-block;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0 0.15rem;
+  vertical-align: -0.32rem;
+  color: var(--sun);
+}
 
 .guide-list {
   margin: 0.6rem 0 0;
