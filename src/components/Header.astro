@@ -1,5 +1,6 @@
 ---
 import BurnMark from './BurnMark.astro';
+import SectionNav from './SectionNav.astro';
 import SocialIcons from './SocialIcons.astro';
 import { burnBan } from '../data/burnBan';
 import { burnView } from '../lib/burnBanView';
@@ -38,21 +39,25 @@ const voteBanner =
         : `Election Day is ${labelFromKey(electionDay)}, polls open ${electionHours}. See hours and polling places.`;
 
 const hero = headerHero(path, { night: headerNight(now), scene: forecast?.scene });
-const links = [
+const beforeLocal = [
   { href: '/', label: 'Front page' },
   { href: '/weather', label: 'Weather' },
   { href: '/scores', label: 'Scores' },
   { href: '/news', label: 'News' },
   { href: '/guides', label: 'Guides' },
-  { href: '/cattle', label: 'Cattle' },
   { href: '/events', label: 'Events' },
   { href: '/this-weekend', label: 'WeekEnd' },
   { href: '/videos', label: 'Videos' },
+];
+const localLinks = [
   { href: '/government', label: 'Gov' },
+  { href: '/cattle', label: 'Cattle' },
+  { href: '/churches', label: 'Churches' },
+];
+const afterLocal = [
   { href: '/groups', label: 'Social' },
   { href: '/directory', label: 'Directory' },
   { href: '/eats', label: 'Eats' },
-  { href: '/churches', label: 'Churches' },
   { href: '/advertise', label: 'Advertise' },
 ];
 const voteLink = { href: '/go-vote', label: 'Go Vote' };
@@ -91,11 +96,7 @@ const statusText = forecast
       <a class="compact-status" href={statusHref}>{statusText}</a>
       <button class="menu compact-menu" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">☰</button>
     </div>
-    <nav id="site-nav" class="nav compact-nav" aria-label="Sections">
-      {links.map((link) => (
-        <a href={link.href} aria-current={current(link.href) ? 'page' : undefined}>{link.label}</a>
-      ))}
-    </nav>
+    <SectionNav navClass="compact-nav" before={beforeLocal} local={localLinks} after={afterLocal} isCurrent={current} />
   </header>
 ) : (
   <>
@@ -126,35 +127,35 @@ const statusText = forecast
   </div>
 
   <div class="header-stage">
-    <div class="brand-band">
-      <div
-        class:list={['header-hero', hero.heroClass]}
-        data-header-hero={hero.rest.length > 0 ? 'true' : undefined}
-        aria-hidden="true"
-      >
+    <div
+      class:list={['header-hero', hero.heroClass]}
+      data-header-hero={hero.rest.length > 0 ? 'true' : undefined}
+      aria-hidden="true"
+    >
+      <img
+        class="is-on"
+        src={hero.visible.src}
+        alt=""
+        width={hero.visible.width}
+        height={hero.visible.height}
+        decoding="async"
+        fetchpriority="high"
+        sizes="100vw"
+      />
+      {hero.rest.map((image) => (
         <img
-          class="is-on"
-          src={hero.visible.src}
+          src={image.src}
           alt=""
-          width={hero.visible.width}
-          height={hero.visible.height}
+          width={image.width}
+          height={image.height}
           decoding="async"
-          fetchpriority="high"
+          fetchpriority="low"
+          loading="lazy"
           sizes="100vw"
         />
-        {hero.rest.map((image) => (
-          <img
-            src={image.src}
-            alt=""
-            width={image.width}
-            height={image.height}
-            decoding="async"
-            fetchpriority="low"
-            loading="lazy"
-            sizes="100vw"
-          />
-        ))}
-      </div>
+      ))}
+    </div>
+    <div class="brand-band">
       <div class="brand-row">
         <a class="brand" href="/">
           <span class="brand-mark">
@@ -352,14 +353,7 @@ const statusText = forecast
         <a href="/events" aria-current={current('/events') ? 'page' : undefined}>Events</a>
         <a class="quick-join" href="/newsletter#newsletter" aria-current={current('/newsletter') ? 'page' : undefined}>Newsletter</a>
       </nav>
-      <nav id="site-nav" class="nav" aria-label="Sections">
-        {voteLive && (
-          <a class="nav-vote" href={voteLink.href} data-expires={voteLiveUntil} aria-current={current(voteLink.href) ? 'page' : undefined}>{voteLink.label}</a>
-        )}
-        {links.map((link) => (
-          <a href={link.href} aria-current={current(link.href) ? 'page' : undefined}>{link.label}</a>
-        ))}
-      </nav>
+      <SectionNav before={beforeLocal} local={localLinks} after={afterLocal} isCurrent={current} vote={voteLive ? voteLink : null} voteExpires={voteLive ? voteLiveUntil : undefined} />
       <form class="nav-search" action="/search" method="get" role="search">
         <label class="sr" for="nav-q">Search Bastropia</label>
         <input id="nav-q" name="q" type="search" placeholder="Search" />
@@ -410,6 +404,45 @@ const statusText = forecast
     const open = nav?.classList.toggle('is-open');
     button.setAttribute('aria-expanded', String(Boolean(open)));
   });
+
+  const local = document.querySelector<HTMLElement>('[data-nav-local]');
+  const localButton = local?.querySelector<HTMLButtonElement>('.nav-local-btn');
+  if (local && localButton) {
+    const setOpen = (on: boolean) => {
+      local.classList.toggle('is-open', on);
+      localButton.setAttribute('aria-expanded', String(on));
+    };
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let suppressFocus = false;
+    if (canHover) {
+      local.addEventListener('mouseenter', () => setOpen(true));
+      local.addEventListener('mouseleave', () => {
+        if (!local.contains(document.activeElement)) setOpen(false);
+      });
+      local.addEventListener('focusin', () => {
+        if (!suppressFocus) setOpen(true);
+      });
+      local.addEventListener('focusout', (event) => {
+        const next = event.relatedTarget;
+        if (!(next instanceof Node) || !local.contains(next)) setOpen(false);
+      });
+    } else {
+      localButton.addEventListener('click', () => {
+        setOpen(localButton.getAttribute('aria-expanded') !== 'true');
+      });
+    }
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Node && !local.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && local.classList.contains('is-open')) {
+        suppressFocus = true;
+        setOpen(false);
+        localButton.focus();
+        suppressFocus = false;
+      }
+    });
+  }
 </script>
 <script is:inline>
   (function () {
