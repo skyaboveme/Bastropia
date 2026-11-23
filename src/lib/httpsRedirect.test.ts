@@ -35,6 +35,12 @@ test('the HTTPS apex is left alone', () => {
   assert.equal(redirect('https://bastropia.com/news?x=1'), null);
 });
 
+test('local dev hosts are not sent to production', () => {
+  assert.equal(redirect('http://127.0.0.1:4321/'), null);
+  assert.equal(redirect('http://localhost:4321/news?x=1'), null);
+  assert.equal(redirect('http://[::1]:4321/'), null);
+});
+
 test('X-Forwarded-Proto and cf-visitor can mark an https URL as http', () => {
   const forwarded = redirect('https://bastropia.com/news', { 'x-forwarded-proto': 'http' });
   assert.equal(forwarded?.headers.get('location'), 'https://bastropia.com/news');
