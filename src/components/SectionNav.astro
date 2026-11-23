@@ -1,0 +1,42 @@
+---
+interface Item {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  before: Item[];
+  local: Item[];
+  after: Item[];
+  isCurrent: (href: string) => boolean;
+  vote?: Item | null;
+  voteExpires?: string;
+  navClass?: string;
+}
+
+const { before, local, after, isCurrent, vote = null, voteExpires, navClass = '' } = Astro.props;
+const localHere = local.some((item) => isCurrent(item.href));
+---
+
+<nav id="site-nav" class:list={['nav', navClass]} aria-label="Sections">
+  {vote && (
+    <a class="nav-vote" href={vote.href} data-expires={voteExpires} aria-current={isCurrent(vote.href) ? 'page' : undefined}>{vote.label}</a>
+  )}
+  {before.map((link) => (
+    <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>
+  ))}
+  <div class="nav-local" data-nav-local>
+    <button type="button" class:list={['nav-local-btn', localHere && 'is-here']} aria-expanded="false" aria-controls="local-menu">
+      Local
+      <span class="nav-local-caret" aria-hidden="true"></span>
+    </button>
+    <div id="local-menu" class="nav-local-menu" role="group" aria-label="Local">
+      {local.map((link) => (
+        <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>
+      ))}
+    </div>
+  </div>
+  {after.map((link) => (
+    <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>
+  ))}
+</nav>
