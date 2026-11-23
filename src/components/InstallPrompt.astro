@@ -22,6 +22,7 @@
     var storageKey = 'bastropia-install';
     var dialog = document.getElementById('install-pop');
     if (!dialog) return;
+    if (/^\/directory(\/|$)/.test(location.pathname)) return;
 
     var deferred = null;
     var action = dialog.querySelector('[data-install-action]');
@@ -52,7 +53,16 @@
       return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
     }
 
+    function inputFocused() {
+      var el = document.activeElement;
+      return !!(el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+    }
+
     function show() {
+      if (inputFocused()) {
+        setTimeout(show, 4000);
+        return;
+      }
       dialog.hidden = false;
       if (typeof dialog.showModal === 'function' && !dialog.open) dialog.showModal();
     }

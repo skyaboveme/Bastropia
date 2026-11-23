@@ -63,8 +63,35 @@ function current(href: string) {
   if (href === '/directory') return path === '/directory' || path.startsWith('/directory/');
   return path === href || path.startsWith(`${href}/`);
 }
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+const statusHref = burnBan.inEffect && !burn.stale ? '/burn-ban' : '/now';
+const statusText = forecast
+  ? `${forecast.temp}° · ${burnBan.inEffect && !burn.stale ? 'Burn ban' : burn.stale ? 'Burn status unconfirmed' : 'No burn ban'}`
+  : burnBan.inEffect && !burn.stale
+    ? 'Burn ban'
+    : 'No burn ban';
 ---
 
+{compact ? (
+  <header class="compact-head">
+    <div class="compact-bar">
+      <a class="compact-brand" href="/">Bastropia</a>
+      <a class="compact-status" href={statusHref}>{statusText}</a>
+      <button class="menu compact-menu" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">☰</button>
+    </div>
+    <nav id="site-nav" class="nav compact-nav" aria-label="Sections">
+      {links.map((link) => (
+        <a href={link.href} aria-current={current(link.href) ? 'page' : undefined}>{link.label}</a>
+      ))}
+    </nav>
+  </header>
+) : (
+  <>
 {burnBan.inEffect && !burn.stale && (
   <a class="alert-bar" href="/burn-ban">Burn ban in effect in Bastrop County. Read the order before you burn.</a>
 )}
@@ -329,6 +356,8 @@ function current(href: string) {
     </nav>
   </div>
 </div>
+  </>
+)}
 <script is:inline>
   (function () {
     var key = 'bastropia-city';

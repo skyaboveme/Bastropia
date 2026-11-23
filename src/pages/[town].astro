@@ -20,6 +20,7 @@ import { activeUpgrades, resolveTier } from '../lib/intake';
 import EventCredit from '../components/EventCredit.astro';
 import ListingPage from '../components/ListingPage.astro';
 import { bumpStat, getBusiness, listBizEvents, listingIsPublic, listSpecials } from '../lib/businessDb';
+import { loadDirectoryEntries } from '../lib/directoryFeed';
 
 const town = townBySlug(Astro.params.town ?? '');
 const listing = town ? null : await getBusiness(Astro.params.town ?? '');
@@ -61,6 +62,7 @@ const channels = youtubeChannels.filter((channel) => town?.channels?.includes(ch
 const scores = town && town.football.length ? await getFridayScores() : [];
 const townScores = scores.filter((score) => town?.football.includes(score.id));
 const schools = footballSchools.filter((school) => town?.football?.includes(school.id));
+const directoryCount = town ? (await loadDirectoryEntries()).filter((entry) => entry.town === town.name).length : 0;
 ---
 
 {liveListing ? (
@@ -87,6 +89,7 @@ const schools = footballSchools.filter((school) => town?.football?.includes(scho
         <button class="button button-dark" type="button" id="use-town" data-town={town.name}>Use {town.name} on the front page</button>
         <a class="button button-ghost" href="/">Front page</a>
         <a class="button button-ghost" href={`/events?city=${encodeURIComponent(town.name)}`}>All {town.name} events</a>
+        <a class="button button-ghost" href={`/directory?town=${encodeURIComponent(town.name)}`}>Businesses in {town.name} ({directoryCount})</a>
       </p>
 
       {forecast && (

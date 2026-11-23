@@ -1,0 +1,53 @@
+---
+import CategoryIcon from './CategoryIcon.astro';
+import type { DirectoryCard } from '../lib/directoryView';
+
+interface Props {
+  card: DirectoryCard;
+}
+
+const { card } = Astro.props;
+const more = card.actions.find((action) => action.label === 'More');
+const slots = card.actions.filter((action) => action.label !== 'More' && action.kind !== 'share');
+---
+
+<li class="biz-row">
+  <a class="biz-hit" href={card.href} aria-label={card.name} target={card.external ? '_blank' : undefined} rel={card.external ? 'noopener noreferrer' : undefined}>
+    <span class:list={['biz-mark', card.logo && 'has-logo']} aria-hidden="true">
+      {card.logo ? <img class="biz-logo" src={card.logo} alt="" decoding="async" /> : <CategoryIcon icon={card.icon} />}
+    </span>
+    <span class="biz-copy">
+      <span class="biz-name">
+        {card.name}
+        {card.badge && <span class:list={['badge', card.badge === 'Featured' && 'badge-featured', card.badge === 'Spotlight' && 'badge-spotlight']}>{card.badge}</span>}
+      </span>
+      <span class="biz-line">
+        {card.trade} · {card.placeLabel}
+        {card.noAddress && <span class="biz-soft"> · no address listed</span>}
+        {card.open && <span class:list={['biz-open', card.open === 'Closed' && 'is-closed']}>{card.open}</span>}
+      </span>
+      {card.address && <span class="biz-addr">{card.address}</span>}
+    </span>
+  </a>
+  {slots.length > 0 && (
+    <div class="biz-actions">
+      {slots.map((action) => (
+        <a class:list={['dir-btn', action.variant === 'call' && 'is-call']} href={action.href} aria-label={action.aria} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener noreferrer' : undefined}>{action.label}</a>
+      ))}
+      {more && card.menu.length > 0 && (
+        <details class="biz-more">
+          <summary aria-label={more.aria}>···</summary>
+          <div class="biz-menu">
+            {card.menu.map((action) => (
+              action.kind === 'share' ? (
+                <button type="button" class="dir-btn" aria-label={action.aria} data-share={card.href} data-share-name={card.name}>Share</button>
+              ) : (
+                <a class="dir-btn" href={action.href} aria-label={action.aria} target={action.external ? '_blank' : undefined} rel={action.external ? 'noopener noreferrer' : undefined}>{action.label}</a>
+              )
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  )}
+</li>

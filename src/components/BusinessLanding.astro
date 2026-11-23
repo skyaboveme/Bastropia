@@ -18,6 +18,7 @@ const { business } = Astro.props;
   imageAlt={business.shareAlt}
   canonicalPath={`/${business.slug}`}
   extra={[localBusiness(business)]}
+  compactHeader
 >
   {business.fontHref && <link slot="head" rel="stylesheet" href={business.fontHref} />}
   <BusinessPage business={business} />

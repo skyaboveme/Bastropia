@@ -2,8 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { directoryBusiness, listingSummary } from '../lib/schema';
 import { logoSrc, type Biz, type BizEvent, type BizSpecial } from '../lib/businessDb';
-import { publicCategoryFor } from '../data/directoryCategories';
 import { mapsSearchUrl, outboundLabel } from '../lib/maps';
+import { loadDirectoryEntries } from '../lib/directoryFeed';
+import { directoryLabelInfo } from '../lib/directoryGroups';
 
 interface Props {
   business: Biz;
@@ -17,12 +18,17 @@ const upcoming = events.filter((item) => item.starts >= new Date().toISOString()
 const description = listingSummary(business);
 const map = mapsSearchUrl(business.address);
 const siteLabel = outboundLabel(business.website);
-const publicGroup = publicCategoryFor(business.category);
+const info = directoryLabelInfo(business.category);
+const publicGroup = { slug: info.group, label: info.display || business.category };
+const related = (await loadDirectoryEntries())
+  .filter((entry) => entry.href !== `/${business.slug}` && directoryLabelInfo(entry.category).group === info.group && (!business.city || entry.town === business.city))
+  .slice(0, 5);
 ---
 
-<BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]}>
-  <article class="wrap">
-    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;">
+<BaseLayout title={business.name} description={description} extra={[directoryBusiness(business)]} compactHeader>
+  <article class="wrap listing-page">
+    <header class="page-head" style="padding-left:0;padding-right:0;width:auto;border-bottom:0;margin-bottom:0.4rem;">
+      <p class="listing-back"><a id="listing-back" href={`/directory?category=${encodeURIComponent(publicGroup.slug)}${business.city ? `&town=${encodeURIComponent(business.city)}` : ''}`}>‹ {publicGroup.label}{business.city ? ` in ${business.city}` : ''}</a></p>
       <div style="display:flex;gap:0.9rem;align-items:center;">
         {business.logo_type && (
           <img src={logoSrc(business)} alt="" width="72" height="72" style="width:4.4rem;height:4.4rem;object-fit:cover;border-radius:0.4rem;background:#fff;flex:none;" />
@@ -33,7 +39,6 @@ const publicGroup = publicCategoryFor(business.category);
         </div>
       </div>
       {business.details && <p class="lede">{business.details}</p>}
-      {business.hours && <p class="listing-hours">{business.hours}</p>}
     </header>
     {business.banner_url && (
       <section class="home-banner banner-poster" data-listing-banner={business.id} aria-label="Sponsored" style="margin-top:1rem;">
@@ -59,12 +64,11 @@ const publicGroup = publicCategoryFor(business.category);
         <h2>{business.daily_special}</h2>
       </section>
     )}
-    <p class="cluster listing-actions">
-      {phoneDigits && <a class="button" href={`/go/biz/${business.id}?to=phone`}>Call {business.phone}</a>}
+    <div class="listing-actions">
+      {phoneDigits && <a class="button listing-call" href={`/go/biz/${business.id}?to=phone`}>Call {business.phone}</a>}
       {map && <a class="button button-ghost" href={map} target="_blank" rel="noopener noreferrer">Directions</a>}
-      {business.website && <a class="button button-ghost" href={`/go/biz/${business.id}?to=site`}>{siteLabel}</a>}
-      <a class="button button-ghost" href={`/directory?category=${encodeURIComponent(publicGroup.slug)}`}>More {publicGroup.label}</a>
-    </p>
+      {business.website ? <a class="button button-ghost" href={`/go/biz/${business.id}?to=site`}>{siteLabel}</a> : <button class="button button-ghost" type="button" id="listing-share">Share</button>}
+    </div>
     <dl class="facts">
       {business.address && (
         <div>
@@ -72,7 +76,8 @@ const publicGroup = publicCategoryFor(business.category);
           <dd>{business.address}{map && <> · <a href={map} target="_blank" rel="noopener noreferrer">Map</a></>}</dd>
         </div>
       )}
-      {business.hours && <div><dt>Hours</dt><dd>{business.hours}</dd></div>}
+      <div><dt>Hours</dt><dd>{business.hours || <>Not listed yet · <a href="/directory/submit">Know them? Tell us</a></>}</dd></div>
+      {business.last_verified && <div><dt>Checked</dt><dd>Verified {business.last_verified.slice(0, 7)}</dd></div>}
       {business.phone && <div><dt>Phone</dt><dd><a href={`/go/biz/${business.id}?to=phone`}>{business.phone}</a></dd></div>}
       {business.website && <div><dt>{siteLabel}</dt><dd><a href={`/go/biz/${business.id}?to=site`}>{business.website.replace(/^https?:\/\//, '')}</a></dd></div>}
       {business.areas && <div><dt>Also serves</dt><dd>{business.areas}</dd></div>}
@@ -101,11 +106,87 @@ const publicGroup = publicCategoryFor(business.category);
         ))}
       </section>
     )}
+    {related.length > 0 && (
+      <section class="section">
+        <h2>More {info.subgroup || publicGroup.label}{business.city ? ` in ${business.city}` : ''}</h2>
+        <ul class="listing-related">
+          {related.map((entry) => (
+            <li>
+              <a href={entry.href}>{entry.name}</a>
+              {entry.phoneHref && <a href={entry.phoneHref} aria-label={`Call ${entry.name}`}>Call</a>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+    <p class="listing-own">Own this business? <a href="/business">Update this listing</a></p>
+    <p class="listing-upsell"><a href="/advertise">A partner page</a> is the paid option when you want the full treatment.</p>
   </article>
+  <div class="listing-sticky" data-listing-sticky hidden>
+    {phoneDigits && <a class="button" href={`/go/biz/${business.id}?to=phone`}>Call</a>}
+    {map && <a class="button button-ghost" href={map} target="_blank" rel="noopener noreferrer">Directions</a>}
+  </div>
+  <script is:inline>
+    (function () {
+      var back = document.getElementById('listing-back');
+      if (back && document.referrer) {
+        try {
+          if (new URL(document.referrer).pathname === '/directory') {
+            back.textContent = '‹ Back to results';
+            back.addEventListener('click', function (event) {
+              event.preventDefault();
+              history.back();
+            });
+          }
+        } catch (error) { /* ignore */ }
+      }
+      var share = document.getElementById('listing-share');
+      if (share) share.addEventListener('click', function () {
+        var payload = { title: document.title, url: location.href };
+        if (navigator.share) navigator.share(payload).catch(function () {});
+        else if (navigator.clipboard) navigator.clipboard.writeText(location.href).catch(function () {});
+      });
+      var bar = document.querySelector('[data-listing-sticky]');
+      if (!bar) return;
+      var onScroll = function () {
+        bar.hidden = window.scrollY < window.innerHeight;
+      };
+      document.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
 </BaseLayout>
 
 <style>
+  .listing-page { padding-top: 0.2rem; }
+  .listing-back { margin: 0; }
+  .listing-back a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; color: var(--river-deep); font-weight: 700; text-decoration: none; }
+  .listing-page h1 { font-size: clamp(1.7rem, 4vw, 2.1rem); line-height: 1.1; }
   .listing-hours { margin: 0.35rem 0 0; font-weight: 650; }
-  .listing-actions { margin-top: 1rem; }
-  .listing-actions .button { min-height: 2.75rem; }
+  .listing-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.8rem; }
+  .listing-actions .listing-call { grid-column: 1 / -1; }
+  .listing-actions .button { min-height: 52px; }
+  .listing-related { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+  .listing-related li { display: flex; justify-content: space-between; gap: 0.5rem; border-bottom: 1px solid var(--line); }
+  .listing-related a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; text-decoration: none; font-family: var(--serif); font-weight: 600; }
+  .listing-own, .listing-upsell { margin-top: 1rem; }
+  .listing-own a, .listing-upsell a { color: var(--river-deep); font-weight: 700; }
+  .listing-sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+    background: #fff;
+    border-top: 1px solid var(--line);
+  }
+  .listing-sticky[hidden] { display: none; }
+  .listing-sticky .button { min-height: 52px; }
+  @media (min-width: 800px) {
+    .listing-sticky { display: none; }
+  }
 </style>
