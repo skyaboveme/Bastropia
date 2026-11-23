@@ -1,16 +1,20 @@
 import type { DirectoryEntry } from '../data/directory.ts';
+import advertiserFile from '../data/advertiserKeywords.json' with { type: 'json' };
 import { categoryIcon } from '../data/categoryIcons.ts';
-import { directoryToday, directoryTrackId, listingIsFeatured, pinDirectoryFeatured } from './directoryAds.ts';
+import { directoryAdLimits, directoryAdSlots, type DirectoryAdSlot } from '../data/directoryAds.ts';
+import { directoryToday, directoryTrackId, listingIsFeatured, pickDirectorySlot, pinDirectoryFeatured, rotateFair, type DirectoryAdContext } from './directoryAds.ts';
 import { outboundLabel } from './maps.ts';
 import { directoryLabelInfo, categoryMatchesGroup, groupShort, subgroupsForGroup, directoryGridGroups, directoryMoreGroups } from './directoryGroups.ts';
 import { directoryOpenPill } from './directoryHours.ts';
 import {
   compareDirectoryAz,
   directoryMatcher,
+  normalizeDirectoryText,
   rankDirectoryRows,
   suggestDirectoryQuery,
   type MatchRow,
-} from './directoryMatch';
+  type QueryUnit,
+} from './directoryMatch.ts';
 
 export type DirectoryIndexRow = MatchRow & {
   id: string;
@@ -30,6 +34,13 @@ export type DirectoryIndexRow = MatchRow & {
   lg?: string;
   lat?: number;
   lng?: number;
+  /** Normalized keyword phrases from advertiserKeywords.json. */
+  kw?: string[];
+  /** Concept ids this advertiser should win. */
+  cc?: string[];
+  /** Inclusive contract dates. Blank means the pin stays on. */
+  ds?: string;
+  de?: string;
 };
 
 export type CardAction = {
@@ -97,6 +108,28 @@ export type DirectoryView = {
 
 const PAGE = 24;
 
+type AdvertiserRecord = {
+  id: string;
+  start?: string;
+  end?: string;
+  concepts?: string[];
+  keywords?: string[];
+  serves?: string[];
+};
+
+const advertiserById = new Map(
+  ((advertiserFile as { advertisers?: AdvertiserRecord[] }).advertisers || []).map((record) => [
+    record.id,
+    {
+      sv: record.serves || [],
+      kw: (record.keywords || []).map((keyword) => normalizeDirectoryText(keyword)).filter(Boolean),
+      cc: record.concepts || [],
+      ds: record.start || '',
+      de: record.end || '',
+    },
+  ]),
+);
+
 function rankOf(entry: { tier?: string; source?: string; r?: number }) {
   if (typeof entry.r === 'number') return entry.r;
   if (entry.tier === 'featured') return 0;
@@ -119,6 +152,7 @@ export function entryToIndexRow(entry: DirectoryEntry, today = directoryToday())
   const facebook = entry.facebook || (siteIsFacebook ? entry.website || '' : '');
   const featured = listingIsFeatured(entry, today);
   const partner = entry.source === 'partner';
+  const advertiser = advertiserById.get(entry.id);
   return {
     id: entry.id,
     n: entry.name,
@@ -137,6 +171,11 @@ export function entryToIndexRow(entry: DirectoryEntry, today = directoryToday())
     k: partner ? 1 : 0,
     su: partner && entry.summary ? clipLine(entry.summary) : '',
     lg: entry.logo || '',
+    sv: advertiser?.sv.length ? advertiser.sv : undefined,
+    kw: advertiser?.kw.length ? advertiser.kw : undefined,
+    cc: advertiser?.cc.length ? advertiser.cc : undefined,
+    ds: advertiser?.ds || undefined,
+    de: advertiser?.de || undefined,
   };
 }
 
@@ -200,10 +239,11 @@ export function cardActions(row: DirectoryIndexRow): { actions: CardAction[]; me
   };
 }
 
-export function toDirectoryCard(row: DirectoryIndexRow, now = new Date()): DirectoryCard {
+export function toDirectoryCard(row: DirectoryIndexRow, now = new Date(), queryTown = ''): DirectoryCard {
   const info = directoryLabelInfo(row.c);
   const address = addressLine(row);
   const town = row.t || '';
+  const served = Boolean(queryTown && town !== queryTown && row.sv?.includes(queryTown));
   const { actions, menu } = cardActions(row);
   const badges: string[] = [];
   if (row.b === 'Featured' || row.b === 'Spotlight') badges.push(row.b);
@@ -219,7 +259,7 @@ export function toDirectoryCard(row: DirectoryIndexRow, now = new Date()): Direc
     icon: categoryIcon(row.c),
     logo: row.lg || '',
     trade: info.subgroup || info.display || row.c,
-    placeLabel: town || 'Bastrop County',
+    placeLabel: served ? `Serves ${queryTown}` : town || 'Bastrop County',
     noAddress: !town,
     address,
     open: directoryOpenPill(row.hr, now),
@@ -265,7 +305,78 @@ function miles(row: DirectoryIndexRow, origin: { lat: number; lng: number }) {
   return 3958.8 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQueryState, origin?: { lat: number; lng: number } | null) {
+export function directoryAdContext(query: string, town: string, category: string): DirectoryAdContext {
+  const parsed = directoryMatcher().parse(query);
+  const concepts = parsed.units.filter((unit) => unit.kind === 'concept').flatMap((unit) => unit.ids || []);
+  const townName = town && town !== 'Countywide' ? town : parsed.town;
+  return {
+    town: townName,
+    category: category || directoryMatcher().conceptGroup(concepts[0] || ''),
+    concepts,
+    text: parsed.text,
+  };
+}
+
+function contractActive(row: DirectoryIndexRow, today: string) {
+  if (row.ds && row.ds > today) return false;
+  if (row.de && today > row.de) return false;
+  return true;
+}
+
+function advertiserEligible(row: DirectoryIndexRow, today: string) {
+  if (!contractActive(row, today)) return false;
+  return row.k === 1 || row.b === 'Featured' || row.r === 0 || Boolean(row.cc?.length || row.kw?.length);
+}
+
+function keywordRelevant(row: DirectoryIndexRow, text: string) {
+  return Boolean(
+    row.kw?.some((keyword) => keyword === text || text.startsWith(`${keyword} `) || (keyword.startsWith(`${text} `) && text.length >= 4)),
+  );
+}
+
+function conceptRelevant(row: DirectoryIndexRow, units: QueryUnit[]) {
+  return units.some((unit) => unit.kind === 'concept' && unit.ids?.some((id) => row.cc?.includes(id)));
+}
+
+function servesQueryTown(row: DirectoryIndexRow, town: string) {
+  if (!town) return true;
+  return row.t === town || Boolean(row.sv?.includes(town));
+}
+
+function sameAdvertiser(row: DirectoryIndexRow, slot: DirectoryAdSlot) {
+  const href = (row.h || '').replace(/^\//, '').toLowerCase();
+  const slotHref = (slot.href || '').replace(/^\//, '').toLowerCase();
+  if (slot.businessId && (row.id === slot.businessId || row.id.toLowerCase() === `partner:${slot.businessId.toLowerCase()}`)) return true;
+  if (slotHref && (href === slotHref || row.id.toLowerCase() === `partner:${slotHref}`)) return true;
+  return Boolean(slot.name && row.n.toLowerCase() === slot.name.toLowerCase());
+}
+
+/** Partner and featured rows that should lead this search, before the spotlight tile is removed. */
+export function directoryAdvertiserPins(
+  pool: DirectoryIndexRow[],
+  matches: DirectoryIndexRow[],
+  units: QueryUnit[],
+  text: string,
+  town: string,
+  today: string,
+  options: { sort?: string; slots?: DirectoryAdSlot[] } = {},
+) {
+  if (!units.length || options.sort === 'az' || options.sort === 'near') return [];
+  const organic = new Set(matches.map((row) => row.id));
+  const pins = pool.filter((row) => {
+    if (!advertiserEligible(row, today)) return false;
+    if (!servesQueryTown(row, town)) return false;
+    return organic.has(row.id) || conceptRelevant(row, units) || keywordRelevant(row, text);
+  });
+  const order = new Map(matches.map((row, index) => [row.id, index]));
+  pins.sort((a, b) => (order.get(a.id) ?? 9999) - (order.get(b.id) ?? 9999) || compareDirectoryAz(a.n, b.n));
+  const ctx = { town, concepts: units.filter((unit) => unit.kind === 'concept').flatMap((unit) => unit.ids || []), text };
+  const spotlight = pickDirectorySlot('spotlight', ctx, today, options.slots);
+  const candidates = spotlight ? pins.filter((row) => !sameAdvertiser(row, spotlight)) : pins;
+  return rotateFair(candidates, today, directoryAdLimits.featuredPerResults);
+}
+
+export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQueryState, origin?: { lat: number; lng: number } | null, slots?: DirectoryAdSlot[]) {
   const scoped = rows.filter((row) => categoryMatchesGroup(row.c, state.category, state.sub));
   const town = state.town === 'Countywide' ? '' : state.town;
   const found = directoryMatcher().search(scoped, state.q, { town: state.town === 'Countywide' ? '' : town });
@@ -293,7 +404,11 @@ export function filterDirectoryRows(rows: DirectoryIndexRow[], state: DirectoryQ
     const rankedCounty = rankDirectoryRows(countywide, found.units);
     countywide.splice(0, countywide.length, ...rankedCounty);
   }
-  const pinned = pinDirectoryFeatured(matches, today);
+  const featured = pinDirectoryFeatured(matches, today);
+  const pinTown = state.town === 'Countywide' ? '' : found.town || state.town;
+  const advertiserPins = directoryAdvertiserPins(scoped, featured, found.units, found.text, pinTown, today, { sort: state.sort, slots: slots || directoryAdSlots });
+  const pinIds = new Set(advertiserPins.map((row) => row.id));
+  const pinned = [...advertiserPins, ...featured.filter((row) => !pinIds.has(row.id))];
   const pinnedCounty = pinDirectoryFeatured(countywide, today);
   return {
     matches: pinned,
@@ -317,8 +432,8 @@ export function buildDirectoryView(
   const categoryName = groupShort(state.category) || state.category;
   const shown = filtered.matches.slice(0, limit);
   const countyShown = state.wide || filtered.matches.length === 0 ? filtered.countywide.slice(0, PAGE) : [];
-  const cards = (list: DirectoryIndexRow[]) => list.map((row) => toDirectoryCard(row, now));
   const townName = state.town === 'Countywide' ? '' : filtered.town || state.town;
+  const cards = (list: DirectoryIndexRow[]) => list.map((row) => toDirectoryCard(row, now, townName));
   const fellBack = active && filtered.matches.length === 0 && filtered.countywide.length > 0 && Boolean(townName);
   const noun = phrase || 'businesses';
   const allCount = fellBack ? filterDirectoryRows(rows, { ...state, town: '' }, options.origin).matches.length : 0;
@@ -400,6 +515,11 @@ export function indexPayload(rows: DirectoryIndexRow[]) {
     if (row.k) next.k = row.k;
     if (row.su) next.su = row.su;
     if (row.lg) next.lg = row.lg;
+    if (row.sv?.length) next.sv = row.sv;
+    if (row.kw?.length) next.kw = row.kw;
+    if (row.cc?.length) next.cc = row.cc;
+    if (row.ds) next.ds = row.ds;
+    if (row.de) next.de = row.de;
     if (typeof row.lat === 'number') next.lat = row.lat;
     if (typeof row.lng === 'number') next.lng = row.lng;
     return next;

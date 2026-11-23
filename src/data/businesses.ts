@@ -111,10 +111,10 @@ export const businesses: Business[] = [
     shareImage: '/images/businesses/string-prairie/og.jpg',
     shareAlt: 'String Prairie Heating & Air logo over a green field, with the phone number 512-924-9744',
     hero: {
-      src: '/images/businesses/string-prairie/team.webp',
+      src: '/images/businesses/string-prairie/team-480.webp',
       alt: 'A String Prairie Heating & Air technician beside the company service truck in a pasture',
-      width: 1200,
-      height: 1600,
+      width: 480,
+      height: 640,
     },
     portrait: {
       src: '/images/businesses/string-prairie/repair.webp',

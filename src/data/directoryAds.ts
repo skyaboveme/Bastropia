@@ -90,6 +90,10 @@ export type DirectoryAdSlot = {
   towns?: string[];
   /** Directory group ids from directoryCategoryGroups.json, such as "home-repair". */
   categories?: string[];
+  /** Concept ids from directorySynonyms.json, such as "hvac". */
+  concepts?: string[];
+  /** Phrases matched against the typed search, towns already removed. */
+  keywords?: string[];
   /** Inclusive, America/Chicago, YYYY-MM-DD. */
   start: string;
   end: string;

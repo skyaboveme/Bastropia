@@ -12,7 +12,7 @@ import { loadDirectoryEntries } from '../lib/directoryFeed';
 import { directoryGridGroups, directoryMoreGroups, groupShort } from '../lib/directoryGroups';
 import { directoryMatcher } from '../lib/directoryMatch';
 import { money } from '../lib/format';
-import { buildDirectoryView, directoryPageSize, entryToIndexRow, type DirectoryQueryState } from '../lib/directoryView';
+import { buildDirectoryView, directoryAdContext, directoryPageSize, entryToIndexRow, type DirectoryQueryState } from '../lib/directoryView';
 
 const params = Astro.url.searchParams;
 const rawQ = (params.get('q') || '').trim().slice(0, 80);
@@ -61,7 +61,7 @@ function href(overrides: Partial<DirectoryQueryState> & { page?: number | null }
 }
 
 const todayKey = directoryToday();
-const adContext = { town, category };
+const adContext = directoryAdContext(q, town, category);
 const spotlight = filtered ? resolveDirectorySpotlight(adContext, todayKey) : null;
 const feed = composeDirectoryFeed(view.matches, adContext, todayKey);
 const countyFeed = view.matches.length === 0

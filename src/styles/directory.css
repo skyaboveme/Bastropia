@@ -1,3 +1,4 @@
+/* Directory search sticks under the shared site bar. */
 .dir { padding: 0.15rem 16px 1rem; }
 @media (max-width: 379px) {
   .dir { padding-inline: 12px; }

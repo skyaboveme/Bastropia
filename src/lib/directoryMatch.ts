@@ -4,12 +4,15 @@
  */
 import synonymsFile from '../data/directorySynonyms.json' with { type: 'json' };
 import groupsFile from '../data/directoryCategoryGroups.json' with { type: 'json' };
+import { directoryLabelInfo } from './directoryGroups.ts';
 
 export type MatchRow = {
   n: string;
   c: string;
   t?: string;
   id?: string;
+  /** Towns this business serves besides its home town. */
+  sv?: string[];
 };
 
 export type QueryUnit = { kind: 'concept' | 'word'; ids?: string[]; text: string };
@@ -154,7 +157,17 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
   function townOk(row: MatchRow, prepared: Prepared, town: string) {
     if (!town) return true;
     if ((row.t || '') === town) return true;
+    if (row.sv?.includes(town)) return true;
     return prepared.nameNorm.includes(` ${normalizeDirectoryText(town)} `);
+  }
+
+  function conceptGroup(id: string) {
+    const concept = concepts.get(id);
+    if (!concept) return '';
+    const listed = [...concept.groups];
+    if (listed[0]) return listed[0];
+    const category = concept.categories?.[0];
+    return category ? directoryLabelInfo(category).group : '';
   }
 
   function unitOk(prepared: Prepared, unit: QueryUnit) {
@@ -185,7 +198,7 @@ export function buildDirectoryMatcher(syn: SynFile = synonymsFile as SynFile, gr
     return concept?.label || '';
   }
 
-  return { parse, search, prep, conceptLabel, concepts };
+  return { parse, search, prep, conceptLabel, conceptGroup, concepts };
 }
 
 let shared: ReturnType<typeof buildDirectoryMatcher> | undefined;
