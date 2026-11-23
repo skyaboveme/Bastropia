@@ -236,8 +236,10 @@ export function bootDirectory() {
   let state = stateFromDom();
   const page = Math.max(1, Number(root.dataset.page || '1') || 1);
   limit = page * directoryPageSize();
+  let pinnedTown = root.dataset.townSource === 'chip' ? state.town : '';
+  let drafting = false;
 
-  function writeUrl() {
+  function writeUrl(kind: 'type' | 'commit' = 'type') {
     const url = new URL(location.href);
     const set = (key: string, value: string) => {
       if (value) url.searchParams.set(key, value);
@@ -250,7 +252,17 @@ export function bootDirectory() {
     set('sort', state.sort);
     set('wide', state.wide ? '1' : '');
     url.searchParams.delete('page');
-    history.replaceState(null, '', url);
+    const next = `${url.pathname}${url.search}`;
+    const current = `${location.pathname}${location.search}`;
+    if (kind === 'commit') {
+      if (next !== current) history.pushState({ dir: true }, '', next);
+      drafting = false;
+    } else if (next !== current && !drafting) {
+      history.pushState({ dir: true }, '', next);
+      drafting = true;
+    } else if (next !== current) {
+      history.replaceState({ dir: true }, '', next);
+    }
     root!.dataset.q = state.q;
     root!.dataset.town = state.town;
     root!.dataset.category = state.category;
@@ -261,13 +273,8 @@ export function bootDirectory() {
 
   function syncInputFromQuery(query: string) {
     const parsed = directoryMatcher().parse(query);
-    if (parsed.town) {
-      state.town = parsed.town;
-      state.q = parsed.text;
-    } else {
-      state.q = parsed.text || query.trim();
-    }
-    input!.value = state.q;
+    state.q = parsed.text || '';
+    state.town = pinnedTown || parsed.town || '';
   }
 
   function paint(focusNew = false) {
@@ -348,16 +355,36 @@ export function bootDirectory() {
       if (view.countywideTotal) {
         const line = document.createElement('p');
         line.className = 'dir-county-line';
-        line.textContent = `${view.countywideTotal} more serve all of Bastrop County`;
+        if (view.fallback) {
+          line.append(view.fallback.detail + ' · ');
+          const see = document.createElement('a');
+          see.className = 'dir-see';
+          see.href = hrefOf({ ...state, town: '' });
+          see.textContent = `${view.fallback.seeAll} →`;
+          see.addEventListener('click', (event) => {
+            event.preventDefault();
+            pinnedTown = '';
+            const parsed = directoryMatcher().parse(input!.value);
+            input!.value = parsed.text;
+            state.town = '';
+            state.q = parsed.text;
+            state.wide = false;
+            writeUrl('commit');
+            paint();
+          });
+          line.append(see);
+        } else {
+          line.textContent = `${view.countywideTotal} more have no street address on file`;
+        }
         countyHost.append(line);
-        if (!state.wide && view.matches.length) {
+        if (!view.fallback && !state.wide && view.matches.length) {
           const button = document.createElement('button');
           button.type = 'button';
           button.className = 'dir-more';
-          button.textContent = 'Show countywide matches';
+          button.textContent = 'Show listings with no street address';
           button.addEventListener('click', () => {
             state.wide = true;
-            writeUrl();
+            writeUrl('commit');
             paint();
           });
           countyHost.append(button);
@@ -404,10 +431,10 @@ export function bootDirectory() {
     document.querySelectorAll<HTMLElement>('[data-chip]').forEach((chip) => {
       const key = chip.dataset.chip;
       const on = key === 'town' ? Boolean(state.town) : key === 'category' ? Boolean(state.category) : key === 'sort' ? Boolean(state.sort) : false;
-      chip.classList.toggle('is-on', on);
+      (chip.closest('[data-chip-wrap]') || chip).classList.toggle('is-on', on);
       const label = chip.querySelector('[data-chip-label]');
       if (!label) return;
-      if (key === 'town') label.textContent = state.town || 'Town';
+      if (key === 'town') label.textContent = state.town ? `📍 ${state.town}` : 'Town';
       if (key === 'category') label.textContent = categoryName;
       if (key === 'sort') label.textContent = state.sort === 'near' ? 'Nearest' : state.sort === 'az' ? 'A–Z' : 'Sort';
     });
@@ -426,12 +453,12 @@ export function bootDirectory() {
     });
   }
 
-  function applyNow() {
+  function applyNow(kind: 'type' | 'commit' = 'type') {
     syncInputFromQuery(input!.value);
     if (state.q) remember(state.q);
     limit = directoryPageSize();
     state.wide = false;
-    writeUrl();
+    writeUrl(kind);
     root!.dataset.mode = state.q || state.town || state.category ? 'results' : 'browse';
     if (ready) paint();
   }
@@ -504,7 +531,7 @@ export function bootDirectory() {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     window.clearTimeout(timer);
-    applyNow();
+    applyNow('commit');
     input!.blur();
   });
   input.addEventListener('blur', () => {
@@ -557,15 +584,7 @@ export function bootDirectory() {
     const apply = sheet.querySelector<HTMLButtonElement>('[data-sheet-apply]');
     if (!townHost || !catHost || !apply) return;
     const draftRows = () => filterDirectoryRows(rows, { ...sheetDraft, wide: false }, origin);
-    const townCounts = (category: string, sub: string) => {
-      const counts = new Map<string, number>();
-      for (const town of TOWNS) {
-        counts.set(town, filterDirectoryRows(rows, { ...sheetDraft, town, category, sub, wide: false }, origin).matches.length);
-      }
-      return counts;
-    };
     const render = () => {
-      const counts = townCounts(sheetDraft.category, sheetDraft.sub);
       townHost.replaceChildren();
       const all = document.createElement('button');
       all.type = 'button';
@@ -581,7 +600,9 @@ export function bootDirectory() {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = sheetDraft.town === town ? 'dir-chip is-on' : 'dir-chip';
-        button.textContent = `${town} ${counts.get(town) || 0}`;
+        const townCount = filterDirectoryRows(rows, { ...sheetDraft, town, wide: false }, origin);
+        const extra = townCount.matches.length === 0 ? townCount.countywide.length : 0;
+        button.textContent = extra ? `${town} ${townCount.matches.length} (+${extra} countywide)` : `${town} ${townCount.matches.length}`;
         button.setAttribute('aria-pressed', String(sheetDraft.town === town));
         button.addEventListener('click', () => {
           sheetDraft.town = town;
@@ -591,7 +612,8 @@ export function bootDirectory() {
       }
       const catCounts = new Map<string, number>();
       for (const group of directoryGroupList()) {
-        catCounts.set(group.id, filterDirectoryRows(rows, { ...sheetDraft, category: group.id, sub: '', wide: false }, origin).matches.length);
+        const found = filterDirectoryRows(rows, { ...sheetDraft, category: group.id, sub: '', wide: false }, origin);
+        catCounts.set(group.id, found.matches.length || found.countywide.length);
       }
       const addGroup = (host: Element, group: { id: string; label: string; short?: string; emoji?: string; icon: string }) => {
         const button = document.createElement('button');
@@ -660,8 +682,51 @@ export function bootDirectory() {
   document.querySelectorAll<HTMLButtonElement>('[data-sheet-open]').forEach((button) => {
     button.addEventListener('click', () => openSheet(button));
   });
+  document.querySelectorAll<HTMLAnchorElement>('[data-clear]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (link.dataset.clear === 'town') {
+        pinnedTown = '';
+        const parsed = directoryMatcher().parse(input!.value);
+        input!.value = parsed.text;
+        state.town = '';
+        state.q = parsed.text;
+      } else {
+        state.category = '';
+        state.sub = '';
+      }
+      state.wide = false;
+      writeUrl('commit');
+      root!.dataset.mode = state.q || state.town || state.category ? 'results' : 'browse';
+      if (ready) paint();
+    });
+  });
+  window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(location.search);
+    pinnedTown = params.get('town') || '';
+    state = {
+      q: params.get('q') || '',
+      town: pinnedTown,
+      category: params.get('category') || '',
+      sub: params.get('sub') || '',
+      sort: (params.get('sort') as DirectoryQueryState['sort']) || '',
+      wide: params.get('wide') === '1',
+    };
+    input!.value = state.q;
+    drafting = false;
+    limit = directoryPageSize();
+    root!.dataset.mode = state.q || state.town || state.category ? 'results' : 'browse';
+    if (ready) paint();
+    else void loadIndex();
+  });
   sheet?.querySelector('[data-sheet-apply]')?.addEventListener('click', async () => {
-    state = { ...sheetDraft, q: state.q, wide: false };
+    pinnedTown = sheetDraft.town;
+    if (!sheetDraft.town) {
+      const parsed = directoryMatcher().parse(input!.value);
+      input!.value = parsed.text;
+    }
+    syncInputFromQuery(input!.value);
+    state = { ...state, ...sheetDraft, q: state.q, town: pinnedTown || state.town, wide: false };
     if (state.sort === 'near' && !origin) {
       origin = await new Promise<Origin>((resolve) => {
         if (!navigator.geolocation) return resolve(null);
@@ -673,7 +738,7 @@ export function bootDirectory() {
       });
     }
     limit = directoryPageSize();
-    writeUrl();
+    writeUrl('commit');
     root!.dataset.mode = state.q || state.town || state.category ? 'results' : 'browse';
     paint();
     sheet?.close();

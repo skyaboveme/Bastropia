@@ -7,7 +7,7 @@ import CategoryIcon from '../components/CategoryIcon.astro';
 import DirectoryCard from '../components/DirectoryCard.astro';
 import { directoryTowns } from '../data/taxonomy';
 import { loadDirectoryEntries } from '../lib/directoryFeed';
-import { directoryGridGroups, directoryGroupById, directoryMoreGroups } from '../lib/directoryGroups';
+import { directoryGridGroups, directoryMoreGroups, groupShort } from '../lib/directoryGroups';
 import { directoryMatcher } from '../lib/directoryMatch';
 import { buildDirectoryView, directoryPageSize, entryToIndexRow, type DirectoryQueryState } from '../lib/directoryView';
 
@@ -32,7 +32,9 @@ const view = buildDirectoryView(rows, state, { limit: page * directoryPageSize()
 const filtered = view.mode === 'results';
 const grid = directoryGridGroups();
 const moreGroups = directoryMoreGroups();
-const categoryLabel = directoryGroupById(category)?.short || directoryGroupById(category)?.label || category;
+const categoryLabel = groupShort(category) || category;
+const townSource = townValid ? 'chip' : parsed.town ? 'query' : '';
+const inputValue = townSource === 'query' ? rawQ : view.input;
 const popular = [
   ['Plumber', 'plumber'],
   ['AC repair', 'ac repair'],
@@ -90,6 +92,7 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
     data-sub={state.sub}
     data-sort={state.sort}
     data-wide={state.wide ? '1' : '0'}
+    data-town-source={townSource}
     data-page={String(page)}
     data-count={String(rows.length)}
   >
@@ -132,7 +135,7 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
                 id="q"
                 type="search"
                 name="q"
-                value={view.input}
+                value={inputValue}
                 placeholder="Plumber, tacos, dentist…"
                 autocomplete="off"
                 autocapitalize="none"
@@ -148,17 +151,17 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
             </div>
           </form>
           <div class="dir-filters" aria-label="Active filters">
-            <span class="dir-chip-pair">
-              <button type="button" class:list={['dir-chip', town && 'is-on']} data-chip="town" data-sheet-open>
-                <span data-chip-label>{town || 'Town'}</span>
+            <span class:list={['dir-chip', town && 'is-on']} data-chip-wrap="town">
+              <button type="button" data-chip="town" data-sheet-open>
+                <span data-chip-label>{town ? `📍 ${town}` : 'Town'}</span>
               </button>
-              <a class="dir-chip-x" data-clear="town" href={href({ town: '' })} aria-label={town ? `Remove ${town} filter` : 'Remove town filter'} hidden={!town}>×</a>
+              <a class="dir-x" data-clear="town" href={href({ town: '' })} aria-label={town ? `Remove ${town} filter` : 'Remove town filter'} hidden={!town}>×</a>
             </span>
-            <span class="dir-chip-pair">
-              <button type="button" class:list={['dir-chip', category && 'is-on']} data-chip="category" data-sheet-open>
+            <span class:list={['dir-chip', category && 'is-on']} data-chip-wrap="category">
+              <button type="button" data-chip="category" data-sheet-open>
                 <span data-chip-label>{category ? categoryLabel : 'Category'}</span>
               </button>
-              <a class="dir-chip-x" data-clear="category" href={href({ category: '', sub: '' })} aria-label={category ? `Remove ${categoryLabel} filter` : 'Remove category filter'} hidden={!category}>×</a>
+              <a class="dir-x" data-clear="category" href={href({ category: '', sub: '' })} aria-label={category ? `Remove ${categoryLabel} filter` : 'Remove category filter'} hidden={!category}>×</a>
             </span>
             <button type="button" class:list={['dir-chip', sort && 'is-on']} data-chip="sort" data-sheet-open>
               <span data-chip-label>{sort === 'near' ? 'Nearest' : sort === 'az' ? 'A–Z' : 'Sort'}</span>
@@ -233,9 +236,16 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
           <div id="directory-county" hidden={view.countywideTotal === 0}>
             {view.countywideTotal > 0 && (
               <>
-                <p class="dir-county-line">{view.countywideTotal} more serve all of Bastrop County</p>
-                {view.matches.length > 0 && !wide ? (
-                  <a class="dir-more" href={href({ wide: true })}>Show countywide matches</a>
+                {view.fallback ? (
+                  <p class="dir-county-line">
+                    {view.fallback.detail}
+                    <a class="dir-see" href={href({ town: '' })}>{view.fallback.seeAll} →</a>
+                  </p>
+                ) : (
+                  <p class="dir-county-line">{view.countywideTotal} more have no street address on file</p>
+                )}
+                {view.matches.length > 0 && !wide && !view.fallback ? (
+                  <a class="dir-more" href={href({ wide: true })}>Show listings with no street address</a>
                 ) : (
                   <ul class="biz-list">
                     {view.countywide.map((card) => <DirectoryCard card={card} />)}
@@ -248,7 +258,7 @@ const towns = directoryTowns.filter((name) => rows.some((row) => row.t === name)
             {page > 1 && <a class="dir-more" href={href({ page: page - 1 })}>Previous</a>}
             <a class="dir-more" id="directory-more" href={href({ page: page + 1 })} hidden={view.matches.length >= view.total}>Show 24 more</a>
           </p>
-          {filtered && <p class="dir-missing">Missing a business? <a href="/directory/submit">Add it free</a></p>}
+          {filtered && !view.empty && <p class="dir-missing">Missing a business? <a href="/directory/submit">Add it free</a></p>}
         </section>
       </div>
     </div>

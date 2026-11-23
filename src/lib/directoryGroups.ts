@@ -63,6 +63,21 @@ export function subgroupsForGroup(groupId: string) {
   return [...found].sort((a, b) => a.localeCompare(b));
 }
 
+const legacyNames: Record<string, string> = {
+  'professional-services': 'Professional services',
+};
+
+/** Short name used in the grid and in headings, so both say "Home Repair". */
+export function groupShort(groupId: string) {
+  if (!groupId) return '';
+  const group = directoryGroupById(groupId);
+  if (group) return group.short || group.label;
+  if (legacyNames[groupId]) return legacyNames[groupId];
+  const pub = publicCategoryBySlug(groupId);
+  if (pub) return pub.label;
+  return groupId.replace(/-/g, ' ');
+}
+
 export function groupLabel(groupId: string) {
-  return byId.get(groupId)?.label || directoryGroupById(groupId)?.label || '';
+  return groupShort(groupId);
 }

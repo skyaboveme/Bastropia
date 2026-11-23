@@ -67,81 +67,201 @@
     "width": 1024,
     "height": 682
   },
+  "/images/businesses/602/burger-720.webp": {
+    "width": 720,
+    "height": 720
+  },
   "/images/businesses/602/burger.jpg": {
     "height": 960,
     "width": 960
+  },
+  "/images/businesses/602/burger.webp": {
+    "width": 960,
+    "height": 960
+  },
+  "/images/businesses/602/chicken-720.webp": {
+    "width": 720,
+    "height": 720
   },
   "/images/businesses/602/chicken.jpg": {
     "height": 960,
     "width": 960
   },
+  "/images/businesses/602/chicken.webp": {
+    "width": 960,
+    "height": 960
+  },
+  "/images/businesses/602/hero-720.webp": {
+    "width": 720,
+    "height": 450
+  },
   "/images/businesses/602/hero.jpg": {
     "height": 1200,
     "width": 1920
+  },
+  "/images/businesses/602/hero.webp": {
+    "width": 1920,
+    "height": 1200
+  },
+  "/images/businesses/602/history-720.webp": {
+    "width": 720,
+    "height": 720
   },
   "/images/businesses/602/history.jpg": {
     "height": 768,
     "width": 768
   },
+  "/images/businesses/602/history.webp": {
+    "width": 768,
+    "height": 768
+  },
   "/images/businesses/602/logo-mark.png": {
     "width": 252,
     "height": 240
+  },
+  "/images/businesses/602/shrimp-720.webp": {
+    "width": 720,
+    "height": 720
   },
   "/images/businesses/602/shrimp.jpg": {
     "height": 960,
     "width": 960
   },
+  "/images/businesses/602/shrimp.webp": {
+    "width": 960,
+    "height": 960
+  },
+  "/images/businesses/barefoot/bouquet-720.webp": {
+    "width": 720,
+    "height": 960
+  },
   "/images/businesses/barefoot/bouquet.jpg": {
     "height": 1600,
     "width": 1200
+  },
+  "/images/businesses/barefoot/bouquet.webp": {
+    "width": 1200,
+    "height": 1600
   },
   "/images/businesses/barefoot/logo.png": {
     "width": 800,
     "height": 360
   },
+  "/images/businesses/barefoot/nursery-720.webp": {
+    "width": 720,
+    "height": 540
+  },
   "/images/businesses/barefoot/nursery.jpg": {
     "height": 1200,
     "width": 1600
+  },
+  "/images/businesses/barefoot/nursery.webp": {
+    "width": 1600,
+    "height": 1200
   },
   "/images/businesses/barefoot/og.jpg": {
     "height": 630,
     "width": 1200
   },
+  "/images/businesses/barefoot/rows-720.webp": {
+    "width": 720,
+    "height": 899
+  },
   "/images/businesses/barefoot/rows.jpg": {
     "height": 1249,
     "width": 1000
+  },
+  "/images/businesses/barefoot/rows.webp": {
+    "width": 1000,
+    "height": 1249
+  },
+  "/images/businesses/barefoot/shop-720.webp": {
+    "width": 720,
+    "height": 960
   },
   "/images/businesses/barefoot/shop.jpg": {
     "height": 1600,
     "width": 1200
   },
+  "/images/businesses/barefoot/shop.webp": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/images/businesses/barefoot/wedding-720.webp": {
+    "width": 720,
+    "height": 900
+  },
   "/images/businesses/barefoot/wedding.jpg": {
     "height": 1350,
     "width": 1080
+  },
+  "/images/businesses/barefoot/wedding.webp": {
+    "width": 1080,
+    "height": 1350
+  },
+  "/images/businesses/barron/build-720.webp": {
+    "width": 720,
+    "height": 480
   },
   "/images/businesses/barron/build.jpg": {
     "height": 800,
     "width": 1200
   },
+  "/images/businesses/barron/build.webp": {
+    "width": 1200,
+    "height": 800
+  },
+  "/images/businesses/barron/hero-720.webp": {
+    "width": 720,
+    "height": 944
+  },
   "/images/businesses/barron/hero.jpg": {
     "height": 1573,
     "width": 1200
+  },
+  "/images/businesses/barron/hero.webp": {
+    "width": 1200,
+    "height": 1573
+  },
+  "/images/businesses/barron/house-720.webp": {
+    "width": 720,
+    "height": 480
   },
   "/images/businesses/barron/house.jpg": {
     "height": 1066,
     "width": 1600
   },
+  "/images/businesses/barron/house.webp": {
+    "width": 1600,
+    "height": 1066
+  },
+  "/images/businesses/barron/kitchen-720.webp": {
+    "width": 720,
+    "height": 470
+  },
   "/images/businesses/barron/kitchen.jpg": {
     "height": 1044,
     "width": 1600
+  },
+  "/images/businesses/barron/kitchen.webp": {
+    "width": 1600,
+    "height": 1044
   },
   "/images/businesses/barron/logo.png": {
     "width": 622,
     "height": 148
   },
+  "/images/businesses/barron/pool-720.webp": {
+    "width": 720,
+    "height": 481
+  },
   "/images/businesses/barron/pool.jpg": {
     "height": 1069,
     "width": 1600
+  },
+  "/images/businesses/barron/pool.webp": {
+    "width": 1600,
+    "height": 1069
   },
   "/images/businesses/lost-pines/logo.png": {
     "width": 588,
@@ -151,45 +271,97 @@
     "height": 630,
     "width": 1200
   },
+  "/images/businesses/lost-pines/showroom-720.webp": {
+    "width": 720,
+    "height": 230
+  },
   "/images/businesses/lost-pines/showroom.jpg": {
     "height": 512,
     "width": 1600
+  },
+  "/images/businesses/lost-pines/showroom.webp": {
+    "width": 1600,
+    "height": 512
   },
   "/images/businesses/rosa-tex/lawn.jpg": {
     "height": 640,
     "width": 640
   },
+  "/images/businesses/rosa-tex/lawn.webp": {
+    "width": 640,
+    "height": 640
+  },
   "/images/businesses/rosa-tex/logo.png": {
     "width": 459,
     "height": 285
+  },
+  "/images/businesses/rosa-tex/mower-720.webp": {
+    "width": 720,
+    "height": 480
   },
   "/images/businesses/rosa-tex/mower.jpg": {
     "height": 1024,
     "width": 1536
   },
+  "/images/businesses/rosa-tex/mower.webp": {
+    "width": 1536,
+    "height": 1024
+  },
   "/images/businesses/rosa-tex/og.jpg": {
     "height": 800,
     "width": 1200
+  },
+  "/images/businesses/string-prairie/attic-720.webp": {
+    "width": 720,
+    "height": 960
   },
   "/images/businesses/string-prairie/attic.jpg": {
     "height": 1600,
     "width": 1200
   },
+  "/images/businesses/string-prairie/attic.webp": {
+    "width": 1200,
+    "height": 1600
+  },
   "/images/businesses/string-prairie/og.jpg": {
     "height": 630,
     "width": 1200
+  },
+  "/images/businesses/string-prairie/repair-720.webp": {
+    "width": 720,
+    "height": 960
   },
   "/images/businesses/string-prairie/repair.jpg": {
     "height": 1600,
     "width": 1200
   },
+  "/images/businesses/string-prairie/repair.webp": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/images/businesses/string-prairie/team-720.webp": {
+    "width": 720,
+    "height": 960
+  },
   "/images/businesses/string-prairie/team.jpg": {
     "height": 1600,
     "width": 1200
   },
+  "/images/businesses/string-prairie/team.webp": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/images/businesses/string-prairie/van-720.webp": {
+    "width": 720,
+    "height": 960
+  },
   "/images/businesses/string-prairie/van.jpg": {
     "height": 1600,
     "width": 1200
+  },
+  "/images/businesses/string-prairie/van.webp": {
+    "width": 1200,
+    "height": 1600
   },
   "/images/events/20th-annual-heroes-and-hot-rod-s-veterans-day-car-show-2026-11-14.jpg": {
     "height": 722,
