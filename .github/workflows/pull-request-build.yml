@@ -41,5 +41,7 @@ jobs:
         run: node --experimental-strip-types --test src/lib/httpsRedirect.test.ts
       - name: H-E-B weekly tests
         run: node --experimental-strip-types --test src/lib/hebWeekly.test.ts
+      - name: Moon phase tests
+        run: node --experimental-strip-types --test src/lib/moon.test.ts
       - name: SEO check
         run: node scripts/seo-check.mjs

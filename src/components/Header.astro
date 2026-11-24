@@ -7,6 +7,7 @@ import { burnBan } from '../data/burnBan';
 import { burnView } from '../lib/burnBanView';
 import { earlyVotingDays, electionDay, electionHours, voteIsLive, voteLiveUntil } from '../data/vote';
 import { headerHero, headerNight } from '../lib/headerHero';
+import { moonReading } from '../lib/moon';
 import { eventKey, formatLong, labelFromKey } from '../lib/time';
 import { getForecast, isTown, weatherLabel } from '../lib/weather';
 import { readTown, townCookie } from '../lib/townChoice';
@@ -40,6 +41,7 @@ const voteBanner =
         : `Election Day is ${labelFromKey(electionDay)}, polls open ${electionHours}. See hours and polling places.`;
 
 const hero = headerHero(path, { night: headerNight(now), scene: forecast?.scene });
+const moon = moonReading(now);
 const beforeLocal = [
   { href: '/', label: 'Front page' },
   { href: '/weather', label: 'Weather' },
@@ -180,9 +182,18 @@ const statusText = forecast
         <li>
           <a class="now-card is-lead" href={`/weather?town=${encodeURIComponent(weatherTown)}`}>
             <strong class="now-value">{forecast ? `${forecast.temp}°` : 'Weather'}</strong>
+            <span class="now-moon" data-moon title={moon.aria} aria-label={moon.aria}>
+              <svg class="now-moon-icon" viewBox="0 0 32 32" aria-hidden="true">
+                <circle cx="16" cy="16" r="13" />
+                <path data-moon-lit d={moon.litPath} />
+              </svg>
+              <span class="now-moon-copy">
+                <span class="now-moon-name" data-moon-name>{moon.name}</span>
+                <span class="now-moon-pct" data-moon-pct>{moon.percent}%</span>
+              </span>
+            </span>
             <span class="now-label">Right now</span>
             <span class="now-detail">{forecast ? `${weatherLabel(forecast.code)} in ${weatherTown}` : 'County forecast'}</span>
-            <svg class="now-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M6.1 6.1l1.4 1.4M16.5 16.5l1.4 1.4M17.9 6.1l-1.4 1.4M7.5 16.5 6.1 17.9"/></svg>
           </a>
         </li>
         <li>
@@ -370,6 +381,22 @@ const statusText = forecast
 <SlimBar newsCurrent={current('/news')} eventsCurrent={current('/events')} newsletterCurrent={current('/newsletter')} />
   </>
 )}
+<script>
+  import { moonReading } from '../lib/moon';
+
+  const moonNode = document.querySelector<HTMLElement>('[data-moon]');
+  if (moonNode) {
+    const reading = moonReading(new Date());
+    moonNode.title = reading.aria;
+    moonNode.setAttribute('aria-label', reading.aria);
+    const name = moonNode.querySelector('[data-moon-name]');
+    const percent = moonNode.querySelector('[data-moon-pct]');
+    const lit = moonNode.querySelector('[data-moon-lit]');
+    if (name) name.textContent = reading.name;
+    if (percent) percent.textContent = `${reading.percent}%`;
+    if (lit) lit.setAttribute('d', reading.litPath);
+  }
+</script>
 <script is:inline>
   (function () {
     var key = 'bastropia-city';

@@ -224,6 +224,35 @@ ul { margin: 0; padding: 0; list-style: none; }
   overflow: hidden;
 }
 .now-card.is-lead { border-top-width: 4px; }
+.now-moon {
+  grid-area: icon;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.22rem;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--ink);
+}
+.now-moon-icon { width: 1.05rem; height: 1.05rem; flex: none; display: block; }
+.now-moon-icon circle { fill: #d5d0c4; }
+.now-moon-icon path { fill: #e8b423; }
+.now-moon-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+}
+.now-moon-name { display: none; }
+.now-moon-pct { font-variant-numeric: tabular-nums; }
+@media (min-width: 768px) {
+  .now-moon-name { display: inline; overflow: hidden; text-overflow: ellipsis; }
+  .now-moon-name::after { content: " · "; font-weight: 650; }
+}
 .now-card.is-alert { border-top-color: #c5161d; background: rgba(255, 246, 245, 0.92); }
 .now-card.is-stale { border-top-color: #b45309; background: rgba(255, 248, 239, 0.92); }
 .now-value {
