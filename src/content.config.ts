@@ -39,7 +39,11 @@ const news = defineCollection({
     /** Set when the story is corrected. dateModified uses this, then pubDate. */
     updated: z.coerce.date().optional(),
     place: z.string(),
-    /** Slug from src/data/authors.ts. Omit it to keep the Bastropia desk byline. */
+    /**
+     * Slug from src/data/authors.ts. Optional.
+     * Omitted (or unknown) on bastropia-daily-* is Michael Smith. Every other story is Ben Caxton.
+     * A Reporter package that leaves the field off still builds.
+     */
     author: z.string().min(1).optional(),
     /** Short bullets copied into the article abstract. Also the fallback for the infographic when `stats` is omitted. */
     keyFacts: z.array(z.string().min(1)).max(8).optional(),

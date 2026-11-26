@@ -1,5 +1,8 @@
 export const siteName = 'Bastropia';
 
+/** Newsroom inbox for tips, corrections, and advertising. */
+export const newsroomEmail = 'news@bastropia.com';
+
 export const siteUrl = 'https://bastropia.com';
 
 export const siteDescription =

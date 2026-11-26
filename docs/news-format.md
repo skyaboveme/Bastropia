@@ -11,8 +11,9 @@ Stories live in `src/content/news/` as `.md` or `.mdx`. The story page turns the
 title: "Headline"
 description: "Dek. One or two sentences."
 pubDate: 2026-11-22T06:00:00-06:00
+# updated: 2026-11-23T09:00:00-06:00 # set when a fact is corrected. The page shows Updated.
 place: Bastrop County
-author: slug-from-src-data-authors # omit to keep the Bastropia desk byline
+author: ben-caxton # optional. Omit it and bastropia-daily-* is Michael Smith; every other story is Ben Caxton.
 keyFacts:
   - "One sentence a reader can use without the rest of the story."
 stats:

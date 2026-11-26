@@ -2,7 +2,8 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { siteName, siteUrl } from '../data/site';
 
-export const prerender = false;
+/** Built with the site. Deploys run daily, so the 48-hour window is current enough for Google News. */
+export const prerender = true;
 
 function xml(value: string) {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

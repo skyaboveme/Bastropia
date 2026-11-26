@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import { newsroomEmail } from '../data/site';
 ---
 
 <BaseLayout
@@ -13,19 +14,22 @@ import PageHead from '../components/PageHead.astro';
     lede="The desk reports what it can check on a public page. When that account is wrong, say so. A correction keeps the original publication date and adds an updated date."
   />
   <div class="wrap prose">
+    <p>
+      The full rules are the <a href="/editorial-policy">editorial policy</a> and the <a href="/corrections-policy">corrections policy</a>. This page is the short version of the same promise.
+    </p>
     <h2>What a story is</h2>
     <p>
       A Bastropia story is a short desk note: what happened, where, and the public page it came from. Burn bans, court dates, hours, prices, and meeting times are summaries. The linked official page is the authority, and it can change after we publish.
     </p>
     <p>
-      The byline is the <a href="/staff">Bastropia desk</a> unless the story names a reporter listed on the masthead. The desk is a shared byline, not a person.
+      The byline is <a href="/authors/ben-caxton">Ben Caxton</a>, reporter, unless the story is the daily roundup or names another person on the <a href="/staff">masthead</a>. <a href="/authors/michael-smith">Michael Smith</a> is the editor.
     </p>
     <h2>How to send a correction</h2>
     <p>
-      Use the <a href="/tips">tip form</a>. Name the story, the sentence that is wrong, and what the public record says instead. Include a link when you have one. The desk reads every note. A correction request is not published by itself.
+      Email <a href={`mailto:${newsroomEmail}`}>{newsroomEmail}</a> or use the <a href="/tips">tip form</a>. Name the story, the sentence that is wrong, and what the public record says instead. Include a link when you have one. The newsroom reads every note. A correction request is not published by itself.
     </p>
     <p>
-      If the fact was wrong, the story is edited. The page keeps the original publication date and shows an updated date. The change is not a new story.
+      If the fact was wrong, the story is edited and the change is labeled with the date. The page keeps the original publication date and shows an updated date. A substantive fact is not changed in silence. The change is not a new story.
     </p>
     <p>
       A story is not taken down because someone dislikes it. Opinions about a public decision stay up. A wrong date, a wrong name, a wrong place, or a number that does not match the source gets fixed.

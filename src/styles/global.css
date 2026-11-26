@@ -1507,6 +1507,19 @@ body.bar-page { --sticky-offset: 60px; }
   color: var(--ink);
 }
 .story-top .meta { margin-top: 0.55rem; }
+.story-byline {
+  margin: 0.7rem 0 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+.story-byline a { color: var(--river-deep); font-weight: 600; }
+.story-dates {
+  margin: 0.15rem 0 0;
+  color: var(--ink);
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
 .story-hero {
   max-width: 52rem;
   margin: 0.85rem auto 1.05rem;
