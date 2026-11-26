@@ -6,12 +6,12 @@ import { authors } from '../data/authors';
 
 <BaseLayout
   title="Staff"
-  description="The Bastropia masthead. Stories run under the Bastropia desk until a reporter is listed here by name."
+  description="Masthead for Bastropia: editor Michael Smith and reporter Ben Caxton, the newsroom for Bastrop County."
 >
   <PageHead
     kicker="Masthead"
     title="Who writes Bastropia"
-    lede="Stories without a named reporter run under the Bastropia desk, a shared byline. A person appears here only when their name is already public."
+    lede="Michael Smith is the editor. Ben Caxton is the reporter. A story names one of them."
   />
   <div class="wrap prose">
     <p>
@@ -30,10 +30,10 @@ import { authors } from '../data/authors';
         </ul>
       </>
     ) : (
-      <p>No reporter is listed by name yet. Until one is, every story is the Bastropia desk. The <a href="/authors">authors</a> page is that same note.</p>
+      <p>No reporter is listed by name yet.</p>
     )}
     <p>
-      The <a href="/corrections">corrections policy</a> says how a wrong fact gets fixed. <a href="/contact">Contact</a> is the tip form, the event form, and the Facebook group. There is no newsroom phone number on this page.
+      The <a href="/editorial-policy">editorial policy</a> is how the newsroom reports. The <a href="/corrections-policy">corrections policy</a> says how a wrong fact gets fixed. <a href="/contact">Contact</a> is the newsroom email, the tip form, and the event form. There is no newsroom phone number on this page.
     </p>
     <p><a href="/about">About Bastropia</a> says what the site covers and what it does not.</p>
   </div>

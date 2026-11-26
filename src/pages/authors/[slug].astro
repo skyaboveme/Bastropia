@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
-import { authors, type Author } from '../../data/authors';
+import { authors, storyAuthorSlug, type Author } from '../../data/authors';
 import { absolute, orgId } from '../../lib/schema';
 import { formatLong } from '../../lib/time';
 
@@ -13,7 +13,7 @@ export async function getStaticPaths() {
     props: {
       author,
       stories: stories
-        .filter((story) => story.data.author === author.slug)
+        .filter((story) => storyAuthorSlug(story.id, story.data.author) === author.slug)
         .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
     },
   }));

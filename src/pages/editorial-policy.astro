@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { authorBySlug, editorSlug } from '../data/authors';
+import { newsroomEmail } from '../data/site';
+
+const editor = authorBySlug(editorSlug);
+---
+
+<BaseLayout
+  title="Editorial policy"
+  description="Bastropia standards: accuracy, independence from advertisers, labeled sponsored content, and human review of every story."
+>
+  <PageHead
+    kicker="Editorial"
+    title="How Bastropia reports"
+    lede="Accuracy, independence, and a human editor on every story. The owners publish the site. They do not assign the news."
+  />
+  <div class="wrap prose">
+    <h2>Accuracy</h2>
+    <p>
+      A story says what happened, where, and when, and it links the public page or document the fact came from. Names, dates, places, and numbers are checked against that source before publishing. A fact that is not in a public record needs a named source. A second source is required when the claim is disputed or cannot be read in a document.
+    </p>
+    <h2>Sourcing and public records</h2>
+    <p>
+      Prefer the record: agendas, minutes, court filings, election results, agency pages, and other public documents. Link them. A summary on Bastropia is not a substitute for the official page, and the official page can change after we publish.
+    </p>
+    <h2>Anonymous sources</h2>
+    <p>
+      Named sources are the rule. An unnamed source is used only when the information is newsworthy, it is not available on the record, and the editor knows who the source is. The story says why the name is withheld. Anonymous assertions are not the only support for a story.
+    </p>
+    <h2>Independence</h2>
+    <p>
+      Bastropia is owned by a cooperative of local Bastrop County business owners and supported by local advertising and directory listings. Owners and advertisers do not assign, edit, or kill stories. A business that advertises is covered the same way as one that does not. Staff do not write a story in which they have a financial stake. A conflict is disclosed to the editor, and the person steps off the story.
+    </p>
+    <h2>News and sponsored content</h2>
+    <p>
+      News and advertising are separate. A paid placement, a listing upgrade, and any sponsored item is labeled Sponsored. Sponsored copy is not published as a news story, and it does not change the burn ban, school status, or emergency numbers. How to buy a placement is on the <a href="/advertise">advertise</a> page.
+    </p>
+    <h2>Fairness and reply</h2>
+    <p>
+      A person or organization criticized in a story gets a chance to respond when the newsroom can reach them before publication. A response that arrives later is added, and the story is marked updated. Criticism of a public decision is not a reason to take a story down. A wrong fact is. The <a href="/corrections-policy">corrections policy</a> says how to ask.
+    </p>
+    <h2>Photos</h2>
+    <p>
+      A news photo is one Bastropia has a license to use: a photo we made, or a freely licensed photo with credit for the photographer and the license. The credit sits under the picture. If the photo is not of the Bastrop County place in the story, the credit says so. If no properly licensed photo exists, the story runs without one. An unlicensed photo is not used.
+    </p>
+    <h2>AI assistance</h2>
+    <p>
+      AI tools may help with research and drafting. They do not publish.
+      {editor ? (
+        <>
+          Every story is reviewed and approved by a human editor, <a href={`/authors/${editor.slug}`}>{editor.name}</a>, before it goes on the site.
+        </>
+      ) : (
+        <>Every story is reviewed and approved by a human editor before it goes on the site.</>
+      )}
+      A fact in a published story is the newsroom's responsibility, not the tool's.
+    </p>
+    <p>
+      Questions about a story go to <a href={`mailto:${newsroomEmail}`}>{newsroomEmail}</a> or the <a href="/contact">contact</a> page.
+    </p>
+  </div>
+</BaseLayout>

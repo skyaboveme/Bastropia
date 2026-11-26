@@ -1,24 +1,56 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import { facebookGroup, facebookGroupMembers, facebookGroupReason, youtubeChannel } from '../data/site';
+import { authorBySlug, editorSlug, reporterSlug } from '../data/authors';
+import { newsroomEmail } from '../data/site';
+
+const editor = authorBySlug(editorSlug);
+const reporter = authorBySlug(reporterSlug);
 ---
 
-<BaseLayout title="About" description="Bastropia is the community desk for everything happening in Bastrop County, Texas.">
+<BaseLayout
+  title="About"
+  description="Who runs Bastropia: a cooperative of Bastrop County business owners, and the newsroom that covers the county."
+>
   <PageHead
     kicker="About"
-    title="A county desk, kept by neighbors"
-    lede="Bastropia collects what is happening in Bastrop County: the weekend, the burn ban, the weather, the court agenda, and the phone number you needed last Tuesday."
+    title="Independent news for Bastrop County"
+    lede="Bastropia is a daily local news site for Bastrop County, Texas. A cooperative of local business owners owns it and runs it. The newsroom reports for the county."
   />
   <div class="wrap prose">
-    <p>It covers Bastrop, Elgin, Smithville, Cedar Creek, McDade, Paige, and the county in between. The Lost Pines, the Colorado River, and a long calendar of other people’s plans.</p>
-    <p>The <a href={facebookGroup}>Bastropia Facebook group</a> ({facebookGroupMembers} members) is the live room — {facebookGroupReason} Video lives on the <a href={youtubeChannel}>Bastropia YouTube channel</a>. This site is the desk you can search.</p>
-    <p>The <a href="/staff">masthead</a> lists who the byline is. The <a href="/corrections">corrections policy</a> says how a wrong fact is fixed. <a href="/contact">Contact</a> is the tip form and the event form.</p>
+    <h2>Mission</h2>
+    <p>
+      The job is independent daily local news: what happened in the county, with the public record linked. Coverage runs across Bastrop, Elgin, Smithville, Cedar Creek, Paige, McDade, Rosanky, and the communities between them.
+    </p>
+    <h2>Who runs it</h2>
+    <p>
+      Bastropia is owned and run by a cooperative of local Bastrop County business owners. The owners publish the site. They do not assign stories, and a business that advertises does not buy a story.
+    </p>
+    <p>
+      The site is supported by local advertising and <a href="/directory">directory listings</a>. Ads and paid listings are labeled. They are not news. The <a href="/editorial-policy">editorial policy</a> is the rule. The <a href="/corrections-policy">corrections policy</a> is how a wrong fact is fixed.
+    </p>
+    <h2>Staff</h2>
+    <ul>
+      {editor && (
+        <li>
+          <a href={`/authors/${editor.slug}`}>{editor.name}</a>, editor. {editor.name} edits the report, including the daily roundup.
+        </li>
+      )}
+      {reporter && (
+        <li>
+          <a href={`/authors/${reporter.slug}`}>{reporter.name}</a>, reporter. {reporter.name} covers Bastrop County.
+        </li>
+      )}
+    </ul>
+    <p>
+      The <a href="/staff">masthead</a> is the same two names. <a href="/contact">Contact</a> is how to reach the newsroom: <a href={`mailto:${newsroomEmail}`}>{newsroomEmail}</a>.
+    </p>
     <h2>What is official, and what is not</h2>
-    <p>Burn-ban status, court dates, and office numbers are summaries of public pages, with those pages linked. They can go stale. The county, the cities, and 911 are the authorities. Bastropia is not a government website.</p>
-    <h2>Listings and ads</h2>
-    <p>Anyone can <a href="/submit">submit an event</a> or <a href="/tips">send a tip or photo</a>. A person reviews it before it is published. <a href="/upgrade">Upgrades</a> make a listing louder. <a href="/advertise">Ads</a> are labeled as sponsored and kept off the emergency list and the burn-ban status.</p>
-    <p>Newcomers can start with the <a href="/new-here">new resident guide</a>. Growth stories live on the <a href="/development">development tracker</a>.</p>
-    <p>Reservations are saved on the desk. Nothing is charged on the form. The publisher sends an invoice, then places the ad or the upgrade.</p>
+    <p>
+      Burn-ban status, court dates, and office numbers are summaries of public pages, with those pages linked. They can go stale. The county, the cities, and 911 are the authorities. Bastropia is not a government website.
+    </p>
+    <p>
+      Anyone can <a href="/submit">submit an event</a> or <a href="/tips">send a tip or photo</a>. A person reviews it before it is published. <a href="/advertise">Ads</a> are labeled as sponsored and kept off the emergency list and the burn-ban status.
+    </p>
   </div>
 </BaseLayout>

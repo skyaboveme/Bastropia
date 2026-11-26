@@ -230,7 +230,12 @@ function guidesMapped(source) {
 }
 
 function sitemapCoverage(stories, guides) {
-  const files = walk(dist).filter((file) => file.endsWith('.xml') || file.endsWith('sitemap.xml'));
+  // news-sitemap.xml is the 48-hour Google News file. It is not the full sitemap.
+  const files = walk(dist).filter((file) => {
+    const name = file.split(sep).join('/');
+    if (name.endsWith('news-sitemap.xml')) return false;
+    return name.endsWith('.xml') || name.endsWith('sitemap.xml');
+  });
   const locs = [];
   for (const file of files) {
     const text = readFileSync(file, 'utf8');

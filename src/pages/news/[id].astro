@@ -5,7 +5,7 @@ import MoreFromBastrop from '../../components/MoreFromBastrop.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import PlaceName from '../../components/PlaceName.astro';
 import StoryGlance from '../../components/StoryGlance.astro';
-import { authorBySlug } from '../../data/authors';
+import { authorBySlug, editorSlug, storyAuthor } from '../../data/authors';
 import { listEvents } from '../../lib/eventSource';
 import { filterEvents } from '../../lib/events';
 import { imageSize } from '../../lib/imageSize';
@@ -34,7 +34,8 @@ const related = relatedStories(
 );
 const upcoming = filterEvents(events, { when: 'upcoming' }).slice(0, 3);
 const photo = story.data.image ? imageSize(story.data.image) : undefined;
-const writer = authorBySlug(story.data.author);
+const writer = storyAuthor(story.id, story.data.author);
+const editor = authorBySlug(editorSlug);
 ---
 
 <BaseLayout
@@ -45,21 +46,25 @@ const writer = authorBySlug(story.data.author);
   pageType="NewsArticle"
   published={story.data.pubDate}
   modified={story.data.updated ?? story.data.pubDate}
-  authorPath={writer ? `/authors/${writer.slug}` : '/staff'}
+  authorPath={`/authors/${writer.slug}`}
   section={story.data.place}
   extra={[newsNode(story, photo)]}
 >
   <article class="wrap story">
     <header class="page-head story-top">
-      <p class="kicker"><PlaceName name={story.data.place} /> · {formatLong(story.data.pubDate)}</p>
+      <p class="kicker"><PlaceName name={story.data.place} /></p>
       <h1>{story.data.title}</h1>
-      <p class="meta">
-        {writer ? (
-          <>By <a href={`/authors/${writer.slug}`}>{writer.name}</a></>
-        ) : (
-          <>By the <a href="/staff">Bastropia desk</a></>
+      <p class="story-byline">
+        By <a href={`/authors/${writer.slug}`}>{writer.name}</a>
+        {editor && writer.slug !== editor.slug && (
+          <> · Edited by <a href={`/authors/${editor.slug}`}>{editor.name}</a></>
         )}
-        {story.data.updated && <> · Updated {formatLong(story.data.updated)}</>}
+      </p>
+      <p class="story-dates">
+        <time datetime={story.data.pubDate.toISOString()}>Published {formatLong(story.data.pubDate)}</time>
+        {story.data.updated && (
+          <> · <time datetime={story.data.updated.toISOString()}>Updated {formatLong(story.data.updated)}</time></>
+        )}
       </p>
       <p class="lede">{story.data.description}</p>
     </header>

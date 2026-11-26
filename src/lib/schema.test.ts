@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { CollectionEntry } from 'astro:content';
-import { articleAuthor, dailyVideoNode, eventNode, eventOffers, faqPage, guideNode, newsNode } from './schema.ts';
+import { articleAuthor, dailyVideoNode, eventNode, eventOffers, faqPage, guideNode, newsNode, organization } from './schema.ts';
 
 const start = new Date('2026-11-21T18:00:00-06:00');
 
@@ -63,13 +63,51 @@ test('event schema keeps known fields and skips unknown ones', () => {
   assert.equal(rich.eventStatus, 'https://schema.org/EventPostponed');
 });
 
-test('news without an author stays the Bastropia desk', () => {
+test('a guide byline stays the desk, and a news byline defaults by story type', () => {
   assert.deepEqual(articleAuthor(undefined), {
     '@type': 'Organization',
     name: 'Bastropia desk',
     url: 'https://bastropia.com/staff',
   });
   assert.equal(articleAuthor('not-a-person')['@type'], 'Organization');
+  assert.equal(articleAuthor('ben-caxton').name, 'Ben Caxton');
+
+  const story = {
+    id: 'bridge',
+    data: {
+      title: 'Bridge opens',
+      description: 'The bridge opens after repairs.',
+      pubDate: new Date('2026-11-01T08:00:00-06:00'),
+      place: 'Bastrop',
+    },
+  } as CollectionEntry<'news'>;
+  const regular = newsNode(story);
+  assert.equal(regular.author['@type'], 'Person');
+  assert.equal(regular.author.name, 'Ben Caxton');
+  assert.equal(regular.author.url, 'https://bastropia.com/authors/ben-caxton');
+  assert.equal(regular.editor.name, 'Michael Smith');
+  assert.equal(regular.isAccessibleForFree, true);
+  assert.equal(regular.publisher.name, 'Bastropia');
+  assert.equal(regular.publisher.url, 'https://bastropia.com/');
+  assert.equal(regular.publisher.publishingPrinciples, 'https://bastropia.com/editorial-policy');
+  assert.equal(regular.publisher.ethicsPolicy, 'https://bastropia.com/editorial-policy');
+  assert.equal(regular.publisher.correctionsPolicy, 'https://bastropia.com/corrections-policy');
+  assert.equal(regular.publisher.ownershipFundingInfo, 'https://bastropia.com/about');
+  assert.equal(regular.mainEntityOfPage.url, 'https://bastropia.com/news/bridge');
+
+  const daily = newsNode({ ...story, id: 'bastropia-daily-2026-11-26' });
+  assert.equal(daily.author.name, 'Michael Smith');
+  assert.equal(daily.author.url, 'https://bastropia.com/authors/michael-smith');
+
+  const named = newsNode({ ...story, data: { ...story.data, author: 'michael-smith' } });
+  assert.equal(named.author.name, 'Michael Smith');
+
+  const org = organization();
+  assert.equal(org['@type'], 'NewsMediaOrganization');
+  assert.equal(org.publishingPrinciples, 'https://bastropia.com/editorial-policy');
+  assert.equal(org.correctionsPolicy, 'https://bastropia.com/corrections-policy');
+  assert.equal(org.ownershipFundingInfo, 'https://bastropia.com/about');
+  assert.equal(org.email, 'news@bastropia.com');
 });
 
 test('an updated date and key facts land on the article', () => {
@@ -88,7 +126,9 @@ test('an updated date and key facts land on the article', () => {
   const node = newsNode(story, { width: 1600, height: 900 });
   assert.notEqual(node.dateModified, node.datePublished);
   assert.equal(node.abstract, 'Reopens Dec. 3 SH 150 at the river');
-  assert.equal(node.author['@type'], 'Organization');
+  assert.equal(node.author['@type'], 'Person');
+  assert.equal(node.author.name, 'Ben Caxton');
+  assert.equal((node.image as { url: string }[])[0].url, 'https://bastropia.com/images/news/bridge.jpg');
   const image = (node.image as { width: number; height: number }[])[0];
   assert.equal(image.width, 1600);
   assert.equal(image.height, 900);

@@ -1,7 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
-import { authorBySlug } from '../data/authors.ts';
+import { authorBySlug, editorSlug, storyAuthor } from '../data/authors.ts';
 import { offerText } from '../data/eatsSpecials.ts';
-import { facebookGroup, facebookPage, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site.ts';
+import { facebookGroup, facebookPage, newsroomEmail, siteDescription, siteName, siteUrl, tiktokProfile, youtubeChannel } from '../data/site.ts';
 import { videoEmbed } from './dailyVideoFeed.ts';
 import { phoneLinks, type Church } from '../data/churches.ts';
 import { mapsSearchUrl } from './maps.ts';
@@ -22,6 +22,25 @@ export function graph(nodes: Record<string, unknown>[]) {
   return { '@context': 'https://schema.org', '@graph': nodes };
 }
 
+export function publisherLogo() {
+  return {
+    '@type': 'ImageObject',
+    url: absolute('/brand/logo.png'),
+    width: 1024,
+    height: 1024,
+  };
+}
+
+/** Policy URLs Google News reads on the publisher. */
+export function publisherPolicies() {
+  return {
+    publishingPrinciples: absolute('/editorial-policy'),
+    ethicsPolicy: absolute('/editorial-policy'),
+    correctionsPolicy: absolute('/corrections-policy'),
+    ownershipFundingInfo: absolute('/about'),
+  };
+}
+
 export function organization() {
   return {
     '@type': 'NewsMediaOrganization',
@@ -29,17 +48,17 @@ export function organization() {
     name: siteName,
     url: `${siteUrl}/`,
     description: siteDescription,
-    publishingPrinciples: absolute('/corrections'),
-    ethicsPolicy: absolute('/corrections'),
-    correctionsPolicy: absolute('/corrections'),
+    ...publisherPolicies(),
     actionableFeedbackPolicy: absolute('/contact'),
     masthead: absolute('/staff'),
-    logo: {
-      '@type': 'ImageObject',
-      url: absolute('/brand/logo.png'),
-      width: 1024,
-      height: 1024,
+    email: newsroomEmail,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'newsroom',
+      email: newsroomEmail,
+      url: absolute('/contact'),
     },
+    logo: publisherLogo(),
     areaServed: {
       '@type': 'AdministrativeArea',
       name: 'Bastrop County, Texas',
@@ -252,15 +271,20 @@ export function eventNode(event: CollectionEntry<'events'>) {
   return node;
 }
 
-export function articleAuthor(slug: string | undefined) {
-  const person = authorBySlug(slug);
-  if (!person) return { '@type': 'Organization', name: 'Bastropia desk', url: absolute('/staff') };
+function personNode(person: { slug: string; name: string; jobTitle?: string }) {
   return {
     '@type': 'Person',
     name: person.name,
     url: absolute(`/authors/${person.slug}`),
     ...(person.jobTitle ? { jobTitle: person.jobTitle } : {}),
   };
+}
+
+/** Guides and other non-news pages. A news story uses storyAuthor instead, so an omitted byline still names a person. */
+export function articleAuthor(slug: string | undefined) {
+  const person = authorBySlug(slug);
+  if (!person) return { '@type': 'Organization', name: 'Bastropia desk', url: absolute('/staff') };
+  return personNode(person);
 }
 
 export function newsImage(path: string, size?: { width: number; height: number }) {
@@ -295,14 +319,21 @@ export function newsNode(story: CollectionEntry<'news'>, size?: { width: number;
     articleSection: story.data.place,
     inLanguage: 'en-US',
     isAccessibleForFree: true,
-    mainEntityOfPage: absolute(path),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${absolute(path)}#webpage`,
+      url: absolute(path),
+    },
     ...(story.data.image ? { image: [newsImage(story.data.image, size)] } : {}),
     dateline: story.data.place,
-    author: articleAuthor(story.data.author),
+    author: personNode(storyAuthor(story.id, story.data.author)),
+    editor: personNode(authorBySlug(editorSlug)!),
     publisher: {
       '@type': 'NewsMediaOrganization',
       name: siteName,
-      logo: { '@type': 'ImageObject', url: absolute('/brand/logo.png'), width: 1024, height: 1024 },
+      url: `${siteUrl}/`,
+      logo: publisherLogo(),
+      ...publisherPolicies(),
     },
     speakable: {
       '@type': 'SpeakableSpecification',

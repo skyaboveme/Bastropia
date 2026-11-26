@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { newsroomEmail } from '../data/site';
+---
+
+<BaseLayout
+  title="Corrections policy"
+  description="How to request a Bastropia correction, how fixes are labeled with a date, and why substantive facts are not edited in silence."
+>
+  <PageHead
+    kicker="Editorial"
+    title="Corrections"
+    lede="If a fact is wrong, say so. A correction stays on the story, with the date. The original publication date does not move."
+  />
+  <div class="wrap prose">
+    <h2>How to ask</h2>
+    <p>
+      Email <a href={`mailto:${newsroomEmail}`}>{newsroomEmail}</a> or use the <a href="/tips">tip form</a>. Name the story, quote the sentence that is wrong, and say what the public record shows instead. Include a link when you have one. A correction request is not published by itself.
+    </p>
+    <h2>How a fix is labeled</h2>
+    <p>
+      A correction, a clarification, and an update are labeled on the story with the date. The page keeps the original publication date and shows an Updated date. The change is not filed as a new story.
+    </p>
+    <ul>
+      <li><strong>Correction.</strong> A factual error: a wrong name, date, place, or number.</li>
+      <li><strong>Clarification.</strong> The words were easy to misread, and the meaning needed a plainer sentence.</li>
+      <li><strong>Update.</strong> Something new happened after publication, and the story now includes it.</li>
+    </ul>
+    <h2>When it happens</h2>
+    <p>
+      The newsroom reviews a complete request within two business days. When the record shows the fact was wrong, the correction is published the same day the error is confirmed. If the check needs a document that is not yet public, the story says the request is open until that record is in.
+    </p>
+    <h2>No silent edits</h2>
+    <p>
+      A substantive fact is not changed in silence. The story shows the correction, clarification, or update, and the Updated date. Spelling, grammar, and formatting that do not change a fact may be fixed without a label.
+    </p>
+    <p>
+      A story is not taken down because someone dislikes it. A wrong fact is fixed in place. The <a href="/editorial-policy">editorial policy</a> covers sourcing, independence, and the right of reply. <a href="/contact">Contact</a> is the newsroom address.
+    </p>
+  </div>
+</BaseLayout>
